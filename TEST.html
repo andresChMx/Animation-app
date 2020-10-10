@@ -1,0 +1,32 @@
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="578" height="200"></canvas>
+    <script>
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+ 
+      context.strokeStyle = '#000000';
+
+context.moveTo(10, 10);
+context.lineTo(50, 10);
+context.lineWidth = 15;
+context.stroke();
+
+context.moveTo(10, 30);
+context.lineTo(50, 30);
+context.lineWidth = 2;
+context.stroke();
+
+    </script>
+  </body>
+</html>      

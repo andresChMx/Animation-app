@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+    body{
+        background:rgb(59, 59, 59);
+    }
+    </style>
+ <link rel="stylesheet" href="styles.css">
+ <link rel="stylesheet" href="stylesPathsDesigner.css">
+</head>
+<body>
+    <canvas id="c"></canvas>
+    <!--==============================
+    ==========ASSETS PANEL=========
+    ===============================-->
+    <section class="panel-assets">
+        <nav class="panel-assets__menu-sections">
+            <div class="panel-assets__menu-sections__item">Drawables</div>
+            <div class="panel-assets__menu-sections__item">Images</div>
+            <div class="panel-assets__menu-sections__item">Sound</div>
+        </nav>
+        <div class="panel-assets__sections-container">
+            <div class="panel-assets__sections-container__section-image-assets">
+            </div>
+            <div class="sections-container__section-second"></div>
+            <div class="sections-container__section-third"></div>
+        </div>
+        <button class="panel-assets__btn-add-resource">Add Resources</button>
+    </section>
+    <!--==============================
+    ==========INSPECTOR PANEL=========
+    ===============================-->
+    <section class="panel-inspector">
+        <div class="panel-inspector__objects-editor">
+            <div class="panel-inspector__objects-editor__inner-container">
+                
+            </div>
+        </div>
+        <div class="panel-inspector__toolbox">
+            <div class="panel-inspector__toolbox__tool-item">
+                <p class="toolbox__tool-item__title">Actions:</p>
+                <button class="toolbox__tool-item__button">Save</button>
+                <button class="toolbox__tool-item__button">Preview</button>
+                <button class="toolbox__tool-item__button">Export</button>
+            </div>
+            <div class="panel-inspector__toolbox__tool-item">
+                <p class="toolbox__tool-item__title">Zoom:</p>
+                <button class="toolbox__tool-item__button">+</button>
+                <button class="toolbox__tool-item__button">-</button>
+            </div>
+        </div>  
+        <div class="panel-inspector__properties-editor">
+            <div class="properties-editor__properties-container">
+                <span class="properties-container__title" style="display:block;">Position</span>
+                <div class="properties-container__field-group">
+                    <label for="left">X:</label>
+                    <input type="text" name="left" />
+                </div>
+                <div class="properties-container__field-group">
+                        <label for="left">Y:</label>
+                        <input type="text" name="top" />
+                    </div>
+            </div>
+            <div class="properties-editor__properties-container">
+                    <span class="properties-container__title" style="display:block;">Scale</span>
+                    <div class="properties-container__field-group">
+                        <label for="left">X:</label>
+                        <input type="text" name="scaleX" />
+                    </div>
+                    <div class="properties-container__field-group">
+                            <label for="left">Y:</label>
+                            <input type="text" name="scaleY"/>
+                        </div>
+                </div>
+            <div class="properties-editor__properties-container">
+                        <div class="properties-container__field-group">
+                            <label for="left">Rotation:</label>
+                            <input type="text" name="angle" />
+                        </div>
+                        <div class="properties-container__field-group">
+                                <label for="left">Opacity:</label>
+                                <input type="text" name="opacity"/>
+                            </div>
+                    </div>
+        </div>
+        <div class="panel-inspector__menu-add-keyframe">
+            <div class="menu-add-keyframe__inner-container">
+                <p class ="menu-add-keyframe__label">Add KeyFrame</p>
+                <ul class="menu-add-keyframe__options-list">
+                    <li class="menu-add-keyframe__options-list__option" name="left">Location X</li>
+                    <li class="menu-add-keyframe__options-list__option" name="top">Location Y</li>
+                    <li class="menu-add-keyframe__options-list__option" name="scaleX">Scale X</li>
+                    <li class="menu-add-keyframe__options-list__option" name="scaleY">Scale Y</li>
+                    <li class="menu-add-keyframe__options-list__option" name="angle">Rotation</li>
+                    <li class="menu-add-keyframe__options-list__option" name="opacity">Opacity</li>
+                </ul>
+            </div>
+            
+        </div>
+    </section>
+
+    <!--==============================
+    ==========TIMELINE================
+    ===============================-->
+    <section class="panel-animation">
+        <div class="panel-animation__top-menu">
+            <ul class="panel-animation__top-menu__list">
+                <li class="panel-animation__top-menu__list__item">Action</li>
+                <li class="panel-animation__top-menu__list__item">Scenes</li>
+                <li class="panel-animation__top-menu__list__item">Curves</li>
+            </ul>
+        </div>
+        <div class="panel-animation__editors-container">
+                <section class="action-editor">
+                    <div class="action-editor__properties-area">
+                        <ul class="action-editor__properties-area__list">
+                            <li class="action-editor__properties-area__list__item">X Location</li>
+                            <li class="action-editor__properties-area__list__item">Y Location</li>
+                            <li class="action-editor__properties-area__list__item">X Scale</li>
+                            <li class="action-editor__properties-area__list__item">Y Scale</li>
+                            <li class="action-editor__properties-area__list__item">Rotation</li>
+                            <li class="action-editor__properties-area__list__item">Opacity</li>
+                        </ul>
+                    </div>
+                    <div class="action-editor__timeline-area">
+                        <div class="margin"></div><div class="margin"></div>
+                        <div class="action-editor__timeline-area__time-bar">
+                            <div class="marker"><div class="marker__head"></div><div class="marker__body"></div></div>
+                            <div class="action-editor__timeline-area__time-bar__time-label-container"></div>
+                        </div>
+                        <div class="action-editor__timeline-area__keyframes-bar">
+                            <div class="keyframes-bar__property-lane"></div>
+                            <div class="keyframes-bar__property-lane"></div>
+                            <div class="keyframes-bar__property-lane"></div>
+                            <div class="keyframes-bar__property-lane"></div>
+                            <div class="keyframes-bar__property-lane"></div>
+                            <div class="keyframes-bar__property-lane"></div>
+                        </div>
+                    </div>
+                </section>
+                <section class="scenes-editor">2</section>
+                <section class="curves-editor">3</section>
+        </div>
+    </section>
+    <!--====================================================================================================================
+    ==================================================PATHS DESIGNER====================================================
+    =====================================================================================================================-->
+    <section class="panel-designer-options">
+        <div class="panel-designer-options__section-preview">
+            <lable class="section-previoew__title">Preview: </lable>
+            <div class="panel-designer-options__section-preview__canvas-container">
+                <canvas class="panel-designer-options__section-preview__canvas-container__canvas" id="cPreview"></canvas>  
+
+            </div>
+        </div>
+        <div class="panel-designer-options__section-settings">
+            <div class="section-settings__setting-action">
+                <label class="setting-action__title">Actions: </label>
+                <button class="setting-action__btn-save" id="save">Save and return</button>
+                <button class="setting-action__btn-cancel" id="cancel">Cancel design</button>
+            </div>
+            <div class="section-settings__setting-zoom">
+                <label class="setting-zoom__title">Zoon: </label>
+                <button class="setting-zoom__btn-zoom-out">-</button>
+                <button class="setting-zoom__btn-zoom-in">+</button>
+            </div>
+            <div class="section-settings__setting-tool">
+                <label class="setting-tool__title">Tools: </label>
+                <button class="setting-tool__btn-tool-selection" id="selection">-></button>
+                <button class="setting-tool__btn-tool-add" id="add">+</button>
+                <button class="setting-tool__btn-tool-remove" id="remove">-</button>
+
+            </div>
+            <div class="section-settings__setting-line-width">
+                <label class="setting-line-width__title">Path line Width: </label>
+                <input type="range" min="1" max="100" value="10" class="setting-line-width__slider"/>
+            </div> 
+            <div class="section-settings__setting-duration">
+                <label for="" class="setting-duration__title">Animation Duration: </label>
+                <input type="range" min="2" max="10" step="1"  value="3" class="setting-duration__slider"/>
+            </div>          
+        </div>
+        <div class="panel-designer-options__section-paths">
+            <p class="panel-designer-options__section-paths__title">Paths: </p>
+            <div class="panel-designer-options__section-paths__paths-box">
+            </div>
+            
+            <button class="panel-designer-options__section-paths__button">Add Path</button>
+        </div>
+    </section>
+
+    <section class="panel-paths-designer">
+        <canvas id="cPathsDesigner"></canvas>
+    </section>
+
+
+
+
+
+
+
+    <!--=============================
+    ==========FLOATING ELEMENTS======
+    ==============================-->
+
+    <div class="section-image-assets__dummy-drag-asset"></div>
+
+    <div class="section-image-assets__item__menu-options">
+    </div>
+
+
+    <script src="./util.js"></script>
+    <script src="fabric.js"></script>
+    <script src="./fabricCustom.js"></script>
+
+
+    <script src="./common/PathIllustrator.js"></script>
+
+    
+    <script src="./controllers/AnimatorView/TimeLineController.js"></script>
+
+    <script src="./controllers/PathDesignerView/PathDesignerController.js"></script>
+    <script src="./controllers/PathDesignerView/DrawingManager.js"></script>
+    <script src="./controllers/PathDesignerView/PreviewManager.js"></script>
+    <script src="./controllers/PathDesignerView/CanvasDrawingManager.js"></script>
+
+
+
+    <script src="./UIAnimator.js"></script>
+    <script src="./UIPathDesigner.js""></script>
+    <script src="main.js"></script>
+</body>
+</html>

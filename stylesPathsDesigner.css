@@ -1,0 +1,101 @@
+.panel-designer-options{
+    position:absolute;
+    top:0;
+    right:0;
+    display:none;
+    background:red;
+    height:100%;
+    width:300px;
+    z-index: 100;
+    color:white;
+}
+.panel-designer-options__section-preview{
+    background:peru;
+    width:100%;
+    padding:10px;
+}
+.section-previoew__title{
+    display:block;
+    margin-bottom:10px;
+}
+.panel-designer-options__section-preview__canvas-container{
+
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+    background:purple;
+}
+.panel-designer-options__section-preview__canvas-container__canvas{
+    
+    background: rgb(255, 255, 255);
+}
+
+.panel-designer-options__section-paths{
+    padding:10px;
+}
+.panel-designer-options__section-paths__title{
+    font-size:1.2em;
+}
+.panel-designer-options__section-paths__paths-box{
+    display:flex;
+    flex-direction: column;
+    width:100%;
+}
+.panel-designer-options__section-paths__paths-box .path{
+    width:100%;
+}
+
+.panel-designer-options__section-paths__paths-box .path__inner-container{
+    background: rgb(116, 116, 56);
+    width:100%;
+    height:30px;
+    padding:5px;
+    margin-bottom:2px;
+    cursor:pointer;
+    transition:all .4s;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.panel-designer-options__section-paths__paths-box .path__inner-container__btn-delete{
+    background:red;
+    padding:5px;
+}
+.panel-designer-options__section-paths__paths-box .path__space-effect{
+    height:20px;
+    background:black;
+    width:100%;
+    display:none;
+}
+.panel-designer-options__section-paths__paths-box .path.active .path__inner-container{
+    background:purple;
+}
+.panel-designer-options__section-paths__paths-box .path.over .path__space-effect{
+    display: block;
+}
+.panel-designer-options__section-paths__paths-box .path.picked{
+    display:none;
+}
+.panel-designer-options__section-paths__button{
+    background:white;
+    padding:10px;
+    border:none;
+    color:black;
+    text-align: right;
+}
+
+.panel-paths-designer{
+    top:0;
+    left:0;
+    position:absolute;
+    width:100%;
+    height:100%;
+    display:none;
+    background:green;
+    z-index:10;
+    overflow:auto;
+    /*display:flex;*/
+    justify-content: center;
+    align-items: center;
+}
