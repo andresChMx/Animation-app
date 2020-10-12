@@ -124,7 +124,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         this.lastSnapShot.src=this.cacheCanvas.toDataURL();
     },
     setTurn:function(is){
-        //this.mainCanvas.renderAll();
+        this.lastSnapShot.src=this.cacheCanvas.toDataURL();
         this.myTurn=is;
     },
     toObject: function() {
@@ -134,7 +134,6 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
     },
     render:function(ctx){
         if(this.myTurn){
-            this.lastSnapShot.src=this.cacheCanvas.toDataURL();
             ctx.drawImage(this.cacheCanvas,this.get("left"),this.get("top"));
         }else{
             ctx.drawImage(this.lastSnapShot,this.get("left"),this.get("top"));  

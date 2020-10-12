@@ -42,13 +42,14 @@ var PathIllustrator=fabric.util.createClass({
         let i=0;
         let j=0;
 
-        let prevIndexPathTurn=0;
+        let prevStrokeIndexTurn=0;
         (function tick(){
             this.counterInterruption--;
             if(this.counterInterruption<0){
                 if(flagFirstTime){
                     flagFirstTime=false;
 
+                    /// Establer tiempo por stroke
                     let totalCantPaths=0;
                     for(let i=0;i<this.data.getPathListLength(k);i++){
                         let tmpCant=this.data.getPathLength(k,i)-1;
@@ -57,28 +58,30 @@ var PathIllustrator=fabric.util.createClass({
                     animPathDuration=this.listObjectsToDraw[k].paths.duration/totalCantPaths;
                     console.log(totalCantPaths);
                     
+                    //Medidor Transcurso de tiempo desde este momento
+                    animStartTime=+new Date();
+                    animFinishTime=animStartTime+this.listObjectsToDraw[k].paths.duration;
+                    animTotalProgress=0;
+                    prevStrokeIndexTurn=0;
 
-                        animStartTime=+new Date();
-                        animFinishTime=animStartTime+this.listObjectsToDraw[k].paths.duration;
-                        animTotalProgress=0;
+                    //Encontrar los indices del primer stroke
+                    i=this.getFirstPathListIndex(k,-1);
+                    j=0;
 
-                        i=this.getFirstPathListIndex(k,-1);;
-                        j=0;
+                    this.ctx.beginPath();
+                    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                    if(this.data.getListLinesWidthsLength(k)>0){
+                        this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
+                    }
 
-                        prevIndexPathTurn=0;
-                        this.ctx.beginPath();
-                        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-                        this.prevPathSnapshot.src=this.canvas.toDataURL();
-                        if(this.data.getListLinesWidthsLength(k)>0){
-                            this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
-                        }
+                    this.prevPathSnapshot.src=this.canvas.toDataURL();
                 }
     
                 if(animPathDuration!=Infinity){//entrar si hay almenos un stroke
                     let nowTime=+new Date();
                     if(nowTime>animFinishTime){
 
-                        ////
+                        //// Completing not drawn lines
                         
                         let indexPathTurn=parseInt(animTotalProgress/animPathDuration);
                         let cantJumps=(Math.round(this.listObjectsToDraw[k].paths.duration/animPathDuration)-1)-indexPathTurn;
@@ -88,7 +91,7 @@ var PathIllustrator=fabric.util.createClass({
                         this.drawCurveSegment(k,i,j,1);
                         this.ctx.stroke();
                         this.ctx.globalCompositeOperation="source-over";
-                        this.actualSnapshot.src=this.canvas.toDataURL();
+                        //this.actualSnapshot.src=this.canvas.toDataURL();
 
                         this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
                         this.ctx.globalCompositeOperation="destination-in";
@@ -102,12 +105,8 @@ var PathIllustrator=fabric.util.createClass({
                         this.ctx.stroke();
                         this.ctx.globalCompositeOperation="source-over";
                         this.actualSnapshot.src=this.canvas.toDataURL(); 
-                        this.ctx.drawImage(this.prevPathSnapshot,0,0);
-                        this.ctx.drawImage(this.actualSnapshot,0,0);
-                        this.actualSnapshot.src=this.canvas.toDataURL(); 
-                        this.ctx.drawImage(this.actualSnapshot,0,0);
-                        ////
 
+                        ///
                         k++;
                         if(k==this.listObjectsToDraw.length){
                             if(this.loopMode){
@@ -116,104 +115,94 @@ var PathIllustrator=fabric.util.createClass({
                                 this.finish();return;
                             }
                         }
-                        this.notifyOnDrawingNewObject(this.listObjectsToDraw[k].imgHTML,k-1,k);
-
-                        let totalCantPaths=0;
-                        for(let i=0;i<this.data.getPathListLength(k);i++){
-                            let tmpCant=this.data.getPathLength(k,i)-1;
-                            totalCantPaths=tmpCant<0?totalCantPaths:totalCantPaths+tmpCant;
-                        }
-                        animPathDuration=this.listObjectsToDraw[k].paths.duration/totalCantPaths;
-
-
-                    
-                        /////
-
+                        ///
+                        //calculando momento final de la animacion de la imagen 
                         animStartTime=+new Date();
                         animFinishTime=animStartTime+this.listObjectsToDraw[k].paths.duration;
                         animTotalProgress=0;
+                        prevStrokeIndexTurn=0;
 
-                        i=this.getFirstPathListIndex(k,-1);
-                        j=0;
-                        prevIndexPathTurn=0;
-                        this.ctx.beginPath();
-                        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-                        this.prevPathSnapshot.src=this.canvas.toDataURL();
-                        if(this.data.getListLinesWidthsLength(k)>0){
-                            this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
-                        }
 
+                        this.actualSnapshot.onload=function(){
+                            this.ctx.drawImage(this.prevPathSnapshot,0,0);
+                            this.ctx.drawImage(this.actualSnapshot,0,0);
+
+
+                            this.notifyOnDrawingNewObject(this.listObjectsToDraw[k].imgHTML,k-1,k);
+
+                            //Buscando los indicices del primer stroke
+                            i=this.getFirstPathListIndex(k,-1);
+                            j=0;
+
+
+                            this.ctx.beginPath();
+                            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                            this.prevPathSnapshot.src=this.canvas.toDataURL();
+                            if(this.data.getListLinesWidthsLength(k)>0){
+                                this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
+                            }
+                            ////// Calculando tiempo de cada stroke
+                            let totalCantPaths=0;
+                            for(let i=0;i<this.data.getPathListLength(k);i++){
+                                let tmpCant=this.data.getPathLength(k,i)-1;
+                                totalCantPaths=tmpCant<0?totalCantPaths:totalCantPaths+tmpCant;
+                            }
+                            animPathDuration=this.listObjectsToDraw[k].paths.duration/totalCantPaths;
+                            
+
+
+                        }.bind(this);
                     }else{
                         animTotalProgress=nowTime-animStartTime;
-                    }
-        ///////////////////////////////// LO DE ARRIBA ES PARA CONTROLAR EL PROGRESO TOTAL O GLOBAL
-                    if(this.data.getPathListLength(k)!=0){
-                        //console.log(this.canvasDrawingManager.listPoints);
-                        if(!Preprotocol.wantConsume){
-                            //return;
-                        }else{
-                            Preprotocol.wantDelete=false;
 
-                            let indexPathTurn=parseInt(animTotalProgress/animPathDuration);
-                            if(prevIndexPathTurn!=indexPathTurn){// se paso a otro stroke
-                                let cantJumps=indexPathTurn-prevIndexPathTurn;
-
-                                this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
-                                this.ctx.globalCompositeOperation="destination-in";
-                                this.drawCurveSegment(k,i,j,1);
-                                this.ctx.stroke();
-                                this.ctx.globalCompositeOperation="source-over";
-                                this.actualSnapshot.src=this.canvas.toDataURL();
-
+                        if(this.data.getPathListLength(k)!=0){
+                            //console.log(this.canvasDrawingManager.listPoints);
+                            if(!Preprotocol.wantConsume){
+                                //return;
+                            }else{
+                                Preprotocol.wantDelete=false;
+    
+                                let indexPathTurn=parseInt(animTotalProgress/animPathDuration);
+                                let cantJumps=indexPathTurn-prevStrokeIndexTurn;
                                 let oldValI=i;
-                                if(cantJumps>=2){
-                                    this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
-                                    this.ctx.globalCompositeOperation="destination-in";
-                                    for(let p=0;p<cantJumps-1;p++){
-                                        let indexes=this.getNextPath(k,i,j,1);
-                                        //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
-                                        this.drawCompletePath(k,indexes[0],indexes[1]);
-                                        i=indexes[0];
-                                        j=indexes[1];
-                                    }
-                                    this.ctx.stroke();
-                                    this.ctx.globalCompositeOperation="source-over";
-                                    this.actualSnapshot.src=this.canvas.toDataURL();                    
+                                for(let p=0;p<cantJumps;p++){
+                                      this.drawCompletePath(k,i,j);
+                                            //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
+                                     let indexes=this.getNextPath(k,i,j,1);
+                                     i=indexes[0];
+                                     j=indexes[1];
                                 }
 
-                                
-                                let indexes=this.getNextPath(k,i,j,1);
-                                j=indexes[1];
-                                
-                                if(oldValI!=indexes[0]){//se paso a otro path
-                                    i=indexes[0];
-                                    this.ctx.drawImage(this.prevPathSnapshot,0,0);
-                                    this.ctx.drawImage(this.actualSnapshot,0,0);
-                                    this.prevPathSnapshot.src=this.canvas.toDataURL();
+                                this.drawCurveSegment(k,i,j,(animTotalProgress%animPathDuration)/animPathDuration);
+                                if(oldValI!=i){//se paso a otro path
+                                    this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
+                                    this.ctx.globalCompositeOperation="destination-in";
+                                    this.ctx.stroke();
+                                    this.ctx.globalCompositeOperation="source-over";
+                                    this.actualSnapshot.src=this.canvas.toDataURL();
+                                    //this.actualSnapshot.onload=function(){
+                                        this.ctx.drawImage(this.prevPathSnapshot,0,0);
+                                        this.ctx.drawImage(this.actualSnapshot,0,0);
+                                        this.prevPathSnapshot.src=this.canvas.toDataURL();
+                                    //}.bind(this);
+
                                     this.ctx.beginPath();
                                     this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
-                                    
                                     if(this.data.getPathLength(k,i).length>0){
                                         this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,0),this.data.getStrokeCoordYAt(k,i,0));
                                     }
+                                }else{
+                                    this.drawFrame(k);
                                 }
-                                prevIndexPathTurn=indexPathTurn;
+                                prevStrokeIndexTurn=indexPathTurn;
+
+                                //FIN AQUI ANIMACIONES
+                                Preprotocol.wantDelete=true;
                             }
-                            //AQUI ANIMACIONES
-                            this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
-                            this.ctx.globalCompositeOperation="destination-in";
-                            this.drawCurveSegment(k,i,j,(animTotalProgress%animPathDuration)/animPathDuration);
-                            this.ctx.stroke();
-                            this.ctx.globalCompositeOperation="source-over";
-                            
-                            this.actualSnapshot.src=this.canvas.toDataURL();
-                            this.ctx.drawImage(this.prevPathSnapshot,0,0);
-                            this.ctx.drawImage(this.actualSnapshot,0,0);
-                            //this.data.drawInTrueCanvas(k,this.actualSnapshot,0,0);
-                            //FIN AQUI ANIMACIONES
-                            Preprotocol.wantDelete=true;
                         }
                     }
+        ///////////////////////////////// LO DE ARRIBA ES PARA CONTROLAR EL PROGRESO TOTAL O GLOBAL
+
                     //console.log(this.canvasDrawingManager.listPoints);
                 }
             }else{
@@ -223,6 +212,17 @@ var PathIllustrator=fabric.util.createClass({
                 fabric.util.requestAnimFrame(tick.bind(this));
             }
         }.bind(this)())
+
+    },
+    drawFrame:function(k){
+        this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
+        this.ctx.globalCompositeOperation="destination-in";
+        this.ctx.stroke();
+        this.ctx.globalCompositeOperation="source-over";
+        
+        this.actualSnapshot.src=this.canvas.toDataURL();
+        this.ctx.drawImage(this.prevPathSnapshot,0,0);
+        this.ctx.drawImage(this.actualSnapshot,0,0);
 
     },
     drawOnNewPathList:function(cantJumps){
@@ -238,7 +238,7 @@ var PathIllustrator=fabric.util.createClass({
         if(cantJumps>=2){
             this.ctx.drawImage(this.imageHTML,0,0,this.canvas.width,this.canvas.height)
             this.ctx.globalCompositeOperation="destination-in";
-            for(let k=prevIndexPathTurn;k<prevIndexPathTurn+cantJumps-1;k++){
+            for(let k=prevStrokeIndexTurn;k<prevStrokeIndexTurn+cantJumps-1;k++){
                 let indexes=this.getNextPath(i,j,1);
                 //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
                 this.drawCompletePath(this.canvasDrawingManager.listPoints[indexes[0]],
