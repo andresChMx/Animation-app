@@ -84,11 +84,12 @@ var Marker=function(selector,HTMLParent,HTMLTimeLineArea){
     this.init();
 }
 
-var Key=function(value,time,HTMLParent,HTMLTimeLineArea){
+var Key=function(value,time,HTMLParent,HTMLTimeLineArea,timelineController){
     this.HTMLElement=null;
     this.RECTBoundings=null;
     this.HTMLParent=null;
     this.HTMLTimeLineArea=null;
+    this.timelineController=null;
 
     this.isPressed=false;
     this.isDragged=false;
@@ -106,6 +107,7 @@ var Key=function(value,time,HTMLParent,HTMLTimeLineArea){
         this.time=time;
         this.HTMLParent=HTMLParent;
         this.HTMLTimeLineArea=HTMLTimeLineArea
+        this.timelineController=timelineController;
 
         this.HTMLElement=document.createElement("div");
         this.HTMLElement.classList.add("property-lane__key");
@@ -175,32 +177,31 @@ var Key=function(value,time,HTMLParent,HTMLTimeLineArea){
         this.HTMLElement.style.left=this.timelineLocation + "px";
     }
     this.getLocationInTimeline=function(moment){
-        let ancestor=PanelActionEditor;
 
         let leftLimit =TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);
         let rightLimit = self.HTMLParent.RECTBoundings.width-TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);;
         let totalDisplacementArea=rightLimit-leftLimit;
 
-        let percentMoment2TotalDuration=moment/ancestor.timelineController.totalDuration;
+        let percentMoment2TotalDuration=moment/self.timelineController.animator.totalDuration;
         return leftLimit+totalDisplacementArea*percentMoment2TotalDuration;
 
     }
     this.getTimeFromLocation=function(globalLocation){
-        let ancestor=PanelActionEditor;
         let leftLimit=TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);
         let rightLimit=self.HTMLParent.RECTBoundings.width-TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);
         let totalDisplacementArea=rightLimit-leftLimit;
         
         let localLocation=globalLocation-leftLimit;
         let percent=localLocation/totalDisplacementArea;
-        return percent*ancestor.timelineController.totalDuration;
+        return percent*self.timelineController.animator.totalDuration;
     }
     this.init();
 }
-var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea){
+var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea,timelineController){
     this.HTMLElement=null;
     this.RECTBoundings=null;
     this.HTMLTimeLineArea=null; //lo usan los keysframes
+    this.timelineController=null;
     this.listKeyFrames=[];
     this.numbActiveKeyFrames=0;
     var self=this;
@@ -209,9 +210,10 @@ var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea){
     this.currentAnimableSelectedObj;
     this.isPressed=false;
     this.init=function(){
+        this.property=property;
         this.HTMLElement=HTMLElement;
         this.HTMLTimeLineArea=HTMLTimeLineArea;
-        this.property=property;
+        this.timelineController=timelineController;
         this.RECTBoundings=this.HTMLElement.getBoundingClientRect();
         this.HTMLElement.addEventListener("mousedown",this.OnMouseDown);
         CanvasManager.registerOnSelectionUpdated(this);
@@ -225,7 +227,7 @@ var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea){
         }
     }
     this._createKeyFrame=function(value,time){//UNICA VEZ QUE SE ALTERA ANIMACION ENTERNAMEINTE
-        let key=new Key(value,time,this,this.HTMLTimeLineArea)
+        let key=new Key(value,time,this,this.HTMLTimeLineArea,this.timelineController)
         
         this.listKeyFrames.push(key);
         key.registerOnDraggingEnded(this);
@@ -375,7 +377,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         let HTMLPropertyLanes=document.querySelectorAll(".keyframes-bar__property-lane");
         let listProperties=['left','top','scaleX',"scaleY","angle","opacity"]
         for(let i=0;i<HTMLPropertyLanes.length;i++){
-            let propertyLane=new PropertyLane(listProperties[i],HTMLPropertyLanes[i],this.HTMLtimeline);
+            let propertyLane=new PropertyLane(listProperties[i],HTMLPropertyLanes[i],this.HTMLtimeline,this.timelineController);
             this.dictPropertyLanes[listProperties[i]]=propertyLane;
         }
     },
@@ -415,7 +417,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     },
     notificationOnOptionClicked:function(property){
         //use the correct dictionary (according to selectoed object)
-        this.dictPropertyLanes[property].generateKeyFrame(this.timelineController.totalProgress);
+        this.dictPropertyLanes[property].generateKeyFrame(this.timelineController.animator.totalProgress);
     },
     notificationOnObjSelected:function(obj){
         let selectedObject=CanvasManager.getSelectedAnimableObj();
@@ -576,16 +578,40 @@ let SectionMenuAddKey={
     }
 
 }
+let SectionToolBox={
+    HTMLElement:null,
+    listObserversOnBtnPreview:[],
+    init:function(){
+        this.HTMLElement=document.querySelector(".panel-inspector__toolbox");
+        let btnPreview=document.querySelector(".toolbox__tool-item__button-preview");
+        btnPreview.addEventListener("click",this.notifyOnBtnPreview.bind(this));
+    },
+    notifyOnBtnPreview:function(){
+        for(let i=0;i<this.listObserversOnBtnPreview.length;i++){
+            this.listObserversOnBtnPreview[i].notificationOnBtnPreview();
+        }
+    },
+    registerOnBtnPreview:function(obj){
+
+        this.listObserversOnBtnPreview.push(obj);
+    }
+}
 var PanelInspector={
     HTMLElement:null,
     htmlElementNormalHeight:0,
 
-
+    SectionToolBox:SectionToolBox,
     SectionMenuAddKey:SectionMenuAddKey,
     SectionPropertiesEditor:SectionPropertiesEditor,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-inspector");
         this.htmlElementNormalHeight=this.HTMLElement.offsetHeight;
+        
+        this.SectionToolBox.init();
+        this.SectionMenuAddKey.init();
+        this.SectionPropertiesEditor.init();
+        
+        
         PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
         PanelDesignerOptions.SectionSettings.registerOnSettingActionClicked(this);
     },
@@ -617,7 +643,11 @@ let SectionImageAssets={
     {url:"http://localhost:3000/character.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
     {url:"http://localhost:3000/dragon.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
     {url:"http://localhost:3000/monster.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
-    {url:"http://localhost:3000/woman.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}}],
+    {url:"http://localhost:3000/woman.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/svg.svg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/elephantBW.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/elephantColor.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/flower.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}}],
     MODELItemMenuOptions:[
         {
             label:"Design Drawing path",
@@ -892,15 +922,27 @@ var CanvasManager={
     },
     createAnimableObject:function(model){
         let self=CanvasManager;
+
+/*
+        fabric.loadSVGFromURL('http://localhost:3000/svg.svg', function(objects, options) {
+        console.log(objects);    
+            var obj = fabric.util.groupSVGElements(objects, options);
+            obj.set({left:WindowManager.mouse.x});
+            obj.set({top:WindowManager.mouse.y});
+            self.canvas.add(obj).renderAll();
+          });
+        */
         let oImg=new ImageAnimable(model.imgHTML,{
             "originX":"center",
             "originY":"center",
             "left":WindowManager.mouse.x,
             "top":WindowManager.mouse.y
         })
+        oImg.imageModel=model;
         oImg.setCoords();
         self.canvas.add(oImg);
         self.listAnimableObjects.push(oImg);
+        
     },
     registerOnSelectionUpdated:function(obj){
         this.listObserversOnObjSelected.push(obj);
@@ -1067,5 +1109,8 @@ function initUI(){
     PanelDesignerOptions.SectionPaths.init();
 
     PanelPathsDesigner.init();
+
+    /*pewviewer*/
+    PanelPreviewer.init(); 
 
 }

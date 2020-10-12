@@ -322,6 +322,57 @@
     margin:auto;
 }
 
+
+
+/*=======================
+==== previewer Panel=====
+========================*/
+.modal-effect{
+    display:none;
+    background:rgba(0, 0, 0, 0.527);
+    position: absolute;
+    width:100%;
+    height:100%;
+    z-index:2000;
+    left:0;
+    top:0;
+
+}
+.panel-previewer{
+    padding:10px;
+    background:white;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+    margin:auto;
+    position:absolute;
+    z-index:2000;   
+}
+.panel-previewer__btn-close{
+    background:red;
+    width:10px; 
+    height:10px;
+    position: absolute;
+    right:0;
+    top:0;
+}
+#panel-previewer__canvas{
+    background:yellow;
+    border:1px solid black;
+}
+.panel-previewer__controls{
+    padding:10px 0;
+    width:100%;
+}
+.panel-previewer__controls__progress-bar{
+    width:100%;
+    height:20px;
+    background:red;
+}
+
+
+
 /*======================
 ==== JS helper clasess==
 =======================*/

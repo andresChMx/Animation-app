@@ -48,9 +48,9 @@
         <div class="panel-inspector__toolbox">
             <div class="panel-inspector__toolbox__tool-item">
                 <p class="toolbox__tool-item__title">Actions:</p>
-                <button class="toolbox__tool-item__button">Save</button>
-                <button class="toolbox__tool-item__button">Preview</button>
-                <button class="toolbox__tool-item__button">Export</button>
+                <button class="toolbox__tool-item__button-save">Save</button>
+                <button class="toolbox__tool-item__button-preview">Preview</button>
+                <button class="toolbox__tool-item__button-export">Export</button>
             </div>
             <div class="panel-inspector__toolbox__tool-item">
                 <p class="toolbox__tool-item__title">Zoom:</p>
@@ -205,6 +205,22 @@
 
 
 
+    <!--====================================================================================================================
+    ==================================================PREVIEWER====================================================
+    =====================================================================================================================-->
+    <div class="modal-effect">
+        <section class="panel-previewer">
+            <div class="panel-previewer__inner-container">
+                <div class="panel-previewer__btn-close"></div>
+                <div class="panel-previewer__canvas-container">
+                    <canvas id="panel-previewer__canvas"></canvas>
+                </div>
+                <div class="panel-previewer__controls">
+                    <div class="panel-previewer__controls__progress-bar"></div>
+                </div>
+            </div>
+        </section>
+    </div>
 
 
 
@@ -224,6 +240,7 @@
 
 
     <script src="./common/PathIllustrator.js"></script>
+    <script src="./common/ControllerAnimator.js"></script>
 
     
     <script src="./controllers/AnimatorView/TimeLineController.js"></script>
@@ -233,10 +250,12 @@
     <script src="./controllers/PathDesignerView/PreviewManager.js"></script>
     <script src="./controllers/PathDesignerView/CanvasDrawingManager.js"></script>
 
-
+    <script src="./controllers/ScenePreviewView/DrawingCacheManager.js"></script>
+    <script src="./controllers/ScenePreviewView/ScenePreviewController.js"></script>
 
     <script src="./UIAnimator.js"></script>
     <script src="./UIPathDesigner.js""></script>
+    <script src="./UIPreviewer.js""></script>
     <script src="main.js"></script>
 </body>
 </html>

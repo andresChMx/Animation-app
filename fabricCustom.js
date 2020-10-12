@@ -6,6 +6,7 @@ var Animation=fabric.util.createClass({
     startMoment:-1,
     endMoment:-1,
     
+
     property:"",
     initialize:function(property,startValue,endValue,startMoment,endMoment){
         this.property=property;
@@ -14,10 +15,12 @@ var Animation=fabric.util.createClass({
         
         this.startMoment=startMoment;
         this.endMoment=endMoment;
-        this.onKeyMoved(startValue,endValue,this.startMoment,this.endMoment)
-        //console.log(this.property,this.startValue,this.endValue,this.startMoment,this.endMoment);
+
+        this.localDuration=endMoment-startMoment;
+        this.byValue=endValue-startValue;
     },
-    onKeyMoved:function(startValue,endValue,startMoment,endMoment){
+    /*
+    updateValues:function(startValue,endValue,startMoment,endMoment){
         this.startValue=startValue;
         this.endValue=endValue;
         this.startMoment=startMoment;
@@ -26,6 +29,7 @@ var Animation=fabric.util.createClass({
         this.localDuration=this.endMoment-this.startMoment;
         this.byValue=this.endValue-this.startValue;
     },
+    */
     tick:function(currentTime){
         if(currentTime>=this.startMoment && currentTime<=this.endMoment){
             let currentTimeLocalAnim=currentTime-this.startMoment;
@@ -44,6 +48,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
+        this.isDrawable=true;
         this.dictAnimations={
             "left":[],
             "top":[],
@@ -57,6 +62,10 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.dictAnimations[property].push(new Animation(property,startValue,endValue,startMoment,endMoment));
         console.log("TOTAL CANT ANIMACIONES EN PROPEIDAD : " + property + this.dictAnimations[property].length);
     },
+    /*
+    updateAnimation:function(property,indexAnimation, startValue,endValue,startMoment,endMoment){
+        this.dictAnimations[property][indexAnimation].updateValues(startValue,endValue,startMoment,endMoment);
+    },*/
     executeAnimations:function(currentTime){
         for(const prop in this.dictAnimations){
             let anims=this.dictAnimations[prop]
@@ -88,7 +97,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     }
     //TODO: update animation handler
 })
-
+/*
 fabric.util.object.extend(fabric.Image,{
     fromURLCustom:function(url, callback, imgOptions){
       fabric.util.loadImage(url, function(img) {
@@ -96,3 +105,40 @@ fabric.util.object.extend(fabric.Image,{
       }, null, imgOptions && imgOptions.crossOrigin);
     }
 })
+*/
+var DrawableImage = fabric.util.createClass(fabric.Object, {
+
+    type: 'DrawingPath',
+    // initialize can be of type function(options) or function(property, options), like for text.
+    // no other signatures allowed.
+    initialize: function(options) {
+      options || (options = { });
+  
+      this.callSuper('initialize', options);
+      this.set('label', options.label || '');
+      this.set({width:1000,height:800});
+    this.cacheCanvas=options.cacheCanvas;
+    this.mainCanvas=options.mainCanvas;
+        this.myTurn=false;
+        this.lastSnapShot=new Image();
+        this.lastSnapShot.src=this.cacheCanvas.toDataURL();
+    },
+    setTurn:function(is){
+        //this.mainCanvas.renderAll();
+        this.myTurn=is;
+    },
+    toObject: function() {
+      return fabric.util.object.extend(this.callSuper('toObject'), {
+        label: this.get('label')
+      });
+    },
+    render:function(ctx){
+        if(this.myTurn){
+            this.lastSnapShot.src=this.cacheCanvas.toDataURL();
+            ctx.drawImage(this.cacheCanvas,this.get("left"),this.get("top"));
+        }else{
+            ctx.drawImage(this.lastSnapShot,this.get("left"),this.get("top"));  
+        }
+    }
+
+  });
