@@ -48,7 +48,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
-        this.isDrawable=true;
+        this.entraceMode=EntranceModes.none;
         this.dictAnimations={
             "left":[],
             "top":[],
@@ -57,6 +57,17 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             "angle":[],
             "opacity":[]
         };
+        this.imageModel=null;
+    },
+    setEntranceMode:function(mode){
+        this.entraceMode=mode;
+    },
+    getEntranceMode:function(){
+        if(this.imageModel.paths.linesWidths.length==0){
+            return EntranceModes.none;
+        }else{
+            return EntranceModes.drawn;
+        }
     },
     addAnimation:function(property,startValue,endValue,startMoment,endMoment){//string,number,number
         this.dictAnimations[property].push(new Animation(property,startValue,endValue,startMoment,endMoment));
@@ -112,19 +123,20 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
     // initialize can be of type function(options) or function(property, options), like for text.
     // no other signatures allowed.
     initialize: function(options) {
-      options || (options = { });
-  
-      this.callSuper('initialize', options);
-      this.set('label', options.label || '');
-      this.set({width:1000,height:800});
-    this.cacheCanvas=options.cacheCanvas;
-    this.mainCanvas=options.mainCanvas;
+        options || (options = { });
+        this.callSuper('initialize',options);
+        this.set('label', options.label || '');
+        this.cacheCanvas=options.cacheCanvas;
+    //this.mainCanvas=options.mainCanvas;
+    this.set({angle:80});
         this.myTurn=false;
         this.lastSnapShot=new Image();
         this.lastSnapShot.src=this.cacheCanvas.toDataURL();
     },
-    setTurn:function(is){
-        this.lastSnapShot.src=this.cacheCanvas.toDataURL();
+    setTurn:function(is,lastDataUrl){
+        if(!is){
+            this.lastSnapShot.src=lastDataUrl;
+        }
         this.myTurn=is;
     },
     toObject: function() {
@@ -141,3 +153,8 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
     }
 
   });
+const EntranceModes={
+    drawn:"drawn",
+    dragged:"dragged",
+    none:"none"
+}

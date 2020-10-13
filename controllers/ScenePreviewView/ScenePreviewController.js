@@ -17,16 +17,17 @@ var ScenePreviewController=fabric.util.createClass({
         let listScalerFactors=[];
         let listDrawableObjects=[];
         for(let i=0;i<CanvasManager.listAnimableObjects.length;i++){
-            let animObj=CanvasManager.listAnimableObjects[i];
-            if(animObj.isDrawable){
-                this.ctrlPointsGenerator.generate(animObj.imageModel);
-                let drawableImage=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,mainCanvas:this.UIPanelPreviewerCanvas,left:animObj.get("left"),top:animObj.get("top"),width:animObj.get("width"),height:animObj.get("height")});
+            let animableObj=CanvasManager.listAnimableObjects[i];
+            if(animableObj.getEntranceMode()==EntranceModes.drawn){
+                this.ctrlPointsGenerator.generate(animableObj.imageModel);
+                let drawableImage=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,left:animableObj.get("left"),top:animableObj.get("top"),width:animableObj.get("width"),height:animableObj.get("height"),angle:90});
                 this.UIPanelPreviewerCanvas.add(drawableImage);
                 listDrawableObjects.push(drawableImage);
-                listObjectsToDraw.push(animObj.imageModel);
-                listScalerFactors.push({x:animObj.imageModel.imgHTML.naturalWidth,y:animObj.imageModel.imgHTML.naturalHeight});
-            }else{
+                listObjectsToDraw.push(animableObj.imageModel);
+                listScalerFactors.push({x:animableObj.imageModel.imgHTML.naturalWidth,y:animableObj.imageModel.imgHTML.naturalHeight});
+            }else if(animableObj.getEntranceMode()==EntranceModes.dragged){
 
+            }else if(animableObj.getEntranceMode()==EntranceModes.none){
                 this.UIPanelPreviewerCanvas.add(CanvasManager.listAnimableObjects[i]);
             }
 

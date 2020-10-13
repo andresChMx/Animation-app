@@ -3,7 +3,7 @@ var DrawingCacheManager=fabric.util.createClass({
     initialize:function(){
         this.canvas=document.createElement("canvas");
         this.ctx=this.canvas.getContext("2d");
-        //this.canvas.style.display="none";
+        this.canvas.style.display="none";
 
         this.listDrawableObjects=[];
         //this.canvas=new OffscreenCanvas(100,1);
@@ -24,12 +24,13 @@ var DrawingCacheManager=fabric.util.createClass({
         this.pathIllustrator.registerOnDrawingNewObject(this);
         this.pathIllustrator.start();
     },
-    notificationOnDrawingNewObject:function(imgHTML,lastObjIndex,newObjIndex){
+    notificationOnDrawingNewObject:function(imgHTML,lastObjIndex,newObjIndex,lastDataUrl){
+        
         //console.log(this.listDrawableObjects.length + "  " + lastObjIndex + "    " + newObjIndex);
         this.canvas.width=imgHTML.naturalWidth;
         this.canvas.height=imgHTML.naturalHeight;
-        this.listDrawableObjects[lastObjIndex].setTurn(false);
-        this.listDrawableObjects[newObjIndex].setTurn(true);
+        this.listDrawableObjects[lastObjIndex].setTurn(false,lastDataUrl);
+        this.listDrawableObjects[newObjIndex].setTurn(true,lastDataUrl);
     },
     sleep:function(){
         this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);

@@ -13,21 +13,22 @@ var HTMLElement=function(elem){
     }
     this.init();
 }
-var Marker=function(selector,HTMLParent,HTMLTimeLineArea){
+var Marker=function(selector,HTMLtimeline_timeBar,HTMLtimeline){
     this.HTMLElement=null;
-    this.RECTBoundings=null;
-    this.HTMLParent=null;
-    this.HTMLTimeLineArea=null;
+    this.HTMLtimeline_timeBar=null;
+    this.HTMLtimeline=null;
     var self=this;
     this.isPressed=false;
-    
+    this.htmlTimeline_timeBarcoordX;
+
     this.listObserversOnDragged=[];
     this.listObserversOnDragEnded=[];
     this.init=function(){
-        this.HTMLParent=HTMLParent;
-        this.HTMLTimeLineArea=HTMLTimeLineArea;
+        this.HTMLtimeline_timeBar=HTMLtimeline_timeBar;
+        this.HTMLtimeline=HTMLtimeline;
         this.HTMLElement=document.querySelector(selector);
-        this.RECTBoundings=this.HTMLElement.getBoundingClientRect();
+
+        this.leftCoordHtmlTimeline_timeBar=this.HTMLtimeline_timeBar.getBoundingClientRect().left;
         this._setupMarketElement();
 
         WindowManager.registerOnMouseUp(this);
@@ -36,12 +37,22 @@ var Marker=function(selector,HTMLParent,HTMLTimeLineArea){
     },
     this._setupMarketElement=function(){
         this.HTMLElement.children[0].style.width=TIMELINE_PADDING*2 + "px";
-        this.HTMLElement.children[0].style.height=this.HTMLParent.RECTBoundings.height + "px";
+        this.HTMLElement.children[0].style.height=this.HTMLtimeline_timeBar.clientHeight + "px";
 
         let needleWidth=3;
         this.HTMLElement.children[1].style.left=this.HTMLElement.offsetWidth/2 -needleWidth/2 + "px";
         this.HTMLElement.children[1].style.width=needleWidth + "px";
-        this.HTMLElement.children[1].style.height=this.HTMLTimeLineArea.RECTBoundings.height-this.HTMLParent.htmlElement.offsetHeight + "px";
+        this.HTMLElement.children[1].style.height=this.HTMLtimeline.clientHeight-this.HTMLtimeline_timeBar.clientHeight + "px";
+    }
+    this.moveMe=function(location){
+        let tmpMarkWidth=self.HTMLElement.clientWidth;
+        let localLimitLeft= TIMELINE_PADDING-tmpMarkWidth/2;
+        let localLimitRight=self.HTMLtimeline_timeBar.clientWidth-TIMELINE_PADDING-(tmpMarkWidth/2);
+        let localNewPosition=(location-self.leftCoordHtmlTimeline_timeBar + self.HTMLtimeline.scrollLeft )-(tmpMarkWidth/2);
+        localNewPosition=localNewPosition<localLimitLeft?localLimitLeft:localNewPosition;
+        localNewPosition=localNewPosition>localLimitRight?localLimitRight:localNewPosition;
+        this.HTMLElement.style.left=localNewPosition + "px";
+        this.notifyOnMarkerDragged(localNewPosition);
     }
     this.registerOnDragged=function(obj){
         self.listObserversOnDragged.push(obj);
@@ -57,14 +68,7 @@ var Marker=function(selector,HTMLParent,HTMLTimeLineArea){
     }
     this.notificationOnMouseMove=function(){
         if(self.isPressed){
-            let tmpMarkWidth=self.HTMLElement.offsetWidth;
-            let localLimitLeft= TIMELINE_PADDING-tmpMarkWidth/2;
-            let localLimitRight=self.HTMLParent.RECTBoundings.width-TIMELINE_PADDING-(tmpMarkWidth/2);
-            let localNewPosition=(WindowManager.mouse.x-self.HTMLParent.RECTBoundings.left + self.HTMLTimeLineArea.htmlElement.scrollLeft )-(tmpMarkWidth/2);
-            localNewPosition=localNewPosition<localLimitLeft?localLimitLeft:localNewPosition;
-            localNewPosition=localNewPosition>localLimitRight?localLimitRight:localNewPosition;
-            this.HTMLElement.style.left=localNewPosition + "px";
-            this.notifyOnMarkerDragged(localNewPosition);
+            self.moveMe(WindowManager.mouse.x);
         }
     }
     this.notifyOnMarkerDragEnded=function(){
@@ -84,12 +88,14 @@ var Marker=function(selector,HTMLParent,HTMLTimeLineArea){
     this.init();
 }
 
-var Key=function(value,time,HTMLParent,HTMLTimeLineArea,timelineController){
+var Key=function(value,time,laneParent,HTMLTimeLineArea,timelineController){
     this.HTMLElement=null;
     this.RECTBoundings=null;
-    this.HTMLParent=null;
+    this.laneParent=null;
     this.HTMLTimeLineArea=null;
     this.timelineController=null;
+
+    this.leftCoordHtmlTimeline_timeBar
 
     this.isPressed=false;
     this.isDragged=false;
@@ -105,17 +111,21 @@ var Key=function(value,time,HTMLParent,HTMLTimeLineArea,timelineController){
     this.init=function(){
         this.value=value;
         this.time=time;
-        this.HTMLParent=HTMLParent;
+        this.laneParent=laneParent;
         this.HTMLTimeLineArea=HTMLTimeLineArea
         this.timelineController=timelineController;
 
+        this.leftCoordHtmlPropertyLaneParent=this.laneParent.HTMLElement.getBoundingClientRect().left;
+
         this.HTMLElement=document.createElement("div");
         this.HTMLElement.classList.add("property-lane__key");
-        this.HTMLParent.HTMLElement.appendChild(this.HTMLElement);
+        this.laneParent.HTMLElement.appendChild(this.HTMLElement);
         this.timelineLocation=this.getLocationInTimeline(this.time);
+
         this.RECTBoundings=this.HTMLElement.getBoundingClientRect();
         this.HTMLElement.addEventListener("mousedown",this.OnMouseDown)
         this.HTMLElement.style.left=this.timelineLocation + "px";
+
         WindowManager.registerOnMouseUp(this);
     }
     this.desable=function(){
@@ -153,9 +163,9 @@ var Key=function(value,time,HTMLParent,HTMLTimeLineArea,timelineController){
     }
     this.notificationOnMouseMove=function(){
         if(self.isPressed){
-            let limitLeft= TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);
-            let limitRight=self.HTMLParent.RECTBoundings.width-TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);
-            let newPosition=(WindowManager.mouse.x-self.HTMLParent.RECTBoundings.left + self.HTMLTimeLineArea.htmlElement.scrollLeft)-self.HTMLElement.offsetWidth/2;
+            let limitLeft= TIMELINE_PADDING-(self.HTMLElement.clientWidth/2);
+            let limitRight=self.laneParent.HTMLElement.clientWidth-TIMELINE_PADDING-(self.HTMLElement.clientWidth/2);
+            let newPosition=(WindowManager.mouse.x-self.leftCoordHtmlPropertyLaneParent + self.HTMLTimeLineArea.scrollLeft)-self.HTMLElement.clientWidth/2;
             newPosition=newPosition<limitLeft?limitLeft:newPosition;
             newPosition=newPosition>limitRight?limitRight:newPosition;
             self.HTMLElement.style.left=newPosition + "px";
@@ -174,21 +184,23 @@ var Key=function(value,time,HTMLParent,HTMLTimeLineArea,timelineController){
         this.time=time;
         this.HTMLElement.style.display="block";   
         this.timelineLocation=this.getLocationInTimeline(this.time);
+
         this.HTMLElement.style.left=this.timelineLocation + "px";
     }
     this.getLocationInTimeline=function(moment){
 
-        let leftLimit =TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);
-        let rightLimit = self.HTMLParent.RECTBoundings.width-TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);;
+        let leftLimit =TIMELINE_PADDING-(self.HTMLElement.clientWidth/2);
+        let rightLimit = self.laneParent.HTMLElement.clientWidth-TIMELINE_PADDING-(self.HTMLElement.clientWidth/2);;
         let totalDisplacementArea=rightLimit-leftLimit;
 
         let percentMoment2TotalDuration=moment/self.timelineController.animator.totalDuration;
+        console.log(percentMoment2TotalDuration);
         return leftLimit+totalDisplacementArea*percentMoment2TotalDuration;
 
     }
     this.getTimeFromLocation=function(globalLocation){
-        let leftLimit=TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);
-        let rightLimit=self.HTMLParent.RECTBoundings.width-TIMELINE_PADDING-(self.HTMLElement.offsetWidth/2);
+        let leftLimit=TIMELINE_PADDING-(self.HTMLElement.clientWidth/2);
+        let rightLimit=self.laneParent.HTMLElement.clientWidth-TIMELINE_PADDING-(self.HTMLElement.clientWidth/2);
         let totalDisplacementArea=rightLimit-leftLimit;
         
         let localLocation=globalLocation-leftLimit;
@@ -199,7 +211,6 @@ var Key=function(value,time,HTMLParent,HTMLTimeLineArea,timelineController){
 }
 var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea,timelineController){
     this.HTMLElement=null;
-    this.RECTBoundings=null;
     this.HTMLTimeLineArea=null; //lo usan los keysframes
     this.timelineController=null;
     this.listKeyFrames=[];
@@ -214,7 +225,6 @@ var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea,timelineControll
         this.HTMLElement=HTMLElement;
         this.HTMLTimeLineArea=HTMLTimeLineArea;
         this.timelineController=timelineController;
-        this.RECTBoundings=this.HTMLElement.getBoundingClientRect();
         this.HTMLElement.addEventListener("mousedown",this.OnMouseDown);
         CanvasManager.registerOnSelectionUpdated(this);
         WindowManager.registerOnMouseUp(this);
@@ -344,14 +354,13 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     listObserversOnMarkerDragEnded:[],
     init:function(){
         
-        this.HTMLElement=new HTMLElement(".action-editor");
-        this.HTMLtimeline=new HTMLElement(".action-editor__timeline-area");
-        this.HTMLtimeline_timeBar=new HTMLElement(".action-editor__timeline-area__time-bar");
-        this.HTMLtimeline_keyframesBar=new HTMLElement(".action-editor__timeline-area__keyframes-bar");
-        this.HTMLmarker=new HTMLElement(".action-editor .marker");
+        this.HTMLElement=document.querySelector(".action-editor");//todo el panel
+        this.HTMLtimeline=document.querySelector(".action-editor__timeline-area");
+        this.HTMLtimeline_timeBar=document.querySelector(".action-editor__timeline-area__time-bar");
+        this.HTMLtimeline_keyframesBar=document.querySelector(".action-editor__timeline-area__keyframes-bar");
+        this.HTMLmarker=document.querySelector(".action-editor .marker");
 
         this.setDuration(3000);
-        this._setupTimeLine();
         this._setupMarker();
         this._setupPropertyLanes();
 
@@ -364,14 +373,15 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         this.timelineController=obj;
     },
     setDuration:function(duration){
+        if(this.marker){
+            this.marker.moveMe(0);
+        }
         this.totalDuration=duration;
+        this.timelineController.animator.setTotalDuration(duration);
         this._updateUI_timeline();
     },
     _setupMarker:function(){
         this.marker=new Marker(".action-editor .marker",this.HTMLtimeline_timeBar,this.HTMLtimeline)
-    },
-    _setupTimeLine:function(){
-        this.notificationOnResize();
     },
     _setupPropertyLanes:function(){
         let HTMLPropertyLanes=document.querySelectorAll(".keyframes-bar__property-lane");
@@ -380,6 +390,60 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
             let propertyLane=new PropertyLane(listProperties[i],HTMLPropertyLanes[i],this.HTMLtimeline,this.timelineController);
             this.dictPropertyLanes[listProperties[i]]=propertyLane;
         }
+    },
+    _updateUI_timeline:function(){
+        this._UIupdateSizes_timelineComponents(true);
+        this._UIupdate_timeline_timebar_labels();
+        this._UIupdateSizes_timelineComponents(false);
+    },
+    _UIupdate_timeline_timebar_labels:function(){
+        this.HTMLtimeline_timeBar.children[1].innerHTML="";
+
+        this.timeBar_numSegments=this.totalDuration/TIMELINE_TIMESTEPS;
+        this.timeBar_segmentLongitude=(this.HTMLtimeline_timeBar.clientWidth-(TIMELINE_PADDING*2))/this.timeBar_numSegments;
+        if(this.timeBar_segmentLongitude<TIMELINE_MIN_LONGITUDE_STEPS){
+            this.timeBar_segmentLongitude=TIMELINE_MIN_LONGITUDE_STEPS;
+        }
+
+        console.log("segment longitude: " + this.timeBar_segmentLongitude);
+        let timeLabelTmp=document.createElement("span");
+        timeLabelTmp.textContent="0";
+        timeLabelTmp.classList.add("timelabel");
+        this.HTMLtimeline_timeBar.children[1].append(timeLabelTmp);
+        timeLabelTmp.style.left=TIMELINE_PADDING-(timeLabelTmp.offsetWidth/2)+"px";
+        for(let i=1;i<=this.timeBar_numSegments;i++){
+            let timeLabel=document.createElement("span");
+            timeLabel.textContent=TIMELINE_TIMESTEPS*i/10;
+            timeLabel.classList.add("timelabel");
+            this.HTMLtimeline_timeBar.children[1].append(timeLabel);
+            timeLabel.style.left=i*this.timeBar_segmentLongitude+TIMELINE_PADDING-(timeLabel.offsetWidth/2)+"px";
+            console.log(timeLabel.offsetWidth);
+        }
+    },
+
+    _UIupdateSizes_timelineComponents:function(resetSizes){
+        let self=PanelActionEditor;
+        let masterWidth;
+        if(resetSizes){
+            masterWidth=self.HTMLtimeline.clientWidth;
+
+        }else{
+            masterWidth=self.HTMLtimeline.scrollWidth;
+        }
+        console.log("onresize: " +self.HTMLtimeline_timeBar.clientLeft );
+        let margins=document.querySelectorAll(".action-editor__timeline-area > .margin");
+        margins[0].style.left=0+"px";
+        margins[1].style.left=masterWidth-TIMELINE_PADDING + "px";
+        //console.log("scrollwidth:" +self.HTMLtimeline.scrollWidth);
+        margins[0].style.width=TIMELINE_PADDING + "px";
+        margins[1].style.width=TIMELINE_PADDING+ "px";
+        
+        self.HTMLtimeline_timeBar.style.width=masterWidth + "px";
+        self.HTMLtimeline_keyframesBar.style.width=masterWidth+ "px";
+
+        //self.HTMLtimeline.calcBoundings();
+        //self.HTMLtimeline_timeBar.calcBoundings();
+        //self.HTMLtimeline_keyframesBar.calcBoundings();
     },
     registerOnMarkerDragged:function(obj){
         this.listObserversOnMarkerDragged.push(obj);
@@ -399,21 +463,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         this.notifyOnMarkerDragEnded();
     },
     notificationOnResize:function(){
-        let self=PanelActionEditor;
-        console.log("onresize: " +self.HTMLtimeline_timeBar.RECTBoundings.left );
-        let margins=document.querySelectorAll(".action-editor__timeline-area > .margin");
-        margins[0].style.left=0+"px";
-        margins[1].style.left=self.HTMLtimeline.htmlElement.scrollWidth-TIMELINE_PADDING + "px";
-        console.log("scrollwidth:" +self.HTMLtimeline.htmlElement.scrollWidth);
-        margins[0].style.width=TIMELINE_PADDING + "px";
-        margins[1].style.width=TIMELINE_PADDING+ "px";
-        
-        self.HTMLtimeline_timeBar.htmlElement.style.width=self.HTMLtimeline.htmlElement.scrollWidth + "px";
-        self.HTMLtimeline_keyframesBar.htmlElement.style.width=self.HTMLtimeline.htmlElement.scrollWidth + "px";
-
-        self.HTMLtimeline.calcBoundings();
-        self.HTMLtimeline_timeBar.calcBoundings();
-        self.HTMLtimeline_keyframesBar.calcBoundings();
+        this._UIupdateSizes_timelineComponents();
     },
     notificationOnOptionClicked:function(property){
         //use the correct dictionary (according to selectoed object)
@@ -427,31 +477,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
 
         }
     },
-    _updateUI_timeline:function(){
-        this.HTMLtimeline_timeBar.htmlElement.children[1].innerHTML="";
 
-        this.timeBar_numSegments=this.totalDuration/TIMELINE_TIMESTEPS;
-        this.timeBar_segmentLongitude=(this.HTMLtimeline_timeBar.RECTBoundings.width-(TIMELINE_PADDING*2))/this.timeBar_numSegments;
-        if(this.timeBar_segmentLongitude<TIMELINE_MIN_LONGITUDE_STEPS){
-            this.timeBar_segmentLongitude=TIMELINE_MIN_LONGITUDE_STEPS;
-        }
-
-        console.log("segment longitude: " + this.timeBar_segmentLongitude);
-        let timeLabelTmp=document.createElement("span");
-        timeLabelTmp.textContent="0";
-        timeLabelTmp.classList.add("timelabel");
-        this.HTMLtimeline_timeBar.htmlElement.children[1].append(timeLabelTmp);
-        timeLabelTmp.style.left=TIMELINE_PADDING-(timeLabelTmp.offsetWidth/2)+"px";
-        for(let i=1;i<=this.timeBar_numSegments;i++){
-            let timeLabel=document.createElement("span");
-            timeLabel.textContent=TIMELINE_TIMESTEPS*i/10;
-            timeLabel.classList.add("timelabel");
-            this.HTMLtimeline_timeBar.htmlElement.children[1].append(timeLabel);
-            timeLabel.style.left=i*this.timeBar_segmentLongitude+TIMELINE_PADDING-(timeLabel.offsetWidth/2)+"px";
-            console.log(timeLabel.offsetWidth);
-        }
-        this.notificationOnResize();
-    },
     notifyOnMarkerDragEnded:function(){
         let self=PanelActionEditor;
         for(let i=0;i<self.listObserversOnMarkerDragEnded.length;i++){
@@ -1066,7 +1092,6 @@ var WindowManager={
     },
     onWindowMouseUp:function(){
         let self=WindowManager;
-        console.log("mouse up");
         for(let i=0;i<self.listObservers[self.activeObserverType].onMouseUp.length;i++){
             self.listObservers[self.activeObserverType].onMouseUp[i].notificationOnMouseUp();
         }

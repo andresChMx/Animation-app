@@ -86,15 +86,8 @@ var PathIllustrator=fabric.util.createClass({
                         let indexPathTurn=parseInt(animTotalProgress/animPathDuration);
                         let cantJumps=(Math.round(this.listObjectsToDraw[k].paths.duration/animPathDuration)-1)-indexPathTurn;
 
-                        this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
-                        this.ctx.globalCompositeOperation="destination-in";
                         this.drawCurveSegment(k,i,j,1);
-                        this.ctx.stroke();
-                        this.ctx.globalCompositeOperation="source-over";
-                        //this.actualSnapshot.src=this.canvas.toDataURL();
 
-                        this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
-                        this.ctx.globalCompositeOperation="destination-in";
                         for(let p=0;p<cantJumps;p++){
                             let indexes=this.getNextPath(k,i,j,1);
                             //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
@@ -102,10 +95,15 @@ var PathIllustrator=fabric.util.createClass({
                             i=indexes[0];
                             j=indexes[1];
                         }
+                        
+                        this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
+                        this.ctx.globalCompositeOperation="destination-in";
                         this.ctx.stroke();
                         this.ctx.globalCompositeOperation="source-over";
+                        
                         this.actualSnapshot.src=this.canvas.toDataURL(); 
-
+                        this.ctx.drawImage(this.prevPathSnapshot,0,0);
+                        this.ctx.drawImage(this.actualSnapshot,0,0);
                         ///
                         k++;
                         if(k==this.listObjectsToDraw.length){
@@ -116,42 +114,31 @@ var PathIllustrator=fabric.util.createClass({
                             }
                         }
                         ///
+                        this.notifyOnDrawingNewObject(this.listObjectsToDraw[k].imgHTML,k-1,k,this.canvas.toDataURL());
                         //calculando momento final de la animacion de la imagen 
                         animStartTime=+new Date();
                         animFinishTime=animStartTime+this.listObjectsToDraw[k].paths.duration;
                         animTotalProgress=0;
                         prevStrokeIndexTurn=0;
+                        //Buscando los indicices del primer stroke
+                        i=this.getFirstPathListIndex(k,-1);
+                        j=0;
 
-
-                        this.actualSnapshot.onload=function(){
-                            this.ctx.drawImage(this.prevPathSnapshot,0,0);
-                            this.ctx.drawImage(this.actualSnapshot,0,0);
-
-
-                            this.notifyOnDrawingNewObject(this.listObjectsToDraw[k].imgHTML,k-1,k);
-
-                            //Buscando los indicices del primer stroke
-                            i=this.getFirstPathListIndex(k,-1);
-                            j=0;
-
-
-                            this.ctx.beginPath();
-                            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-                            this.prevPathSnapshot.src=this.canvas.toDataURL();
-                            if(this.data.getListLinesWidthsLength(k)>0){
+                        //Setting up canvas for new image (cleaning, empty snapshot, setup linewidth)
+                        this.ctx.beginPath();
+                        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                        this.prevPathSnapshot.src=this.canvas.toDataURL();
+                        if(this.data.getListLinesWidthsLength(k)>0){
                                 this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
-                            }
-                            ////// Calculando tiempo de cada stroke
-                            let totalCantPaths=0;
-                            for(let i=0;i<this.data.getPathListLength(k);i++){
+                        }
+                        ////// Calculando tiempo de cada stroke
+                        let totalCantPaths=0;
+                        for(let i=0;i<this.data.getPathListLength(k);i++){
                                 let tmpCant=this.data.getPathLength(k,i)-1;
                                 totalCantPaths=tmpCant<0?totalCantPaths:totalCantPaths+tmpCant;
-                            }
-                            animPathDuration=this.listObjectsToDraw[k].paths.duration/totalCantPaths;
-                            
+                        }
+                        animPathDuration=this.listObjectsToDraw[k].paths.duration/totalCantPaths;
 
-
-                        }.bind(this);
                     }else{
                         animTotalProgress=nowTime-animStartTime;
 
@@ -173,7 +160,6 @@ var PathIllustrator=fabric.util.createClass({
                                      j=indexes[1];
                                 }
 
-                                this.drawCurveSegment(k,i,j,(animTotalProgress%animPathDuration)/animPathDuration);
                                 if(oldValI!=i){//se paso a otro path
                                     this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
                                     this.ctx.globalCompositeOperation="destination-in";
@@ -181,20 +167,21 @@ var PathIllustrator=fabric.util.createClass({
                                     this.ctx.globalCompositeOperation="source-over";
                                     this.actualSnapshot.src=this.canvas.toDataURL();
                                     //this.actualSnapshot.onload=function(){
-                                        this.ctx.drawImage(this.prevPathSnapshot,0,0);
-                                        this.ctx.drawImage(this.actualSnapshot,0,0);
-                                        this.prevPathSnapshot.src=this.canvas.toDataURL();
-                                    //}.bind(this);
-
+                                    this.ctx.drawImage(this.prevPathSnapshot,0,0);
+                                    this.ctx.drawImage(this.actualSnapshot,0,0);
+                                    this.prevPathSnapshot.src=this.canvas.toDataURL();
+                                        //}.bind(this);
+                                        
                                     this.ctx.beginPath();
                                     this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
                                     if(this.data.getPathLength(k,i).length>0){
-                                        this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,0),this.data.getStrokeCoordYAt(k,i,0));
+                                            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,0),this.data.getStrokeCoordYAt(k,i,0));
                                     }
                                 }else{
+                                    this.drawCurveSegment(k,i,j,(animTotalProgress%animPathDuration)/animPathDuration);
+                                    prevStrokeIndexTurn=indexPathTurn;
                                     this.drawFrame(k);
                                 }
-                                prevStrokeIndexTurn=indexPathTurn;
 
                                 //FIN AQUI ANIMACIONES
                                 Preprotocol.wantDelete=true;
@@ -420,9 +407,9 @@ var PathIllustrator=fabric.util.createClass({
             y: this._getLValue(position,startY,endY)
         }
     },
-    notifyOnDrawingNewObject:function(imgHTML,lastObjIndex,newObjIndex){//suscritos : su manejador de este en la vista PreviewerView (DrawingCacheManager)
+    notifyOnDrawingNewObject:function(imgHTML,lastObjIndex,newObjIndex,lastDataUrl){//suscritos : su manejador de este en la vista PreviewerView (DrawingCacheManager)
         for(let i=0;i<this.listObserversOnDrawingNewObject.length;i++){
-            this.listObserversOnDrawingNewObject[i].notificationOnDrawingNewObject(imgHTML,lastObjIndex,newObjIndex);
+            this.listObserversOnDrawingNewObject[i].notificationOnDrawingNewObject(imgHTML,lastObjIndex,newObjIndex,lastDataUrl);
         }
     },
     registerOnDrawingNewObject:function(obj){
@@ -430,14 +417,12 @@ var PathIllustrator=fabric.util.createClass({
     }
 })
 var IllustratorDataAdapterPreview=fabric.util.createClass({
-    initialize:function(drawingManager,canvasDrawingManager,scalerFactorX,scalerFactorY,ctx){
+    initialize:function(drawingManager,canvasDrawingManager,scalerFactorX,scalerFactorY){
         this.drawingManager=drawingManager;
         this.canvasDrawingManager=canvasDrawingManager;
 
         this.scalerFactorX=scalerFactorX;
         this.scalerFactorY=scalerFactorY;
-
-        this.ctx=ctx;
     },
     getStrokeCoordXAt:function(k,i,j){
         return this.canvasDrawingManager.listPoints[i][j].get("left")*this.scalerFactorX;
@@ -465,21 +450,14 @@ var IllustratorDataAdapterPreview=fabric.util.createClass({
     getLineWidthAt:function(k,i){
         return this.canvasDrawingManager.listLinesWidths[i]*this.scalerFactorX;
     },
-    getImageData:function(){
-        return this.ctx.toDataURL();
-    },
-    drawInTrueCanvas:function(k,imageDataUrl,posX,posY){
-        //this.ctx.drawImage(imageDataUrl,posX,posY);
-    }
 })
 
 
 var IllustratorDataAdapterCache=fabric.util.createClass({
-    initialize:function(listObjectsToDraw,listScalerFactors,ctx){
+    initialize:function(listObjectsToDraw,listScalerFactors){
         //this.setNewAnimableObject(scalerFactorX,scalerFactorY,imageModel);
         this.imagesModel=listObjectsToDraw;
         this.scalerFactors=listScalerFactors;
-        this.ctx=ctx;
     },
     getStrokeCoordXAt:function(k,i,j){
         return this.imagesModel[k].paths.points[i][j*2]*this.scalerFactors[k].x;
@@ -507,11 +485,5 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
     getLineWidthAt:function(k,i){
         return this.imagesModel[k].paths.linesWidths[i]*this.scalerFactors[k].x;
     },
-    getImageData:function(){
-        return this.ctx.toBlob();
-    },
-    drawInTrueCanvas:function(k,imageDataUrl,posX,posY){
-        //this.listDrawableImageObjects[k].setImageData(imageDataUrl);
-        //this.canvas.renderAll();
-    }
+
 })
