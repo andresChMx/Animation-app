@@ -143,7 +143,6 @@ var PathIllustrator=fabric.util.createClass({
                         animTotalProgress=nowTime-animStartTime;
 
                         if(this.data.getPathListLength(k)!=0){
-                            //console.log(this.canvasDrawingManager.listPoints);
                             if(!Preprotocol.wantConsume){
                                 //return;
                             }else{
@@ -154,24 +153,16 @@ var PathIllustrator=fabric.util.createClass({
                                 let oldValI=i;
                                 for(let p=0;p<cantJumps;p++){
                                       this.drawCompletePath(k,i,j);
-                                            //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
+                                    //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
                                      let indexes=this.getNextPath(k,i,j,1);
                                      i=indexes[0];
                                      j=indexes[1];
                                 }
 
                                 if(oldValI!=i){//se paso a otro path
-                                    this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
-                                    this.ctx.globalCompositeOperation="destination-in";
-                                    this.ctx.stroke();
-                                    this.ctx.globalCompositeOperation="source-over";
-                                    this.actualSnapshot.src=this.canvas.toDataURL();
-                                    //this.actualSnapshot.onload=function(){
-                                    this.ctx.drawImage(this.prevPathSnapshot,0,0);
-                                    this.ctx.drawImage(this.actualSnapshot,0,0);
+                                    this.drawCurrentStrokes(k);
                                     this.prevPathSnapshot.src=this.canvas.toDataURL();
                                         //}.bind(this);
-                                        
                                     this.ctx.beginPath();
                                     this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
                                     if(this.data.getPathLength(k,i).length>0){
@@ -179,10 +170,10 @@ var PathIllustrator=fabric.util.createClass({
                                     }
                                 }else{
                                     this.drawCurveSegment(k,i,j,(animTotalProgress%animPathDuration)/animPathDuration);
-                                    prevStrokeIndexTurn=indexPathTurn;
-                                    this.drawFrame(k);
+                                    this.drawCurrentStrokes(k);
                                 }
-
+                                
+                                prevStrokeIndexTurn=indexPathTurn;
                                 //FIN AQUI ANIMACIONES
                                 Preprotocol.wantDelete=true;
                             }
@@ -201,7 +192,7 @@ var PathIllustrator=fabric.util.createClass({
         }.bind(this)())
 
     },
-    drawFrame:function(k){
+    drawCurrentStrokes:function(k){
         this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
         this.ctx.globalCompositeOperation="destination-in";
         this.ctx.stroke();

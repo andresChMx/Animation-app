@@ -48,7 +48,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
-        this.entraceMode=EntranceModes.none;
+        this.entraceMode=EntranceModes.drawn;
         this.dictAnimations={
             "left":[],
             "top":[],
@@ -126,12 +126,14 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         options || (options = { });
         this.callSuper('initialize',options);
         this.set('label', options.label || '');
+
         this.cacheCanvas=options.cacheCanvas;
     //this.mainCanvas=options.mainCanvas;
-    this.set({angle:80});
         this.myTurn=false;
         this.lastSnapShot=new Image();
         this.lastSnapShot.src=this.cacheCanvas.toDataURL();
+        this.width=options.width;
+        this.height=options.height;
     },
     setTurn:function(is,lastDataUrl){
         if(!is){
@@ -145,11 +147,22 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
       });
     },
     render:function(ctx){
-        if(this.myTurn){
-            ctx.drawImage(this.cacheCanvas,this.get("left"),this.get("top"));
-        }else{
-            ctx.drawImage(this.lastSnapShot,this.get("left"),this.get("top"));  
-        }
+        
+        ctx.save();
+            this.transform(ctx);
+            if(this.myTurn){
+                ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
+            }else{
+                ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);  
+            }
+        ctx.restore();
+        
+       /*
+       if(this.myTurn){
+           ctx.drawImage(this.cacheCanvas,0,0);
+       }else{
+           ctx.drawImage(this.lastSnapShot,0,0);  
+       }*/
     }
 
   });

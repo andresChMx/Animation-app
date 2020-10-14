@@ -20,7 +20,7 @@ var ScenePreviewController=fabric.util.createClass({
             let animableObj=CanvasManager.listAnimableObjects[i];
             if(animableObj.getEntranceMode()==EntranceModes.drawn){
                 this.ctrlPointsGenerator.generate(animableObj.imageModel);
-                let drawableImage=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,left:animableObj.get("left"),top:animableObj.get("top"),width:animableObj.get("width"),height:animableObj.get("height"),angle:90});
+                let drawableImage=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,left:animableObj.get("left"),top:animableObj.get("top"),width:animableObj.get("width"),height:animableObj.get("height"),angle:animableObj.get("angle"),scaleX:animableObj.get("scaleX"),scaleY:animableObj.get("scaleY"),originX: 'center',originY: 'center'});
                 this.UIPanelPreviewerCanvas.add(drawableImage);
                 listDrawableObjects.push(drawableImage);
                 listObjectsToDraw.push(animableObj.imageModel);

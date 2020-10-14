@@ -27,6 +27,7 @@ var ControllerAnimator=fabric.util.createClass({
         this.canvasToDisplay.renderAll();
     },
     playAnimation:function(){
+
         this.animStartTime= +new Date();
         this.animFinishTime= this.animStartTime + (this.totalDuration-this.totalProgress);
         this.flagDoLastUpdate=true;

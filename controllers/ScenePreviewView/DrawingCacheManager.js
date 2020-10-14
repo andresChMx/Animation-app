@@ -3,7 +3,7 @@ var DrawingCacheManager=fabric.util.createClass({
     initialize:function(){
         this.canvas=document.createElement("canvas");
         this.ctx=this.canvas.getContext("2d");
-        this.canvas.style.display="none";
+        //this.canvas.style.display="none";
 
         this.listDrawableObjects=[];
         //this.canvas=new OffscreenCanvas(100,1);
@@ -25,7 +25,6 @@ var DrawingCacheManager=fabric.util.createClass({
         this.pathIllustrator.start();
     },
     notificationOnDrawingNewObject:function(imgHTML,lastObjIndex,newObjIndex,lastDataUrl){
-        
         //console.log(this.listDrawableObjects.length + "  " + lastObjIndex + "    " + newObjIndex);
         this.canvas.width=imgHTML.naturalWidth;
         this.canvas.height=imgHTML.naturalHeight;
