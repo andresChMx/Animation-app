@@ -3,7 +3,7 @@ var DrawingCacheManager=fabric.util.createClass({
     initialize:function(){
         this.canvas=document.createElement("canvas");
         this.ctx=this.canvas.getContext("2d");
-        //this.canvas.style.display="none";
+        this.canvas.style.display="none";
 
         this.listDrawableObjects=[];
         //this.canvas=new OffscreenCanvas(100,1);
@@ -14,10 +14,12 @@ var DrawingCacheManager=fabric.util.createClass({
 
     },
     wakeUp:function(imagesModelsToDraw,listScalerFactors,listDrawableObjects){
-        this.canvas.width=listScalerFactors[0].x;
-        this.canvas.height=listScalerFactors[0].y;
-        this.listDrawableObjects=listDrawableObjects;
-        this.listDrawableObjects[0].setTurn(true);
+        if(listDrawableObjects.length>0){
+            this.canvas.width=listScalerFactors[0].x;
+            this.canvas.height=listScalerFactors[0].y;
+            this.listDrawableObjects=listDrawableObjects;
+            this.listDrawableObjects[0].setTurn(true);
+        }
         let illustratorDataAdapterCache=new IllustratorDataAdapterCache(imagesModelsToDraw,listScalerFactors,this.ctx);
         this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,illustratorDataAdapterCache,false);
         this.pathIllustrator.setListObjectsToDraw(imagesModelsToDraw);

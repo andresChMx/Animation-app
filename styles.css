@@ -33,6 +33,9 @@
     position: relative;
     height:var(--panel-animation__top-menu_height);
     width:100%;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
 }
 .panel-animation__top-menu__list{
     list-style:none;
@@ -49,6 +52,9 @@
 }
 .panel-animation__top-menu__list__item:hover{
     background:#48887B;
+}
+.panel-animation__top-menu__form-duration{
+
 }
 .panel-animation__editors-container{
     height:calc( 100% - var(--panel-animation__top-menu_height));

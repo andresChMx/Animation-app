@@ -31,12 +31,14 @@ var Animation=fabric.util.createClass({
     },
     */
     tick:function(currentTime){
-        if(currentTime>=this.startMoment && currentTime<=this.endMoment){
-            let currentTimeLocalAnim=currentTime-this.startMoment;
-            let currentValue = fabric.util.ease.easeInSine(currentTimeLocalAnim, this.startValue, this.byValue, this.localDuration);
-            return currentValue;
+        if(currentTime<this.startMoment){
+            return "tiempoMenor";
+        }else if(currentTime>this.endMoment){
+            return "tiempoMayor";
         }else{
-            return -1;
+            let currentTimeLocalAnim=currentTime-this.startMoment;
+            let currentValue = fabric.util.ease.easeOutElastic(currentTimeLocalAnim, this.startValue, this.byValue, this.localDuration);
+            return currentValue;
         }
     },
     hasTwoKeys:function(){
@@ -78,14 +80,27 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.dictAnimations[property][indexAnimation].updateValues(startValue,endValue,startMoment,endMoment);
     },*/
     executeAnimations:function(currentTime){
+
         for(const prop in this.dictAnimations){
             let anims=this.dictAnimations[prop]
             for(var i=0;i<anims.length;i++){
                 let anim=anims[i];
                 if(anim.hasTwoKeys()){
                     let value=anim.tick(currentTime)
-                    if(value!=-1){
+                    if(value==="tiempoMenor"){
+                        if(this.isFirstIndex(i)){
+                            this.set(anim.property,anim.startValue);
+                            break;
+                        }
+                    }else if (value==="tiempoMayor"){
+                        if(this.isLastIndex(i,anims.length)){
+                            this.set(anim.property,anim.endValue);
+                            break;
+                        }
+                    }
+                    else{
                         this.set(anim.property,value);
+                        break;
                     }
                 }else{
                     this.set(anim.property,anim.startValue);
@@ -93,7 +108,14 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             }
         }
     },
+    isLastIndex:function(index,listLength){
+        return index===listLength-1;
+    },
+    isFirstIndex:function(index){
+        return index===0;
+    },
     hasAnimations:function(){
+
         for(const prop in this.dictAnimations){
             if(this.dictAnimations[prop].length>0){
                 return true;
@@ -105,6 +127,32 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     },
     hasPropertyAnimations:function(prop){
         return (this.dictAnimations[prop].length>0);
+    },
+    render:function(ctx){
+        ctx.save();
+        this._setupCompositeOperation(ctx);
+        this.drawSelectionBackground(ctx);
+        this.transform(ctx);
+        this._setOpacity(ctx);
+        this._setShadow(ctx, this);
+        if (this.transformMatrix) {
+          ctx.transform.apply(ctx, this.transformMatrix);
+        }
+        this.clipTo && fabric.util.clipContext(this, ctx);
+        if (this.shouldCache()) {
+          this.renderCache();
+          this.drawCacheOnCanvas(ctx);
+        }
+        else {
+          this._removeCacheCanvas();
+          this.dirty = false;
+          this.drawObject(ctx);
+          if (this.objectCaching && this.statefullCache) {
+            this.saveState({ propertySet: 'cacheProperties' });
+          }
+        }
+        this.clipTo && ctx.restore();
+        ctx.restore();
     }
     //TODO: update animation handler
 })
@@ -119,7 +167,7 @@ fabric.util.object.extend(fabric.Image,{
 */
 var DrawableImage = fabric.util.createClass(fabric.Object, {
 
-    type: 'DrawingPath',
+    type: 'DrawableImage',
     // initialize can be of type function(options) or function(property, options), like for text.
     // no other signatures allowed.
     initialize: function(options) {
@@ -134,6 +182,9 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         this.lastSnapShot.src=this.cacheCanvas.toDataURL();
         this.width=options.width;
         this.height=options.height;
+
+        this.dictAnimations=options.animations;
+
     },
     setTurn:function(is,lastDataUrl){
         if(!is){
@@ -146,6 +197,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         label: this.get('label')
       });
     },
+    
     render:function(ctx){
         
         ctx.save();
@@ -163,7 +215,57 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
        }else{
            ctx.drawImage(this.lastSnapShot,0,0);  
        }*/
-    }
+    },
+    executeAnimations:function(currentTime){
+
+        for(const prop in this.dictAnimations){
+            let anims=this.dictAnimations[prop]
+            for(var i=0;i<anims.length;i++){
+                let anim=anims[i];
+                if(anim.hasTwoKeys()){
+                    let value=anim.tick(currentTime)
+                    if(value==="tiempoMenor"){
+                        if(this.isFirstIndex(i,anims.length)){
+                            this.set(anim.property,anim.startValue);
+                            break;
+                        }
+                    }else if (value==="tiempoMayor"){
+                        if(this.isLastIndex(i)){
+                            this.set(anim.property,anim.endValue);
+                            break;
+                        }
+                    }
+                    else{
+                        this.set(anim.property,value);
+                        break;
+                    }
+                }else{
+                    this.set(anim.property,anim.startValue);
+                }
+            }
+        }
+    },
+    isLastIndex:function(index,listLength){
+        return index===listLength-1;
+    },
+    isFirstIndex:function(index){
+        return index===0;
+    },
+    hasAnimations:function(){
+
+        for(const prop in this.dictAnimations){
+            if(this.dictAnimations[prop].length>0){
+                return true;
+            }
+            
+        }
+
+        return false;
+    },
+    hasPropertyAnimations:function(prop){
+        return (this.dictAnimations[prop].length>0);
+    },
+
 
   });
 const EntranceModes={

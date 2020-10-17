@@ -114,15 +114,13 @@ var Key=function(value,time,laneParent,HTMLTimeLineArea,timelineController){
         this.laneParent=laneParent;
         this.HTMLTimeLineArea=HTMLTimeLineArea
         this.timelineController=timelineController;
-
-        this.leftCoordHtmlPropertyLaneParent=this.laneParent.HTMLElement.getBoundingClientRect().left;
+        this.leftCoordHtmlTimeline=this.HTMLTimeLineArea.getBoundingClientRect().left;
 
         this.HTMLElement=document.createElement("div");
         this.HTMLElement.classList.add("property-lane__key");
         this.laneParent.HTMLElement.appendChild(this.HTMLElement);
         this.timelineLocation=this.getLocationInTimeline(this.time);
 
-        this.RECTBoundings=this.HTMLElement.getBoundingClientRect();
         this.HTMLElement.addEventListener("mousedown",this.OnMouseDown)
         this.HTMLElement.style.left=this.timelineLocation + "px";
 
@@ -165,7 +163,7 @@ var Key=function(value,time,laneParent,HTMLTimeLineArea,timelineController){
         if(self.isPressed){
             let limitLeft= TIMELINE_PADDING-(self.HTMLElement.clientWidth/2);
             let limitRight=self.laneParent.HTMLElement.clientWidth-TIMELINE_PADDING-(self.HTMLElement.clientWidth/2);
-            let newPosition=(WindowManager.mouse.x-self.leftCoordHtmlPropertyLaneParent + self.HTMLTimeLineArea.scrollLeft)-self.HTMLElement.clientWidth/2;
+            let newPosition=(WindowManager.mouse.x-(self.leftCoordHtmlTimeline) + self.HTMLTimeLineArea.scrollLeft)-self.HTMLElement.clientWidth/2;
             newPosition=newPosition<limitLeft?limitLeft:newPosition;
             newPosition=newPosition>limitRight?limitRight:newPosition;
             self.HTMLElement.style.left=newPosition + "px";
@@ -339,6 +337,8 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     HTMLtimeline_timeBar:null,
     HTMLtimeline_keyframesBar:null,
     
+    HTMLdurationFormInput:null,
+    HTMLdurationForm:null,
     marker:null,
 
     timelineController:null,
@@ -352,8 +352,11 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
 
     listObserversOnMarkerDragged:[],
     listObserversOnMarkerDragEnded:[],
+
+    listObserversOnDurationForm:[],
     init:function(){
-        
+        this.HTMLdurationFormInput=document.querySelector(".panel-animation__top-menu__form-duration__input");
+        this.HTMLdurationForm=document.querySelector(".panel-animation__top-menu__form-duration");
         this.HTMLElement=document.querySelector(".action-editor");//todo el panel
         this.HTMLtimeline=document.querySelector(".action-editor__timeline-area");
         this.HTMLtimeline_timeBar=document.querySelector(".action-editor__timeline-area__time-bar");
@@ -363,6 +366,8 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         this.setDuration(3000);
         this._setupMarker();
         this._setupPropertyLanes();
+
+        this._setupFormDuration();
 
         WindowManager.registerObserverOnResize(this);
         PanelInspector.SectionMenuAddKey.registerOnOptionClicked(this);
@@ -379,6 +384,10 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         this.totalDuration=duration;
         this.timelineController.animator.setTotalDuration(duration);
         this._updateUI_timeline();
+    },
+    _setupFormDuration:function(){
+        //this.HTMLdurationForm.addEventListener("submit",this.OnDurationForm.bind(this));
+        this.HTMLdurationFormInput.addEventListener("focusout",this.OnDurationForm.bind(this));
     },
     _setupMarker:function(){
         this.marker=new Marker(".action-editor .marker",this.HTMLtimeline_timeBar,this.HTMLtimeline)
@@ -417,7 +426,6 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
             timeLabel.classList.add("timelabel");
             this.HTMLtimeline_timeBar.children[1].append(timeLabel);
             timeLabel.style.left=i*this.timeBar_segmentLongitude+TIMELINE_PADDING-(timeLabel.offsetWidth/2)+"px";
-            console.log(timeLabel.offsetWidth);
         }
     },
 
@@ -444,6 +452,28 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         //self.HTMLtimeline.calcBoundings();
         //self.HTMLtimeline_timeBar.calcBoundings();
         //self.HTMLtimeline_keyframesBar.calcBoundings();
+    },
+    OnDurationForm:function(e){
+        e.preventDefault();
+        let duration;
+        let target;
+        if(e.target.className=="panel-animation__top-menu__form-duration"){
+            target=e.target.children[1].value;
+            duration=parseInt(e.target.children[1].value);
+        }else{
+            target=e.target;
+            duration=parseInt(e.target.value);
+        }
+        console.log(duration);
+        if(!isNaN(duration)){
+            this.setDuration(duration);
+            this.notifyOnDurationForm(duration);
+        }else{
+            target.value=3000;
+        }
+    },
+    registerOnDurationForm:function(obj){
+        this.listObserversOnDurationForm.push(obj);
     },
     registerOnMarkerDragged:function(obj){
         this.listObserversOnMarkerDragged.push(obj);
@@ -477,7 +507,11 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
 
         }
     },
-
+    notifyOnDurationForm:function(duration){
+        for(let i=0;i<this.listObserversOnDurationForm.length;i++){
+            this.listObserversOnDurationForm[i].notificationOnDurationForm(duration);
+        }
+    },
     notifyOnMarkerDragEnded:function(){
         let self=PanelActionEditor;
         for(let i=0;i<self.listObserversOnMarkerDragEnded.length;i++){
@@ -663,17 +697,23 @@ let SectionImageAssets={
     listObserversOnDummyDraggingEnded:[],
     listObserversOnItemsMenu_designPaths:[],
 
-    MODELItemAssets:[{url:"http://localhost:3000/img.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},/*paths:{points:[[]],lineWidth:10}}*/
-    {url:"http://localhost:3000/mock.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
-    {url:"http://localhost:3000/text.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
-    {url:"http://localhost:3000/character.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    MODELItemAssets:[{url:"http://localhost:3000/icecream.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},/*paths:{points:[[]],lineWidth:10}}*/
+    {url:"http://localhost:3000/icecreamColored.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/nieves.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/nievesColored.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
     {url:"http://localhost:3000/dragon.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
     {url:"http://localhost:3000/monster.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
     {url:"http://localhost:3000/woman.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
     {url:"http://localhost:3000/svg.svg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
     {url:"http://localhost:3000/elephantBW.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
     {url:"http://localhost:3000/elephantColor.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
-    {url:"http://localhost:3000/flower.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}}],
+    {url:"http://localhost:3000/flower.jpg",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/earth.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/metheor.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/metheorBad.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/ship.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/msg1.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}},
+    {url:"http://localhost:3000/msg2.png",paths:{points:[],linesWidths:[],pathsNames:[],duration:3000}}],
     MODELItemMenuOptions:[
         {
             label:"Design Drawing path",
@@ -969,6 +1009,13 @@ var CanvasManager={
         self.canvas.add(oImg);
         self.listAnimableObjects.push(oImg);
         
+    },
+    setCanvasOnAnimableObjects:function(){
+        for(let i=0;i<this.listAnimableObjects.length;i++){
+            this.listAnimableObjects[i]._set('canvas', this.canvas);
+            this.listAnimableObjects[i].setCoords();
+        }
+        this.canvas.renderAll();
     },
     registerOnSelectionUpdated:function(obj){
         this.listObserversOnObjSelected.push(obj);

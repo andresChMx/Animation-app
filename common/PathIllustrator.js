@@ -20,7 +20,9 @@ var PathIllustrator=fabric.util.createClass({
         this.listObjectsToDraw=listObjects;
     },
     start:function(){
-        if(this.listObjectsToDraw.length==0){return;}
+        if(this.listObjectsToDraw.length==0){
+            return;
+        }
         this.prevPathSnapshot.src=this.canvas.toDataURL();
         this.endLoop=false;
         this._loop();
@@ -31,6 +33,7 @@ var PathIllustrator=fabric.util.createClass({
         this.flagFirstTime=true;
     },
     _loop:function(){
+        this.ctx.lineCap = "round";
         let flagFirstTime=true;
 
         let animStartTime;

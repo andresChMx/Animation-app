@@ -1,7 +1,7 @@
 var ControllerAnimator=fabric.util.createClass({
-    initialize:function(canvasToDisplay,objectsToAnimate){
+    initialize:function(canvasToDisplay){
         this.canvasToDisplay=canvasToDisplay;
-        this.objectsToAnimate=objectsToAnimate;
+        this.objectsToAnimate=[];
         this.totalDuration=9000;
         this.totalProgress=0;
 
@@ -10,6 +10,9 @@ var ControllerAnimator=fabric.util.createClass({
         this.flagDoLastUpdate;
 
         this.requestAnimFrameID=null;
+    },
+    setListObjectsToAnimate:function(list){
+        this.objectsToAnimate=list;
     },
     setTotalDuration:function(valDuration){
         this.totalDuration=valDuration;
@@ -66,7 +69,12 @@ var ControllerAnimator=fabric.util.createClass({
     _updateObjectsAccordAnims:function(self){
         for(var i=0;i<this.objectsToAnimate.length;i++){
             if(this.objectsToAnimate[i].hasAnimations()){
+
+                this.objectsToAnimate[i].visible=true;
                 this.objectsToAnimate[i].executeAnimations(self.totalProgress);
+                this.objectsToAnimate[i].visible=true;
+                //if (!this.objectsToAnimate[i].isOnScreen()) {
+                //}
               //console.log(listAnimableObjects[i].listAnimations.length);
             }else{
               //no hacer nada

@@ -7,42 +7,53 @@ var ScenePreviewController=fabric.util.createClass({
         this.animator=null;
         PanelInspector.SectionToolBox.registerOnBtnPreview(this);
         PanelPreviewer.registerOnBtnClose(this);
+        PanelActionEditor.registerOnDurationForm(this);
     },
     setPreviewerCanvas:function(previewerCanvas){
         this.UIPanelPreviewerCanvas=previewerCanvas;
-        this.animator=new ControllerAnimator(previewerCanvas,CanvasManager.listAnimableObjects);
+        this.animator=new ControllerAnimator(this.UIPanelPreviewerCanvas);
     },
-    loadAnimableObjects:function(){
-        let listObjectsToDraw=[];
-        let listScalerFactors=[];
-        let listDrawableObjects=[];
+    loadObjectsForAnimation:function(listAllObjects,listDrawableObjects,listImageModels,listScalerFactors){
+
         for(let i=0;i<CanvasManager.listAnimableObjects.length;i++){
             let animableObj=CanvasManager.listAnimableObjects[i];
+            let tmpObject=null;
             if(animableObj.getEntranceMode()==EntranceModes.drawn){
                 this.ctrlPointsGenerator.generate(animableObj.imageModel);
-                let drawableImage=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,left:animableObj.get("left"),top:animableObj.get("top"),width:animableObj.get("width"),height:animableObj.get("height"),angle:animableObj.get("angle"),scaleX:animableObj.get("scaleX"),scaleY:animableObj.get("scaleY"),originX: 'center',originY: 'center'});
-                this.UIPanelPreviewerCanvas.add(drawableImage);
-                listDrawableObjects.push(drawableImage);
-                listObjectsToDraw.push(animableObj.imageModel);
+                tmpObject=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,left:animableObj.get("left"),top:animableObj.get("top"),width:animableObj.get("width"),height:animableObj.get("height"),angle:animableObj.get("angle"),scaleX:animableObj.get("scaleX"),scaleY:animableObj.get("scaleY"),originX: 'center',originY: 'center',animations:animableObj.dictAnimations});
+                listDrawableObjects.push(tmpObject);
+                listImageModels.push(animableObj.imageModel);
                 listScalerFactors.push({x:animableObj.imageModel.imgHTML.naturalWidth,y:animableObj.imageModel.imgHTML.naturalHeight});
             }else if(animableObj.getEntranceMode()==EntranceModes.dragged){
-
+                
             }else if(animableObj.getEntranceMode()==EntranceModes.none){
-                this.UIPanelPreviewerCanvas.add(CanvasManager.listAnimableObjects[i]);
+                tmpObject=animableObj;
             }
 
+            this.UIPanelPreviewerCanvas.add(tmpObject);
+            listAllObjects.push(tmpObject);
        }
-       this.drawingCacheManager.wakeUp(listObjectsToDraw,listScalerFactors,listDrawableObjects);
     },
     notificationOnBtnPreview:function(){
+        let listAllObjects=[];
+        //listas para el DrawingCacheManager (dibujador)
+        let listDrawableObjects=[];
+        let listImageModels=[];
+        let listScalerFactors=[];
+        this.loadObjectsForAnimation(listAllObjects,listDrawableObjects,listImageModels,listScalerFactors);
+        this.drawingCacheManager.wakeUp(listImageModels,listScalerFactors,listDrawableObjects);
+        this.animator.setListObjectsToAnimate(listAllObjects);
 
-        this.loadAnimableObjects();
         this.animator.setTotalProgress(0);
-        this.animator.playAnimation(0);
+        this.animator.playAnimation();
     },
     notificationOnBtnClose:function(){
         this.UIPanelPreviewerCanvas.clear();
         this.drawingCacheManager.sleep();
+        CanvasManager.setCanvasOnAnimableObjects();
+    },
+    notificationOnDurationForm:function(duration){
+        this.animator.setTotalDuration(duration);
     }
 });
 
