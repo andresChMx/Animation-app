@@ -23,7 +23,7 @@ var PreviewManager=fabric.util.createClass({
         this.scalerLineWidth;
 
     },
-    wakeUp:function(imageModel){
+    wakeUp:function(imageModel,drawingData){
         this.imageModel=imageModel;
         this.animTotalDuration=imageModel.paths.duration;
         let imgWidth=imageModel.imgHTML.naturalWidth;

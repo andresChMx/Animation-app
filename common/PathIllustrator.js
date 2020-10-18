@@ -15,6 +15,14 @@ var PathIllustrator=fabric.util.createClass({
         this.counterInterruption=0;
         this.flagFirstTime=true;
         this.endLoop=false;
+
+
+        //vars for previewer
+        this.lastPicIndex=0;
+        this.lastPath=0;
+        this.lastStroke=0;
+        this.lastStrokeAnimDuration=0;
+        this.prevSnapshot=null
     },
     setListObjectsToDraw:function(listObjects){//Debe ser llamado simpre obligatoriamente
         this.listObjectsToDraw=listObjects;
@@ -31,6 +39,99 @@ var PathIllustrator=fabric.util.createClass({
         this.endLoop=true;
         this.counterInterruption=-1;
         this.flagFirstTime=true;
+    },
+    _executeAnimationFirstTime:function(){
+        let totalCantPaths=0;
+        for(let i=0;i<this.data.getPathListLength(this.lastPicIndex);i++){
+            let tmpCant=this.data.getPathLength(this.lastPicIndex,i)-1;
+            totalCantPaths=tmpCant<0?totalCantPaths:totalCantPaths+tmpCant;
+        }
+        this.lastStrokeAnimDuration=this.listObjectsToDraw[this.lastPicIndex].paths.duration/totalCantPaths;
+        this.lastPicIndex=0;
+
+        i=this.getFirstPathListIndex(k,-1);
+        j=0;
+        this.ctx.beginPath();
+        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+        if(this.data.getListLinesWidthsLength(k)>0){
+            this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
+        }
+
+        this.prevPathSnapshot.src=this.canvas.toDataURL();
+    },
+    _executeAnimation:function(totalTimeProgress){
+        let tmp=totalTimeProgress;
+        let k=0;
+        for(k=0;k<this.listObjectsToDraw.length;k++){
+          tmp-=this.listObjectsToDraw[i].paths.duration;
+          if(tmp<0){
+              break;
+          }
+        }
+        if(k==this.listObjectsToDraw.length){return}
+        if(k!=this.lastPicIndex){
+
+            let indexPathTurn=parseInt(animTotalProgress/animPathDuration);
+            let cantJumps=(Math.round(this.listObjectsToDraw[k].paths.duration/animPathDuration)-1)-indexPathTurn;
+
+            this.drawCurveSegment(k,i,j,1);
+
+            for(let p=0;p<cantJumps;p++){
+                let indexes=this.getNextPath(k,i,j,1);
+                //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
+                this.drawCompletePath(k,indexes[0],indexes[1]);
+                i=indexes[0];
+                j=indexes[1];
+            }
+
+            this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
+            this.ctx.globalCompositeOperation="destination-in";
+            this.ctx.stroke();
+            this.ctx.globalCompositeOperation="source-over";
+
+            this.actualSnapshot.src=this.canvas.toDataURL();
+            this.ctx.drawImage(this.prevPathSnapshot,0,0);
+            this.ctx.drawImage(this.actualSnapshot,0,0);
+        }else{
+            animTotalProgress=nowTime-animStartTime;
+
+            if(this.data.getPathListLength(k)!=0){
+                if(!Preprotocol.wantConsume){
+                    //return;
+                }else{
+                    Preprotocol.wantDelete=false;
+
+                    let indexPathTurn=parseInt(animTotalProgress/animPathDuration);
+                    let cantJumps=indexPathTurn-prevStrokeIndexTurn;
+                    let oldValI=i;
+                    for(let p=0;p<cantJumps;p++){
+                        this.drawCompletePath(k,i,j);
+                        //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
+                        let indexes=this.getNextPath(k,i,j,1);
+                        i=indexes[0];
+                        j=indexes[1];
+                    }
+
+                    if(oldValI!=i){//se paso a otro path
+                        this.drawCurrentStrokes(k);
+                        this.prevPathSnapshot.src=this.canvas.toDataURL();
+                        //}.bind(this);
+                        this.ctx.beginPath();
+                        this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
+
+                    }else{
+                        this.drawCurveSegment(k,i,j,(animTotalProgress%animPathDuration)/animPathDuration);
+                        this.drawCurrentStrokes(k);
+                    }
+
+                    prevStrokeIndexTurn=indexPathTurn;
+                    //FIN AQUI ANIMACIONES
+                    Preprotocol.wantDelete=true;
+                }
+            }
+        }
+            this.lastPictureIndex=k;
+
     },
     _loop:function(){
         this.ctx.lineCap = "round";
@@ -118,11 +219,14 @@ var PathIllustrator=fabric.util.createClass({
                         }
                         ///
                         this.notifyOnDrawingNewObject(this.listObjectsToDraw[k].imgHTML,k-1,k,this.canvas.toDataURL());
-                        //calculando momento final de la animacion de la imagen 
-                        animStartTime=+new Date();
+                        //calculando momento final de la animacion de la imagen
+                        let offsetTime=nowTime-animFinishTime;
+
+                        animStartTime=+new Date()-offsetTime;
                         animFinishTime=animStartTime+this.listObjectsToDraw[k].paths.duration;
                         animTotalProgress=0;
                         prevStrokeIndexTurn=0;
+
                         //Buscando los indicices del primer stroke
                         i=this.getFirstPathListIndex(k,-1);
                         j=0;
@@ -168,9 +272,7 @@ var PathIllustrator=fabric.util.createClass({
                                         //}.bind(this);
                                     this.ctx.beginPath();
                                     this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
-                                    if(this.data.getPathLength(k,i).length>0){
-                                            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,0),this.data.getStrokeCoordYAt(k,i,0));
-                                    }
+
                                 }else{
                                     this.drawCurveSegment(k,i,j,(animTotalProgress%animPathDuration)/animPathDuration);
                                     this.drawCurrentStrokes(k);
@@ -205,32 +307,6 @@ var PathIllustrator=fabric.util.createClass({
         this.ctx.drawImage(this.prevPathSnapshot,0,0);
         this.ctx.drawImage(this.actualSnapshot,0,0);
 
-    },
-    drawOnNewPathList:function(cantJumps){
-        /*
-        this.ctx.drawImage(this.imageHTML,0,0,this.canvas.width,this.canvas.height)
-        this.ctx.globalCompositeOperation="destination-in";
-        this.drawCurveSegment(this.canvasDrawingManager.listPoints[i],this.drawingManager.ctrlPointsManager.list[i],j,1);
-        this.ctx.stroke();
-        this.ctx.globalCompositeOperation="source-over";
-
-        this.actualSnapshot.src=this.canvas.toDataURL();
-        let oldValI=i;
-        if(cantJumps>=2){
-            this.ctx.drawImage(this.imageHTML,0,0,this.canvas.width,this.canvas.height)
-            this.ctx.globalCompositeOperation="destination-in";
-            for(let k=prevStrokeIndexTurn;k<prevStrokeIndexTurn+cantJumps-1;k++){
-                let indexes=this.getNextPath(i,j,1);
-                //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
-                this.drawCompletePath(this.canvasDrawingManager.listPoints[indexes[0]],
-                this.drawingManager.ctrlPointsManager.list[indexes[0]],indexes[1]);
-                i=indexes[0];
-                j=indexes[1];
-            }
-            this.ctx.stroke();
-            this.ctx.globalCompositeOperation="source-over";
-            this.actualSnapshot.src=this.canvas.toDataURL();                    
-        }*/
     },
     getNextPath:function(k,i,j,jumps){
         let lengthCurrentPath=this.data.getPathLength(k,i);
@@ -270,91 +346,85 @@ var PathIllustrator=fabric.util.createClass({
         let self=this;
 
         var len = this.data.getPathLength(k,i); // number of points
-        if (len >=2){
-            if (len == 2) {
-                this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,0),this.data.getStrokeCoordYAt(k,i,0));
-                this.ctx.lineTo(this.data.getStrokeCoordXAt(k,i,1),this.data.getStrokeCoordYAt(k,i,1));
-            }
-            else {
-                if(pAIndex==0){
-                    this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,0),this.data.getStrokeCoordYAt(k,i,0));
-                    this.ctx.quadraticCurveTo(this.data.getCtrlPointCoordXAt(k,i,0),this.data.getCtrlPointCoordYAt(k,i,1),
-                                            this.data.getStrokeCoordXAt(k,i,1),
-                                            this.data.getStrokeCoordYAt(k,i,1));    
-                }else if(pAIndex<this.data.getPathLength(k,i)-2){
-                    this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
-                    this.ctx.bezierCurveTo(this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex)-1)*2),
-                                            this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex)-1)*2+1),
-                                            this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex))*2),
-                                            this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex))*2+1),
-                                            this.data.getStrokeCoordXAt(k,i,pAIndex+1),
-                                            this.data.getStrokeCoordYAt(k,i,pAIndex+1));
-
-                }else if(pAIndex==this.data.getPathLength(k,i)-2){
-                    this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
-                    this.ctx.quadraticCurveTo(this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex)-1)*2),this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex)-1)*2+1),
-                                               this.data.getStrokeCoordXAt(k,i,pAIndex+1),this.data.getStrokeCoordYAt(k,i,pAIndex+1)); 
-                }else{
-                    alert("WDF?? sesuponge que a drawCompletePath se le pasa puntos ya validos");
-                }
-            }
+        if(len<2){
+            return;
         }
-
+        if (this.data.getStrokeTypeAt(k,i,pAIndex)=="l") {
+                this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
+                this.ctx.lineTo(this.data.getStrokeCoordXAt(k,i,pAIndex+1),this.data.getStrokeCoordYAt(k,i,pAIndex+1));
+        }
+        else if (this.data.getStrokeTypeAt(k,i,pAIndex)=="c"){
+            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
+            this.ctx.bezierCurveTo(
+                this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex))*2),
+                this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex))*2+1),
+                this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex)+1)*2),
+                this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex)+1)*2+1),
+                this.data.getStrokeCoordXAt(k,i,pAIndex+1),
+                this.data.getStrokeCoordYAt(k,i,pAIndex+1));
+        }else if(this.data.getStrokeTypeAt(k,i,pAIndex)=="q"){
+            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
+            this.ctx.quadraticCurveTo(
+                this.data.getCtrlPointCoordXAt(k,i,(2*pAIndex)*2),
+                this.data.getCtrlPointCoordYAt(k,i,(2*pAIndex)*2+1),
+                this.data.getStrokeCoordXAt(k,i,pAIndex+1),
+                this.data.getStrokeCoordYAt(k,i,pAIndex+1));
+        }else if(this.data.getStrokeTypeAt(k,i,pAIndex)=="q1"){
+            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,0),this.data.getStrokeCoordYAt(k,i,0));
+            this.ctx.quadraticCurveTo(
+                this.data.getCtrlPointCoordXAt(k,i,(2*pAIndex+1)*2),
+                this.data.getCtrlPointCoordYAt(k,i,(2*pAIndex+1)*2+1),
+                this.data.getStrokeCoordXAt(k,i,1),
+                this.data.getStrokeCoordYAt(k,i,1));
+        }
     },
 
     drawCurveSegment:function(k,i,pAIndex,temperature){
-        //console.log(listPaths);
-
-        //console.log(Preprotocol.wantConsume);
         var len = this.data.getPathLength(k,i); // number of points
-        if (len >=2){
-            if (len == 2) {
-                let point=this.getLineCurvePoint(this.data.getStrokeCoordXAt(k,i,0),this.data.getStrokeCoordYAt(k,i,0),this.data.getStrokeCoordXAt(k,i,1),this.data.getStrokeCoordYAt(k,i,1),
-                    temperature);
-                 this.ctx.lineTo(point.x,point.y);
-            }
-            else {
-                if(pAIndex==0){
-                    point=this.getQuadraticCurvePoint(
-                        this.data.getStrokeCoordXAt(k,i,0),
-                        this.data.getStrokeCoordYAt(k,i,0),
-                        this.data.getCtrlPointCoordXAt(k,i,0),
-                        this.data.getCtrlPointCoordYAt(k,i,1),
-                        this.data.getStrokeCoordXAt(k,i,1),
-                        this.data.getStrokeCoordYAt(k,i,1),
-                        temperature
-                    )
-                    this.ctx.lineTo(point.x,point.y);
-                    
-                }else if(pAIndex<this.data.getPathLength(k,i)-2){
-                    points=this._getBezierCtrlPoints(
-                        this.data.getStrokeCoordXAt(k,i,pAIndex),
-                        this.data.getStrokeCoordYAt(k,i,pAIndex),
-                        this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex)-1)*2),
-                        this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex)-1)*2+1),
-                        this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex))*2),
-                        this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex))*2+1),
-                        this.data.getStrokeCoordXAt(k,i,pAIndex+1),
-                        this.data.getStrokeCoordYAt(k,i,pAIndex+1),
-                        temperature
-                    )
-                    this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
-                    this.ctx.bezierCurveTo(points[0],points[1],points[2],points[3],points[4],points[5]);   
-
-                }else if(pAIndex==this.data.getPathLength(k,i)-2){
-                    point=this.getQuadraticCurvePoint(
-                        this.data.getStrokeCoordXAt(k,i,pAIndex),
-                        this.data.getStrokeCoordYAt(k,i,pAIndex),
-                        this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex)-1)*2),
-                        this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex)-1)*2+1),
-                        this.data.getStrokeCoordXAt(k,i,pAIndex+1),
-                        this.data.getStrokeCoordYAt(k,i,pAIndex+1),
-                        temperature
-                        )
-                    this.ctx.lineTo(point.x,point.y);
-                }
-
-            }
+        if(len<2){return;}
+        if(this.data.getStrokeTypeAt(k,i,pAIndex)=="l"){
+            let point=this.getLineCurvePoint(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex),this.data.getStrokeCoordXAt(k,i,pAIndex+1),this.data.getStrokeCoordYAt(k,i,pAIndex+1),
+                temperature);
+            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
+            this.ctx.lineTo(point.x,point.y);
+        }else if(this.data.getStrokeTypeAt(k,i,pAIndex)=="c"){
+            let points=this._getBezierCtrlPoints(
+                this.data.getStrokeCoordXAt(k,i,pAIndex),
+                this.data.getStrokeCoordYAt(k,i,pAIndex),
+                this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex))*2),
+                this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex))*2+1),
+                this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex)+1)*2),
+                this.data.getCtrlPointCoordYAt(k,i,(2*(pAIndex)+1)*2+1),
+                this.data.getStrokeCoordXAt(k,i,pAIndex+1),
+                this.data.getStrokeCoordYAt(k,i,pAIndex+1),
+                temperature
+            )
+            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
+            this.ctx.bezierCurveTo(points[0],points[1],points[2],points[3],points[4],points[5]);
+        }else if(this.data.getStrokeTypeAt(k,i,pAIndex)=="q"){
+            let points=this._getQuadraticCtrlPoints(
+                this.data.getStrokeCoordXAt(k,i,pAIndex),
+                this.data.getStrokeCoordYAt(k,i,pAIndex),
+                this.data.getCtrlPointCoordXAt(k,i,(2*pAIndex)*2),
+                this.data.getCtrlPointCoordYAt(k,i,(2*pAIndex)*2+1),
+                this.data.getStrokeCoordXAt(k,i,pAIndex+1),
+                this.data.getStrokeCoordYAt(k,i,pAIndex+1),
+                temperature
+            )
+            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex))
+            this.ctx.quadraticCurveTo(points[0],points[1],points[2],points[3])
+        }else if(this.data.getStrokeTypeAt(k,i,pAIndex)=="q1"){
+            let points=this._getQuadraticCtrlPoints(
+                this.data.getStrokeCoordXAt(k,i,pAIndex),
+                this.data.getStrokeCoordYAt(k,i,pAIndex),
+                this.data.getCtrlPointCoordXAt(k,i,(2*pAIndex+1)*2),
+                this.data.getCtrlPointCoordYAt(k,i,(2*pAIndex+1)*2+1),
+                this.data.getStrokeCoordXAt(k,i,pAIndex+1),
+                this.data.getStrokeCoordYAt(k,i,pAIndex+1),
+                temperature
+            )
+            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex))
+            this.ctx.quadraticCurveTo(points[0],points[1],points[2],points[3])
         }
     },
     _getBezierCtrlPoints:function(p1x,p1y,c1x,c1y,c2x,c2y,p2x,p2y,temperature){
@@ -380,6 +450,18 @@ var PathIllustrator=fabric.util.createClass({
         let yd=qyb*u1+qyd*t;
 
         return [xb,yb,xc,yc,xd,yd];
+    },
+    _getQuadraticCtrlPoints:function(p1x,p1y,c1x,c1y,p2x,p2y,temperature){
+        let t=temperature;
+        let v1X=p1x+(c1x-p1x)*t;
+        let v1Y=p1y+(c1y-p1y)*t;
+        let newCtpX=v1X;
+        let newCtpY=v1Y;
+        let newP2X=v1X+((c1x+(p2x-c1x)*t)-v1X)*t;
+        let newP2Y=v1Y+((c1y+(p2y-c1y)*t)-v1Y)*t;
+        return [newCtpX,newCtpY,newP2X,newP2Y];
+
+
     },
     _getQBezierValue:function(t,p1,p2,p3){
         var iT = 1 - t;
@@ -444,6 +526,10 @@ var IllustratorDataAdapterPreview=fabric.util.createClass({
     getLineWidthAt:function(k,i){
         return this.canvasDrawingManager.listLinesWidths[i]*this.scalerFactorX;
     },
+
+    getStrokeTypeAt:function(k,i,j){
+        return this.canvasDrawingManager.listPathStrokesType[i][j];
+    }
 })
 
 
@@ -472,7 +558,9 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
     getCtrlPointCoordYAt:function(k,i,j){
         return this.imagesModel[k].paths.ctrlPoints[i][j]*this.scalerFactors[k].y;
     },
-
+    getStrokeTypeAt:function(k,i,j){
+        return this.imagesModel[k].paths.strokesTypes[i][j];
+    },
     getListLinesWidthsLength:function(k){
         return this.imagesModel[k].paths.linesWidths.length;
     },

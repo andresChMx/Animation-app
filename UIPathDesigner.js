@@ -103,6 +103,7 @@ let SectionPaths={
     listObserversOnBtnAddPathClicked:[],
     listObserversOnPathClicked:[],
     listObserversOnBtnDeletePathClicked:[],
+    listObserversOnBtnLoadSVGClicked:[],
 
     designerController:null,
     currentActiveHTMLPath:-1,
@@ -110,9 +111,10 @@ let SectionPaths={
         this.HTMLElement=document.querySelector(".panel-designer-options__section-paths");
         this.HTMLButtonAddPath=document.querySelector(".panel-designer-options__section-paths__button");
         this.HTMLPathsBox=document.querySelector(".panel-designer-options__section-paths__paths-box");
+        this.HTMLButtonLaadSVG=document.querySelector(".panel-designer__btn-load-svg")
 
         this.HTMLButtonAddPath.addEventListener("click",this.OnBtnAddPathClicked.bind(this));
-
+        this.HTMLButtonLaadSVG.addEventListener("click",this.OnBtnLoadSVGClicked.bind(this));
     },
     wakeUp:function(){
         this._generateHTMLPathsCollection(this.designerController.drawingManager.listPathsNames);
@@ -192,7 +194,11 @@ let SectionPaths={
             this.notifyOnPathClicked(e);
         }
         this._activateHTMLPath(this.designerController.drawingManager.currentPathIndex);
-    },  
+    },
+    OnBtnLoadSVGClicked:function (e){
+    this.notifyOnBtnLoadSVGClicked()
+    },
+
     notifyOnBtnAddPathClicked:function(){
         for(let i=0;i<this.listObserversOnBtnAddPathClicked.length;i++){
             this.listObserversOnBtnAddPathClicked[i].notificationOnBtnAddPathClicked();
@@ -210,6 +216,11 @@ let SectionPaths={
             this.listObserversOnBtnDeletePathClicked[i].notificationOnBtnDeletePathClicked(indexPath);
         }
     },
+    notifyOnBtnLoadSVGClicked:function(){
+        for(let i=0;i<this.listObserversOnBtnLoadSVGClicked.length;i++){
+            this.listObserversOnBtnLoadSVGClicked[i].notificationOnbtnLoadSVGClicked();
+        }
+    },
     registerOnBtnAddPathClicked:function(obj){
         this.listObserversOnBtnAddPathClicked.push(obj);
     },
@@ -218,8 +229,10 @@ let SectionPaths={
     },
     registerOnBtnDeletePathClicked:function(obj){
         this.listObserversOnBtnDeletePathClicked.push(obj);
+    },
+    registerOnBtnLoadSVGClicked:function(obj){
+        this.listObserversOnBtnLoadSVGClicked.push(obj);
     }
-
 }
 var PanelDesignerOptions={
     HTMLElement:null,

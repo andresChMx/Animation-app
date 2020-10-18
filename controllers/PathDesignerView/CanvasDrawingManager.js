@@ -7,6 +7,7 @@ var CanvasDrawingManager=fabric.util.createClass({
 
         this.listPoints=[];
         this.listLinesWidths=[];
+        this.listPathStrokesType=[];
 
         this.listPathsColors=[];
 
@@ -22,7 +23,7 @@ var CanvasDrawingManager=fabric.util.createClass({
 
 
     },
-    wakeUp:function(imageModel){
+    wakeUp:function(imageModel,drawingData){
         this.canvasZoomVal=1;
         this.canvas.on("mouse:move",this.OnMouseMoved.bind(this))
         this.canvas.on("mouse:up",this.OnMouseUp.bind(this))
@@ -39,8 +40,9 @@ var CanvasDrawingManager=fabric.util.createClass({
 
         this.setupCanvasDimensions();
         this.initDrawingPath();
-        this.tryLoadPaths(imageModel);
-        this.tryLoadLinesWidths(imageModel);
+        this.tryLoadPaths(drawingData);
+        this.tryLoadPathStrokesType(drawingData);
+        this.tryLoadLinesWidths(drawingData);
     },
     sleep:function(){
         //clean canvas
@@ -52,10 +54,11 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.listLinesWidths=[];
         this.listPathsColors=[];
         this.listPoints=[];
+        this.listPathStrokesType=[];
         this.drawingPath=null;
     },
     initDrawingPath:function(){
-        this.drawingPath=new DrawingPath({left:0,top:0,width:this.canvasOriginalWidth,height:this.canvasOriginalHeight,pts:[],cps:[],listLinesWidths:[],listPathsColors:this.listPathsColors,selectable:false,evented:false,globalCompositeOperation:"destination-in",stroke:"rgb(255,0,0)"});
+        this.drawingPath=new DrawingPath({left:0,top:0,width:this.canvasOriginalWidth,height:this.canvasOriginalHeight,pts:[],cps:[],listLinesWidths:[],listPathsColors:this.listPathsColors,strokesType:this.listPathStrokesType,selectable:false,evented:false,globalCompositeOperation:"destination-in"});
         this.canvas.add(this.drawingPath);
     },
     setupCanvasDimensions:function(){
@@ -64,29 +67,36 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.canvas.setHeight(this.canvasOriginalHeight*this.canvasZoomVal);
         
     },
-    tryLoadPaths:function(imageModel){
-        if(imageModel.paths.points.length==0){
+    tryLoadPaths:function(drawingData){
+        if(drawingData.points.length===0){
             this.listPoints.push([]);
             this.listPathsColors.push(this.genearteRandomColor());
             return
         };
         this.listPoints=[];
-        for(let i=0;i<imageModel.paths.points.length;i++){
+        for(let i=0;i<drawingData.points.length;i++){
             this.listPoints.push([]);
             this.listPathsColors.push(this.genearteRandomColor());
-            for(let j=0;j<imageModel.paths.points[i].length/2;j++){
-                let pathPoints=imageModel.paths.points[i];
+            for(let j=0;j<drawingData.points[i].length/2;j++){
+                let pathPoints=drawingData.points[i];
                 this.addPoint(pathPoints[2*j]*this.canvasOriginalWidth,pathPoints[(2*j)+1]*this.canvasOriginalHeight,i);
             }
         }
 
     },
-    tryLoadLinesWidths:function(imageModel){
-        if(imageModel.paths.linesWidths.length==0){
+    tryLoadLinesWidths:function(drawingData){
+        if(drawingData.linesWidths.length===0){
             this.listLinesWidths.push(10);
             return;
         }
-        this.listLinesWidths=imageModel.paths.linesWidths.map(function(width){return width*this.canvasOriginalWidth}.bind(this));
+        this.listLinesWidths=drawingData.linesWidths.map(function(width){return width*this.canvasOriginalWidth}.bind(this));
+    },
+    tryLoadPathStrokesType:function(drawingData){
+        if(drawingData.strokesTypes.length===0){
+            this.listPathStrokesType.push([]);
+            return
+        }
+        this.listPathStrokesType=drawingData.strokesTypes;
     },
     getLinesWidthsNormalized:function(){
         let linesWidths=[]
@@ -94,6 +104,9 @@ var CanvasDrawingManager=fabric.util.createClass({
             linesWidths[i]=this.listLinesWidths[i]/this.canvasOriginalWidth;
         }
         return linesWidths;
+    },
+    getListPathStrokesType:function(){
+        return this.listPathStrokesType;
     },
     genearteRandomColor:function(){
         return 'rgba('+Math.random()*255+','+Math.random()*255+','+Math.random()*255+','+0.7+')';
@@ -106,12 +119,26 @@ var CanvasDrawingManager=fabric.util.createClass({
         point.pathIndex=pathIndex;
         this.canvas.add(point);
         this.listPoints[pathIndex].push(point);
+
         
+    },
+    addStrokeType:function(pathIndex){
+        let len=this.listPoints[pathIndex].length;
+        if(len<2){return;}
+        if(len==2){
+            this.listPathStrokesType[pathIndex].push("l");
+
+        }else{
+            let strokesLen=this.listPathStrokesType[pathIndex].length;
+            if(len==3){this.listPathStrokesType[pathIndex][0]="q1";this.listPathStrokesType[pathIndex].push("q")}
+            else{this.listPathStrokesType[pathIndex][strokesLen-1]="c";this.listPathStrokesType[pathIndex].push("q");}
+        }
     },
     addPath:function(){
         this.listPoints.push([]);
         this.listLinesWidths.push(10);
         this.listPathsColors.push(this.genearteRandomColor());
+        this.listPathStrokesType.push([]);
     },
     removePathAt:function(index){
         for(let i=0;i<this.listPoints[index].length;i++){
@@ -120,6 +147,7 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.listPoints.splice(index,1);
         this.listLinesWidths.splice(index,1);
         this.listPathsColors.splice(index,1);
+        this.listPathStrokesType.splice(index,1)
 
         this.reassignPointsPathIndex(index);
     },
@@ -144,6 +172,7 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.drawingPath.cps=ctrlPoints;
         this.drawingPath.pts=points;
         this.drawingPath.listLinesWidths=this.listLinesWidths;
+        this.drawingPath.strokesType=this.listPathStrokesType;
     },
     reassignPointsPathIndex:function(index){
         for(let i=index;i<this.listPoints.length;i++){
@@ -206,6 +235,7 @@ var DrawingPath = fabric.util.createClass(fabric.Object, {
       this.set({width:1000,height:800});
       this.pts=options.pts;
       this.cps=options.cps;
+      this.strokesType=options.strokesType;
       this.ctx=null;
     },
   
@@ -222,24 +252,24 @@ var DrawingPath = fabric.util.createClass(fabric.Object, {
             ctx.beginPath();
             ctx.strokeStyle=this.listPathsColors[i];
             ctx.lineWidth=this.listLinesWidths[i];
-            if (len == 2) {
-                ctx.moveTo(this.pts[i][0].get("left"), this.pts[i][0].get("top"));
-                ctx.lineTo(this.pts[i][1].get("left"), this.pts[i][1].get("top"));
-            }
-            else {
-              ctx.moveTo(this.pts[i][0].get("left"), this.pts[i][0].get("top"));
-              // from point 0 to point 1 is a quadratic
-              ctx.quadraticCurveTo(this.cps[i][0], this.cps[i][1], this.pts[i][1].get("left"), this.pts[i][1].get("top"));
-              // for all middle points, connect with bezier
-              for (var j = 2; j < len-1; j += 1) {
-                // console.log("to", this.pts[i][2*i], this.pts[i][2*i+1]);
-                ctx.bezierCurveTo(this.cps[i][(2*(j-1)-1)*2], this.cps[i][(2*(j-1)-1)*2+1],
-                                  this.cps[i][(2*(j-1))*2], this.cps[i][(2*(j-1))*2+1],
-                                  this.pts[i][j].get("left"), this.pts[i][j].get("top"));
+            ctx.moveTo(this.pts[i][0].get("left"), this.pts[i][0].get("top"));
+              for (var j = 1; j < len; j += 1) {
+                  if(this.strokesType[i][j-1]=="l"){
+                      ctx.moveTo(this.pts[i][j-1].get("left"), this.pts[i][j-1].get("top"));
+                      ctx.lineTo(this.pts[i][j].get("left"), this.pts[i][j].get("top"));
+                  }else if(this.strokesType[i][j-1]=="c"){
+                      ctx.bezierCurveTo(this.cps[i][((2*j)-2)*2], this.cps[i][((2*j)-2)*2 +1],
+                          this.cps[i][((2*j)-1)*2 ], this.cps[i][((2*j)-1)*2 +1],
+                          this.pts[i][j].get("left"), this.pts[i][j].get("top"));
+                  }else if(this.strokesType[i][j-1]=="q"){
+                      ctx.quadraticCurveTo(this.cps[i][((2*j)-2)*2], this.cps[i][((2*j)-2)*2 +1],
+                          this.pts[i][j].get("left"), this.pts[i][j].get("top"));
+                  }else if(this.strokesType[i][j-1]=="q1"){
+                      ctx.quadraticCurveTo(this.cps[i][(2*j-1)*2], this.cps[i][(2*j-1)*2 +1],
+                          this.pts[i][j].get("left"), this.pts[i][j].get("top"));
+                  }
+
               }
-              ctx.quadraticCurveTo(this.cps[i][(2*(j-1)-1)*2], this.cps[i][(2*(j-1)-1)*2+1],
-                                   this.pts[i][j].get("left"), this.pts[i][j].get("top"));
-            }
             ctx.stroke();
         }
     }

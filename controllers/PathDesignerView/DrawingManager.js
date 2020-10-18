@@ -2,18 +2,32 @@ var CrtlPoinstManagement=fabric.util.createClass({
     initialize:function(){
         this.list=[];
     },
-    wakeUp:function(matPts){
-        this.generateCrtlPointsFromPointsMatrix(matPts);
+    wakeUp:function(matPts,drawingData,imgWidth,imgHeight){
+        if(drawingData.ctrlPoints.length!==0){
+            this.list=[];
+            for(let i=0;i<drawingData.ctrlPoints.length;i++){
+                let layer=drawingData.ctrlPoints[i].map(function(value,index){
+                    if(index%2==0){
+                        return value*imgWidth;
+                    }else{
+                        return value*imgHeight;
+                    }
+                })
+                this.list.push(layer);
+            }
+        }else{
+            this.generateCrtlPointsFromPointsMatrix(matPts);
+        }
     },
     sleep:function(){
         this.list=[];
     },
-    tryLoadCrtlPoints:function(imageModel){
+    tryLoadCrtlPoints:function(drawingData){
         
-        if(imageModel.paths.ctrlPoints.length==0){return};
+        if(drawingData.ctrlPoints.length===0){return};
 
-        for(let i=0;i<imageModel.paths.ctrlPoints.length;i++){
-            this.list.push(imageModel.paths.ctrlPoints[i]);
+        for(let i=0;i<drawingData.ctrlPoints.length;i++){
+            this.list.push(drawingData.ctrlPoints[i]);
         }
     },
     _triangleWidthHeight:function(arr, i, j){
@@ -23,7 +37,7 @@ var CrtlPoinstManagement=fabric.util.createClass({
         return Math.sqrt(Math.pow(arr[2*i]-arr[2*j], 2) + Math.pow(arr[2*i+1]-arr[2*j+1], 2));
     },
     _calcCrtlPointsSinglePoint:function(x1,y1,x2,y2,x3,y3){
-        var t = 0.5;
+        var t = 0.4;
         var v = this._triangleWidthHeight(arguments, 0, 2);
         var d01 = this._distace(arguments, 0, 1);
         var d12 = this._distace(arguments, 1, 2);
@@ -34,19 +48,22 @@ var CrtlPoinstManagement=fabric.util.createClass({
     
     generateCrtlPointsFromPointsMatrix:function(matPts){
         if(matPts.length==0){
-            this.list.push([]);
+            this.list.push([-1,-1]);
             return;
         }
         this.list=[];
         for (var i = 0; i <matPts.length; i += 1) {
-            let newCrtlPoints=[]; 
+            let newCrtlPoints=[-1,-1];
             if(matPts[i].length>=3){
                 for(var j=0;j<matPts[i].length-2;j++){
                     newCrtlPoints = newCrtlPoints.concat(this._calcCrtlPointsSinglePoint(matPts[i][j].get("left"), matPts[i][j].get("top"), matPts[i][j+1].get("left"), matPts[i][j+1].get("top"), matPts[i][j+2].get("left"), matPts[i][j+2].get("top")));
                 }
             }
+            newCrtlPoints.push(-1);
+            newCrtlPoints.push(-1);
             this.list.push(newCrtlPoints);
           }
+
     },
     recalcCtrlPointsForDeletedPoint:function(indexPath){
         let length=this.list[indexPath].length;
@@ -54,10 +71,16 @@ var CrtlPoinstManagement=fabric.util.createClass({
         //flata para diferetnes cantidades de elementos
     },
     recalcCtrlPointsForNewPoint:function(pts,indexPath){
+        this.list[indexPath].pop();
+        this.list[indexPath].pop();
+        ///
         let i=pts.length-1;
         if(pts.length>2){
             this.list[indexPath]=this.list[indexPath].concat(this._calcCrtlPointsSinglePoint(pts[i-2].get("left"), pts[i-2].get("top"), pts[i-1].get("left"), pts[i-1].get("top"), pts[i].get("left"), pts[i].get("top")));
         }
+        ///
+        this.list[indexPath].push(-1);
+        this.list[indexPath].push(-1);
     },
     recalcCtrlPointsPointArea:function(pts,pointIndex,pathIndex){
         let length=pts.length;
@@ -67,17 +90,17 @@ var CrtlPoinstManagement=fabric.util.createClass({
                 newCrtlPoints = newCrtlPoints.concat(this._calcCrtlPointsSinglePoint(pts[i].get("left"), pts[i].get("top"), pts[i+1].get("left"), pts[i+1].get("top"), pts[i+2].get("left"), pts[i+2].get("top")));
               }
             for(var i=0;i<newCrtlPoints.length;i++){
-               this.list[pathIndex][i]=newCrtlPoints[i];
+               this.list[pathIndex][i+2]=newCrtlPoints[i];
             }
             return;   
         }
 
         if(pointIndex==0){
             let newCtrlPoint=this._calcCrtlPointsSinglePoint(pts[0].get("left"), pts[0].get("top"), pts[1].get("left"), pts[1].get("top"), pts[2].get("left"), pts[2].get("top"))
-           this.list[pathIndex][0]=newCtrlPoint[0];
-           this.list[pathIndex][1]=newCtrlPoint[1];
-           this.list[pathIndex][2]=newCtrlPoint[2];
-           this.list[pathIndex][3]=newCtrlPoint[3];
+           this.list[pathIndex][0+2]=newCtrlPoint[0];
+           this.list[pathIndex][1+2]=newCtrlPoint[1];
+           this.list[pathIndex][2+2]=newCtrlPoint[2];
+           this.list[pathIndex][3+2]=newCtrlPoint[3];
             return;
         }else if(pointIndex==1){
             let newCrtlPoints=[]; 
@@ -85,7 +108,7 @@ var CrtlPoinstManagement=fabric.util.createClass({
                 newCrtlPoints = newCrtlPoints.concat(this._calcCrtlPointsSinglePoint(pts[i].get("left"), pts[i].get("top"), pts[i+1].get("left"), pts[i+1].get("top"), pts[i+2].get("left"), pts[i+2].get("top")));
               }
             for(var i=0;i<newCrtlPoints.length;i++){
-               this.list[pathIndex][i]=newCrtlPoints[i];
+               this.list[pathIndex][i+2]=newCrtlPoints[i];
             }
             return;  
         }else if(pointIndex==length-2){
@@ -94,12 +117,12 @@ var CrtlPoinstManagement=fabric.util.createClass({
                 newCrtlPoints = newCrtlPoints.concat(this._calcCrtlPointsSinglePoint(pts[i].get("left"), pts[i].get("top"), pts[i+1].get("left"), pts[i+1].get("top"), pts[i+2].get("left"), pts[i+2].get("top")));
               }
             for(var i=0;i<newCrtlPoints.length;i++){
-               this.list[pathIndex][this.list[pathIndex].length-8+i]=newCrtlPoints[i];
+               this.list[pathIndex][this.list[pathIndex].length-8+i-2]=newCrtlPoints[i];
             }
         }else if(pointIndex==length-1){
             let newCrtlPoints=this._calcCrtlPointsSinglePoint(pts[pointIndex-2].get("left"), pts[pointIndex-2].get("top"), pts[pointIndex-1].get("left"), pts[pointIndex-1].get("top"), pts[pointIndex].get("left"), pts[pointIndex].get("top"))
             for(var i=0;i<newCrtlPoints.length;i++){
-                this.list[pathIndex][this.list[pathIndex].length-4+i]=newCrtlPoints[i];
+                this.list[pathIndex][this.list[pathIndex].length-4+i -2]=newCrtlPoints[i];
              }
         }else{
             let newCrtlPoints=[]; 
@@ -107,16 +130,18 @@ var CrtlPoinstManagement=fabric.util.createClass({
                 newCrtlPoints = newCrtlPoints.concat(this._calcCrtlPointsSinglePoint(pts[i].get("left"), pts[i].get("top"), pts[i+1].get("left"), pts[i+1].get("top"), pts[i+2].get("left"), pts[i+2].get("top")));
               }
             for(var i=pointIndex-1;i<=pointIndex+1;i++){
-               this.list[pathIndex][(2*(i-1)-1)*2+2]=newCrtlPoints[((i-(pointIndex-1))*4)];
-               this.list[pathIndex][(2*(i-1)-1)*2+1+2]=newCrtlPoints[((i-(pointIndex-1))*4)+1]
-               this.list[pathIndex][(2*(i-1))*2+2]=newCrtlPoints[((i-(pointIndex-1))*4)+2]
-               this.list[pathIndex][(2*(i-1))*2+1+2]=newCrtlPoints[((i-(pointIndex-1))*4)+3]
+               this.list[pathIndex][(2*i-1)*2]=newCrtlPoints[((i-(pointIndex-1))*4)];
+               this.list[pathIndex][(2*i-1)*2+1 ]=newCrtlPoints[((i-(pointIndex-1))*4)+1]
+               this.list[pathIndex][(2*i)*2 ]=newCrtlPoints[((i-(pointIndex-1))*4)+2]
+               this.list[pathIndex][(2*i)*2+1 ]=newCrtlPoints[((i-(pointIndex-1))*4)+3]
             }
-            return;  
+            return;
+            // DOCUMENTACION INDICES
+            // al iniciio de cada arreglo correspondiente a cada path hay 1 ctrl points adicional (x, y dos valores), igual al final, es decir hay 4 valores de mas
         }
     },
     addPath:function(){
-        this.list.push([]);
+        this.list.push([-1,-1,-1,-1]);
     },
     removePathAt:function(index){
         this.list.splice(index,1);
@@ -160,10 +185,11 @@ var DrawingManager=fabric.util.createClass({
         PanelDesignerOptions.SectionPaths.registerOnPathClicked(this);
         PanelDesignerOptions.SectionPaths.registerOnBtnDeletePathClicked(this);
     },
-    wakeUp:function(imageModel){
+    wakeUp:function(imageModel,drawingData){
 
-        this.tryLoadPathsNames(imageModel.paths.pathsNames);
-        this.ctrlPointsManager.wakeUp(this.canvasManager.listPoints);
+        this.tryLoadPathsNames(drawingData.pathsNames);
+
+        this.ctrlPointsManager.wakeUp(this.canvasManager.listPoints,drawingData,imageModel.imgHTML.naturalWidth,imageModel.imgHTML.naturalHeight);
         this.canvasManager.updatePathData(this.ctrlPointsManager.list,this.canvasManager.listPoints);
         this.totalAmountPaths=this.canvasManager.listPoints.length;
         this.currentPathIndex=0;
@@ -191,6 +217,20 @@ var DrawingManager=fabric.util.createClass({
                 mat[i].push(p.get("left")/this.canvasManager.canvasOriginalWidth);
                 mat[i].push(p.get("top")/this.canvasManager.canvasOriginalHeight);
             }
+        }
+        return mat;
+    },
+    getMatrixCtrlPoints:function(){
+        let mat=[];
+        for(let i=0;i<this.ctrlPointsManager.list.length;i++){
+            let tmp=this.ctrlPointsManager.list[i].map(function(value,index){
+                if(index%2==0){
+                    return value/this.canvasManager.canvasOriginalWidth;
+                }else{
+                    return value/this.canvasManager.canvasOriginalHeight;
+                }
+            }.bind(this))
+            mat.push(tmp);
         }
         return mat;
     },
@@ -239,6 +279,7 @@ var DrawingManager=fabric.util.createClass({
                 break;
             case this.tools.add:
                 this.canvasManager.addPoint(mouseX,mouseY,this.currentPathIndex);
+                this.canvasManager.addStrokeType(this.currentPathIndex);
                 this.ctrlPointsManager.recalcCtrlPointsForNewPoint(this.canvasManager.listPoints[this.currentPathIndex],this.currentPathIndex);
                 this.canvasManager.updatePathData(this.ctrlPointsManager.list,this.canvasManager.listPoints);
                 break;

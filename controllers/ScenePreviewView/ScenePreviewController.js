@@ -19,7 +19,9 @@ var ScenePreviewController=fabric.util.createClass({
             let animableObj=CanvasManager.listAnimableObjects[i];
             let tmpObject=null;
             if(animableObj.getEntranceMode()==EntranceModes.drawn){
-                this.ctrlPointsGenerator.generate(animableObj.imageModel);
+                if(!animableObj.imageModel.paths.fromSVG){
+                    this.ctrlPointsGenerator.generate(animableObj.imageModel);
+                }
                 tmpObject=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,left:animableObj.get("left"),top:animableObj.get("top"),width:animableObj.get("width"),height:animableObj.get("height"),angle:animableObj.get("angle"),scaleX:animableObj.get("scaleX"),scaleY:animableObj.get("scaleY"),originX: 'center',originY: 'center',animations:animableObj.dictAnimations});
                 listDrawableObjects.push(tmpObject);
                 listImageModels.push(animableObj.imageModel);
@@ -88,12 +90,14 @@ var GeneratorCtrlPointsForImageModel=fabric.util.createClass({
         }
         let list=[];
         for (var i = 0; i <matPts.length; i += 1) {
-            let newCrtlPoints=[]; 
+            let newCrtlPoints=[-1,-1];
             if(matPts[i].length>=3){
                 for(var j=0;j<(matPts[i].length/2)-2;j++){
                     newCrtlPoints = newCrtlPoints.concat(this._calcCrtlPointsSinglePoint(matPts[i][j*2], matPts[i][j*2+1], matPts[i][j*2+2], matPts[i][j*2+3], matPts[i][j*2+4], matPts[i][j*2+5]));
                 }
             }
+            newCrtlPoints.push(-1);
+            newCrtlPoints.push(-1);
             list.push(newCrtlPoints);
         }
         return list;

@@ -61,7 +61,7 @@ var ControllerAnimator=fabric.util.createClass({
             }
             else{
               //termino animacion
-              self.setTotalProgress(0);
+              //self.setTotalProgress(0);
             }
         }())
 

@@ -10,22 +10,20 @@
     </style>
   </head>
   <body>
-    <canvas id="myCanvas" width="578" height="200"></canvas>
+    <canvas id="myCanvas"></canvas>
+    <script src="fabric.js"></script>
     <script>
       var canvas = document.getElementById('myCanvas');
-      var context = canvas.getContext('2d');
- 
-      context.strokeStyle = '#000000';
-
-context.moveTo(10, 10);
-context.lineTo(50, 10);
-context.lineWidth = 15;
-context.stroke();
-
-context.moveTo(10, 30);
-context.lineTo(50, 30);
-context.lineWidth = 2;
-context.stroke();
+      var canvas = new fabric.Canvas('myCanvas', {
+        width:window.innerWidth,
+        height:window.innerHeight
+      });
+      fabric.loadSVGFromURL("http://localhost:3000/svg2.svg",function(objects, options) {
+        console.log(objects);
+        var obj = fabric.util.groupSVGElements(objects, options);
+        console.log(obj);
+        canvas.add(obj).renderAll();
+      })
 
     </script>
   </body>
