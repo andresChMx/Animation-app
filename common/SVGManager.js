@@ -18,22 +18,24 @@ var SVGManager=fabric.util.createClass({
         let layerIndex=-1;
         fabric.loadSVGFromURL(url, function(objects, options) {
             var obj = fabric.util.groupSVGElements(objects, options);
-            console.log(obj);
-            self.parseFabricGroup.bind(self)(obj,result,layerIndex);
+            console.log(obj.type);
+            if(obj.type==="path"){
+                self.listParser.parseSinglePath(obj,result,layerIndex,self.imgWidth,self.imgHeight);
+            }else if(obj.type==="group"){
+                self.parseFabricGroup.bind(self)(obj,result,layerIndex);
+            }
             callback(result);
         });
     },
     parseFabricGroup:function(group,result,layerIndex){
 
-        alert(this.imgHeight);
         let groupElems=group.getObjects();
         for(let i=0;i<groupElems.length;i++){
             console.log(groupElems[i].type);
-            if(groupElems[i].type=="path"){
+            if(groupElems[i].type==="path"){
                 layerIndex=this.listParser.parseSinglePath(groupElems[i],result,layerIndex,this.imgWidth,this.imgHeight);
             }
         }
-        return layerIndex;
     },
     parseSinglePath:function(pathArray){
     }

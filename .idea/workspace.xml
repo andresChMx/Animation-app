@@ -20,19 +20,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/common/SVGManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TEST.html" beforeDir="false" afterPath="$PROJECT_DIR$/TEST.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UIAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/UIAnimator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UIPathDesigner.js" beforeDir="false" afterPath="$PROJECT_DIR$/UIPathDesigner.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/ControllerAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ControllerAnimator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGManager.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +60,7 @@
       <updated>1602912311462</updated>
       <workItem from="1602912316435" duration="16513000" />
       <workItem from="1602946188509" duration="46423000" />
-      <workItem from="1603035225649" duration="19893000" />
+      <workItem from="1603035225649" duration="22003000" />
     </task>
     <servers />
   </component>
