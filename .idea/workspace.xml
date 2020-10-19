@@ -21,6 +21,7 @@
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UIAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/UIAnimator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGManager.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -61,6 +62,7 @@
       <workItem from="1602912316435" duration="16513000" />
       <workItem from="1602946188509" duration="46423000" />
       <workItem from="1603035225649" duration="22003000" />
+      <workItem from="1603072613137" duration="2170000" />
     </task>
     <servers />
   </component>

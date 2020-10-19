@@ -18,7 +18,7 @@ var SVGManager=fabric.util.createClass({
         let layerIndex=-1;
         fabric.loadSVGFromURL(url, function(objects, options) {
             var obj = fabric.util.groupSVGElements(objects, options);
-            console.log(obj.type);
+            console.log(obj);
             if(obj.type==="path"){
                 self.listParser.parseSinglePath(obj,result,layerIndex,self.imgWidth,self.imgHeight);
             }else if(obj.type==="group"){
@@ -133,7 +133,11 @@ var SVGParser=fabric.util.createClass({
                     result.strokesTypes.push([]);
                     result.points.push([(x + l)/this.imgWidth,(y+t)/this.imgHeight]);
                     result.ctrlPoints.push([]);
-                    result.linesWidths.push(50/this.imgWidth);
+                    if(pathObj.stroke && pathObj.strokeWidth){
+                        result.linesWidths.push(current.strokeWidth/this.imgWidth);
+                    }else{
+                        result.linesWidths.push(50/this.imgWidth);
+                    }
                     result.pathsNames.push("Path " +layerIndex)
 
                     break;
@@ -147,7 +151,11 @@ var SVGParser=fabric.util.createClass({
                     result.strokesTypes.push([]);
                     result.points.push([(x + l)/this.imgWidth,(y+t)/this.imgHeight]);
                     result.ctrlPoints.push([]);
-                    result.linesWidths.push(50/this.imgWidth);
+                    if(pathObj.stroke && pathObj.strokeWidth){
+                        result.linesWidths.push(pathObj.strokeWidth/this.imgWidth);
+                    }else{
+                        result.linesWidths.push(50/this.imgWidth);
+                    }
                     result.pathsNames.push("Path " +layerIndex)
 
                     break;

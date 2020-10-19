@@ -700,10 +700,10 @@ let SectionImageAssets={
     MODELItemAssets:[{url:"http://localhost:3000/icecream.png",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},/*paths:{points:[[]],lineWidth:10}}*/
     {url:"http://localhost:3000/icecreamColored.png",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
     {url:"http://localhost:3000/nieves.png",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
-    {url:"http://localhost:3000/nievesColored.png",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
+    {url:"http://localhost:3000/woman.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
     {url:"http://localhost:3000/dragon.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
     {url:"http://localhost:3000/monster.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
-    {url:"http://localhost:3000/woman.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
+    {url:"http://localhost:3000/men.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
     {url:"http://localhost:3000/svg.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
     {url:"http://localhost:3000/elephantBW.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
     {url:"http://localhost:3000/elephantColor.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
