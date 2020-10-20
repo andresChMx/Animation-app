@@ -187,7 +187,7 @@ var DrawingManager=fabric.util.createClass({
     },
     wakeUp:function(imageModel,drawingData){
 
-        this.tryLoadPathsNames(drawingData.pathsNames);
+        this.tryLoadPathsNames(drawingData);
 
         this.ctrlPointsManager.wakeUp(this.canvasManager.listPoints,drawingData,imageModel.imgHTML.naturalWidth,imageModel.imgHTML.naturalHeight);
         this.canvasManager.updatePathData(this.ctrlPointsManager.list,this.canvasManager.listPoints);
@@ -201,12 +201,12 @@ var DrawingManager=fabric.util.createClass({
         this.listPathsNames=[];
 
     },
-    tryLoadPathsNames:function(pathsNames){
-        if(pathsNames.length==0){
+    tryLoadPathsNames:function(drawingData){
+        if(drawingData.pathsNames.length==0){
             this.listPathsNames.push("Path uno");
             return;
         }
-        this.listPathsNames=pathsNames;
+        this.listPathsNames=drawingData.pathsNames.slice(0);
     },
     getMatrixPathsPoints:function(){
         let mat=[];

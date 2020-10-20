@@ -259,11 +259,11 @@ var PathIllustrator=fabric.util.createClass({
                                 let cantJumps=indexPathTurn-prevStrokeIndexTurn;
                                 let oldValI=i;
                                 for(let p=0;p<cantJumps;p++){
-                                      this.drawCompletePath(k,i,j);
-                                    //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
-                                     let indexes=this.getNextPath(k,i,j,1);
-                                     i=indexes[0];
-                                     j=indexes[1];
+                                        this.drawCompletePath(k,i,j);
+                                        //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
+                                        let indexes=this.getNextPath(k,i,j,1);
+                                        i=indexes[0];
+                                        j=indexes[1];
                                 }
 
                                 if(oldValI!=i){//se paso a otro path

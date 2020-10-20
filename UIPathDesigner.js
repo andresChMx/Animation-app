@@ -117,6 +117,7 @@ let SectionPaths={
         this.HTMLButtonLaadSVG.addEventListener("click",this.OnBtnLoadSVGClicked.bind(this));
     },
     wakeUp:function(){
+
         this._generateHTMLPathsCollection(this.designerController.drawingManager.listPathsNames);
         this._activateHTMLPath(0);
     },
@@ -234,11 +235,45 @@ let SectionPaths={
         this.listObserversOnBtnLoadSVGClicked.push(obj);
     }
 }
+var SectionPathDesignerPopup={
+    HTMLElement:null,
+    modelCurrentOptions:null,
+    init:function(){
+        this.HTMLElement=document.querySelector(".panel-paths__popup");
+        this.HTMLparent=document.querySelector(".panel-paths__popup__filter");
+        this.HTMLTitle=document.querySelector(".panel-paths__popup__title");
+        this.HTMLMessage=document.querySelector(".panel-paths__popup__message");
+        this.HTMLOptionsBox=document.querySelector(".panel-paths__popup__box-options");
+        this.HTMLOption=this.HTMLOptionsBox.children[0].cloneNode(true)
+        },
+    showMessage:function(title,message,options){ //[{name:"",action:function(){}}]
+        this.HTMLparent.style.display="flex"
+        this.modelCurrentOptions=options;
+        this.HTMLTitle.innerHTML=title;
+        this.HTMLMessage.innerHTML=message;
+        this.HTMLOptionsBox.innerHTML="";
+        for(let i=0;i<options.length;i++){
+            let htmlOpt=this.HTMLOption.cloneNode(true);
+            htmlOpt.innerHTML=options[i].name;
+            htmlOpt.setAttribute("index",i)
+            htmlOpt.addEventListener("click",this.optionClicked.bind(this))
+            htmlOpt.style.display="block";
+            this.HTMLOptionsBox.appendChild(htmlOpt);
+        }
+    },
+    optionClicked:function(e){
+        let index=parseInt(e.target.getAttribute("index"));
+        this.modelCurrentOptions[index].action();
+
+        this.HTMLparent.style.display="none";
+    }
+}
 var PanelDesignerOptions={
     HTMLElement:null,
 
     SectionSettings:SectionSettings,
     SectionPaths:SectionPaths,
+    SectionPathDesignerPopup:SectionPathDesignerPopup,
     designerController:null,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-designer-options");

@@ -22,7 +22,14 @@
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UIAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/UIAnimator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UIPathDesigner.js" beforeDir="false" afterPath="$PROJECT_DIR$/UIPathDesigner.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +69,11 @@
       <workItem from="1602912316435" duration="16513000" />
       <workItem from="1602946188509" duration="46423000" />
       <workItem from="1603035225649" duration="22003000" />
-      <workItem from="1603072613137" duration="2170000" />
+      <workItem from="1603072613137" duration="12100000" />
+      <workItem from="1603119729819" duration="7455000" />
+      <workItem from="1603136259289" duration="875000" />
+      <workItem from="1603147408241" duration="762000" />
+      <workItem from="1603157044041" duration="3443000" />
     </task>
     <servers />
   </component>
@@ -98,9 +109,13 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="dock-window-2/0.0.1920.1050@0.0.1920.1050" timestamp="1602996543928" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1603050161323">
+    <state x="616" y="237" key="run.anything.popup" timestamp="1603128136012">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603050161323" />
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603128136012" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1603126840355">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603126840355" />
   </component>
 </project>

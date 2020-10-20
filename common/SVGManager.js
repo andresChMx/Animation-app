@@ -3,7 +3,7 @@ var SVGManager=fabric.util.createClass({
 
         this.listParser=new SVGParser();
     },
-    loadSVG:function(url,imgWidth,imgHeight,callback){
+    loadSVG:function(url,imgWidth,imgHeight,loadingMode,callback){
 
         let self=this;
         this.imgWidth=imgWidth;
@@ -20,20 +20,26 @@ var SVGManager=fabric.util.createClass({
             var obj = fabric.util.groupSVGElements(objects, options);
             console.log(obj);
             if(obj.type==="path"){
-                self.listParser.parseSinglePath(obj,result,layerIndex,self.imgWidth,self.imgHeight);
+                self.parseFabricGroup.bind(self)([obj],result,layerIndex,loadingMode);
             }else if(obj.type==="group"){
-                self.parseFabricGroup.bind(self)(obj,result,layerIndex);
+                self.parseFabricGroup.bind(self)(obj.getObjects(),result,layerIndex,loadingMode);
             }
             callback(result);
         });
     },
-    parseFabricGroup:function(group,result,layerIndex){
+    parseFabricGroup:function(group,result,layerIndex,loadingMode){
 
-        let groupElems=group.getObjects();
+        let groupElems=group;
         for(let i=0;i<groupElems.length;i++){
             console.log(groupElems[i].type);
             if(groupElems[i].type==="path"){
-                layerIndex=this.listParser.parseSinglePath(groupElems[i],result,layerIndex,this.imgWidth,this.imgHeight);
+                if(loadingMode==="force_paths"){
+                    layerIndex=this.listParser.parseSinglePath(groupElems[i],result,layerIndex,this.imgWidth,this.imgHeight,true);
+
+                }else{
+                    layerIndex=this.listParser.parseSinglePath(groupElems[i],result,layerIndex,this.imgWidth,this.imgHeight,false);
+
+                }
             }
         }
     },
@@ -49,7 +55,25 @@ var SVGParser=fabric.util.createClass({
     parsePathArray:function(){
 
     },
-    parseSinglePath: function(pathObj,result,layerIndex,imgWidth,imgHeight) {
+    parseSinglePath: function(pathObj,result,layerIndex,imgWidth,imgHeight,forcePaths) {
+        let strokeWidth;
+        if(forcePaths){
+            if(pathObj.hasOwnProperty("strokeWidth")){
+                strokeWidth=pathObj.strokeWidth;
+            }else{
+                strokeWidth=10;
+            }
+        }else{
+
+            if(pathObj.hasOwnProperty("strokeWidth")) {
+
+                strokeWidth = pathObj.strokeWidth;
+            }else{
+                return layerIndex;
+            }
+        }
+
+
         let fliX=pathObj.flipX?-1:1;
         let fliY=pathObj.flipY?-1:1;
         this.imgWidth=imgWidth/pathObj.scaleX*fliX;
@@ -133,11 +157,7 @@ var SVGParser=fabric.util.createClass({
                     result.strokesTypes.push([]);
                     result.points.push([(x + l)/this.imgWidth,(y+t)/this.imgHeight]);
                     result.ctrlPoints.push([]);
-                    if(pathObj.stroke && pathObj.strokeWidth){
-                        result.linesWidths.push(current.strokeWidth/this.imgWidth);
-                    }else{
-                        result.linesWidths.push(50/this.imgWidth);
-                    }
+                    result.linesWidths.push(strokeWidth/this.imgWidth);
                     result.pathsNames.push("Path " +layerIndex)
 
                     break;
@@ -151,11 +171,7 @@ var SVGParser=fabric.util.createClass({
                     result.strokesTypes.push([]);
                     result.points.push([(x + l)/this.imgWidth,(y+t)/this.imgHeight]);
                     result.ctrlPoints.push([]);
-                    if(pathObj.stroke && pathObj.strokeWidth){
-                        result.linesWidths.push(pathObj.strokeWidth/this.imgWidth);
-                    }else{
-                        result.linesWidths.push(50/this.imgWidth);
-                    }
+                    result.linesWidths.push(strokeWidth/this.imgWidth);
                     result.pathsNames.push("Path " +layerIndex)
 
                     break;

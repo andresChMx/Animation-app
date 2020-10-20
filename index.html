@@ -41,9 +41,22 @@
     ===============================-->
     <section class="panel-inspector">
         <div class="panel-inspector__objects-editor">
-            <div class="panel-inspector__objects-editor__inner-container">
-                
-            </div>
+                <p class="panel-inspector__objects-editor__title">Objects with Effects</p>
+                <div class="panel-inspector__objects-editor__box-items ">
+                    <div class="panel-inspector__objects-editor__box-items__item clearfix">
+                        <div class="panel-inspector__objects-editor__box-items__item__icon">
+                            <img src="http://localhost:3000/character.jpg" alt="" class="">
+                        </div>
+                        <div class="panel-inspector__objects-editor__box-items__item__input-field">
+                            <label for="">Delay</label>
+                            <input type="text">
+                        </div>
+                        <div class="panel-inspector__objects-editor__box-items__item__input-field">
+                            <label for="">Duration</label>
+                            <input type="text">
+                        </div>
+                    </div>
+                </div>
         </div>
         <div class="panel-inspector__toolbox">
             <div class="panel-inspector__toolbox__tool-item">
@@ -208,6 +221,16 @@
     <section class="panel-paths-designer">
         <canvas id="cPathsDesigner"></canvas>
     </section>
+
+    <div class="panel-paths__popup__filter" style="display:none;">
+        <section class="panel-paths__popup">
+            <p class="panel-paths__popup__title"></p>
+            <p class="panel-paths__popup__message"></p>
+            <div class="panel-paths__popup__box-options">
+                <button class="panel-paths__popup__box-options__option" style="display:none;"></button>
+            </div>
+        </section>
+    </div>
 
 
 

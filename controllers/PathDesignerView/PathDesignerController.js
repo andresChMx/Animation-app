@@ -74,10 +74,10 @@ var PathDesignerController=fabric.util.createClass({
             break;
         }
     },
-    notificationOnbtnLoadSVGClicked:function(){
+    loadingPathsFromSVG:function(loadingMode){
         let self=this;
         if(this.imageModel!=null){
-            this.svgManager.loadSVG(this.imageModel.url,this.imageModel.imgHTML.naturalWidth,this.imageModel.imgHTML.naturalHeight,function( svgLoadedData){
+            this.svgManager.loadSVG(this.imageModel.url,this.imageModel.imgHTML.naturalWidth,this.imageModel.imgHTML.naturalHeight,loadingMode,function( svgLoadedData){
 
                 (function Wait(){
                     if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),1);return;}
@@ -100,12 +100,26 @@ var PathDesignerController=fabric.util.createClass({
             })
         }
     },
+    notificationOnbtnLoadSVGClicked:function(){
+        let self=this;
+        PanelDesignerOptions.SectionPathDesignerPopup.showMessage("", "loading mode:",[
+            {
+                name:"force Strokes",action:function(){self.loadingPathsFromSVG.bind(self)("force_paths")}
+            },
+            {
+                name:"Not Forcing", action:function(){self.loadingPathsFromSVG.bind(self)("no-force")}
+            }
+        ])
+
+    },
     notifyOnSetupCompleted:function(){
+
         for(let i=0;i<this.listObserversOnSetupCompleted.length;i++){
             this.listObserversOnSetupCompleted[i].notificationOnSetupCompleted();
         }
     },
     registerOnSetupCompleted:function(obj){
+
         this.listObserversOnSetupCompleted.push(obj);
     }
 

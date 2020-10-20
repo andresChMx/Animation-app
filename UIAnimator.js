@@ -656,10 +656,20 @@ let SectionToolBox={
         this.listObserversOnBtnPreview.push(obj);
     }
 }
+var SectionObjectsEditor={
+    HTMLElement:null,
+    init:function(){
+        this.HTMLElement=document.querySelector(".panel-inspector__objects-editor__box-items");
+        this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
+
+        CanvasManager.registerOn
+    },
+
+}
 var PanelInspector={
     HTMLElement:null,
     htmlElementNormalHeight:0,
-
+    SectionObjectsEditor:SectionObjectsEditor,
     SectionToolBox:SectionToolBox,
     SectionMenuAddKey:SectionMenuAddKey,
     SectionPropertiesEditor:SectionPropertiesEditor,
@@ -697,9 +707,9 @@ let SectionImageAssets={
     listObserversOnDummyDraggingEnded:[],
     listObserversOnItemsMenu_designPaths:[],
 
-    MODELItemAssets:[{url:"http://localhost:3000/icecream.png",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},/*paths:{points:[[]],lineWidth:10}}*/
-    {url:"http://localhost:3000/icecreamColored.png",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
-    {url:"http://localhost:3000/nieves.png",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
+    MODELItemAssets:[{url:"http://localhost:3000/prop01.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},/*paths:{points:[[]],lineWidth:10}}*/
+    {url:"http://localhost:3000/props/pc-statistics.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
+    {url:"http://localhost:3000/props/gold.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
     {url:"http://localhost:3000/woman.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
     {url:"http://localhost:3000/dragon.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
     {url:"http://localhost:3000/monster.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],fromSVG:false}},
@@ -1181,7 +1191,7 @@ function initUI(){
     PanelDesignerOptions.init();
     PanelDesignerOptions.SectionSettings.init();
     PanelDesignerOptions.SectionPaths.init();
-
+    PanelDesignerOptions.SectionPathDesignerPopup.init();
     PanelPathsDesigner.init();
 
     /*pewviewer*/

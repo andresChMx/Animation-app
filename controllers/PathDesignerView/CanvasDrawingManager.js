@@ -96,7 +96,10 @@ var CanvasDrawingManager=fabric.util.createClass({
             this.listPathStrokesType.push([]);
             return
         }
-        this.listPathStrokesType=drawingData.strokesTypes;
+        this.listPathStrokesType=[];
+        for(let i=0;i<drawingData.strokesTypes.length;i++){
+            this.listPathStrokesType.push(drawingData.strokesTypes[i].slice(0));
+        }
     },
     getLinesWidthsNormalized:function(){
         let linesWidths=[]

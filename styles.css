@@ -155,10 +155,27 @@
     width:300px;
     padding:10px;
 }
+
 /*--------------objects-editor-----------*/
-.panel-inspector__objects-editor__inner-container{
+.panel-inspector__objects-editor__box-items{
     background:white;
     height:300px;
+}
+.panel-inspector__objects-editor__box-items__item{
+    background:peru;
+}
+.panel-inspector__objects-editor__box-items__item__icon{
+    float:left;
+    width:30%;
+    padding:10px;
+    box-sizing: border-box;
+}
+.panel-inspector__objects-editor__box-items__item__icon img{
+    width:100%;
+}
+.panel-inspector__objects-editor__box-items__item__input-field{
+    float:left;
+    width:70%;
 }
 /*-------------toolbox--------------*/
 .panel-inspector__toolbox__tool-item{
@@ -227,7 +244,7 @@
     width:50%;
 }
 /*=======================
-==== inspector panel=====
+==== PANEL ASSETS   =====
 ========================*/
 .panel-assets{
     position:absolute;
@@ -298,8 +315,8 @@
     background:black;
     color:white;
     z-index:1000;
-    top:-200;
-    left:-200;
+    top:-200px;
+    left:-200px;
     display:none;
 
 }
@@ -327,8 +344,47 @@
     right:0;
     margin:auto;
 }
+/*=======================
+==== PANEL PATHS DESIGNER=====
+========================*/
+/*---------popup----------*/
+.panel-paths__popup__filter{
+    position:absolute;
 
+    z-index: 2000;
+    left:0;
+    top:0;
+    bottom:0;
+    right:0;
+    background: rgba(0,0,0,0.4);
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+.panel-paths__popup{
+    padding:10px;
+    background:white;
+    text-align:center;
 
+}
+.panel-paths__popup__title{
+    font-weight: bold;
+}
+.panel-paths__popup__message{
+    font-size: .8em;
+    margin-bottom:10px;
+}
+.panel-paths__popup__box-options{
+    display:flex;
+    justify-content: space-between;
+}
+.panel-paths__popup__box-options__option{
+    margin-right:10px;
+    padding:10px;
+}
+.panel-paths__popup__box-options__option:last-child{
+    margin-right:0;
+}
 
 /*=======================
 ==== previewer Panel=====
@@ -397,4 +453,9 @@
     z-index:2000;
     left:0;
     top:0;
+}
+.clearfix:after,.clearfix:before{
+    content:"";
+    display:blocK;
+    clear:both;
 }
