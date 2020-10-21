@@ -21,11 +21,35 @@ var PathDesignerController=fabric.util.createClass({
     },
     notificationOnItemsMenu_designPaths:function(imageModel){
         this.imageModel=imageModel;
-        this.canvasManager.wakeUp(imageModel,imageModel.paths);
-        this.drawingManager.wakeUp(imageModel,imageModel.paths);
-        this.previewManager.wakeUp(imageModel);
-        this.notifyOnSetupCompleted();
+        if(imageModel.paths.type===ImageType.CREATED_NOPATH){
+            this.wakeUpComponentes(imageModel.paths);
+        }else if(imageModel.paths.type===ImageType.CREATED_PATHLOADED){
+            if(imageModel.paths.points.length===0){
+                //TODO: query firebase points,ctrlPoints,lineswidths,pathsNames,strokesTypes,type
+            }else{
+                this.wakeUpComponentes(imageModel.paths);
+            }
+        }else if (imageModel.paths.type===ImageType.CREATED_PATHDESIGNED){
+            if(imageModel.paths.points.length===0) {
+                //TODO: query firebase points,lineswidths,pathsNames,type, strokesTypes
+            }else{
+                this.wakeUpComponentes(imageModel.paths);
+            }
+        }
 
+
+    },
+    wakeUpComponentes:function(drawingData){
+
+        this.canvasManager.wakeUp(this.imageModel,drawingData);
+        this.drawingManager.wakeUp(this.imageModel,drawingData);
+        this.previewManager.wakeUp(this.imageModel,null);
+        this.notifyOnSetupCompleted();
+    },
+    isSVG:function(urlstring){
+        const regex1 = RegExp('.svg$', 'i');
+
+        return regex1.test(urlstring);
     },
     notificationOnSettingActionClicked:function(actionId){
         switch (actionId){
@@ -36,14 +60,22 @@ var PathDesignerController=fabric.util.createClass({
                 let listLinesWidths=this.canvasManager.getLinesWidthsNormalized();
                 let listPathsNames=this.drawingManager.listPathsNames;
                 let listPathStrokesType= this.canvasManager.getListPathStrokesType();
-                if(this.imageModel.paths.fromSVG || this.hasLoadedFromSVG){
-                    this.imageModel.paths.fromSVG=true;
-                    this.imageModel.paths.ctrlPoints=this.drawingManager.getMatrixCtrlPoints();
-                }
+
                 this.imageModel.paths.points=matPoints;
                 this.imageModel.paths.linesWidths=listLinesWidths;
                 this.imageModel.paths.pathsNames=listPathsNames;
                 this.imageModel.paths.strokesTypes=listPathStrokesType;
+
+                if(this.hasLoadedFromSVG || this.imageModel.paths.type===ImageType.CREATED_PATHLOADED){
+                    this.imageModel.paths.type=ImageType.CREATED_PATHLOADED;
+                    this.imageModel.paths.ctrlPoints=this.drawingManager.getMatrixCtrlPoints();
+                }else if(this.imageModel.paths.type===ImageType.CREATED_NOPATH){
+                    // if(there are at least 1 stroke){
+                        this.imageModel.paths.type=ImageType.CREATED_PATHDESIGNED;
+                    //
+                    // }
+                }
+
 
                 (function Wait(){
                     if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),1);return;}
@@ -84,6 +116,7 @@ var PathDesignerController=fabric.util.createClass({
                     Preprotocol.wantConsume=false;
 
                     this.hasLoadedFromSVG=true;
+                    svgLoadedData.type=ImageType.CREATED_PATHLOADED;
 
                     this.previewManager.sleep();
                     this.drawingManager.sleep();
@@ -113,9 +146,8 @@ var PathDesignerController=fabric.util.createClass({
 
     },
     notifyOnSetupCompleted:function(){
-
         for(let i=0;i<this.listObserversOnSetupCompleted.length;i++){
-            this.listObserversOnSetupCompleted[i].notificationOnSetupCompleted();
+            this.listObserversOnSetupCompleted[i].notificationOnSetupCompleted(this.isSVG(this.imageModel.url));
         }
     },
     registerOnSetupCompleted:function(obj){

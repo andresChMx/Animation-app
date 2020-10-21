@@ -37,12 +37,18 @@ var CanvasDrawingManager=fabric.util.createClass({
             "evented":false,
         })
         this.canvas.add(oImg);
-
         this.setupCanvasDimensions();
         this.initDrawingPath();
-        this.tryLoadPaths(drawingData);
-        this.tryLoadPathStrokesType(drawingData);
-        this.tryLoadLinesWidths(drawingData);
+
+        if(drawingData.type===ImageType.CREATED_NOPATH){
+            this.initDrawingDataAsEmpty();
+
+        }else{
+            this.loadPaths(drawingData);
+            this.loadPathStrokesType(drawingData);
+            this.loadLinesWidths(drawingData);
+        }
+
     },
     sleep:function(){
         //clean canvas
@@ -57,6 +63,15 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.listPathStrokesType=[];
         this.drawingPath=null;
     },
+    initDrawingDataAsEmpty:function(){
+        this.listPoints.push([]);
+        this.listPathsColors.push(this.genearteRandomColor());
+
+        this.listLinesWidths.push(10);
+
+        this.listPathStrokesType.push([]);
+
+    },
     initDrawingPath:function(){
         this.drawingPath=new DrawingPath({left:0,top:0,width:this.canvasOriginalWidth,height:this.canvasOriginalHeight,pts:[],cps:[],listLinesWidths:[],listPathsColors:this.listPathsColors,strokesType:this.listPathStrokesType,selectable:false,evented:false,globalCompositeOperation:"destination-in"});
         this.canvas.add(this.drawingPath);
@@ -67,12 +82,7 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.canvas.setHeight(this.canvasOriginalHeight*this.canvasZoomVal);
         
     },
-    tryLoadPaths:function(drawingData){
-        if(drawingData.points.length===0){
-            this.listPoints.push([]);
-            this.listPathsColors.push(this.genearteRandomColor());
-            return
-        };
+    loadPaths:function(drawingData){
         this.listPoints=[];
         for(let i=0;i<drawingData.points.length;i++){
             this.listPoints.push([]);
@@ -82,20 +92,11 @@ var CanvasDrawingManager=fabric.util.createClass({
                 this.addPoint(pathPoints[2*j]*this.canvasOriginalWidth,pathPoints[(2*j)+1]*this.canvasOriginalHeight,i);
             }
         }
-
     },
-    tryLoadLinesWidths:function(drawingData){
-        if(drawingData.linesWidths.length===0){
-            this.listLinesWidths.push(10);
-            return;
-        }
+    loadLinesWidths:function(drawingData){
         this.listLinesWidths=drawingData.linesWidths.map(function(width){return width*this.canvasOriginalWidth}.bind(this));
     },
-    tryLoadPathStrokesType:function(drawingData){
-        if(drawingData.strokesTypes.length===0){
-            this.listPathStrokesType.push([]);
-            return
-        }
+    loadPathStrokesType:function(drawingData){
         this.listPathStrokesType=[];
         for(let i=0;i<drawingData.strokesTypes.length;i++){
             this.listPathStrokesType.push(drawingData.strokesTypes[i].slice(0));

@@ -2,8 +2,12 @@ var CrtlPoinstManagement=fabric.util.createClass({
     initialize:function(){
         this.list=[];
     },
-    wakeUp:function(matPts,drawingData,imgWidth,imgHeight){
-        if(drawingData.ctrlPoints.length!==0){
+    wakeUp:function(canvasManagerPoints,drawingData,imgWidth,imgHeight){
+        if(drawingData.type===ImageType.CREATED_NOPATH){
+            this.list.push([-1,-1,-1,-1]);
+        }else if(drawingData.type===ImageType.CREATED_PATHDESIGNED){
+            this.generateCrtlPointsFromPointsMatrix(canvasManagerPoints);
+        }else if(drawingData.type===ImageType.CREATED_PATHLOADED){
             this.list=[];
             for(let i=0;i<drawingData.ctrlPoints.length;i++){
                 let layer=drawingData.ctrlPoints[i].map(function(value,index){
@@ -15,9 +19,10 @@ var CrtlPoinstManagement=fabric.util.createClass({
                 })
                 this.list.push(layer);
             }
-        }else{
-            this.generateCrtlPointsFromPointsMatrix(matPts);
         }
+
+
+
     },
     sleep:function(){
         this.list=[];
@@ -46,17 +51,22 @@ var CrtlPoinstManagement=fabric.util.createClass({
                     x2 + v[0] * t * d12 / d012, y2 + v[1] * t * d12 / d012 ];
     },
     
-    generateCrtlPointsFromPointsMatrix:function(matPts){
-        if(matPts.length==0){
-            this.list.push([-1,-1]);
-            return;
-        }
+    generateCrtlPointsFromPointsMatrix:function(canvasManagerPoints){
         this.list=[];
-        for (var i = 0; i <matPts.length; i += 1) {
+        for (var i = 0; i <canvasManagerPoints.length; i += 1) {
             let newCrtlPoints=[-1,-1];
-            if(matPts[i].length>=3){
-                for(var j=0;j<matPts[i].length-2;j++){
-                    newCrtlPoints = newCrtlPoints.concat(this._calcCrtlPointsSinglePoint(matPts[i][j].get("left"), matPts[i][j].get("top"), matPts[i][j+1].get("left"), matPts[i][j+1].get("top"), matPts[i][j+2].get("left"), matPts[i][j+2].get("top")));
+            if(canvasManagerPoints[i].length>=3){
+                for(var j=0;j<canvasManagerPoints[i].length-2;j++){
+                    newCrtlPoints = newCrtlPoints.concat(
+                        this._calcCrtlPointsSinglePoint(
+                            canvasManagerPoints[i][j].get("left"),
+                            canvasManagerPoints[i][j].get("top"),
+                            canvasManagerPoints[i][j+1].get("left"),
+                            canvasManagerPoints[i][j+1].get("top"),
+                            canvasManagerPoints[i][j+2].get("left"),
+                            canvasManagerPoints[i][j+2].get("top")
+                        )
+                    );
                 }
             }
             newCrtlPoints.push(-1);
@@ -202,11 +212,11 @@ var DrawingManager=fabric.util.createClass({
 
     },
     tryLoadPathsNames:function(drawingData){
-        if(drawingData.pathsNames.length==0){
+        if(drawingData.type===ImageType.CREATED_NOPATH){
             this.listPathsNames.push("Path uno");
-            return;
+        }else{
+            this.listPathsNames=drawingData.pathsNames.slice(0);
         }
-        this.listPathsNames=drawingData.pathsNames.slice(0);
     },
     getMatrixPathsPoints:function(){
         let mat=[];

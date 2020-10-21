@@ -157,7 +157,8 @@
 }
 
 /*--------------objects-editor-----------*/
-.panel-inspector__objects-editor__box-items{
+
+{
     background:white;
     height:300px;
 }
@@ -277,7 +278,8 @@
 .panel-assets__sections-container__section-image-assets{
     width:100%;
     height:100%;
-    
+    overflow-y:auto;
+    overflow-x:hidden;
     
 }
 .panel-assets__section-image-assets__item{

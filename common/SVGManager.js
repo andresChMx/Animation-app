@@ -61,7 +61,7 @@ var SVGParser=fabric.util.createClass({
             if(pathObj.hasOwnProperty("strokeWidth")){
                 strokeWidth=pathObj.strokeWidth;
             }else{
-                strokeWidth=10;
+                strokeWidth=8000/(imgWidth);
             }
         }else{
 

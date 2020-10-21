@@ -111,12 +111,13 @@ let SectionPaths={
         this.HTMLElement=document.querySelector(".panel-designer-options__section-paths");
         this.HTMLButtonAddPath=document.querySelector(".panel-designer-options__section-paths__button");
         this.HTMLPathsBox=document.querySelector(".panel-designer-options__section-paths__paths-box");
-        this.HTMLButtonLaadSVG=document.querySelector(".panel-designer__btn-load-svg")
+        this.HTMLButtonLoadSVG=document.querySelector(".panel-designer__btn-load-svg")
 
         this.HTMLButtonAddPath.addEventListener("click",this.OnBtnAddPathClicked.bind(this));
-        this.HTMLButtonLaadSVG.addEventListener("click",this.OnBtnLoadSVGClicked.bind(this));
+        this.HTMLButtonLoadSVG.addEventListener("click",this.OnBtnLoadSVGClicked.bind(this));
     },
-    wakeUp:function(){
+    wakeUp:function(designingSVG){
+        this.HTMLButtonLoadSVG.style.display=designingSVG?"block":"none";
 
         this._generateHTMLPathsCollection(this.designerController.drawingManager.listPathsNames);
         this._activateHTMLPath(0);
@@ -294,8 +295,8 @@ var PanelDesignerOptions={
         this.HTMLElement.style.display="none";
         this.SectionPaths.sleep();
     },
-    notificationOnSetupCompleted:function(){
-        this.SectionPaths.wakeUp();
+    notificationOnSetupCompleted:function(designingSVG){
+        this.SectionPaths.wakeUp(designingSVG);
         
     }
 }

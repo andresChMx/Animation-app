@@ -3,7 +3,7 @@ var ScenePreviewController=fabric.util.createClass({
     initialize:function(){
         this.drawingCacheManager=new DrawingCacheManager();
         this.UIPanelPreviewerCanvas=null;
-        this.ctrlPointsGenerator=new GeneratorCtrlPointsForImageModel();
+        this.ctrlPointsGenerator=new GeneratorDrawingDataImageModel();
         this.animator=null;
         PanelInspector.SectionToolBox.registerOnBtnPreview(this);
         PanelPreviewer.registerOnBtnClose(this);
@@ -19,8 +19,13 @@ var ScenePreviewController=fabric.util.createClass({
             let animableObj=CanvasManager.listAnimableObjects[i];
             let tmpObject=null;
             if(animableObj.getEntranceMode()==EntranceModes.drawn){
-                if(!animableObj.imageModel.paths.fromSVG){
+                if(animableObj.imageModel.paths.type===ImageType.CREATED_NOPATH){
+                    //calculate points and ctrlPoints
+                }else if(animableObj.imageModel.paths.type===ImageType.CREATED_PATHDESIGNED){
                     this.ctrlPointsGenerator.generate(animableObj.imageModel);
+                }
+                else if(animableObj.imageModel.paths.type===ImageType.CREATED_PATHLOADED){
+                    //NOTHING BECAUSE POINTS AND CTRLPOINTS ARE ALREADY CALCULATED
                 }
                 tmpObject=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,left:animableObj.get("left"),top:animableObj.get("top"),width:animableObj.get("width"),height:animableObj.get("height"),angle:animableObj.get("angle"),scaleX:animableObj.get("scaleX"),scaleY:animableObj.get("scaleY"),originX: 'center',originY: 'center',animations:animableObj.dictAnimations});
                 listDrawableObjects.push(tmpObject);
@@ -59,7 +64,7 @@ var ScenePreviewController=fabric.util.createClass({
     }
 });
 
-var GeneratorCtrlPointsForImageModel=fabric.util.createClass({
+var GeneratorDrawingDataImageModel=fabric.util.createClass({
     initialize:function(){
     },
     generate:function(imageModel){
