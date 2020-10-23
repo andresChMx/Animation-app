@@ -1,6 +1,6 @@
 var SectionSettings={
     HTMLElement:null,
-    
+
     listObserversOnActionClicked:[],
 
     listObserversOnZoomOut:[],
@@ -23,7 +23,7 @@ var SectionSettings={
         let btnCancel=document.querySelector(".setting-action__btn-cancel");
         btnSave.addEventListener("click",this.notifyOnActionClicked.bind(this));
         btnCancel.addEventListener("click",this.notifyOnActionClicked.bind(this));
-       
+
     },
     setupHTMLSettingZoom:function(){
         let btnZoomOut=document.querySelector(".setting-zoom__btn-zoom-out");
@@ -198,7 +198,7 @@ let SectionPaths={
         this._activateHTMLPath(this.designerController.drawingManager.currentPathIndex);
     },
     OnBtnLoadSVGClicked:function (e){
-    this.notifyOnBtnLoadSVGClicked()
+        this.notifyOnBtnLoadSVGClicked()
     },
 
     notifyOnBtnAddPathClicked:function(){
@@ -208,13 +208,13 @@ let SectionPaths={
     },
     notifyOnPathClicked:function(e){
         let indexPath=e.target.getAttribute("name");
-        for(let i=0;i<this.listObserversOnPathClicked.length;i++){  
+        for(let i=0;i<this.listObserversOnPathClicked.length;i++){
             this.listObserversOnPathClicked[i].notificationOnPathClicked(indexPath);
         }
     },
     notifyOnBtnDeletePathClicked:function(e){
         let indexPath=e.target.getAttribute("name");
-        for(let i=0;i<this.listObserversOnBtnDeletePathClicked.length;i++){ 
+        for(let i=0;i<this.listObserversOnBtnDeletePathClicked.length;i++){
             this.listObserversOnBtnDeletePathClicked[i].notificationOnBtnDeletePathClicked(indexPath);
         }
     },
@@ -246,7 +246,7 @@ var SectionPathDesignerPopup={
         this.HTMLMessage=document.querySelector(".panel-paths__popup__message");
         this.HTMLOptionsBox=document.querySelector(".panel-paths__popup__box-options");
         this.HTMLOption=this.HTMLOptionsBox.children[0].cloneNode(true)
-        },
+    },
     showMessage:function(title,message,options){ //[{name:"",action:function(){}}]
         this.HTMLparent.style.display="flex"
         this.modelCurrentOptions=options;
@@ -278,7 +278,7 @@ var PanelDesignerOptions={
     designerController:null,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-designer-options");
-        
+
         PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
         this.SectionSettings.registerOnSettingActionClicked(this);
     },
@@ -289,7 +289,7 @@ var PanelDesignerOptions={
     },
     notificationOnItemsMenu_designPaths:function(imageModel){
         this.HTMLElement.style.display="block";
-        
+
     },
     notificationOnSettingActionClicked:function(){
         this.HTMLElement.style.display="none";
@@ -297,26 +297,6 @@ var PanelDesignerOptions={
     },
     notificationOnSetupCompleted:function(designingSVG){
         this.SectionPaths.wakeUp(designingSVG);
-        
-    }
-}
-var PanelPathsDesigner={
-    HTMLElement:null,
-    init:function(){
-        this.HTMLElement=document.querySelector(".panel-paths-designer");
 
-        PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
-        PanelDesignerOptions.SectionSettings.registerOnSettingActionClicked(this);
-    },
-    notificationOnSettingActionClicked:function(){
-        this.HTMLElement.style.display="none";
-    },
-    notificationOnItemsMenu_designPaths:function(data){
-        this.HTMLElement.style.display="flex";
-        this.resizeHTMLElement();
-    },
-    resizeHTMLElement:function(){
-        this.HTMLElement.style.width=document.body.offsetWidth-(PanelAssets.HTMLElement.offsetLeft+PanelAssets.HTMLElement.offsetWidth )-PanelDesignerOptions.HTMLElement.offsetWidth  + "px";
-        this.HTMLElement.style.left=PanelAssets.HTMLElement.offsetWidth + "px";
     }
 }

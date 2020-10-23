@@ -15,7 +15,7 @@ var PanelPreviewer={
 
         this.HTMLCanvas=document.querySelector("#panel-previewer__canvas");
         this.HTMLControls=document.querySelector(".panel-previewer__controls");
-        
+
         let btnClose=document.querySelector(".panel-previewer__btn-close");
         btnClose.addEventListener("click",this.OnBtnCloseClicked.bind(this));
         PanelInspector.SectionToolBox.registerOnBtnPreview(this);
