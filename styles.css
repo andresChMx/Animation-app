@@ -157,7 +157,7 @@
 }
 
 /*--------------objects-editor-----------*/
-
+.panel-inspector__objects-editor__box-items
 {
     background:white;
     height:300px;
@@ -177,6 +177,9 @@
 .panel-inspector__objects-editor__box-items__item__input-field{
     float:left;
     width:70%;
+}
+.panel-inspector__objects-editor__box-items #active-item{
+    background:red;
 }
 /*-------------toolbox--------------*/
 .panel-inspector__toolbox__tool-item{

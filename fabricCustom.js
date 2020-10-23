@@ -59,17 +59,20 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             "angle":[],
             "opacity":[]
         };
+        this.entranceDuration=3000;
+        this.entranceDelay=0;
         this.imageModel=null;
     },
     setEntranceMode:function(mode){
         this.entraceMode=mode;
     },
     getEntranceMode:function(){
-        if(this.imageModel.paths.linesWidths.length==0){
-            return EntranceModes.none;
-        }else{
-            return EntranceModes.drawn;
-        }
+        // if(this.imageModel.paths.linesWidths.length==0){
+        //     return EntranceModes.none;
+        // }else{
+        //     return EntranceModes.drawn;
+        // }
+        return EntranceModes.drawn;
     },
     addAnimation:function(property,startValue,endValue,startMoment,endMoment){//string,number,number
         this.dictAnimations[property].push(new Animation(property,startValue,endValue,startMoment,endMoment));

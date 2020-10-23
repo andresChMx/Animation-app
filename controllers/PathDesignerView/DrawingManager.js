@@ -2,39 +2,21 @@ var CrtlPoinstManagement=fabric.util.createClass({
     initialize:function(){
         this.list=[];
     },
+    /*
     wakeUp:function(canvasManagerPoints,drawingData,imgWidth,imgHeight){
+        //this.list=[]; en sleep() ya se limpia
         if(drawingData.type===ImageType.CREATED_NOPATH){
-            this.list.push([-1,-1,-1,-1]);
+
         }else if(drawingData.type===ImageType.CREATED_PATHDESIGNED){
             this.generateCrtlPointsFromPointsMatrix(canvasManagerPoints);
         }else if(drawingData.type===ImageType.CREATED_PATHLOADED){
-            this.list=[];
-            for(let i=0;i<drawingData.ctrlPoints.length;i++){
-                let layer=drawingData.ctrlPoints[i].map(function(value,index){
-                    if(index%2==0){
-                        return value*imgWidth;
-                    }else{
-                        return value*imgHeight;
-                    }
-                })
-                this.list.push(layer);
-            }
+            this.generateCrtlPointsFromLoadedData(drawingData,imgWidth,imgHeight)
         }
-
-
 
     },
     sleep:function(){
         this.list=[];
-    },
-    tryLoadCrtlPoints:function(drawingData){
-        
-        if(drawingData.ctrlPoints.length===0){return};
-
-        for(let i=0;i<drawingData.ctrlPoints.length;i++){
-            this.list.push(drawingData.ctrlPoints[i]);
-        }
-    },
+    },*/
     _triangleWidthHeight:function(arr, i, j){
         return [arr[2*j]-arr[2*i], arr[2*j+1]-arr[2*i+1]]
     },
@@ -50,7 +32,9 @@ var CrtlPoinstManagement=fabric.util.createClass({
         return [x2 - v[0] * t * d01 / d012, y2 - v[1] * t * d01 / d012,
                     x2 + v[0] * t * d12 / d012, y2 + v[1] * t * d12 / d012 ];
     },
-    
+    initCtrlPointsAsEmpty:function (){
+        this.list.push([-1,-1,-1,-1]);
+    },
     generateCrtlPointsFromPointsMatrix:function(canvasManagerPoints){
         this.list=[];
         for (var i = 0; i <canvasManagerPoints.length; i += 1) {
@@ -75,6 +59,19 @@ var CrtlPoinstManagement=fabric.util.createClass({
           }
 
     },
+    generateCrtlPointsFromLoadedData:function(drawingData,imgWidth,imgHeight){
+        for(let i=0;i<drawingData.ctrlPoints.length;i++){
+            let layer=drawingData.ctrlPoints[i].map(function(value,index){
+                if(index%2==0){
+                    return value*imgWidth;
+                }else{
+                    return value*imgHeight;
+                }
+            })
+            this.list.push(layer);
+        }
+    },
+
     recalcCtrlPointsForDeletedPoint:function(indexPath){
         let length=this.list[indexPath].length;
         this.list[indexPath].slice(length-1-4,4);
@@ -196,27 +193,34 @@ var DrawingManager=fabric.util.createClass({
         PanelDesignerOptions.SectionPaths.registerOnBtnDeletePathClicked(this);
     },
     wakeUp:function(imageModel,drawingData){
+        if(drawingData.type===ImageType.CREATED_NOPATH){
+            this.initPathsNamesAsEmpty();
+            this.ctrlPointsManager.initCtrlPointsAsEmpty()
+        }else if(drawingData.type===ImageType.CREATED_PATHDESIGNED){
+            this.loadPathsNames(drawingData);
+            this.ctrlPointsManager.generateCrtlPointsFromPointsMatrix(this.canvasManager.listPoints)
+        }else if(drawingData.type===ImageType.CREATED_PATHLOADED){
+            this.loadPathsNames(drawingData);
+            this.ctrlPointsManager.generateCrtlPointsFromLoadedData(drawingData,imageModel.imgHTML.naturalWidth,imageModel.imgHTML.naturalHeight)
+        }
 
-        this.tryLoadPathsNames(drawingData);
-
-        this.ctrlPointsManager.wakeUp(this.canvasManager.listPoints,drawingData,imageModel.imgHTML.naturalWidth,imageModel.imgHTML.naturalHeight);
         this.canvasManager.updatePathData(this.ctrlPointsManager.list,this.canvasManager.listPoints);
+
         this.totalAmountPaths=this.canvasManager.listPoints.length;
         this.currentPathIndex=0;
     },
     sleep:function(){
         this.totalAmountPaths=1;
         this.currentPathIndex=0;
-        this.ctrlPointsManager.sleep();
+        this.ctrlPointsManager.list=[];
         this.listPathsNames=[];
 
     },
-    tryLoadPathsNames:function(drawingData){
-        if(drawingData.type===ImageType.CREATED_NOPATH){
-            this.listPathsNames.push("Path uno");
-        }else{
-            this.listPathsNames=drawingData.pathsNames.slice(0);
-        }
+    initPathsNamesAsEmpty:function(){
+        this.listPathsNames.push("Path uno");
+    },
+    loadPathsNames:function(drawingData){
+        this.listPathsNames=drawingData.pathsNames.slice(0);
     },
     getMatrixPathsPoints:function(){
         let mat=[];

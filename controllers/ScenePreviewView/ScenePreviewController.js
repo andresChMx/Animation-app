@@ -3,7 +3,7 @@ var ScenePreviewController=fabric.util.createClass({
     initialize:function(){
         this.drawingCacheManager=new DrawingCacheManager();
         this.UIPanelPreviewerCanvas=null;
-        this.ctrlPointsGenerator=new GeneratorDrawingDataImageModel();
+        this.pointsGenerator=new GeneratorDrawingDataImageModel();
         this.animator=null;
         PanelInspector.SectionToolBox.registerOnBtnPreview(this);
         PanelPreviewer.registerOnBtnClose(this);
@@ -19,14 +19,10 @@ var ScenePreviewController=fabric.util.createClass({
             let animableObj=CanvasManager.listAnimableObjects[i];
             let tmpObject=null;
             if(animableObj.getEntranceMode()==EntranceModes.drawn){
-                if(animableObj.imageModel.paths.type===ImageType.CREATED_NOPATH){
-                    //calculate points and ctrlPoints
-                }else if(animableObj.imageModel.paths.type===ImageType.CREATED_PATHDESIGNED){
-                    this.ctrlPointsGenerator.generate(animableObj.imageModel);
-                }
-                else if(animableObj.imageModel.paths.type===ImageType.CREATED_PATHLOADED){
-                    //NOTHING BECAUSE POINTS AND CTRLPOINTS ARE ALREADY CALCULATED
-                }
+                animableObj.imageModel.paths.duration=animableObj.entranceDuration;
+                animableObj.imageModel.paths.delay=animableObj.entranceDelay;
+
+                this.loadDrawingDataOnDrawableObject(animableObj);
                 tmpObject=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,left:animableObj.get("left"),top:animableObj.get("top"),width:animableObj.get("width"),height:animableObj.get("height"),angle:animableObj.get("angle"),scaleX:animableObj.get("scaleX"),scaleY:animableObj.get("scaleY"),originX: 'center',originY: 'center',animations:animableObj.dictAnimations});
                 listDrawableObjects.push(tmpObject);
                 listImageModels.push(animableObj.imageModel);
@@ -40,6 +36,38 @@ var ScenePreviewController=fabric.util.createClass({
             this.UIPanelPreviewerCanvas.add(tmpObject);
             listAllObjects.push(tmpObject);
        }
+    },
+    loadDrawingDataOnDrawableObject:function(animableObj){
+        if(animableObj.imageModel.paths.type===ImageType.CREATED_NOPATH){
+            //calculate points and ctrlPoints and strokestyes (para el pathillustrator)
+            this.pointsGenerator.generateDefaultDrawingPointsAndLineWidth(animableObj.imageModel, 35)
+            animableObj.imageModel.paths.ctrlPoints=this.pointsGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageModel.paths.points);
+            animableObj.imageModel.paths.strokesTypes=this.pointsGenerator.generateStrokesTypesFromPoints(animableObj.imageModel.paths.points);
+            animableObj.imageModel.paths.pathsNames=this.pointsGenerator.generateLayerNames(animableObj.imageModel.paths.points)
+        }else if(animableObj.imageModel.paths.type===ImageType.CREATED_PATHDESIGNED){
+            // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
+            animableObj.imageModel.paths.ctrlPoints=this.pointsGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageModel.paths.points);
+        }
+        else if(animableObj.imageModel.paths.type===ImageType.CREATED_PATHLOADED){
+            //NOTHING BECAUSE POINTS AND CTRLPOINTS ARE ALREADY CALCULATED
+        }
+    },
+    clearDrawingDataOnDrawableObjects:function(){
+        for(let i=0;i<CanvasManager.listAnimableObjects.length;i++) {
+            let animableObj = CanvasManager.listAnimableObjects[i];
+            if(animableObj.imageModel.paths.type===ImageType.CREATED_NOPATH){
+                animableObj.imageModel.paths.points=[];
+                animableObj.imageModel.paths.linesWidths=[];
+                animableObj.imageModel.paths.ctrlPoints=[];
+                animableObj.imageModel.paths.strokesTypes=[];
+                animableObj.imageModel.paths.pathsNames=[];
+            }else if(animableObj.imageModel.paths.type===ImageType.CREATED_PATHDESIGNED){
+                animableObj.imageModel.paths.ctrlPoints=[];
+            }
+            else if(animableObj.imageModel.paths.type===ImageType.CREATED_PATHLOADED){
+
+            }
+        }
     },
     notificationOnBtnPreview:function(){
         let listAllObjects=[];
@@ -58,6 +86,7 @@ var ScenePreviewController=fabric.util.createClass({
         this.UIPanelPreviewerCanvas.clear();
         this.drawingCacheManager.sleep();
         CanvasManager.setCanvasOnAnimableObjects();
+        this.clearDrawingDataOnDrawableObjects()
     },
     notificationOnDurationForm:function(duration){
         this.animator.setTotalDuration(duration);
@@ -67,8 +96,11 @@ var ScenePreviewController=fabric.util.createClass({
 var GeneratorDrawingDataImageModel=fabric.util.createClass({
     initialize:function(){
     },
-    generate:function(imageModel){
+    generateCtrlPoints:function(imageModel){
         imageModel.paths.ctrlPoints=this.generateCrtlPointsFromPointsMatrix(imageModel.paths.points);
+    },
+    generatePoints:function(){
+
     },
     delete:function(imageModel){
         imageModel.paths.ctrlPoints=[];
@@ -107,4 +139,74 @@ var GeneratorDrawingDataImageModel=fabric.util.createClass({
         }
         return list;
     },
+    generateDefaultDrawingPointsAndLineWidth:function (imageModel,lineWidthWanted){
+        let imageWidth=imageModel.imgHTML.naturalWidth;
+        let imageHeight=imageModel.imgHTML.naturalHeight;
+
+        let matPoints=[]
+        let listLinesWidths=[lineWidthWanted/imageWidth];
+        matPoints.push([]);
+        let p1x,p1y,p2x,p2y;
+
+        let layerIndex=0;
+        let contPointsLayer=0;
+        for(let i=0;i<imageHeight+imageWidth;i+=(lineWidthWanted-lineWidthWanted/4)){
+            if(contPointsLayer>50){
+                layerIndex++;
+                contPointsLayer=0;
+                matPoints.push([])
+                listLinesWidths.push(lineWidthWanted/imageWidth);
+            }//new layer
+
+            if(i<imageWidth){
+                p1x=i;
+                p1y=0;
+            }else{
+                p1x=imageWidth;
+                p1y=i-imageWidth;
+            }
+            if(i<imageHeight){
+                p2x=0;
+                p2y=i;
+            }else{
+                p2x=i-imageHeight;
+                p2y=imageHeight;
+            }
+            contPointsLayer+=2;
+
+            matPoints[layerIndex].push(
+                p1x/imageWidth,
+                p1y/imageHeight,
+                p2x/imageWidth,
+                p2y/imageHeight
+            );
+        }
+        imageModel.paths.points=matPoints;
+        imageModel.paths.linesWidths=listLinesWidths;
+    },
+    generateStrokesTypesFromPoints:function(matPoints){
+        let matStrokes=[];
+
+        for(let i=0;i<matPoints.length;i++){
+            matStrokes.push([]);
+            let len=matPoints[i].length;
+            if(len<2){continue}
+            if(len==2){
+                matStrokes[i].push("l");
+            }else{
+                for(let j=0;j<matPoints[i].length;j++){
+                    matStrokes[i].push("l");
+                }
+            }
+        }
+        return matStrokes;
+    },
+
+    generateLayerNames:function(matPoints){
+        let layers=[];
+        for(let i=0;i<matPoints.length;i++){
+            layers.push("Patha" + i);
+        }
+        return layers;
+    }
 });

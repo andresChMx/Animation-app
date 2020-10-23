@@ -105,6 +105,7 @@ var PathIllustrator=fabric.util.createClass({
                     let cantJumps=indexPathTurn-prevStrokeIndexTurn;
                     let oldValI=i;
                     for(let p=0;p<cantJumps;p++){
+
                         this.drawCompletePath(k,i,j);
                         //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
                         let indexes=this.getNextPath(k,i,j,1);
@@ -154,17 +155,15 @@ var PathIllustrator=fabric.util.createClass({
                     flagFirstTime=false;
 
                     /// Establer tiempo por stroke
-                    let totalCantPaths=0;
-                    for(let i=0;i<this.data.getPathListLength(k);i++){
-                        let tmpCant=this.data.getPathLength(k,i)-1;
-                        totalCantPaths=tmpCant<0?totalCantPaths:totalCantPaths+tmpCant;
-                    }
+                    let totalCantPaths=this.getTotalStrokesInImage(k);
+
                     animPathDuration=this.listObjectsToDraw[k].paths.duration/totalCantPaths;
                     console.log(totalCantPaths);
                     
                     //Medidor Transcurso de tiempo desde este momento
                     animStartTime=+new Date();
-                    animFinishTime=animStartTime+this.listObjectsToDraw[k].paths.duration;
+                    animFinishTime=animStartTime+this.listObjectsToDraw[k].paths.duration +this.listObjectsToDraw[k].paths.delay ;
+
                     animTotalProgress=0;
                     prevStrokeIndexTurn=0;
 
@@ -186,15 +185,24 @@ var PathIllustrator=fabric.util.createClass({
                     if(nowTime>animFinishTime){
 
                         //// Completing not drawn lines
-                        
-                        let indexPathTurn=parseInt(animTotalProgress/animPathDuration);
+                        let animTrueProgress=animTotalProgress-this.listObjectsToDraw[k].paths.delay;
+                        animTrueProgress=Math.max(0,animTrueProgress);
+                        let indexPathTurn=parseInt(animTrueProgress/animPathDuration);
                         let cantJumps=(Math.round(this.listObjectsToDraw[k].paths.duration/animPathDuration)-1)-indexPathTurn;
 
                         this.drawCurveSegment(k,i,j,1);
-
+                        let oldValI=i;
                         for(let p=0;p<cantJumps;p++){
-                            let indexes=this.getNextPath(k,i,j,1);
                             //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
+                            // if(oldValI!=i){//se paso a otro path
+                            //     oldValI=i;
+                            //     this.drawCurrentStrokes(k);
+                            //     this.prevPathSnapshot.src=this.canvas.toDataURL();
+                            //     //}.bind(this);
+                            //     this.ctx.beginPath();
+                            //     this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
+                            // }
+                            let indexes=this.getNextPath(k,i,j,1);
                             this.drawCompletePath(k,indexes[0],indexes[1]);
                             i=indexes[0];
                             j=indexes[1];
@@ -209,6 +217,7 @@ var PathIllustrator=fabric.util.createClass({
                         this.ctx.drawImage(this.prevPathSnapshot,0,0);
                         this.ctx.drawImage(this.actualSnapshot,0,0);
                         ///
+
                         k++;
                         if(k==this.listObjectsToDraw.length){
                             if(this.loopMode){
@@ -219,11 +228,12 @@ var PathIllustrator=fabric.util.createClass({
                         }
                         ///
                         this.notifyOnDrawingNewObject(this.listObjectsToDraw[k].imgHTML,k-1,k,this.canvas.toDataURL());
+
                         //calculando momento final de la animacion de la imagen
                         let offsetTime=nowTime-animFinishTime;
 
                         animStartTime=+new Date()-offsetTime;
-                        animFinishTime=animStartTime+this.listObjectsToDraw[k].paths.duration;
+                        animFinishTime=animStartTime+this.listObjectsToDraw[k].paths.duration+ this.listObjectsToDraw[k].paths.delay;
                         animTotalProgress=0;
                         prevStrokeIndexTurn=0;
 
@@ -254,13 +264,15 @@ var PathIllustrator=fabric.util.createClass({
                                 //return;
                             }else{
                                 Preprotocol.wantDelete=false;
-    
-                                let indexPathTurn=parseInt(animTotalProgress/animPathDuration);
+                                let animTrueProgress=animTotalProgress-this.listObjectsToDraw[k].paths.delay;
+                                animTrueProgress=Math.max(0,animTrueProgress);
+                                let indexPathTurn=parseInt(animTrueProgress/animPathDuration);
                                 let cantJumps=indexPathTurn-prevStrokeIndexTurn;
                                 let oldValI=i;
                                 for(let p=0;p<cantJumps;p++){
-                                        this.drawCompletePath(k,i,j);
+
                                         //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
+                                        this.drawCompletePath(k,i,j);
                                         let indexes=this.getNextPath(k,i,j,1);
                                         i=indexes[0];
                                         j=indexes[1];
@@ -274,10 +286,9 @@ var PathIllustrator=fabric.util.createClass({
                                     this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
 
                                 }else{
-                                    this.drawCurveSegment(k,i,j,(animTotalProgress%animPathDuration)/animPathDuration);
+                                    this.drawCurveSegment(k,i,j,(animTrueProgress%animPathDuration)/animPathDuration);
                                     this.drawCurrentStrokes(k);
                                 }
-                                
                                 prevStrokeIndexTurn=indexPathTurn;
                                 //FIN AQUI ANIMACIONES
                                 Preprotocol.wantDelete=true;
@@ -482,6 +493,14 @@ var PathIllustrator=fabric.util.createClass({
             x: this._getLValue(position,startX,endX),
             y: this._getLValue(position,startY,endY)
         }
+    },
+    getTotalStrokesInImage:function(k){
+        let totalCantPaths=0;
+        for(let i=0;i<this.data.getPathListLength(k);i++){
+            let tmpCant=this.data.getPathLength(k,i)-1;
+            totalCantPaths=tmpCant<0?totalCantPaths:totalCantPaths+tmpCant;
+        }
+        return totalCantPaths;
     },
     notifyOnDrawingNewObject:function(imgHTML,lastObjIndex,newObjIndex,lastDataUrl){//suscritos : su manejador de este en la vista PreviewerView (DrawingCacheManager)
         for(let i=0;i<this.listObserversOnDrawingNewObject.length;i++){

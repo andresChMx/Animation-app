@@ -70,10 +70,9 @@ var PathDesignerController=fabric.util.createClass({
                     this.imageModel.paths.type=ImageType.CREATED_PATHLOADED;
                     this.imageModel.paths.ctrlPoints=this.drawingManager.getMatrixCtrlPoints();
                 }else if(this.imageModel.paths.type===ImageType.CREATED_NOPATH){
-                    // if(there are at least 1 stroke){
-                        this.imageModel.paths.type=ImageType.CREATED_PATHDESIGNED;
-                    //
-                    // }
+                    if(this.getTotalStrokesAmount(matPoints)>0) {
+                        this.imageModel.paths.type = ImageType.CREATED_PATHDESIGNED;
+                    }
                 }
 
 
@@ -132,6 +131,14 @@ var PathDesignerController=fabric.util.createClass({
 
             })
         }
+    },
+    getTotalStrokesAmount:function(matrixPoints){
+        let totalCantPaths=0;
+        for(let i=0;i<matrixPoints.length;i++){
+            let tmpCant=(matrixPoints[i].length/2)-1;
+            totalCantPaths=tmpCant<0?totalCantPaths:totalCantPaths+tmpCant;
+        }
+        return totalCantPaths;
     },
     notificationOnbtnLoadSVGClicked:function(){
         let self=this;

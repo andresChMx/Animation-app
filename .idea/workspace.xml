@@ -20,16 +20,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/common/NetworkManager.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/variables/globales.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UIAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/UIAnimator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UIPathDesigner.js" beforeDir="false" afterPath="$PROJECT_DIR$/UIPathDesigner.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
     </list>
@@ -77,7 +74,12 @@
       <workItem from="1603147408241" duration="762000" />
       <workItem from="1603157044041" duration="4040000" />
       <workItem from="1603199754950" duration="9379000" />
-      <workItem from="1603229201419" duration="18500000" />
+      <workItem from="1603229201419" duration="19267000" />
+      <workItem from="1603290542105" duration="30264000" />
+      <workItem from="1603381214094" duration="11116000" />
+      <workItem from="1603400104569" duration="5516000" />
+      <workItem from="1603411864113" duration="13545000" />
+      <workItem from="1603488853021" duration="1452000" />
     </task>
     <servers />
   </component>
@@ -113,13 +115,13 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="dock-window-2/0.0.1920.1050@0.0.1920.1050" timestamp="1602996543928" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1603128136012">
+    <state x="616" y="237" key="run.anything.popup" timestamp="1603429898777">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603128136012" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1603126840355">
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603429898777" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1603297598408">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603126840355" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603297598408" />
   </component>
 </project>

@@ -495,7 +495,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     notificationOnResize:function(){
         this._UIupdateSizes_timelineComponents();
     },
-    notificationOnOptionClicked:function(property){
+    notificationOnOptionClicked:function(property){//del menu keyframes
         //use the correct dictionary (according to selectoed object)
         this.dictPropertyLanes[property].generateKeyFrame(this.timelineController.animator.totalProgress);
     },
@@ -662,9 +662,79 @@ var SectionObjectsEditor={
         this.HTMLElement=document.querySelector(".panel-inspector__objects-editor__box-items");
         this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
 
-        CanvasManager.registerOn
+        this.lastActiveHTMLItem=null;
+        CanvasManager.registerOnObjCreated(this);
+        CanvasManager.registerOnObjDeleted(this);
+        CanvasManager.registerOnSelectionUpdated(this);
     },
+    notificationOnObjCreated:function (animObjWithEntrance){
 
+        this.createHTMLItem(animObjWithEntrance)
+
+    },
+    notificationOnObjDeleted:function(indexObjsWithEntranceList,indexMainList){
+        this.deleteHTMLItemAt(indexObjsWithEntranceList);
+    },
+    notificationOnSelectionUpdated:function(obj){
+        let animbleActiveObject=CanvasManager.getSelectedAnimableObj();
+        if(animbleActiveObject!=null){
+            let indexInEntrancedObjectsList=CanvasManager.getListIndexObjectWithEntrance(animbleActiveObject);
+            if(indexInEntrancedObjectsList!==-1){
+                this.activeBoxObjectsHTMLItem(indexInEntrancedObjectsList);
+                return;
+            }
+        }
+        this.clearActivenessHTMLLastItem();
+    },
+    activeBoxObjectsHTMLItem:function(index){
+        this.clearActivenessHTMLLastItem();
+        let trueIndex=index+1;
+        this.HTMLElement.children[trueIndex].id="active-item";
+        this.lastActiveHTMLItem=this.HTMLElement.children[trueIndex];
+    },
+    clearActivenessHTMLLastItem:function (){
+        if(this.lastActiveHTMLItem!=null){
+            this.lastActiveHTMLItem.id="";
+            this.lastActiveHTMLItem=null;
+        }
+    },
+    createHTMLItem:function(animObjWithEntrance){
+        let newItem=this.HTMLBoxItem.cloneNode(true);
+        let icon=newItem.querySelector(".panel-inspector__objects-editor__box-items__item__icon img");
+        let inputDelay=newItem.querySelector(".box-items__item__input-field__input-element-delay");
+        let inputDuration=newItem.querySelector(".box-items__item__input-field__input-element-duration");
+        icon.setAttribute("src",animObjWithEntrance.imageModel.url);
+        inputDelay.value=animObjWithEntrance.entranceDelay;
+        inputDuration.value=animObjWithEntrance.entranceDuration;
+        newItem.style.display="block";
+        newItem.setAttribute("index",this.HTMLElement.children.length-1);
+        inputDuration.addEventListener("input",this.onInputDuration.bind(this));
+        inputDelay.addEventListener("input",this.onInputDelay.bind(this));
+        newItem.addEventListener("click",this.onHTMLItemClicked.bind(this))
+        this.HTMLElement.appendChild(newItem)
+    },
+    deleteHTMLItemAt:function(index){
+        this.HTMLElement.children[index+1].remove();// index-1 porque siempre hay un item oculto en el box items
+    },
+    onInputDelay:function(e){
+        let index=[].slice.call(this.HTMLElement.children).indexOf(e.target.parentNode.parentNode)-1;
+        //let index=parseInt(e.target.parentNode.parentNode.getAttribute("index"));
+        CanvasManager.listAnimableObjectsWithEntrance[index].entranceDelay=parseInt(e.target.value);
+    },
+    onInputDuration:function(e){
+        let index=[].slice.call(this.HTMLElement.children).indexOf(e.target.parentNode.parentNode)-1;
+        //let index=parseInt(e.target.parentNode.parentNode.getAttribute("index"));
+        CanvasManager.listAnimableObjectsWithEntrance[index].entranceDuration=parseInt(e.target.value);
+    },
+    onHTMLItemClicked:function(e){
+        let HTMLElem=e.target;
+        while(HTMLElem.className!=="panel-inspector__objects-editor__box-items__item clearfix"){
+            HTMLElem=HTMLElem.parentNode;
+        };
+        let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
+        CanvasManager.canvas.setActiveObject(CanvasManager.listAnimableObjectsWithEntrance[trueIndex])
+        CanvasManager.canvas.renderAll();
+    }
 }
 var PanelInspector={
     HTMLElement:null,
@@ -680,7 +750,7 @@ var PanelInspector={
         this.SectionToolBox.init();
         this.SectionMenuAddKey.init();
         this.SectionPropertiesEditor.init();
-        
+        this.SectionObjectsEditor.init();
         
         PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
         PanelDesignerOptions.SectionSettings.registerOnSettingActionClicked(this);
@@ -708,18 +778,31 @@ let SectionImageAssets={
     listObserversOnItemsMenu_designPaths:[],
     baseUrl:"https://res.cloudinary.com/dswkzmiyh",
     MODELItemAssets:[
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603254969/nievesColored_wvpt0u.png",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235823/characters/medic-woman_ydb5so.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603246107/food/cake_nosio7.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603246107/food/wine_ejz737.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603246106/food/fish_c7mikq.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603246106/food/sandwich_e8uh5l.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603248942/animals/duck_atw8rs.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603248940/animals/cat_kijg3o.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603248937/animals/bull_g3oqxl.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603249660/animals/dog_p94ylr.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603249564/animals/sheep_ua885z.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603249564/animals/pig_xpdonl.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603391302/700_FO49918911_12cfed34802ecb4daaa7a7b7fddd464d_w2lfrh.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603343397/sample.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348016/characters/man-chatting_tm5goo.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-driving_apauqe.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-flying_nn8kls.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-travel-world_oyajkr.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/woman-vacation_zglkwg.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-pilot_i4ueol.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/book2_exm9ix.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/book_w9pqvy.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/laptop_uggkg9.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/paper-plane_zmao5u.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347887/food/cangre_zw3xud.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347861/food/tomato_tf8ydk.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347600/food/bread_b3bevl.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347841/food/sandwich2_hfrzew.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347831/food/wine_yg6g9u.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347600/food/bread_b3bevl.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347598/food/uvo_koaxdq.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347598/food/water_dnnaa0.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347599/food/banana_dlyh07.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/pina_g1z6li.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/sandwich_soqxls.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/pear_xocq7t.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347596/food/icecream_abwou8.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
         //{url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/chef-man_w8k7do.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
         //{url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/suit-man-contract_oau3t6.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
         //{url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/suit-man_cfadsx.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
@@ -730,24 +813,24 @@ let SectionImageAssets={
         //{url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235820/characters/suit-woman-waiting_ezof2s.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
         //{url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235819/characters/technical-man_phv6gs.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
         //{url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235819/characters/air-attender-woman_vwv4gu.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603237231/characters/board-man-suit_x2llk5.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242016/characters/man-suit-green-crying_qup2ul.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242016/characters/man-suit-green-avoid_cfkrzi.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-green-thrilling_bxb3yb.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-fine_roqslv.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-idle_xuciwu.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-green-good_e3anur.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-doubt_j9yzvq.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-stop_omm0mw.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/box_aaalib.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/cross_zfek6m.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/circle-check_afaqbo.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/admiration_krsmcm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/question_wtweh5.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242842/signs/down-arrow_zvv3rm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/euro_fcy9nr.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/statistics_o0qvas.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/avoid_hgarvs.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603237231/characters/board-man-suit_x2llk5.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242016/characters/man-suit-green-crying_qup2ul.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242016/characters/man-suit-green-avoid_cfkrzi.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-green-thrilling_bxb3yb.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-fine_roqslv.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-idle_xuciwu.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-green-good_e3anur.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-doubt_j9yzvq.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-stop_omm0mw.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/box_aaalib.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/cross_zfek6m.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/circle-check_afaqbo.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/admiration_krsmcm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/question_wtweh5.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242842/signs/down-arrow_zvv3rm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/euro_fcy9nr.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/statistics_o0qvas.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/avoid_hgarvs.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
 
     ],
     //state:imported-empty,imported-designed,ours, bitmap-empty,bitmap-designed,svg-emtpy,svg-designed,svg-custom,
@@ -989,21 +1072,26 @@ var AssetAudio=function(){
 var CanvasManager={
     canvas:null,
     listAnimableObjects:[],
+    listAnimableObjectsWithEntrance:[],
 
     listObserversOnObjSelected:[],
     listObserversOnObjModified:[],
     listObserversOnObjDeleted:[],
+
+    listObserversOnObjCreated:[],
     init:function(){
         this.canvas=new fabric.Canvas('c',{ width: window.innerWidth, height: window.innerHeight ,backgroundColor: 'rgb(0,0,0)'});
         this.canvas.preserveObjectStacking=true;
         this.canvas.on('selection:updated',this.notifyOnObjSelected)
         this.canvas.on('selection:created',this.notifyOnObjSelected)
         this.canvas.on('selection:cleared',this.notifyOnObjSelected)
-        this.canvas.on('object:removed',this.notifyOnObjDeleted)
+        //this.canvas.on('object:removed',this.notifyOnObjDeleted)
         this.canvas.on('object:modified',this.notifyOnObjModified)
         PanelInspector.SectionPropertiesEditor.registerOnFieldInput(this);
         PanelAssets.SectionImageAssets.registerOnDummyDraggingEnded(this);
         PanelActionEditor.registerOnMarkerDragEnded(this);
+
+        WindowManager.registerOnKeyDeletePressed(this);
         /*
         let self=this;
         window.addEventListener("keydown",function(e){
@@ -1022,6 +1110,9 @@ var CanvasManager={
         }
         //switch(case obj.)
 
+    },
+    getListIndexObjectWithEntrance:function(obj){
+        return this.listAnimableObjectsWithEntrance.indexOf(obj);
     },
     createAnimableObject:function(model){
         let self=CanvasManager;
@@ -1042,9 +1133,12 @@ var CanvasManager={
             "top":WindowManager.mouse.y
         })
         oImg.imageModel=model;
+        oImg.entraceMode=EntranceModes.drawn;
         oImg.setCoords();
         self.canvas.add(oImg);
         self.listAnimableObjects.push(oImg);
+        self.listAnimableObjectsWithEntrance.push(oImg);
+        self.notifyOnObjCreated(oImg)
         
     },
     setCanvasOnAnimableObjects:function(){
@@ -1063,16 +1157,25 @@ var CanvasManager={
     registerOnObjModified:function(obj){
         this.listObserversOnObjModified.push(obj);
     },
+    registerOnObjCreated:function(obj){
+        this.listObserversOnObjCreated.push(obj);
+    },
+    notifyOnObjCreated:function(animObj){
+        let self=CanvasManager;
+        for(let i=0;i<self.listObserversOnObjCreated.length;i++){
+            self.listObserversOnObjCreated[i].notificationOnObjCreated(animObj);
+        }
+    },
     notifyOnObjSelected:function(opt){
         let self=CanvasManager;
         for(let i=0;i<self.listObserversOnObjSelected.length;i++){
             self.listObserversOnObjSelected[i].notificationOnSelectionUpdated(opt.target);
         }
     },
-    notifyOnObjDeleted:function(opt){
+    notifyOnObjDeleted:function(indexInObjsWithEntrance,indexInMainList){
         let self=CanvasManager;
         for(let i=0;i<self.listObserversOnObjDeleted.length;i++){
-            self.listObserversOnObjDeleted[i].notificationOnObjDeleted(opt.target);
+            self.listObserversOnObjDeleted[i].notificationOnObjDeleted(indexInObjsWithEntrance,indexInMainList);
         }
     },
     notifyOnObjModified:function(){
@@ -1091,12 +1194,29 @@ var CanvasManager={
             self.canvas.renderAll();
         }
     },
+    notificationOnKeyDeleteUp:function(){
+      if(this.canvas.getActiveObject()){
+
+          let activeObject=this.canvas.getActiveObject();
+          if(activeObject.type==="ImageAnimable"){
+              let indexInMainList=this.listAnimableObjects.indexOf(activeObject);
+              let indexInObjsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(activeObject);
+              if(indexInMainList!=-1){
+                this.listAnimableObjects.splice(indexInMainList,1);
+              }
+              if(indexInObjsWithEntrance!=-1){
+                  this.listAnimableObjectsWithEntrance.splice(indexInObjsWithEntrance,1);
+              }
+              this.notifyOnObjDeleted(indexInObjsWithEntrance,indexInMainList);
+              this.canvas.remove(this.canvas.getActiveObject());
+          }
+      }
+    },
     notificationOnDummyDraggingEnded:function(model){
         let self=CanvasManager;
         self.createAnimableObject(model);
     },
     notificationOnMarkerDragEnded:function(){
-        console.log("se termino de arrastrar marker");
         for(let i=0;i<this.listAnimableObjects.length;i++){
             this.listAnimableObjects[i].setCoords();
         }
@@ -1125,6 +1245,7 @@ var WindowManager={
             onMouseUp:[],
             onMouseMove:[],
             onMouseDown:[],
+            onKeyDeleteUp:[]
         }
     },
 
@@ -1136,6 +1257,8 @@ var WindowManager={
         window.addEventListener("mouseup",this.onWindowMouseUp);
         window.addEventListener("mousemove",this.onWindowMouseMove);
         window.addEventListener("mousedown",this.onWindowMouseDown);
+
+        window.addEventListener("keyup",this.onKeyUp.bind(this))
         PanelDesignerOptions.SectionSettings.registerOnSettingActionClicked(this);
         PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
     },
@@ -1167,6 +1290,10 @@ var WindowManager={
         let self=WindowManager;
         self.listObservers[obsType].onMouseMove.push(obj);
     },
+    registerOnKeyDeletePressed:function(obj,obsType=ObserverType.main){
+        let self=WindowManager;
+        self.listObservers[obsType].onKeyDeleteUp.push(obj);
+    },
     onWindowResize:function(){
         let self=WindowManager;
         for(var i=0;i<self.listObservers[self.activeObserverType].onResize.length;i++){
@@ -1193,6 +1320,14 @@ var WindowManager={
         let self=WindowManager;
         for(let i=0;i<self.listObservers[self.activeObserverType].onMouseDown.length;i++){
             self.listObservers[self.activeObserverType].onMouseDown[i].notificationOnMouseDown(e);
+        }
+    },
+    onKeyUp:function(e){
+        let self=WindowManager;
+        if(e.keyCode==46){
+            for(let i=0;i<self.listObservers[self.activeObserverType].onKeyDeleteUp.length;i++){
+                self.listObservers[self.activeObserverType].onKeyDeleteUp[i].notificationOnKeyDeleteUp();
+            }
         }
     }
 }
