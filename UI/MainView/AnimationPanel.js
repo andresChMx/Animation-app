@@ -1,18 +1,7 @@
 var TIMELINE_TIMESTEPS=100;
 var TIMELINE_MIN_LONGITUDE_STEPS=40;
 var TIMELINE_PADDING=16;
-var HTMLElement=function(elem){
-    this.htmlElement=null;
-    this.RECTBoundings=null;
-    this.init=function(){
-        this.htmlElement=document.querySelector(elem);
-        this.calcBoundings();
-    }
-    this.calcBoundings=function(){
-        this.RECTBoundings=this.htmlElement.getBoundingClientRect();
-    }
-    this.init();
-}
+
 var Marker=function(selector,HTMLtimeline_timeBar,HTMLtimeline){
     this.HTMLElement=null;
     this.HTMLtimeline_timeBar=null;

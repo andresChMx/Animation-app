@@ -18,7 +18,42 @@
  <link rel="stylesheet" href="stylesPathsDesigner.css">
 </head>
 <body>
+    <!--==============================
+    ========== MAIN CANVAS  =========
+    ===============================-->
     <canvas id="c"></canvas>
+    <div class="canvas-animator__object-configuration__filter" style="display:none;">
+        <div class="canvas-animator__object-configuration">
+            <div class="canvas-animator__object-configuration__btn-close"></div>
+            <div class="canvas-animator__object-configuration__entrance-settings">
+                <p class="canvas-animator__object-configuration__entrance-settings__title">Entrace Modes</p>
+                <div class="canvas-animator__object-configuration__entrance-settings__box-radio-buttons">
+                    <label for="none">None</label>
+                    <input type="radio" name="entrace_mode" value="none" id="none" class="entrance-settings__box-radio-buttons__radio-button">
+                    <label for="drawn">Drawn</label>
+                    <input type="radio" name="entrace_mode" value="drawn" id="drawn" class="entrance-settings__box-radio-buttons__radio-button">
+                    <label for="dragged">Dragged</label>
+                    <input type="radio" name="entrace_mode" value="dragged" id="dragged" class="entrance-settings__box-radio-buttons__radio-button">
+                </div>
+                <div class="canvas-animator__object-configuration__entrance-settings__box-options">
+                    <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options none">
+
+                    </div>
+                    <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options drawn">
+                        opciones de el modo drawn
+                    </div>
+                    <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options dragged">
+                        opciones del modo dragged
+                    </div>
+                </div>
+                <div class="canvas-animator__object-configuration__entrance-settings__box-buttons">
+                    <button class="btn-accept">Accept</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!--==============================
     ==========ASSETS PANEL=========
     ===============================-->
@@ -262,6 +297,8 @@
 
     <div class="section-image-assets__item__menu-options">
     </div>
+
+    <div class="canvas-animator__object__menu-options"></div>
 
     <script src="./variables/globales.js"></script>
     <script src="./util.js"></script>

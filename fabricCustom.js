@@ -50,7 +50,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
-        this.entraceMode=EntranceModes.drawn;
+        this.entranceMode=EntranceModes.drawn;
         this.dictAnimations={
             "left":[],
             "top":[],
@@ -64,15 +64,10 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.imageModel=null;
     },
     setEntranceMode:function(mode){
-        this.entraceMode=mode;
+        this.entranceMode=mode;
     },
     getEntranceMode:function(){
-        // if(this.imageModel.paths.linesWidths.length==0){
-        //     return EntranceModes.none;
-        // }else{
-        //     return EntranceModes.drawn;
-        // }
-        return EntranceModes.drawn;
+        return this.entranceMode;
     },
     addAnimation:function(property,startValue,endValue,startMoment,endMoment){//string,number,number
         this.dictAnimations[property].push(new Animation(property,startValue,endValue,startMoment,endMoment));

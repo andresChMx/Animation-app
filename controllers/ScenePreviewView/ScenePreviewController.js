@@ -14,27 +14,43 @@ var ScenePreviewController=fabric.util.createClass({
         this.animator=new ControllerAnimator(this.UIPanelPreviewerCanvas);
     },
     loadObjectsForAnimation:function(listAllObjects,listDrawableObjects,listImageModels,listScalerFactors){
+        for(let i=0;i<CanvasManager.listAnimableObjectsWithEntrance.length;i++){
+            let animableObjWithEntrance=CanvasManager.listAnimableObjectsWithEntrance[i];
+            let tmpObject=null;
+            if(animableObjWithEntrance.getEntranceMode()===EntranceModes.drawn){
+                animableObjWithEntrance.imageModel.paths.duration=animableObjWithEntrance.entranceDuration;
+                animableObjWithEntrance.imageModel.paths.delay=animableObjWithEntrance.entranceDelay;
 
+                this.loadDrawingDataOnDrawableObject(animableObjWithEntrance);
+                tmpObject=new DrawableImage({
+                    cacheCanvas:this.drawingCacheManager.canvas,
+                    left:animableObjWithEntrance.get("left"),
+                    top:animableObjWithEntrance.get("top"),
+                    width:animableObjWithEntrance.get("width"),
+                    height:animableObjWithEntrance.get("height"),
+                    angle:animableObjWithEntrance.get("angle"),
+                    scaleX:animableObjWithEntrance.get("scaleX"),
+                    scaleY:animableObjWithEntrance.get("scaleY"),
+                    originX: 'center',
+                    originY: 'center',
+                    animations:animableObjWithEntrance.dictAnimations});
+                listDrawableObjects.push(tmpObject);
+                listImageModels.push(animableObjWithEntrance.imageModel);
+                listScalerFactors.push({x:animableObjWithEntrance.imageModel.imgHTML.naturalWidth,y:animableObjWithEntrance.imageModel.imgHTML.naturalHeight});
+            }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.dragged){
+                //TODO Manager para objetos que entran arrastrados
+            }
+            if(tmpObject){
+                this.UIPanelPreviewerCanvas.add(tmpObject);
+                listAllObjects.push(tmpObject);
+            }
+        }
         for(let i=0;i<CanvasManager.listAnimableObjects.length;i++){
             let animableObj=CanvasManager.listAnimableObjects[i];
-            let tmpObject=null;
-            if(animableObj.getEntranceMode()==EntranceModes.drawn){
-                animableObj.imageModel.paths.duration=animableObj.entranceDuration;
-                animableObj.imageModel.paths.delay=animableObj.entranceDelay;
-
-                this.loadDrawingDataOnDrawableObject(animableObj);
-                tmpObject=new DrawableImage({cacheCanvas:this.drawingCacheManager.canvas,left:animableObj.get("left"),top:animableObj.get("top"),width:animableObj.get("width"),height:animableObj.get("height"),angle:animableObj.get("angle"),scaleX:animableObj.get("scaleX"),scaleY:animableObj.get("scaleY"),originX: 'center',originY: 'center',animations:animableObj.dictAnimations});
-                listDrawableObjects.push(tmpObject);
-                listImageModels.push(animableObj.imageModel);
-                listScalerFactors.push({x:animableObj.imageModel.imgHTML.naturalWidth,y:animableObj.imageModel.imgHTML.naturalHeight});
-            }else if(animableObj.getEntranceMode()==EntranceModes.dragged){
-                
-            }else if(animableObj.getEntranceMode()==EntranceModes.none){
-                tmpObject=animableObj;
+            if(animableObj.getEntranceMode()===EntranceModes.none){
+                this.UIPanelPreviewerCanvas.add(animableObj);
+                listAllObjects.push(animableObj);
             }
-
-            this.UIPanelPreviewerCanvas.add(tmpObject);
-            listAllObjects.push(tmpObject);
        }
     },
     loadDrawingDataOnDrawableObject:function(animableObj){
@@ -65,7 +81,7 @@ var ScenePreviewController=fabric.util.createClass({
                 animableObj.imageModel.paths.ctrlPoints=[];
             }
             else if(animableObj.imageModel.paths.type===ImageType.CREATED_PATHLOADED){
-
+                //NOTHING
             }
         }
     },

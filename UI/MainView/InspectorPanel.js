@@ -123,29 +123,11 @@ var SectionObjectsEditor={
         this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
 
         this.lastActiveHTMLItem=null;
-        CanvasManager.registerOnObjCreated(this);
-        CanvasManager.registerOnObjDeleted(this);
+        CanvasManager.registerOnObjAddedToListWithEntrance(this);
+        CanvasManager.registerOnObjDeletedFromListWidthEntraces(this);
         CanvasManager.registerOnSelectionUpdated(this);
     },
-    notificationOnObjCreated:function (animObjWithEntrance){
 
-        this.createHTMLItem(animObjWithEntrance)
-
-    },
-    notificationOnObjDeleted:function(indexObjsWithEntranceList,indexMainList){
-        this.deleteHTMLItemAt(indexObjsWithEntranceList);
-    },
-    notificationOnSelectionUpdated:function(obj){
-        let animbleActiveObject=CanvasManager.getSelectedAnimableObj();
-        if(animbleActiveObject!=null){
-            let indexInEntrancedObjectsList=CanvasManager.getListIndexObjectWithEntrance(animbleActiveObject);
-            if(indexInEntrancedObjectsList!==-1){
-                this.activeBoxObjectsHTMLItem(indexInEntrancedObjectsList);
-                return;
-            }
-        }
-        this.clearActivenessHTMLLastItem();
-    },
     activeBoxObjectsHTMLItem:function(index){
         this.clearActivenessHTMLLastItem();
         let trueIndex=index+1;
@@ -176,6 +158,7 @@ var SectionObjectsEditor={
     deleteHTMLItemAt:function(index){
         this.HTMLElement.children[index+1].remove();// index-1 porque siempre hay un item oculto en el box items
     },
+    /*EVENTOS INTERNOS*/
     onInputDelay:function(e){
         let index=[].slice.call(this.HTMLElement.children).indexOf(e.target.parentNode.parentNode)-1;
         //let index=parseInt(e.target.parentNode.parentNode.getAttribute("index"));
@@ -194,6 +177,30 @@ var SectionObjectsEditor={
         let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
         CanvasManager.canvas.setActiveObject(CanvasManager.listAnimableObjectsWithEntrance[trueIndex])
         CanvasManager.canvas.renderAll();
+    },
+    /*NOTIFICACIONES ENTRANTES*/
+    notificationOnObjAddedToListObjectsWithEntrance:function (animObjWithEntrance){
+
+        this.createHTMLItem(animObjWithEntrance)
+        this.notificationOnSelectionUpdated();
+        //simulando seleccion, ya que se agregara un elemento a la listaObjectswithentrance
+        //tambien en el panel de configuracion de objectos, y al cerrarse estara un objeto activo
+        //Invocando a esta fucion ahora actualizaremos el elemento html correpondiente
+        // a ese elemento fabric, como seleccionado
+    },
+    notificationOnObjDeletedFromListWithEntrance:function(indexObjsWithEntranceList){
+        this.deleteHTMLItemAt(indexObjsWithEntranceList);
+    },
+    notificationOnSelectionUpdated:function(){
+        let animbleActiveObject=CanvasManager.getSelectedAnimableObj();
+        if(animbleActiveObject!=null){
+            let indexInEntrancedObjectsList=CanvasManager.getListIndexObjectWithEntrance(animbleActiveObject);
+            if(indexInEntrancedObjectsList!==-1){
+                this.activeBoxObjectsHTMLItem(indexInEntrancedObjectsList);
+                return;
+            }
+        }
+        this.clearActivenessHTMLLastItem();
     }
 }
 var PanelInspector={
