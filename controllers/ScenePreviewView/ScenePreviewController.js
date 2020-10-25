@@ -14,6 +14,19 @@ var ScenePreviewController=fabric.util.createClass({
         this.animator=new ControllerAnimator(this.UIPanelPreviewerCanvas);
     },
     loadObjectsForAnimation:function(listAllObjects,listDrawableObjects,listImageModels,listScalerFactors){
+        /*Razones del siguiente bucle:
+        * recorremos todos los objetos del canvas, porque queremos el orden el que estan
+        * */
+        listAllObjects.push(CanvasManager.camera);
+        let allCanvasObjects=CanvasManager.canvas.getObjects();
+        for(let i=0;i<allCanvasObjects.length;i++){// empezando contador de 1 porque la camara esta en 0
+            let canvasObject=allCanvasObjects[i];
+            if(canvasObject.type==="ImageAnimable" && canvasObject.getEntranceMode()===EntranceModes.none){
+                this.UIPanelPreviewerCanvas.add(canvasObject);
+                listAllObjects.push(canvasObject);
+            }
+        }
+
         for(let i=0;i<CanvasManager.listAnimableObjectsWithEntrance.length;i++){
             let animableObjWithEntrance=CanvasManager.listAnimableObjectsWithEntrance[i];
             let tmpObject=null;
@@ -31,8 +44,8 @@ var ScenePreviewController=fabric.util.createClass({
                     angle:animableObjWithEntrance.get("angle"),
                     scaleX:animableObjWithEntrance.get("scaleX"),
                     scaleY:animableObjWithEntrance.get("scaleY"),
-                    originX: 'center',
-                    originY: 'center',
+                    originX: 'left',
+                    originY: 'top',
                     animations:animableObjWithEntrance.dictAnimations});
                 listDrawableObjects.push(tmpObject);
                 listImageModels.push(animableObjWithEntrance.imageModel);
@@ -40,18 +53,14 @@ var ScenePreviewController=fabric.util.createClass({
             }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.dragged){
                 //TODO Manager para objetos que entran arrastrados
             }
+
             if(tmpObject){
                 this.UIPanelPreviewerCanvas.add(tmpObject);
                 listAllObjects.push(tmpObject);
             }
         }
-        for(let i=0;i<CanvasManager.listAnimableObjects.length;i++){
-            let animableObj=CanvasManager.listAnimableObjects[i];
-            if(animableObj.getEntranceMode()===EntranceModes.none){
-                this.UIPanelPreviewerCanvas.add(animableObj);
-                listAllObjects.push(animableObj);
-            }
-       }
+
+
     },
     loadDrawingDataOnDrawableObject:function(animableObj){
         if(animableObj.imageModel.paths.type===ImageType.CREATED_NOPATH){
@@ -69,7 +78,7 @@ var ScenePreviewController=fabric.util.createClass({
         }
     },
     clearDrawingDataOnDrawableObjects:function(){
-        for(let i=0;i<CanvasManager.listAnimableObjects.length;i++) {
+        for(let i=1;i<CanvasManager.listAnimableObjects.length;i++) {//omitiendo el primer porque es la camara
             let animableObj = CanvasManager.listAnimableObjects[i];
             if(animableObj.imageModel.paths.type===ImageType.CREATED_NOPATH){
                 animableObj.imageModel.paths.points=[];
@@ -85,12 +94,20 @@ var ScenePreviewController=fabric.util.createClass({
             }
         }
     },
+    startCamera:function (){
+        CanvasManager.camera.start();
+        CanvasManager.camera.setCanvasCamera(this.UIPanelPreviewerCanvas);
+    },
+    stopCamera:function(){
+      CanvasManager.camera.stop();
+    },
     notificationOnBtnPreview:function(){
-        let listAllObjects=[];
+        let listAllObjects=[];// lista para el animator
         //listas para el DrawingCacheManager (dibujador)
         let listDrawableObjects=[];
         let listImageModels=[];
         let listScalerFactors=[];
+        this.startCamera();
         this.loadObjectsForAnimation(listAllObjects,listDrawableObjects,listImageModels,listScalerFactors);
         this.drawingCacheManager.wakeUp(listImageModels,listScalerFactors,listDrawableObjects);
         this.animator.setListObjectsToAnimate(listAllObjects);
@@ -99,6 +116,8 @@ var ScenePreviewController=fabric.util.createClass({
         this.animator.playAnimation();
     },
     notificationOnBtnClose:function(){
+        this.stopCamera();
+        this.animator.stopAnimation();
         this.UIPanelPreviewerCanvas.clear();
         this.drawingCacheManager.sleep();
         CanvasManager.setCanvasOnAnimableObjects();

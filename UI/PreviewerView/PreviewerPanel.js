@@ -20,7 +20,7 @@ var PanelPreviewer={
         btnClose.addEventListener("click",this.OnBtnCloseClicked.bind(this));
         PanelInspector.SectionToolBox.registerOnBtnPreview(this);
 
-        this.canvas=new fabric.StaticCanvas('panel-previewer__canvas');
+        this.canvas=new CustomStaticCanvas('panel-previewer__canvas');
         this.scenePreviewerController.setPreviewerCanvas(this.canvas);
     },
     setScenePreviewerController:function(controller){

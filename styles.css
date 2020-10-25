@@ -161,6 +161,7 @@
 {
     background:white;
     height:300px;
+    overflow: auto;
 }
 .panel-inspector__objects-editor__box-items__item{
     background:peru;
@@ -440,13 +441,34 @@
 /*======================
 ==== canvas-animator==
 =======================*/
+.canvas-outterContainer{
+    position:relative;
+    display: block;
+    margin:auto;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.canvas-container{
+    position:absolute;
+    left:0 !important;
+    right:0 !important;
+    top:0 !important;
+    bottom:0 !important;
+    margin:auto !important;
+}
 .canvas-animator__object__menu-options{
-    display: flex;
     background:black;
     position: absolute;
     z-index: 2000;
     left:0;
     top:0;
+    display: inline-block;
+}
+.canvas-animator__object__menu-options div{/*items/opciones del menu*/
+    background-position: center;
+    background-size: 70%;
+    background-repeat:no-repeat ;
+    border:1px solid #3b3b3b;
 }
 .canvas-animator__object-configuration__filter{
     position:absolute;

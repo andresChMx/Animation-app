@@ -70,9 +70,7 @@ var ControllerAnimator=fabric.util.createClass({
         for(var i=0;i<this.objectsToAnimate.length;i++){
             if(this.objectsToAnimate[i].hasAnimations()){
 
-                this.objectsToAnimate[i].visible=true;
                 this.objectsToAnimate[i].executeAnimations(self.totalProgress);
-                this.objectsToAnimate[i].visible=true;
                 //if (!this.objectsToAnimate[i].isOnScreen()) {
                 //}
               //console.log(listAnimableObjects[i].listAnimations.length);

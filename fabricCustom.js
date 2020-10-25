@@ -37,7 +37,7 @@ var Animation=fabric.util.createClass({
             return "tiempoMayor";
         }else{
             let currentTimeLocalAnim=currentTime-this.startMoment;
-            let currentValue = fabric.util.ease.easeOutElastic(currentTimeLocalAnim, this.startValue, this.byValue, this.localDuration);
+            let currentValue = fabric.util.ease.easeInOutSine(currentTimeLocalAnim, this.startValue, this.byValue, this.localDuration);
             return currentValue;
         }
     },
@@ -68,6 +68,12 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     },
     getEntranceMode:function(){
         return this.entranceMode;
+    },
+    getGlobalLeft:function(){
+        return this.left + this.canvas._offset.left;
+    },
+    getGlobalTop:function(){
+        return this.top + this.canvas._offset.top;
     },
     addAnimation:function(property,startValue,endValue,startMoment,endMoment){//string,number,number
         this.dictAnimations[property].push(new Animation(property,startValue,endValue,startMoment,endMoment));
@@ -106,6 +112,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             }
         }
     },
+
     isLastIndex:function(index,listLength){
         return index===listLength-1;
     },
@@ -113,14 +120,11 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         return index===0;
     },
     hasAnimations:function(){
-
         for(const prop in this.dictAnimations){
             if(this.dictAnimations[prop].length>0){
                 return true;
             }
-            
         }
-
         return false;
     },
     hasPropertyAnimations:function(prop){
@@ -154,15 +158,15 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     }
     //TODO: update animation handler
 })
-/*
+
 fabric.util.object.extend(fabric.Image,{
     fromURLCustom:function(url, callback, imgOptions){
       fabric.util.loadImage(url, function(img) {
-        callback && callback(new ImageAnimable(img, imgOptions));
+        callback && callback(new AnimableCamera(img, imgOptions));
       }, null, imgOptions && imgOptions.crossOrigin);
     }
 })
-*/
+
 var DrawableImage = fabric.util.createClass(fabric.Object, {
 
     type: 'DrawableImage',
@@ -199,6 +203,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
     render:function(ctx){
         
         ctx.save();
+            this._setOpacity(ctx);
             this.transform(ctx);
             if(this.myTurn){
                 ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
@@ -271,3 +276,120 @@ const EntranceModes={
     dragged:"dragged",
     none:"none"
 }
+var AnimableCamera=fabric.util.createClass(ImageAnimable,{
+    type:"AnimableCamera",
+    initialize:function(element,options){
+        this.callSuper("initialize",element,options)
+        this.started=false;
+        this.canvasCamera=null;
+        this.entranceMode=EntranceModes.none;
+
+        this.lockUniScaling=true;
+        this.lockRotation=true;
+        this.cornerStyle="rect";
+        this.cornerColor="rgba(200,100,0,0.9)"
+        this.cornerSize=20;
+    },
+    start:function(){
+        this.started=true;
+    },
+    stop:function(){
+        this.started=false;
+    },
+    setCanvasCamera:function(canvas){
+        this.canvasCamera=canvas;
+    },
+    executeAnimations:function(currentTime){
+        this.callSuper("executeAnimations",currentTime);
+        if(this.started){
+            this.updateCanvastWithOwnState();
+        }
+    },
+    updateCanvastWithOwnState:function(){
+        var vpt = this.canvasCamera.viewportTransform;
+        let vtmp=[this.get("scaleX"),0,0,this.get("scaleX"),0,0]
+        let inverseScale=this.invertTransform(vtmp);
+        vpt[4] = -this.get("left")*inverseScale[0];
+        vpt[5] = -this.get("top") *inverseScale[0];
+        this.canvasCamera.zoomToPoint(new fabric.Point(0,0),inverseScale[0]);
+        this.canvasCamera.opacity=this.get("opacity");
+    },
+    invertTransform: function(t) {
+        var a = 1 / (t[0] * t[3] - t[1] * t[2]),
+            r = [a * t[3], -a * t[1], -a * t[2], a * t[0]],
+            o = fabric.util.transformPoint({ x: t[4], y: t[5] }, r, true);
+        r[4] = -o.x;
+        r[5] = -o.y;
+        return r;
+    }
+})
+/*
+* Canvas en el que se toma en cuenta la opacidad, la cual es aplicar a todos los objetos. Usado para el canvas previewer
+* */
+var CustomStaticCanvas = fabric.util.createClass(fabric.Canvas, {
+    initialize:function(id,options){
+        this.callSuper('initialize', id,options);
+        this.opacity=1;
+    },
+    renderCanvas:function(ctx, objects){
+        var v = this.viewportTransform, path = this.clipPath;
+        this.cancelRequestedRender();
+        this.calcViewportBoundaries();
+        this.clearContext(ctx);
+        this.fire('before:render', { ctx: ctx, });
+        if (this.clipTo) {
+            fabric.util.clipContext(this, ctx);
+        }
+        this._renderBackground(ctx);
+
+        ctx.save();
+        ctx.globalAlpha=this.opacity;
+        //apply viewport transform once for all rendering process
+        ctx.transform(v[0], v[1], v[2], v[3], v[4], v[5]);
+        this._renderObjects(ctx, objects);
+        ctx.restore();
+        if (!this.controlsAboveOverlay && this.interactive) {
+            this.drawControls(ctx);
+        }
+        if (this.clipTo) {
+            ctx.restore();
+        }
+        if (path) {
+            path.canvas = this;
+            // needed to setup a couple of variables
+            path.shouldCache();
+            path._transformDone = true;
+            path.renderCache({ forClipping: true });
+            this.drawClipPathOnCanvas(ctx);
+        }
+        this._renderOverlay(ctx);
+        if (this.controlsAboveOverlay && this.interactive) {
+            this.drawControls(ctx);
+        }
+        this.fire('after:render', { ctx: ctx, });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
