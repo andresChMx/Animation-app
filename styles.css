@@ -142,7 +142,27 @@
     background:#606062;
     outline:1px #4B4B4D solid;
 }
-
+.action-editor__properties-area__list__item__btn-add{
+    display: inline-block;
+    padding:0 2px 0 2px;
+    border:1px solid white;
+}
+.action-editor__properties-area__list__item__label{
+    width:40%;
+    display: inline-block;
+}
+.action-editor__properties-area__list__item__box-inputs{
+    display:inline-block;
+    width:40%;
+}
+.action-editor__properties-area__list__item__box-inputs input{
+    margin:0;
+    padding:0;
+    width:30%;
+}
+.action-editor__properties-area__list__item__box-inputs input{
+    width:20%;
+}
 /*===================
 ==== inspector panel
 ====================*/

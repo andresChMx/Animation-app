@@ -22,7 +22,7 @@
     ========== MAIN CANVAS  =========
     ===============================-->
     <div class="canvas-outterContainer">
-        <div class="canvas-animator__object__menu-options"></div>
+        <div class="canvas-animator__object__menu-options" style="display: none;"></div>
         <canvas id="c" class="canvas-animator"></canvas>
     </div>
     <div class="canvas-animator__object-configuration__filter" style="display:none;">
@@ -147,10 +147,8 @@
             <div class="menu-add-keyframe__inner-container">
                 <p class ="menu-add-keyframe__label">Add KeyFrame</p>
                 <ul class="menu-add-keyframe__options-list">
-                    <li class="menu-add-keyframe__options-list__option" name="left">Location X</li>
-                    <li class="menu-add-keyframe__options-list__option" name="top">Location Y</li>
-                    <li class="menu-add-keyframe__options-list__option" name="scaleX">Scale X</li>
-                    <li class="menu-add-keyframe__options-list__option" name="scaleY">Scale Y</li>
+                    <li class="menu-add-keyframe__options-list__option" name="position">Position</li>
+                    <li class="menu-add-keyframe__options-list__option" name="scale">Scale</li>
                     <li class="menu-add-keyframe__options-list__option" name="angle">Rotation</li>
                     <li class="menu-add-keyframe__options-list__option" name="opacity">Opacity</li>
                 </ul>
@@ -179,14 +177,38 @@
         <div class="panel-animation__editors-container">
                 <section class="action-editor">
                     <div class="action-editor__properties-area">
-                        <ul class="action-editor__properties-area__list">
-                            <li class="action-editor__properties-area__list__item">X Location</li>
-                            <li class="action-editor__properties-area__list__item">Y Location</li>
-                            <li class="action-editor__properties-area__list__item">X Scale</li>
-                            <li class="action-editor__properties-area__list__item">Y Scale</li>
-                            <li class="action-editor__properties-area__list__item">Rotation</li>
-                            <li class="action-editor__properties-area__list__item">Opacity</li>
-                        </ul>
+                        <div class="action-editor__properties-area__list">
+                            <div class="action-editor__properties-area__list__item">
+                                <span class="action-editor__properties-area__list__item__btn-add">+</span>
+                                <p class="action-editor__properties-area__list__item__label">Position</p>
+                                <div class="action-editor__properties-area__list__item__box-inputs">
+                                    <label>x:</label><input type="text">
+                                    <label>y:</label><input type="text">
+                                </div>
+                            </div>
+                            <div class="action-editor__properties-area__list__item">
+                                <span class="action-editor__properties-area__list__item__btn-add">+</span>
+                                <p class="action-editor__properties-area__list__item__label">Scale</p>
+                                <div class="action-editor__properties-area__list__item__box-inputs">
+                                    <label>x:</label><input type="text">
+                                    <label>y:</label><input type="text">
+                                </div>
+                            </div>
+                            <div class="action-editor__properties-area__list__item">
+                                <span class="action-editor__properties-area__list__item__btn-add">+</span>
+                                <p class="action-editor__properties-area__list__item__label">Angle</p>
+                                <div class="action-editor__properties-area__list__item__box-inputs">
+                                    <input type="text">
+                                </div>
+                            </div>
+                            <div class="action-editor__properties-area__list__item">
+                                <span class="action-editor__properties-area__list__item__btn-add">+</span>
+                                <p class="action-editor__properties-area__list__item__label">Opacity</p>
+                                <div class="action-editor__properties-area__list__item__box-inputs">
+                                    <input type="text">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="action-editor__timeline-area">
                         <div class="margin"></div><div class="margin"></div>

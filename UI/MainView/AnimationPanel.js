@@ -77,7 +77,7 @@ var Marker=function(selector,HTMLtimeline_timeBar,HTMLtimeline){
     this.init();
 }
 
-var Key=function(value,time,laneParent,HTMLTimeLineArea,timelineController){
+var Key=function(values,time,laneParent,HTMLTimeLineArea,timelineController){
     this.HTMLElement=null;
     this.RECTBoundings=null;
     this.laneParent=null;
@@ -89,7 +89,7 @@ var Key=function(value,time,laneParent,HTMLTimeLineArea,timelineController){
     this.isPressed=false;
     this.isDragged=false;
 
-    this.value=0;
+    this.values=[];
     this.time=0;
     this.timelineLocation=0;
 
@@ -98,7 +98,7 @@ var Key=function(value,time,laneParent,HTMLTimeLineArea,timelineController){
     this.listObserversOnDraggingEnded=[];
     var self=this;
     this.init=function(){
-        this.value=value;
+        this.values=values;
         this.time=time;
         this.laneParent=laneParent;
         this.HTMLTimeLineArea=HTMLTimeLineArea
@@ -166,8 +166,8 @@ var Key=function(value,time,laneParent,HTMLTimeLineArea,timelineController){
     this.desable=function(){
         this.HTMLElement.style.display="none";
     }
-    this.enable=function(value,time){
-        this.value=value;
+    this.enable=function(values,time){
+        this.values=values;
         this.time=time;
         this.HTMLElement.style.display="block";
         this.timelineLocation=this.getLocationInTimeline(this.time);
@@ -196,19 +196,19 @@ var Key=function(value,time,laneParent,HTMLTimeLineArea,timelineController){
     }
     this.init();
 }
-var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea,timelineController){
+var PropertyLane=function(properties,HTMLElement,HTMLTimeLineArea,timelineController){
     this.HTMLElement=null;
     this.HTMLTimeLineArea=null; //lo usan los keysframes
     this.timelineController=null;
     this.listKeyFrames=[];
     this.numbActiveKeyFrames=0;
     var self=this;
-    this.property="";
+    this.properties=[];
 
     this.currentAnimableSelectedObj;
     this.isPressed=false;
     this.init=function(){
-        this.property=property;
+        this.properties=properties;
         this.HTMLElement=HTMLElement;
         this.HTMLTimeLineArea=HTMLTimeLineArea;
         this.timelineController=timelineController;
@@ -223,25 +223,29 @@ var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea,timelineControll
             this.listKeyFrames[i].desable();
         }
     }
-    this._createKeyFrame=function(value,time){//UNICA VEZ QUE SE ALTERA ANIMACION ENTERNAMEINTE
-        let key=new Key(value,time,this,this.HTMLTimeLineArea,this.timelineController)
+    this._createKeyFrame=function(values,time){//UNICA VEZ QUE SE ALTERA ANIMACION ENTERNAMEINTE
+        let key=new Key(values,time,this,this.HTMLTimeLineArea,this.timelineController)
 
         this.listKeyFrames.push(key);
         key.registerOnDraggingEnded(this);
         key.registerOnDeleted(this);
     }
-    this._retriveKeyFromPool=function(value,time){
+    this._retriveKeyFromPool=function(values,time){
         if(this.numbActiveKeyFrames>=this.listKeyFrames.length){
             this.numbActiveKeyFrames++;
-            this._createKeyFrame(value,time);
+            this._createKeyFrame(values,time);
         }else{
             this.numbActiveKeyFrames++;
-            this.listKeyFrames[this.numbActiveKeyFrames-1].enable(value,time);
+            this.listKeyFrames[this.numbActiveKeyFrames-1].enable(values,time);
         }
     }
     this.generateKeyFrame=function(totalProgress){
         if(this.currentAnimableSelectedObj==null){return;}
-        this._retriveKeyFromPool(this.currentAnimableSelectedObj.get(this.property),totalProgress);
+        let values=[]
+        for(let i in this.properties){
+            values.push(this.currentAnimableSelectedObj.get(this.properties[i]));
+        }
+        this._retriveKeyFromPool(values,totalProgress);
         this._regenerateAnimations()
     }
 
@@ -268,15 +272,18 @@ var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea,timelineControll
     }
     this._regenerateAnimations=function(){
         insertionSort(this.listKeyFrames,this.numbActiveKeyFrames)
-        self.currentAnimableSelectedObj.dictAnimations[self.property]=[];
+        for(let i in this.properties ){self.currentAnimableSelectedObj.dictAnimations[self.properties[i]]=[];}
         if(self.numbActiveKeyFrames>0){
-            if(self.numbActiveKeyFrames==1){
-
-                self.currentAnimableSelectedObj.addAnimation(self.property,self.listKeyFrames[0].value,-1,self.listKeyFrames[0].time,-1);
+            if(self.numbActiveKeyFrames===1){
+                for(let i in this.properties ){
+                    self.currentAnimableSelectedObj.addAnimation(self.properties[i],self.listKeyFrames[0].values[i],-1,self.listKeyFrames[0].time,-1);
+                }
             }else{
                 for(let i=0;i<self.numbActiveKeyFrames-1;i++){
                     let key=self.listKeyFrames;
-                    self.currentAnimableSelectedObj.addAnimation(self.property,key[i].value,key[i+1].value,key[i].time,key[i+1].time);
+                    for(let j in this.properties ) {
+                        self.currentAnimableSelectedObj.addAnimation(self.properties[j], key[i].values[j], key[i + 1].values[j], key[i].time, key[i + 1].time);
+                    }
                 }
             }
 
@@ -285,24 +292,42 @@ var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea,timelineControll
     this._regenerateKeyFrames=function(){
         self._disableAllKeyframes();
         let selectedObject=self.currentAnimableSelectedObj;
-        if(selectedObject.hasPropertyAnimations(self.property)){
-            if(!(selectedObject.dictAnimations[self.property][0].hasTwoKeys())){
-                let anim=selectedObject.dictAnimations[self.property][0]
-                this._retriveKeyFromPool(anim.startValue,anim.startMoment);
+        //verificando solo la primer propiedad, porque si la tiene es porque las demas tambien lsa tiene
+        let firstOroperty=self.properties[0];
+        if(selectedObject.hasPropertyAnimations(firstOroperty)){
+            if(!(selectedObject.dictAnimations[firstOroperty][0].hasTwoKeys())){
+                let values=[];
+                for (let k in self.properties){
+                    values.push(selectedObject.dictAnimations[self.properties[k]][0].startValue);
+                }
+                let firstPropertyAnim=selectedObject.dictAnimations[self.properties[0]][0];
+                this._retriveKeyFromPool(values,firstPropertyAnim.startMoment);
             }else{
-                for(let i=0;i<selectedObject.dictAnimations[self.property].length;i+=2){
-                    let anim=selectedObject.dictAnimations[self.property][i]
-                    this._retriveKeyFromPool(anim.startValue,anim.startMoment);
-                    this._retriveKeyFromPool(anim.endValue,anim.endMoment);
+                for(let i=0;i<selectedObject.dictAnimations[self.properties[0]].length;i+=2){
+                    let firstPropertyAnim=selectedObject.dictAnimations[self.properties[0]][i];
+                    let startValues=[];
+                    let endValues=[];
+                    for (let k in self.properties){
+                        startValues.push(selectedObject.dictAnimations[self.properties[k]][i].startValue);
+                        endValues.push(selectedObject.dictAnimations[self.properties[k]][i].endValue)
+                    }
+                    this._retriveKeyFromPool(startValues,firstPropertyAnim.startMoment);
+                    this._retriveKeyFromPool(endValues,firstPropertyAnim.endMoment);
                 }
 
-                let animsLength=selectedObject.dictAnimations[self.property].length;
-                if(animsLength%2==0){
-                    let anim=selectedObject.dictAnimations[self.property][animsLength-1];
-                    this._retriveKeyFromPool(anim.endValue,anim.endMoment);
+                let animsLength=selectedObject.dictAnimations[self.properties[0]].length;
+                if(animsLength%2===0){
+                    let values=[];
+                    for(let k in self.properties){
+                        values.push(selectedObject.dictAnimations[self.properties[k]][animsLength-1].endValue)
+                    }
+                    let firstPropertyAnim=selectedObject.dictAnimations[self.properties[0]][animsLength-1];
+                    this._retriveKeyFromPool(values,firstPropertyAnim.endMoment);
                 }
             }
         }
+
+
     }
     this.notificationOnMouseUp=function(){
         self.isPressed=false;
@@ -316,6 +341,9 @@ var PropertyLane=function(property,HTMLElement,HTMLTimeLineArea,timelineControll
     }
     this.OnMouseDown=function(){
         self.isPressed=true;
+    }
+    this.OnBtnAddKeyClicked=function(){
+        this.generateKeyFrame(this.timelineController.animator.totalProgress);
     }
     this.init();
 }
@@ -383,11 +411,10 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     },
     _setupPropertyLanes:function(){
         let HTMLPropertyLanes=document.querySelectorAll(".keyframes-bar__property-lane");
-        let listProperties=['left','top','scaleX',"scaleY","angle","opacity"]
-        for(let i=0;i<HTMLPropertyLanes.length;i++){
-            let propertyLane=new PropertyLane(listProperties[i],HTMLPropertyLanes[i],this.HTMLtimeline,this.timelineController);
-            this.dictPropertyLanes[listProperties[i]]=propertyLane;
-        }
+        this.dictPropertyLanes["position"]=new PropertyLane(["left","top"],HTMLPropertyLanes[0],this.HTMLtimeline,this.timelineController);
+        this.dictPropertyLanes["scale"]=new PropertyLane(["scaleX","scaleY"],HTMLPropertyLanes[1],this.HTMLtimeline,this.timelineController);
+        this.dictPropertyLanes["angle"]=new PropertyLane(["angle"],HTMLPropertyLanes[2],this.HTMLtimeline,this.timelineController);
+        this.dictPropertyLanes["opacity"]=new PropertyLane(["opacity"],HTMLPropertyLanes[3],this.HTMLtimeline,this.timelineController);
     },
     _updateUI_timeline:function(){
         this._UIupdateSizes_timelineComponents(true);
@@ -484,10 +511,11 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     notificationOnResize:function(){
         this._UIupdateSizes_timelineComponents();
     },
+    /*
     notificationOnOptionClicked:function(property){//del menu keyframes
         //use the correct dictionary (according to selectoed object)
         this.dictPropertyLanes[property].generateKeyFrame(this.timelineController.animator.totalProgress);
-    },
+    },*/
     notificationOnObjSelected:function(obj){
         let selectedObject=CanvasManager.getSelectedAnimableObj();
         if(selectedObject!=null){
