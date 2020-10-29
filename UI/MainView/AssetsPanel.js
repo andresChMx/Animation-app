@@ -38,34 +38,34 @@ let SectionImageAssets={
         // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/sandwich_soqxls.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
         // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/pear_xocq7t.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
         // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347596/food/icecream_abwou8.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/chef-man_w8k7do.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/suit-man-contract_oau3t6.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/suit-man_cfadsx.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/farmer-man_bgq1km.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235820/characters/suit-man-device_xiadim.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235820/characters/suit-woman_tbo2fm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235820/characters/suit-woman-coffe_jovpzk.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235820/characters/suit-woman-waiting_ezof2s.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235819/characters/technical-man_phv6gs.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235819/characters/air-attender-woman_vwv4gu.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603237231/characters/board-man-suit_x2llk5.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242016/characters/man-suit-green-crying_qup2ul.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242016/characters/man-suit-green-avoid_cfkrzi.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-green-thrilling_bxb3yb.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-fine_roqslv.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-idle_xuciwu.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-green-good_e3anur.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-doubt_j9yzvq.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-stop_omm0mw.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/box_aaalib.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/cross_zfek6m.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/circle-check_afaqbo.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/admiration_krsmcm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/question_wtweh5.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242842/signs/down-arrow_zvv3rm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/euro_fcy9nr.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/statistics_o0qvas.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/avoid_hgarvs.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603778695/black_dll5gm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/suit-man-contract_oau3t6.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/suit-man_cfadsx.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/farmer-man_bgq1km.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235820/characters/suit-man-device_xiadim.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235820/characters/suit-woman_tbo2fm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235820/characters/suit-woman-coffe_jovpzk.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235820/characters/suit-woman-waiting_ezof2s.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235819/characters/technical-man_phv6gs.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235819/characters/air-attender-woman_vwv4gu.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603237231/characters/board-man-suit_x2llk5.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242016/characters/man-suit-green-crying_qup2ul.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242016/characters/man-suit-green-avoid_cfkrzi.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-green-thrilling_bxb3yb.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-fine_roqslv.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-idle_xuciwu.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242014/characters/man-suit-green-good_e3anur.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-doubt_j9yzvq.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242013/characters/man-suit-green-stop_omm0mw.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/box_aaalib.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/cross_zfek6m.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242845/signs/circle-check_afaqbo.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/admiration_krsmcm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/question_wtweh5.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242842/signs/down-arrow_zvv3rm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/euro_fcy9nr.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/statistics_o0qvas.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603242843/signs/avoid_hgarvs.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
 
     ],
     //state:imported-empty,imported-designed,ours, bitmap-empty,bitmap-designed,svg-emtpy,svg-designed,svg-custom,
@@ -208,6 +208,24 @@ let SectionImageAssets={
     }
 
 }
+var SectionFontAssets={
+    HTMLElement:null,
+    MODELItemAssets:[
+        {font:''}
+    ],
+    init:function(){
+        this.HTMLElement=document.querySelector(".panel-assets__sections-container__section-font-assets");
+
+    },
+    generateHTMLCollectionAssets:function(){
+        for(let i=0;i<this.MODELItemAssets.length;i++){
+
+        }
+    },
+    generateHTMLAsset:function(){
+        let itemHTML=document.createElement("div");
+    }
+}
 var PanelAssets={
     HTMLElement:null,
     htmlElementNormalHeight:0,
@@ -229,6 +247,8 @@ var PanelAssets={
     }
 
 }
+
+
 var AssetImage=function(model){
     this.HTMLElement=null;
     this.HTMLDraggable=null;

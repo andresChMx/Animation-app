@@ -35,7 +35,8 @@ var PanelPreviewer={
         let controlsHeight=progressBarHeight+controlsPadding*2;
 
         let aspectRatio=resolutionHeight/resolutionWidth;
-        let actualWidth=(window.innerWidth*0.7);
+        let actualWidth=1400;
+        //let actualWidth=(window.innerWidth*0.7);
         let actualHeight=actualWidth*aspectRatio;
 
         this.canvas.setWidth(actualWidth);

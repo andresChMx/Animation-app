@@ -43,7 +43,7 @@ var PreviewManager=fabric.util.createClass({
         this.scalerFactorY=this.canvas.height/this.canvasDrawingManager.canvasOriginalHeight;
     
         this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this.scalerFactorX,this.scalerFactorY);
-        this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,this.illustratorDataAdapter);
+        this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,this.illustratorDataAdapter,true);
         this.pathIllustrator.setListObjectsToDraw([this.imageModel]);
         this.pathIllustrator.start();
     },

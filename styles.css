@@ -10,6 +10,13 @@
                                         supported by Chrome, Edge, Opera and Firefox */
       
 }
+@font-face {
+    font-family: 'parisienne';
+    src: url('fonts/Parisienne-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+
+}
 :root {
     --panel-animation-height:200px;
     --panel-animation__top-menu_height:15%;

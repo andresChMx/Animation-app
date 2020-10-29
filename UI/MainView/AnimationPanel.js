@@ -1,7 +1,90 @@
 var TIMELINE_TIMESTEPS=100;
 var TIMELINE_MIN_LONGITUDE_STEPS=40;
 var TIMELINE_PADDING=16;
+var SectionProperties={
+    HTMLElement:null,
+    listObserversOnBtnAddKey:[],
+    listObserversOnFieldInput:[],
+    init:function(){
+        this.HTMLElement=document.querySelector(".action-editor__properties-area");
+        this.HTMLListProperties=document.querySelectorAll(".action-editor__properties-area__list__item");
+        this.HTMLInputsPropertyEditors=document.querySelectorAll(".action-editor__properties-area__list__item__box-inputs input");
+        this.initEvents();
+    },
+    initEvents:function(){
+        for(let i=0;i<this.HTMLListProperties.length;i++){
+            let btnAddKey=this.HTMLListProperties[i].querySelector(".action-editor__properties-area__list__item__btn-add");
+            btnAddKey.addEventListener("click",this.OnBtnAddKeyClicked.bind(this));
+        }
+        for(let i=0;i<this.HTMLInputsPropertyEditors.length;i++){
+            this.HTMLInputsPropertyEditors[i].addEventListener("input",this.OnFieldInput.bind(this));
 
+        }
+        CanvasManager.registerOnSelectionUpdated(this);
+        CanvasManager.registerOnObjModified(this);
+    },
+    _desableFields:function(){
+        for(let i=0;i<this.HTMLInputsPropertyEditors.length;i++){
+            this.HTMLInputsPropertyEditors[i].value="a";
+            this.HTMLInputsPropertyEditors[i].setAttribute("disabled","")
+        }
+    },
+    _enableFields:function(){
+        for(let i=0;i<this.HTMLInputsPropertyEditors.length;i++){
+            this.HTMLInputsPropertyEditors[i].removeAttribute("disabled")
+        }
+    },
+    _populateFields:function(selectedAnimObj){
+        for(let i=0;i<this.HTMLInputsPropertyEditors.length;i++){
+            let fieldHTML=this.HTMLInputsPropertyEditors[i];
+            fieldHTML.value=selectedAnimObj.get(fieldHTML.getAttribute("property"));
+        }
+    },
+    OnBtnAddKeyClicked:function(e){
+        let attrPropName=e.target.parentNode.getAttribute("property");
+        this.notifyOnBtnAddKey(attrPropName);
+    },
+    OnFieldInput:function(e){
+        let attrPropName=e.target.getAttribute("property");
+        let propertyNewValue=e.target.value;
+        this.notifyOnFieldPropertyInput(attrPropName,propertyNewValue);
+    },
+    notificationOnSelectionUpdated:function(){
+        let selectedAnimObj=CanvasManager.getSelectedAnimableObj();
+        if(!selectedAnimObj){
+            this._desableFields();
+        }else{
+            this._enableFields();
+            this._populateFields(selectedAnimObj);
+        }
+    },
+    notificationOnObjModified:function(){
+        let selectedAnimObj=CanvasManager.getSelectedAnimableObj();
+        if(!selectedAnimObj){
+            this._desableFields();
+        }else{
+            this._enableFields();
+            this._populateFields(selectedAnimObj);
+        }
+
+    },
+    notifyOnBtnAddKey:function(propName){
+        for(let i in this.listObserversOnBtnAddKey){
+            this.listObserversOnBtnAddKey[i].notificationOnBtnKeyAddKey(propName);
+        }
+    },
+    notifyOnFieldPropertyInput:function(propName,propNewValue){
+        for(let i in this.listObserversOnFieldInput){
+            this.listObserversOnFieldInput[i].notificationOnFieldPropertyInput(propName,propNewValue);
+        }
+    },
+    registerOnBtnAddKey:function(obj){
+        this.listObserversOnBtnAddKey.push(obj);
+    },
+    registerOnFieldPropertyInput:function (obj){
+        this.listObserversOnFieldInput.push(obj);
+    }
+}
 var Marker=function(selector,HTMLtimeline_timeBar,HTMLtimeline){
     this.HTMLElement=null;
     this.HTMLtimeline_timeBar=null;
@@ -272,17 +355,17 @@ var PropertyLane=function(properties,HTMLElement,HTMLTimeLineArea,timelineContro
     }
     this._regenerateAnimations=function(){
         insertionSort(this.listKeyFrames,this.numbActiveKeyFrames)
-        for(let i in this.properties ){self.currentAnimableSelectedObj.dictAnimations[self.properties[i]]=[];}
+        for(let i in this.properties ){self.currentAnimableSelectedObj.animator.dictAnimations[self.properties[i]]=[];}
         if(self.numbActiveKeyFrames>0){
             if(self.numbActiveKeyFrames===1){
                 for(let i in this.properties ){
-                    self.currentAnimableSelectedObj.addAnimation(self.properties[i],self.listKeyFrames[0].values[i],-1,self.listKeyFrames[0].time,-1);
+                    self.currentAnimableSelectedObj.animator.addAnimation(self.properties[i],self.listKeyFrames[0].values[i],-1,self.listKeyFrames[0].time,-1);
                 }
             }else{
                 for(let i=0;i<self.numbActiveKeyFrames-1;i++){
                     let key=self.listKeyFrames;
                     for(let j in this.properties ) {
-                        self.currentAnimableSelectedObj.addAnimation(self.properties[j], key[i].values[j], key[i + 1].values[j], key[i].time, key[i + 1].time);
+                        self.currentAnimableSelectedObj.animator.addAnimation(self.properties[j], key[i].values[j], key[i + 1].values[j], key[i].time, key[i + 1].time);
                     }
                 }
             }
@@ -294,34 +377,34 @@ var PropertyLane=function(properties,HTMLElement,HTMLTimeLineArea,timelineContro
         let selectedObject=self.currentAnimableSelectedObj;
         //verificando solo la primer propiedad, porque si la tiene es porque las demas tambien lsa tiene
         let firstOroperty=self.properties[0];
-        if(selectedObject.hasPropertyAnimations(firstOroperty)){
-            if(!(selectedObject.dictAnimations[firstOroperty][0].hasTwoKeys())){
+        if(selectedObject.animator.hasPropertyAnimations(firstOroperty)){
+            if(!(selectedObject.animator.dictAnimations[firstOroperty][0].hasTwoKeys())){
                 let values=[];
                 for (let k in self.properties){
-                    values.push(selectedObject.dictAnimations[self.properties[k]][0].startValue);
+                    values.push(selectedObject.animator.dictAnimations[self.properties[k]][0].startValue);
                 }
-                let firstPropertyAnim=selectedObject.dictAnimations[self.properties[0]][0];
+                let firstPropertyAnim=selectedObject.animator.dictAnimations[self.properties[0]][0];
                 this._retriveKeyFromPool(values,firstPropertyAnim.startMoment);
             }else{
-                for(let i=0;i<selectedObject.dictAnimations[self.properties[0]].length;i+=2){
-                    let firstPropertyAnim=selectedObject.dictAnimations[self.properties[0]][i];
+                for(let i=0;i<selectedObject.animator.dictAnimations[self.properties[0]].length;i+=2){
+                    let firstPropertyAnim=selectedObject.animator.dictAnimations[self.properties[0]][i];
                     let startValues=[];
                     let endValues=[];
                     for (let k in self.properties){
-                        startValues.push(selectedObject.dictAnimations[self.properties[k]][i].startValue);
-                        endValues.push(selectedObject.dictAnimations[self.properties[k]][i].endValue)
+                        startValues.push(selectedObject.animator.dictAnimations[self.properties[k]][i].startValue);
+                        endValues.push(selectedObject.animator.dictAnimations[self.properties[k]][i].endValue)
                     }
                     this._retriveKeyFromPool(startValues,firstPropertyAnim.startMoment);
                     this._retriveKeyFromPool(endValues,firstPropertyAnim.endMoment);
                 }
 
-                let animsLength=selectedObject.dictAnimations[self.properties[0]].length;
+                let animsLength=selectedObject.animator.dictAnimations[self.properties[0]].length;
                 if(animsLength%2===0){
                     let values=[];
                     for(let k in self.properties){
-                        values.push(selectedObject.dictAnimations[self.properties[k]][animsLength-1].endValue)
+                        values.push(selectedObject.animator.dictAnimations[self.properties[k]][animsLength-1].endValue)
                     }
-                    let firstPropertyAnim=selectedObject.dictAnimations[self.properties[0]][animsLength-1];
+                    let firstPropertyAnim=selectedObject.animator.dictAnimations[self.properties[0]][animsLength-1];
                     this._retriveKeyFromPool(values,firstPropertyAnim.endMoment);
                 }
             }
@@ -342,9 +425,6 @@ var PropertyLane=function(properties,HTMLElement,HTMLTimeLineArea,timelineContro
     this.OnMouseDown=function(){
         self.isPressed=true;
     }
-    this.OnBtnAddKeyClicked=function(){
-        this.generateKeyFrame(this.timelineController.animator.totalProgress);
-    }
     this.init();
 }
 
@@ -357,6 +437,8 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     HTMLdurationFormInput:null,
     HTMLdurationForm:null,
     marker:null,
+
+    SectionProperties:SectionProperties,
 
     timelineController:null,
     totalDuration:0,
@@ -372,6 +454,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
 
     listObserversOnDurationForm:[],
     init:function(){
+        this.SectionProperties.init();
         this.HTMLdurationFormInput=document.querySelector(".panel-animation__top-menu__form-duration__input");
         this.HTMLdurationForm=document.querySelector(".panel-animation__top-menu__form-duration");
         this.HTMLElement=document.querySelector(".action-editor");//todo el panel
@@ -387,7 +470,8 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         this._setupFormDuration();
 
         WindowManager.registerObserverOnResize(this);
-        PanelInspector.SectionMenuAddKey.registerOnOptionClicked(this);
+        // PanelInspector.SectionMenuAddKey.registerOnOptionClicked(this);
+        this.SectionProperties.registerOnBtnAddKey(this);
         this.marker.registerOnDragged(this);
         this.marker.registerOnDragEnded(this);
     },
@@ -516,6 +600,9 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         //use the correct dictionary (according to selectoed object)
         this.dictPropertyLanes[property].generateKeyFrame(this.timelineController.animator.totalProgress);
     },*/
+    notificationOnBtnKeyAddKey:function(propertyName){
+      this.dictPropertyLanes[propertyName].generateKeyFrame(this.timelineController.animator.totalProgress)
+    },
     notificationOnObjSelected:function(obj){
         let selectedObject=CanvasManager.getSelectedAnimableObj();
         if(selectedObject!=null){
@@ -537,6 +624,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     }
 
 }
+
 var PanelAnimation={//LA VENTANA COMPLETA
     HTMLElement:null,
     PanelActionEditor:PanelActionEditor,

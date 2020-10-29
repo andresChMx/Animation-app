@@ -1,7 +1,7 @@
 var CanvasManager={
     HTMLElement:null,
     canvas:null,
-    listAnimableObjects:[],
+    listAnimableObjects:[],//NO TIENE UNA RAZON DE SER CLARA PERO SE ESPERA QUE CUANDO DENGAMOS QUE HACER ALGO EN LOS ELEMENTOS ANIMABLES, NO TENGMOS QUE RECORRER TODOS LOS ELEMENTOS DEL CANVAS, sino solo lso animables
     listAnimableObjectsWithEntrance:[],
     camera:null,
 
@@ -13,12 +13,13 @@ var CanvasManager={
 
     SectionFloatingMenu:null,
     init:function(){
-        this.HTMLElement=document.querySelector(".canvas-animator");
-        this.boundingClientRect=this.HTMLElement.getBoundingClientRect();
         this.SectionFloatingMenu=SectionFloatingMenu;
         this.SectionConfigureObject=SectionConfigureObject;
         this.SectionFloatingMenu.init();
         this.SectionConfigureObject.init();
+
+        this.HTMLElement=document.querySelector(".canvas-animator");
+        this.boundingClientRect=this.HTMLElement.getBoundingClientRect();
         this.initCanvas();
         this.initEvents();
         this.initCamera();
@@ -38,9 +39,11 @@ var CanvasManager={
         this.canvas.on('selection:cleared',this.notifyOnObjSelectionUpdated)
         //this.canvas.on('object:removed',this.notifyOnObjDeleted)
         this.canvas.on('object:modified',this.notifyOnObjModified)
-        PanelInspector.SectionPropertiesEditor.registerOnFieldInput(this);
+        //PanelInspector.SectionPropertiesEditor.registerOnFieldInput(this);
+        PanelActionEditor.SectionProperties.registerOnFieldPropertyInput(this);
         PanelAssets.SectionImageAssets.registerOnDummyDraggingEnded(this);
         PanelActionEditor.registerOnMarkerDragEnded(this);
+        PanelInspector.SectionToolBox.registerOnTextTools(this);
 
         WindowManager.registerOnKeyDeletePressed(this);
         },
@@ -74,7 +77,7 @@ var CanvasManager={
     /*FIN-METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTSO DE ENTRADA (DRAWN Y DRAGGED)*/
     getSelectedAnimableObj:function(){
         let activeObj=this.canvas.getActiveObject()
-        if(activeObj && (activeObj.type==="ImageAnimable" || activeObj.type==="AnimableCamera")){
+        if(activeObj && (activeObj.type==="ImageAnimable" || activeObj.type==="AnimableCamera" || activeObj.type==="TextAnimable")){
             return activeObj
         }else{
             return null;
@@ -82,7 +85,7 @@ var CanvasManager={
         //switch(case obj.)
 
     },
-    createAnimableObject:function(model){
+    createAnimableObject:function(model,type="ImageAnimable"){
         let self=CanvasManager;
 
         /*
@@ -94,19 +97,32 @@ var CanvasManager={
                     self.canvas.add(obj).renderAll();
                   });
                 */
-        let oImg=new ImageAnimable(model.imgHTML,{
+        let animObj=null;
+        if(type==="ImageAnimable"){
+            animObj=new ImageAnimable(model.imgHTML,{
 
-            "left":WindowManager.mouse.x-this.canvas._offset.left,
-            "top":WindowManager.mouse.y-this.canvas._offset.top
-        })
-        oImg.imageModel=model;
-        oImg.entraceMode=EntranceModes.drawn;
-        oImg.setCoords();
-        self.canvas.add(oImg);
-        self.listAnimableObjects.push(oImg);
-        self.listAnimableObjectsWithEntrance.push(oImg);
+                "left":WindowManager.mouse.x-this.canvas._offset.left,
+                "top":WindowManager.mouse.y-this.canvas._offset.top
+            })
+            animObj.setEntranceMode(EntranceModes.drawn); // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea
+        }else{ //(type==="TextAnimable")
+            animObj=new TextAnimable("asdfasdfasdf",{
+                "left":100,
+                "top":100,
+                "width":200,
+            })
+            animObj.setEntranceMode(EntranceModes.text_drawn); //textos tambien tendran entrada siendo dibujados
+        }
+        animObj.imageModel=model;
+        animObj.setCoords();
+        self.listAnimableObjects.push(animObj);
+        self.listAnimableObjectsWithEntrance.push(animObj);
+        self.canvas.add(animObj);
 
-        self.notifyOnObjAddedToListObjectsWithEntrance(oImg);
+        self.notifyOnObjAddedToListObjectsWithEntrance(animObj);
+
+    },
+    createAnimableText:function(){
 
     },
     removeActiveAnimableObject:function(){
@@ -168,14 +184,15 @@ var CanvasManager={
             self.listObserversOnObjModified[i].notificationOnObjModified(opt.target);
         }
     },
-    notificationOnFieldInput:function(target){
-        console.log(target.getAttribute("name") + " + " + target.value);
-        let self=CanvasManager;
-        let activeAnimObj=self.getSelectedAnimableObj();
+    notificationOnTextToolsPressed:function(action){
+      this.createAnimableObject({url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603741009/text_xzcmse.png"},"TextAnimable")
+    },
+    notificationOnFieldPropertyInput:function(propName,propNewValue){
+        let activeAnimObj=this.getSelectedAnimableObj();
         if(activeAnimObj){
-            activeAnimObj.set(target.getAttribute("name"),parseFloat(target.value));
+            activeAnimObj.set(propName,parseFloat(propNewValue));
             activeAnimObj.setCoords();
-            self.canvas.renderAll();
+            this.canvas.renderAll();
         }
     },
     notificationOnKeyDeleteUp:function(){
@@ -327,7 +344,16 @@ var SectionConfigureObject={
             this.currentSelectedOptions={
                 entranceMode:animableObject.getEntranceMode()
             };
-            this.HTMLAreaEntranceSettings.querySelector("#" + animableObject.getEntranceMode()).checked=true;
+            let objEntranceMode=animableObject.getEntranceMode();
+            if(animableObject.type==="TextAnimable"){
+                if(animableObject.getEntranceMode()==="text_drawn"){objEntranceMode="drawn";}
+                this.HTMLAreaEntranceSettings.querySelector("#label_typed").style.display="inline";
+                this.HTMLAreaEntranceSettings.querySelector("#typed").style.display="inline";
+            }else{
+                this.HTMLAreaEntranceSettings.querySelector("#label_typed").style.display="none";
+                this.HTMLAreaEntranceSettings.querySelector("#typed").style.display="none";
+            }
+            this.HTMLAreaEntranceSettings.querySelector("#" + objEntranceMode).checked=true;
             this.HTMLElement.style.display="block";
         }
     },

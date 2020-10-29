@@ -1,13 +1,33 @@
 var SVGManager=fabric.util.createClass({
     initialize:function (){
-
-        this.listParser=new SVGParser();
     },
-    loadSVG:function(url,imgWidth,imgHeight,loadingMode,callback){
+    fetchTextSVGData:function(animableText,callback){
+        let request={
+            message: animableText.text,
+            font_size:animableText.fontSize
+        }
+        fetch("http://localhost:8080",{
+            method: 'POST',
+            headers: {'Content-Type': 'application/json',},
+            body: JSON.stringify(request),
+        })  .then(response => response.json())
+            .then(data => callback(data.response));
+    },
 
-        let self=this;
-        this.imgWidth=imgWidth;
-        this.imgHeight=imgHeight;
+
+    calcDrawingDataFromString_noForcePaths:function(string,imgWidth,imgHeight,callback){
+        this.calcDrawingData(string,imgWidth,imgHeight,"no_force","string",callback)
+    },
+    calcDrawingDataFromString_forcePaths:function(string,imgWidth,imgHeight,strokeWidth,callback){
+        this.calcDrawingData(string,imgWidth,imgHeight,"force_paths","string",callback,strokeWidth)
+    },
+    calcDrawingDataFromUrl_noForcePaths:function(url,imgWidth,imgHeight,callback){
+        this.calcDrawingData(url,imgWidth,imgHeight,"no_force","url",callback)
+    },
+    calcDrawingDataFromUrl_forcePaths:function(url,imgWidth,imgHeight,strokeWidth,callback){
+        this.calcDrawingData(url,imgWidth,imgHeight,"force_paths","url",callback,strokeWidth)
+    },
+    calcDrawingData:function(source,imgWidth,imgHeight,loadingMode,sourceType,callback,strokeWidth=8000){
         let result= {
             points: [],
             linesWidths:[],
@@ -15,10 +35,28 @@ var SVGManager=fabric.util.createClass({
             strokesTypes: [],
             ctrlPoints:[]
         }
-        let layerIndex=-1;
-        fabric.loadSVGFromURL(url, function(objects, options) {
+        let f=function(objects, options) {
             var obj = fabric.util.groupSVGElements(objects, options);
-            console.log(obj);
+
+            if(obj.type==="path"){
+                this.parseFabricGroup([obj],imgWidth,imgHeight,strokeWidth,loadingMode,result);
+            }else if(obj.type==="group"){
+                this.parseFabricGroup(obj.getObjects(),imgWidth,imgHeight,strokeWidth,loadingMode,result);
+            }
+            callback(result);
+        }.bind(this);
+
+        if(sourceType==="url"){
+            fabric.loadSVGFromURL(source,f);
+        }else if(sourceType==="string"){
+            fabric.loadSVGFromString(source,f);
+        }
+
+
+        /*
+        fabric.loadSVGFromURLCustom(url, function(objects, options) {
+            var obj = fabric.util.groupSVGElements(objects, options);
+
             if(obj.type==="path"){
                 self.parseFabricGroup.bind(self)([obj],result,layerIndex,loadingMode);
             }else if(obj.type==="group"){
@@ -26,45 +64,109 @@ var SVGManager=fabric.util.createClass({
             }
             callback(result);
         });
+        */
     },
-    parseFabricGroup:function(group,result,layerIndex,loadingMode){
 
-        let groupElems=group;
-        for(let i=0;i<groupElems.length;i++){
-            console.log(groupElems[i].type);
-            if(groupElems[i].type==="path"){
-                if(loadingMode==="force_paths"){
-                    layerIndex=this.listParser.parseSinglePath(groupElems[i],result,layerIndex,this.imgWidth,this.imgHeight,true);
-
-                }else{
-                    layerIndex=this.listParser.parseSinglePath(groupElems[i],result,layerIndex,this.imgWidth,this.imgHeight,false);
-
-                }
+    /*METODOS PRIVADOS*/
+    parseFabricGroup:function(group,imgWidth,imgHeight,strokeWidth,loadingMode,result){
+        let layerIndex=-1;
+        for(let i=0;i<group.length;i++){
+            if(group[i].type==="path"){
+               layerIndex=this.parsePath(group[i],imgWidth,imgHeight,strokeWidth,result,layerIndex,loadingMode);
             }
         }
+        console.log(result);
     },
-    parseSinglePath:function(pathArray){
-    }
+    utilParseArc :function(fx, fy, coords) {
+        var rx = coords[0],
+            ry = coords[1],
+            rot = coords[2],
+            large = coords[3],
+            sweep = coords[4],
+            tx = coords[5],
+            ty = coords[6],
+            segs = [[], [], [], []],
+            segsNorm = this.arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
 
-});
-var SVGParser=fabric.util.createClass({
-    initialize:function(){
-    this.imgWidth;
-    this.imgHeight
+        for (var i = 0, len = segsNorm.length; i < len; i++) {
+            segs[i][0] = segsNorm[i][0] + fx;
+            segs[i][1] = segsNorm[i][1] + fy;
+            segs[i][2] = segsNorm[i][2] + fx;
+            segs[i][3] = segsNorm[i][3] + fy;
+            segs[i][4] = segsNorm[i][4] + fx;
+            segs[i][5] = segsNorm[i][5] + fy;
+            ctx.bezierCurveTo.apply(ctx, segs[i]);
+        }
     },
-    parsePathArray:function(){
+    arcToSegments:function (toX, toY, rx, ry, large, sweep, rotateX) {
+        var argsString = _join.call(arguments);
+        if (fabric.arcToSegmentsCache[argsString]) {
+            return fabric.arcToSegmentsCache[argsString];
+        }
 
+        var PI = Math.PI, th = rotateX * PI / 180,
+            sinTh = fabric.util.sin(th),
+            cosTh = fabric.util.cos(th),
+            fromX = 0, fromY = 0;
+
+        rx = Math.abs(rx);
+        ry = Math.abs(ry);
+
+        var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
+            py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
+            rx2 = rx * rx, ry2 = ry * ry, py2 = py * py, px2 = px * px,
+            pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
+            root = 0;
+
+        if (pl < 0) {
+            var s = Math.sqrt(1 - pl / (rx2 * ry2));
+            rx *= s;
+            ry *= s;
+        }
+        else {
+            root = (large === sweep ? -1.0 : 1.0) *
+                Math.sqrt( pl / (rx2 * py2 + ry2 * px2));
+        }
+
+        var cx = root * rx * py / ry,
+            cy = -root * ry * px / rx,
+            cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
+            cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
+            mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
+            dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
+
+        if (sweep === 0 && dtheta > 0) {
+            dtheta -= 2 * PI;
+        }
+        else if (sweep === 1 && dtheta < 0) {
+            dtheta += 2 * PI;
+        }
+
+        // Convert into cubic bezier segments <= 90deg
+        var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
+            result = [], mDelta = dtheta / segments,
+            mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
+            th3 = mTheta + mDelta;
+
+        for (var i = 0; i < segments; i++) {
+            result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
+            fromX = result[i][4];
+            fromY = result[i][5];
+            mTheta = th3;
+            th3 += mDelta;
+        }
+        fabric.arcToSegmentsCache[argsString] = result;
+        return result;
     },
-    parseSinglePath: function(pathObj,result,layerIndex,imgWidth,imgHeight,forcePaths) {
-        let strokeWidth;
-        if(forcePaths){
+
+    parsePath:function(pathObj,imgWidth,imgHeight,strokeWidth,result,layerIndex,loadingMode){
+        if(loadingMode==="force_paths"){
             if(pathObj.hasOwnProperty("strokeWidth")){
                 strokeWidth=pathObj.strokeWidth;
             }else{
-                strokeWidth=8000/(imgWidth);
+                strokeWidth=strokeWidth;
             }
         }else{
-
             if(pathObj.hasOwnProperty("strokeWidth")) {
 
                 strokeWidth = pathObj.strokeWidth;
@@ -76,8 +178,8 @@ var SVGParser=fabric.util.createClass({
 
         let fliX=pathObj.flipX?-1:1;
         let fliY=pathObj.flipY?-1:1;
-        this.imgWidth=imgWidth/pathObj.scaleX*fliX;
-        this.imgHeight=imgHeight/pathObj.scaleY*fliY;
+        imgWidth=imgWidth/pathObj.scaleX*fliX;
+        imgHeight=imgHeight/pathObj.scaleY*fliY;
         var current, // current instruction
             previous = null,
             subpathStartX = 0,
@@ -90,13 +192,16 @@ var SVGParser=fabric.util.createClass({
             tempY,
             l = 0,
             t = 0;
-
-            if(pathObj.flipX){
-                l=this.imgWidth;
-            }
-            if(pathObj.flipY){
-                t=this.imgHeight
-            }
+        //l=pathObj.aCoords.tl.x/pathObj.scaleX,
+        //t=pathObj.aCoords.tl.y/pathObj.scaleY;
+        //l=-pathObj.pathOffset.x+pathObj.left/pathObj.scaleX +imgWidth/2,
+        //t=-pathObj.pathOffset.y+pathObj.top/pathObj.scaleY +imgHeight/2;
+        if(pathObj.flipX){
+            l=imgWidth;
+        }
+        if(pathObj.flipY){
+            t=imgHeight
+        }
 
         for (var i = 0, len =pathObj.path.length; i < len; ++i) {
             current =pathObj.path[i];
@@ -107,7 +212,7 @@ var SVGParser=fabric.util.createClass({
                     y += current[2];
 
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/this.imgWidth,(y+t)/this.imgHeight);
+                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
@@ -115,7 +220,7 @@ var SVGParser=fabric.util.createClass({
                     x = current[1];
                     y = current[2];
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/this.imgWidth,(y+t)/this.imgHeight);
+                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
@@ -123,28 +228,28 @@ var SVGParser=fabric.util.createClass({
                     x += current[1];
                     ctx.lineTo(x + l, y + t);
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/this.imgWidth,(y+t)/this.imgHeight);
+                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
                 case 'H': // horizontal lineto, absolute
                     x = current[1];
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/this.imgWidth,(y+t)/this.imgHeight);
+                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
                 case 'v': // vertical lineto, relative
                     y += current[1];
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/this.imgWidth,(y+t)/this.imgHeight);
+                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
                 case 'V': // verical lineto, absolute
                     y = current[1];
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/this.imgWidth,(y+t)/this.imgHeight);
+                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
@@ -155,9 +260,9 @@ var SVGParser=fabric.util.createClass({
                     subpathStartY = y;
                     layerIndex++;
                     result.strokesTypes.push([]);
-                    result.points.push([(x + l)/this.imgWidth,(y+t)/this.imgHeight]);
+                    result.points.push([(x + l)/imgWidth,(y+t)/imgHeight]);
                     result.ctrlPoints.push([]);
-                    result.linesWidths.push(strokeWidth/this.imgWidth);
+                    result.linesWidths.push(strokeWidth/imgWidth);
                     result.pathsNames.push("Path " +layerIndex)
 
                     break;
@@ -169,9 +274,9 @@ var SVGParser=fabric.util.createClass({
                     subpathStartY = y;
                     layerIndex++;
                     result.strokesTypes.push([]);
-                    result.points.push([(x + l)/this.imgWidth,(y+t)/this.imgHeight]);
+                    result.points.push([(x + l)/imgWidth,(y+t)/imgHeight]);
                     result.ctrlPoints.push([]);
-                    result.linesWidths.push(strokeWidth/this.imgWidth);
+                    result.linesWidths.push(strokeWidth/imgWidth);
                     result.pathsNames.push("Path " +layerIndex)
 
                     break;
@@ -183,12 +288,12 @@ var SVGParser=fabric.util.createClass({
                     controlY = y + current[4];
 
                     result.strokesTypes[layerIndex].push("c");
-                    result.points[layerIndex].push((tempX + l)/this.imgWidth,(tempY + t)/this.imgHeight);
+                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(
-                        (x + current[1] + l)/this.imgWidth,
-                            (y + current[2] + t)/this.imgHeight,
-                                (controlX + l)/this.imgWidth,
-                                    (controlY + t)/this.imgHeight
+                        (x + current[1] + l)/imgWidth,
+                        (y + current[2] + t)/imgHeight,
+                        (controlX + l)/imgWidth,
+                        (controlY + t)/imgHeight
                     );
 
                     x = tempX;
@@ -201,12 +306,12 @@ var SVGParser=fabric.util.createClass({
                     controlX = current[3];
                     controlY = current[4];
                     result.strokesTypes[layerIndex].push("c");
-                    result.points[layerIndex].push((x + l)/this.imgWidth,(y+t)/this.imgHeight);
+                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(
-                        (current[1] + l)/this.imgWidth,
-                            (current[2] + t )/this.imgHeight,
-                                (controlX + l )/this.imgWidth,
-                                    (controlY + t)/this.imgHeight
+                        (current[1] + l)/imgWidth,
+                        (current[2] + t )/imgHeight,
+                        (controlX + l )/imgWidth,
+                        (controlY + t)/imgHeight
                     );
                     break;
 
@@ -230,12 +335,12 @@ var SVGParser=fabric.util.createClass({
 
 
                     result.strokesTypes[layerIndex].push("c");
-                    result.points[layerIndex].push((tempX + l)/this.imgWidth,(tempY + t)/this.imgHeight);
+                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/this.imgWidth,
-                            (controlY + t )/this.imgHeight,
-                                (x + current[1] + l)/this.imgWidth,
-                                    (y + current[2] +t )/this.imgHeight
+                        (controlX + l)/imgWidth,
+                        (controlY + t )/imgHeight,
+                        (x + current[1] + l)/imgWidth,
+                        (y + current[2] +t )/imgHeight
                     );
                     // set control point to 2nd one of this command
                     // "... the first control point is assumed to be
@@ -264,12 +369,12 @@ var SVGParser=fabric.util.createClass({
                     }
 
                     result.strokesTypes[layerIndex].push("c");
-                    result.points[layerIndex].push((tempX + l)/this.imgWidth,(tempY + t)/this.imgHeight);
+                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/this.imgWidth,
-                            (controlY + t)/this.imgHeight,
-                                (current[1] + l)/this.imgWidth,
-                                    (current[2] +t )/this.imgHeight
+                        (controlX + l)/imgWidth,
+                        (controlY + t)/imgHeight,
+                        (current[1] + l)/imgWidth,
+                        (current[2] +t )/imgHeight
                     );
                     x = tempX;
                     y = tempY;
@@ -293,12 +398,12 @@ var SVGParser=fabric.util.createClass({
 
 
                     result.strokesTypes[layerIndex].push("q");
-                    result.points[layerIndex].push((tempX + l)/this.imgWidth,(tempY + t)/this.imgHeight);
+                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/this.imgWidth,
-                            (controlY + t)/this.imgHeight,
-                                (-1)/this.imgWidth,
-                                    (-1)/this.imgHeight
+                        (controlX + l)/imgWidth,
+                        (controlY + t)/imgHeight,
+                        (-1)/imgWidth,
+                        (-1)/imgHeight
                     );
                     x = tempX;
                     y = tempY;
@@ -310,12 +415,12 @@ var SVGParser=fabric.util.createClass({
 
 
                     result.strokesTypes[layerIndex].push("q");
-                    result.points[layerIndex].push((tempX + l)/this.imgWidth,(tempY + t)/this.imgHeight);
+                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(
-                        (current[1] + l)/this.imgWidth,
-                            (current[2] + t)/this.imgHeight,
-                                (-1)/this.imgWidth,
-                                    (-1)/this.imgHeight
+                        (current[1] + l)/imgWidth,
+                        (current[2] + t)/imgHeight,
+                        (-1)/imgWidth,
+                        (-1)/imgHeight
                     );
                     x = tempX;
                     y = tempY;
@@ -342,12 +447,12 @@ var SVGParser=fabric.util.createClass({
                     }
 
                     result.strokesTypes[layerIndex].push("q");
-                    result.points[layerIndex].push((tempX + l)/this.imgWidth,(tempY + t)/this.imgHeight);
+                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/this.imgWidth,
-                            (controlY + t)/this.imgHeight,
-                                (-1)/this.imgWidth,
-                                    (-1)/this.imgHeight
+                        (controlX + l)/imgWidth,
+                        (controlY + t)/imgHeight,
+                        (-1)/imgWidth,
+                        (-1)/imgHeight
                     );
                     x = tempX;
                     y = tempY;
@@ -371,12 +476,12 @@ var SVGParser=fabric.util.createClass({
                     }
 
                     result.strokesTypes[layerIndex].push("q");
-                    result.points[layerIndex].push((tempX + l)/this.imgWidth,(tempY + t)/this.imgHeight);
+                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/this.imgWidth,
-                            (controlY + t)/this.imgHeight,
-                                (-1)/this.imgWidth,
-                                    (-1)/this.imgHeight
+                        (controlX + l)/imgWidth,
+                        (controlY + t)/imgHeight,
+                        (-1)/imgWidth,
+                        (-1)/imgHeight
                     );
                     x = tempX;
                     y = tempY;
@@ -427,86 +532,6 @@ var SVGParser=fabric.util.createClass({
             previous = current;
         }
         return layerIndex;
-    },
-    utilParseArc :function(fx, fy, coords) {
-        var rx = coords[0],
-            ry = coords[1],
-            rot = coords[2],
-            large = coords[3],
-            sweep = coords[4],
-            tx = coords[5],
-            ty = coords[6],
-            segs = [[], [], [], []],
-            segsNorm = this.arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
-
-        for (var i = 0, len = segsNorm.length; i < len; i++) {
-            segs[i][0] = segsNorm[i][0] + fx;
-            segs[i][1] = segsNorm[i][1] + fy;
-            segs[i][2] = segsNorm[i][2] + fx;
-            segs[i][3] = segsNorm[i][3] + fy;
-            segs[i][4] = segsNorm[i][4] + fx;
-            segs[i][5] = segsNorm[i][5] + fy;
-            ctx.bezierCurveTo.apply(ctx, segs[i]);
-        }
-    },
-    arcToSegments:function (toX, toY, rx, ry, large, sweep, rotateX) {
-    var argsString = _join.call(arguments);
-    if (fabric.arcToSegmentsCache[argsString]) {
-        return fabric.arcToSegmentsCache[argsString];
     }
 
-    var PI = Math.PI, th = rotateX * PI / 180,
-        sinTh = fabric.util.sin(th),
-        cosTh = fabric.util.cos(th),
-        fromX = 0, fromY = 0;
-
-    rx = Math.abs(rx);
-    ry = Math.abs(ry);
-
-    var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
-        py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
-        rx2 = rx * rx, ry2 = ry * ry, py2 = py * py, px2 = px * px,
-        pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
-        root = 0;
-
-    if (pl < 0) {
-        var s = Math.sqrt(1 - pl / (rx2 * ry2));
-        rx *= s;
-        ry *= s;
-    }
-    else {
-        root = (large === sweep ? -1.0 : 1.0) *
-            Math.sqrt( pl / (rx2 * py2 + ry2 * px2));
-    }
-
-    var cx = root * rx * py / ry,
-        cy = -root * ry * px / rx,
-        cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
-        cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
-        mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
-        dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
-
-    if (sweep === 0 && dtheta > 0) {
-        dtheta -= 2 * PI;
-    }
-    else if (sweep === 1 && dtheta < 0) {
-        dtheta += 2 * PI;
-    }
-
-    // Convert into cubic bezier segments <= 90deg
-    var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
-        result = [], mDelta = dtheta / segments,
-        mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
-        th3 = mTheta + mDelta;
-
-    for (var i = 0; i < segments; i++) {
-        result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
-        fromX = result[i][4];
-        fromY = result[i][5];
-        mTheta = th3;
-        th3 += mDelta;
-    }
-    fabric.arcToSegmentsCache[argsString] = result;
-    return result;
-}
-})
+});

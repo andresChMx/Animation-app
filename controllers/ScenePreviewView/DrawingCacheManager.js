@@ -4,7 +4,6 @@ var DrawingCacheManager=fabric.util.createClass({
         this.canvas=document.createElement("canvas");
         this.ctx=this.canvas.getContext("2d");
         this.canvas.style.display="none";
-
         this.listDrawableObjects=[];
         //this.canvas=new OffscreenCanvas(100,1);
         //this.ctx=this.canvas.getContext("2d"); 
@@ -12,24 +11,41 @@ var DrawingCacheManager=fabric.util.createClass({
         
         this.pathIllustrator=null;
 
+        this.PIXEL_RATIO = (function () {
+            var ctx = document.createElement("canvas").getContext("2d"),
+                dpr = window.devicePixelRatio || 1,
+                bsr = ctx.webkitBackingStorePixelRatio ||
+                    ctx.mozBackingStorePixelRatio ||
+                    ctx.msBackingStorePixelRatio ||
+                    ctx.oBackingStorePixelRatio ||
+                    ctx.backingStorePixelRatio || 1;
+
+            return dpr / bsr;
+        })();
+
+    },
+    setCanvasDimentions:function(w,h){
+        this.canvas.width = w * this.PIXEL_RATIO;
+        this.canvas.height = h * this.PIXEL_RATIO;
+        this.canvas.style.width = w + "px";
+        this.canvas.style.height = h + "px";
+        this.ctx=this.canvas.getContext("2d");
+        this.ctx.setTransform(this.PIXEL_RATIO, 0, 0, this.PIXEL_RATIO, 0, 0);
     },
     wakeUp:function(imagesModelsToDraw,listScalerFactors,listDrawableObjects){
-        if(listDrawableObjects.length>0){
-            this.canvas.width=listScalerFactors[0].x;
-            this.canvas.height=listScalerFactors[0].y;
-            this.listDrawableObjects=listDrawableObjects;
-            this.listDrawableObjects[0].setTurn(true);
-        }
-        let illustratorDataAdapterCache=new IllustratorDataAdapterCache(imagesModelsToDraw,listScalerFactors,this.ctx);
+        this.listDrawableObjects=listDrawableObjects;
+        let illustratorDataAdapterCache=new IllustratorDataAdapterCache(imagesModelsToDraw,listScalerFactors);
         this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,illustratorDataAdapterCache,false);
         this.pathIllustrator.setListObjectsToDraw(imagesModelsToDraw);
         this.pathIllustrator.registerOnDrawingNewObject(this);
         this.pathIllustrator.start();
     },
-    notificationOnDrawingNewObject:function(imgHTML,lastObjIndex,newObjIndex,lastDataUrl){
-        //console.log(this.listDrawableObjects.length + "  " + lastObjIndex + "    " + newObjIndex);
-        this.canvas.width=imgHTML.naturalWidth;
-        this.canvas.height=imgHTML.naturalHeight;
+    notificationOnDrawingNewObject:function(lastObjIndex,newObjIndex,lastDataUrl){
+        this.OnIllustratorDrawingNewObject(lastObjIndex,newObjIndex,lastDataUrl);
+    },
+    OnIllustratorDrawingNewObject:function(lastObjIndex,newObjIndex,lastDataUrl){
+        this.setCanvasDimentions(this.pathIllustrator.data.scalerFactors[newObjIndex].x,
+                                this.pathIllustrator.data.scalerFactors[newObjIndex].y)
         this.listDrawableObjects[lastObjIndex].setTurn(false,lastDataUrl);
         this.listDrawableObjects[newObjIndex].setTurn(true,lastDataUrl);
     },

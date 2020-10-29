@@ -100,20 +100,45 @@ let SectionMenuAddKey={
 }
 let SectionToolBox={
     HTMLElement:null,
+    toolsActions:{
+        projectTools:["preview"],
+        textTools:["add-text"]
+    },
     listObserversOnBtnPreview:[],
+    listObserversOnTextToolsPressed:[],
     init:function(){
         this.HTMLElement=document.querySelector(".panel-inspector__toolbox");
-        let btnPreview=document.querySelector(".toolbox__tool-item__button-preview");
+        let btnPreview=document.querySelector(".toolbox__item__button-preview");
         btnPreview.addEventListener("click",this.notifyOnBtnPreview.bind(this));
+
+        this.HTMLTextTools=document.querySelector(".panel-inspector__toolbox__item-text");
+        this.initEvents();
+    },
+    initEvents:function(){
+      for(let i=1;i<this.HTMLTextTools.children.length;i++){// 0 es el titulo
+          this.HTMLTextTools.children[i].addEventListener("click",this.OnTextToolsPressed.bind(this));
+      }
+    },
+    OnTextToolsPressed:function(e){
+        let action=e.target.getAttribute("action");
+      this.notifyOnTextToolsPressed(action)
     },
     notifyOnBtnPreview:function(){
         for(let i=0;i<this.listObserversOnBtnPreview.length;i++){
             this.listObserversOnBtnPreview[i].notificationOnBtnPreview();
         }
     },
+    notifyOnTextToolsPressed:function(action){
+        for(let i=0;i<this.listObserversOnTextToolsPressed.length;i++){
+            this.listObserversOnTextToolsPressed[i].notificationOnTextToolsPressed(action);
+        }
+    },
     registerOnBtnPreview:function(obj){
 
         this.listObserversOnBtnPreview.push(obj);
+    },
+    registerOnTextTools:function(obj){
+        this.listObserversOnTextToolsPressed.push(obj);
     }
 }
 var SectionObjectsEditor={
@@ -146,8 +171,8 @@ var SectionObjectsEditor={
         let inputDelay=newItem.querySelector(".box-items__item__input-field__input-element-delay");
         let inputDuration=newItem.querySelector(".box-items__item__input-field__input-element-duration");
         icon.setAttribute("src",animObjWithEntrance.imageModel.url);
-        inputDelay.value=animObjWithEntrance.entranceDelay;
-        inputDuration.value=animObjWithEntrance.entranceDuration;
+        inputDelay.value=animObjWithEntrance.animator.entranceDelay;
+        inputDuration.value=animObjWithEntrance.animator.entranceDuration;
         newItem.style.display="block";
         newItem.setAttribute("index",this.HTMLElement.children.length-1);
         inputDuration.addEventListener("input",this.onInputDuration.bind(this));
@@ -162,12 +187,12 @@ var SectionObjectsEditor={
     onInputDelay:function(e){
         let index=[].slice.call(this.HTMLElement.children).indexOf(e.target.parentNode.parentNode)-1;
         //let index=parseInt(e.target.parentNode.parentNode.getAttribute("index"));
-        CanvasManager.listAnimableObjectsWithEntrance[index].entranceDelay=parseInt(e.target.value);
+        CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceDelay=parseInt(e.target.value);
     },
     onInputDuration:function(e){
         let index=[].slice.call(this.HTMLElement.children).indexOf(e.target.parentNode.parentNode)-1;
         //let index=parseInt(e.target.parentNode.parentNode.getAttribute("index"));
-        CanvasManager.listAnimableObjectsWithEntrance[index].entranceDuration=parseInt(e.target.value);
+        CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceDuration=parseInt(e.target.value);
     },
     onHTMLItemClicked:function(e){
         let HTMLElem=e.target;
@@ -208,15 +233,15 @@ var PanelInspector={
     htmlElementNormalHeight:0,
     SectionObjectsEditor:SectionObjectsEditor,
     SectionToolBox:SectionToolBox,
-    SectionMenuAddKey:SectionMenuAddKey,
-    SectionPropertiesEditor:SectionPropertiesEditor,
+    //SectionMenuAddKey:SectionMenuAddKey,
+    //SectionPropertiesEditor:SectionPropertiesEditor,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-inspector");
         this.htmlElementNormalHeight=this.HTMLElement.offsetHeight;
 
         this.SectionToolBox.init();
-        this.SectionMenuAddKey.init();
-        this.SectionPropertiesEditor.init();
+        //this.SectionMenuAddKey.init();
+        //this.SectionPropertiesEditor.init();
         this.SectionObjectsEditor.init();
 
         PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);

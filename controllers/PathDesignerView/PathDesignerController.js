@@ -21,6 +21,7 @@ var PathDesignerController=fabric.util.createClass({
     },
     notificationOnItemsMenu_designPaths:function(imageModel){
         this.imageModel=imageModel;
+        console.log(imageModel);
         if(imageModel.paths.type===ImageType.CREATED_NOPATH){
             this.wakeUpComponentes(imageModel.paths);
         }else if(imageModel.paths.type===ImageType.CREATED_PATHLOADED){
@@ -108,7 +109,7 @@ var PathDesignerController=fabric.util.createClass({
     loadingPathsFromSVG:function(loadingMode){
         let self=this;
         if(this.imageModel!=null){
-            this.svgManager.loadSVG(this.imageModel.url,this.imageModel.imgHTML.naturalWidth,this.imageModel.imgHTML.naturalHeight,loadingMode,function( svgLoadedData){
+            this.svgManager.calcDrawingData(this.imageModel.url,this.imageModel.imgHTML.naturalWidth,this.imageModel.imgHTML.naturalHeight,loadingMode,"url",function( svgLoadedData){
 
                 (function Wait(){
                     if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),1);return;}

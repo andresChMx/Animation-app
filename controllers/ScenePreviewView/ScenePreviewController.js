@@ -8,31 +8,56 @@ var ScenePreviewController=fabric.util.createClass({
         PanelInspector.SectionToolBox.registerOnBtnPreview(this);
         PanelPreviewer.registerOnBtnClose(this);
         PanelActionEditor.registerOnDurationForm(this);
+
+        this.counterCallBacksDrawableTexts=0;
+        this.indexDrawableTexts=0;
+        this.listDelayedObjects=[];
     },
     setPreviewerCanvas:function(previewerCanvas){
         this.UIPanelPreviewerCanvas=previewerCanvas;
         this.animator=new ControllerAnimator(this.UIPanelPreviewerCanvas);
     },
-    loadObjectsForAnimation:function(listAllObjects,listDrawableObjects,listImageModels,listScalerFactors){
-        /*Razones del siguiente bucle:
+    loadObjectsForAnimation:function(listForAnimator,listDrawableObjects,listImageModels,listScalerFactors){
+        /*
+        * Tenemos 3 tipos de objetos (ImageAnimable, TextAnimable, AnimableCamera ) que reciden en el canvas principal
+        *   * Llevan la palabra Animable porque son animables por el ControllerAnimator, es decir por la linea de tiempo
+        * Tenemos 1 objeto especial DrawableImage, que reemplaza a los objetos ImageAnimable en el canvas de previsualizacion, que tienen un modo de entrada drawn
+        * es decir se creara un DrawableImage por cada ImageAnimable que tenga activo un modo de entrada drawn, es decir que entrara dibujandose
+        * Los modos de entrdada en total son (none,drawn,dragged,text_drawn, text_typed)
+        * Los ImageAnimables que tienen de modo de entrada none, simplemente son agregados directamente al canvas de previsualizacion
+        *
+        * Los ImageAnimable estan asociados a un imageModel que tambien pertenecen a categorias o tipos, que son : PROVIDED, CREATED_NOPATH, CREATED_PATHDESIGNED, CREATED_PATHSVGLOADED
+        * las ImageModel que nosotros daremos a los usuarios son PROVIDED, y sus dados de dibujado seran objetidos de la nube de su data svg
+        * Las ImageModel que son creadas por los usuarios cuaya data de dibujado  no han diseñado un paht son CREATED_NOPATH
+        * Las ImageModel que son creadas por los usuarios cuya data de dibujado han sido diseñados son CREATED_PATHDESIGNED
+        * las ImageModel que son cradas por los usuarios  cuya data de dibujado  han sido cargados de su data svg son CREATED_PATHSVGLOADED
+        *    Estos tipos nos ayudan a la hora de saber de donde sacamos la data de dibujado de los objetos: los creamos nosotros todo (pintado default), solo calculamos los ctrlpoints, o no calculamos nada
+        *       En cualquiera de los casos puede ser que los imageModel no tienen ninguna data, pero ya sabremos que pedir del servidor y que no
+        *
+        * Todos los objetos son agregados al Canvas de previsualizacion a excepcion de la AnimableCamara
+        * Con un caso particular, y es que los objetos que tengan un efecto de entrada tendran que ser reemplazados por otros objetos que nos permitan aplicar jsutamente el efecto, estos nuevos objetos seran compuestos por un animator para que el ControllerAnimator los pueda animar.
+        * Todos los objetos son agregamos a la lista del animator del canvas de previsualizacion, ya que todos son animables (por la linea de tiempo)(incluido la Animable Camera)
+        * */
+
+        /*
         * recorremos todos los objetos del canvas, porque queremos el orden el que estan
         * */
-        listAllObjects.push(CanvasManager.camera);
+        listForAnimator.push(CanvasManager.camera);                  //Primero agregamos la camara
         let allCanvasObjects=CanvasManager.canvas.getObjects();
-        for(let i=0;i<allCanvasObjects.length;i++){// empezando contador de 1 porque la camara esta en 0
+        for(let i=0;i<allCanvasObjects.length;i++){
             let canvasObject=allCanvasObjects[i];
-            if(canvasObject.type==="ImageAnimable" && canvasObject.getEntranceMode()===EntranceModes.none){
-                this.UIPanelPreviewerCanvas.add(canvasObject);
-                listAllObjects.push(canvasObject);
+            if(canvasObject.type!=="AnimableCamera" && canvasObject.getEntranceMode()===EntranceModes.none){
+                this.UIPanelPreviewerCanvas.add(canvasObject);      //Agremos al canvas de previsualizacion tdos los objetos animables (no el restangulo camara [AnimableCamara])
+                listForAnimator.push(canvasObject);                  // Agregamos todos los abjetos (incluido al AnimableCamara)
             }
         }
-
+        /*Se recorren los objetos en estos dos bucles por separado ya que nos interesa el orden en elque estan en estos arreglos*/
         for(let i=0;i<CanvasManager.listAnimableObjectsWithEntrance.length;i++){
             let animableObjWithEntrance=CanvasManager.listAnimableObjectsWithEntrance[i];
             let tmpObject=null;
             if(animableObjWithEntrance.getEntranceMode()===EntranceModes.drawn){
-                animableObjWithEntrance.imageModel.paths.duration=animableObjWithEntrance.entranceDuration;
-                animableObjWithEntrance.imageModel.paths.delay=animableObjWithEntrance.entranceDelay;
+                animableObjWithEntrance.imageModel.paths.duration=animableObjWithEntrance.animator.entranceDuration;
+                animableObjWithEntrance.imageModel.paths.delay=animableObjWithEntrance.animator.entranceDelay;
 
                 this.loadDrawingDataOnDrawableObject(animableObjWithEntrance);
                 tmpObject=new DrawableImage({
@@ -46,18 +71,45 @@ var ScenePreviewController=fabric.util.createClass({
                     scaleY:animableObjWithEntrance.get("scaleY"),
                     originX: 'left',
                     originY: 'top',
-                    animations:animableObjWithEntrance.dictAnimations});
-                listDrawableObjects.push(tmpObject);
-                listImageModels.push(animableObjWithEntrance.imageModel);
-                listScalerFactors.push({x:animableObjWithEntrance.imageModel.imgHTML.naturalWidth,y:animableObjWithEntrance.imageModel.imgHTML.naturalHeight});
+                    animations:animableObjWithEntrance.animator.dictAnimations});
+                listDrawableObjects[i]=tmpObject;
+                listImageModels[i]=animableObjWithEntrance.imageModel;
+                listScalerFactors[i]={x:animableObjWithEntrance.imageModel.imgHTML.naturalWidth,y:animableObjWithEntrance.imageModel.imgHTML.naturalHeight};
             }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.dragged){
                 //TODO Manager para objetos que entran arrastrados
+            }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.text_drawn){
+                /*Loading drawing data of text*/
+                //console.log(animableObjWithEntrance.multi);
+                this.counterCallBacksDrawableTexts++;
+                let self=this;
+                let index=i;
+                this.pointsGenerator.generateTextDrawingDataNoForcing(animableObjWithEntrance,animableObjWithEntrance.width,animableObjWithEntrance.height,function(result) {
+                    console.log("dentro del callback: " +index );
+                    animableObjWithEntrance.imageModel.paths = result;
+                    animableObjWithEntrance.imageModel.paths.duration=animableObjWithEntrance.animator.entranceDuration;
+                    animableObjWithEntrance.imageModel.paths.delay=animableObjWithEntrance.animator.entranceDelay;
+                    animableObjWithEntrance.imageModel.paths.type=TextType.PROVIDED;
+                    animableObjWithEntrance.imageModel.imgHTML=PanelAssets.SectionImageAssets.HTMLElement.children[0].children[0].children[0];
+                    let textDrawable=new DrawableImage({
+                        cacheCanvas:self.drawingCacheManager.canvas,
+                        left:animableObjWithEntrance.get("left"),
+                        top:animableObjWithEntrance.get("top"),
+                        width:animableObjWithEntrance.get("width"),
+                        height:animableObjWithEntrance.get("height"),
+                        angle:animableObjWithEntrance.get("angle"),
+                        scaleX:animableObjWithEntrance.get("scaleX"),
+                        scaleY:animableObjWithEntrance.get("scaleY"),
+                        originX: 'left',
+                        originY: 'top',
+                        animations:animableObjWithEntrance.animator.dictAnimations});
+                    listDrawableObjects[index]=textDrawable;
+                    listImageModels[index]=animableObjWithEntrance.imageModel;
+                    listScalerFactors[index]={x:animableObjWithEntrance.calcTextWidth(),y:animableObjWithEntrance.calcTextHeight()};
+                    self.listDelayedObjects[index]=textDrawable;
+                    self.counterCallBacksDrawableTexts--;
+                })
             }
 
-            if(tmpObject){
-                this.UIPanelPreviewerCanvas.add(tmpObject);
-                listAllObjects.push(tmpObject);
-            }
         }
 
 
@@ -80,7 +132,7 @@ var ScenePreviewController=fabric.util.createClass({
     clearDrawingDataOnDrawableObjects:function(){
         for(let i=1;i<CanvasManager.listAnimableObjects.length;i++) {//omitiendo el primer porque es la camara
             let animableObj = CanvasManager.listAnimableObjects[i];
-            if(animableObj.imageModel.paths.type===ImageType.CREATED_NOPATH){
+            if(animableObj.imageModel.paths.type===ImageType.CREATED_NOPATH || animableObj.imageModel.paths.type===TextType.PROVIDED){
                 animableObj.imageModel.paths.points=[];
                 animableObj.imageModel.paths.linesWidths=[];
                 animableObj.imageModel.paths.ctrlPoints=[];
@@ -94,29 +146,32 @@ var ScenePreviewController=fabric.util.createClass({
             }
         }
     },
-    startCamera:function (){
-        CanvasManager.camera.start();
-        CanvasManager.camera.setCanvasCamera(this.UIPanelPreviewerCanvas);
-    },
-    stopCamera:function(){
-      CanvasManager.camera.stop();
-    },
     notificationOnBtnPreview:function(){
-        let listAllObjects=[];// lista para el animator
+        let listForAnimator=[];// lista para el animator (contiene los elementos de listDrawableObjects)
         //listas para el DrawingCacheManager (dibujador)
-        let listDrawableObjects=[];
-        let listImageModels=[];
-        let listScalerFactors=[];
-        this.startCamera();
-        this.loadObjectsForAnimation(listAllObjects,listDrawableObjects,listImageModels,listScalerFactors);
-        this.drawingCacheManager.wakeUp(listImageModels,listScalerFactors,listDrawableObjects);
-        this.animator.setListObjectsToAnimate(listAllObjects);
+        let listDrawableObjects=[]; //lista para objetos con efecto de dibujado, para el DrawingCacheManager, que orquestara el dibujado en orden de estos objetos
+        let listImageModels=[];     //lista para el PathIllustratos, ya que los iamgeModels tienen la data de dibujado, ira en orden pintando cada objeto. Sin embargo no accedera directamente a esa data (Adapters), solo a la iamgen html que reside tambien en estos objetos
+        let listScalerFactors=[];   //Indirectamente para el PathIllustrator, ya que esta lista sera el adapter, mediante al cual PathIllustrator accedera a la data
+        CanvasManager.camera.animator.start(this.UIPanelPreviewerCanvas);
+        this.loadObjectsForAnimation(listForAnimator,listDrawableObjects,listImageModels,listScalerFactors);
+        (function Wait(){
+            if(this.counterCallBacksDrawableTexts!==0){setTimeout(Wait.bind(this),1);return;}
+            //TODO: ORDERlistDelayerObjects
+            for(let i=0;i<listDrawableObjects.length;i++){
+                this.UIPanelPreviewerCanvas.add(listDrawableObjects[i]);
+                listForAnimator.push(listDrawableObjects[i]);
+            }
+            this.drawingCacheManager.wakeUp(listImageModels,listScalerFactors,listDrawableObjects);
+            this.animator.setListObjectsToAnimate(listForAnimator);
 
-        this.animator.setTotalProgress(0);
-        this.animator.playAnimation();
+            this.animator.setTotalProgress(0);
+            this.animator.playAnimation();
+        }.bind(this)())
+
     },
     notificationOnBtnClose:function(){
-        this.stopCamera();
+        this.listDelayedObjects=[];
+        CanvasManager.camera.animator.stop();
         this.animator.stopAnimation();
         this.UIPanelPreviewerCanvas.clear();
         this.drawingCacheManager.sleep();
@@ -243,5 +298,33 @@ var GeneratorDrawingDataImageModel=fabric.util.createClass({
             layers.push("Patha" + i);
         }
         return layers;
+    },
+
+    // generateTextDrawingDataNoForcing:function(animableText,textWidth,textHeight,callback){
+    //     let text=animableText.text;
+    //     let svgCache=document.createElement("div");
+    //     svgCache.id="container";
+    //     document.body.appendChild(svgCache)
+    //     new Vara("#container","http://localhost:3000/font.json",[{
+    //         text:text,
+    //         letterSpacing:-10
+    //     }],{
+    //         fontSize:46
+    //     });
+    //
+    //     flatten(svgCache);
+    //
+    //     let s = new XMLSerializer();
+    //     let str = s.serializeToString(svgCache);
+    //     svgCache.remove();
+    //     new SVGManager().loadSVGFromString(str,textWidth,textHeight,'no-force',callback)
+    //
+    // }
+    generateTextDrawingDataNoForcing:function(animableText,textWidth,textHeight,callback){
+        let svgManager=new SVGManager;
+        svgManager.fetchTextSVGData(animableText,function(responseSVG){
+            svgManager.calcDrawingDataFromString_forcePaths(responseSVG,textWidth,textHeight,3,callback);
+        })
+
     }
 });

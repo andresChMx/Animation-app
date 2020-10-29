@@ -2,6 +2,8 @@
   WindowManager.init();
   CanvasManager.init();
 
+  var fontsLoader=new FontsLoader();
+
   var timeLineController=new TimeLineController();
   PanelActionEditor.setTimelineController(timeLineController);
 

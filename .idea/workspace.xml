@@ -20,11 +20,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/SVGLoading/SVGFlattener.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/SVGLoading/TextToSVGConverter.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/fontsLoading/FontFaceObserver.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/fontsLoading/FontsLoader.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/fontsLoading/drawinData.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/MainView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/AnimationPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/MainView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/AssetsPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/MainView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/CanvasManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/MainView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/InspectorPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/MainView/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/WindowManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/ControllerAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ControllerAnimator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/variables/globales.js" beforeDir="false" afterPath="$PROJECT_DIR$/variables/globales.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +73,12 @@
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\github\doodly-clone\common\SVGLoading" />
+      <recent name="D:\github\doodly-clone\common\fontsLoading" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -79,7 +105,13 @@
       <workItem from="1603490672559" duration="6980000" />
       <workItem from="1603508175202" duration="20434000" />
       <workItem from="1603564416490" duration="42559000" />
-      <workItem from="1603643918056" duration="8383000" />
+      <workItem from="1603643918056" duration="29122000" />
+      <workItem from="1603719124613" duration="19838000" />
+      <workItem from="1603748892155" duration="2614000" />
+      <workItem from="1603754252634" duration="19049000" />
+      <workItem from="1603832999310" duration="4887000" />
+      <workItem from="1603887256636" duration="55435000" />
+      <workItem from="1603990137878" duration="4274000" />
     </task>
     <servers />
   </component>
@@ -103,6 +135,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="413" y="177" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1602962481446" />
+    <state x="92" y="92" width="1736" height="866" key="DiffContextDialog" timestamp="1603911902248">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="92" y="92" width="1736" height="866" key="DiffContextDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1603911902248" />
     <state x="786" y="225" key="RollbackChangesDialog" timestamp="1603601297477">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -111,6 +147,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="460" y="155" key="SettingsEditor/0.0.1920.1050@0.0.1920.1050" timestamp="1602967926986" />
+    <state x="569" y="201" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1603766122220">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="569" y="201" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1050@0.0.1920.1050" timestamp="1603766122220" />
     <state x="308" y="107" width="1628" height="993" key="dock-window-1" timestamp="1602996513706">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -119,17 +159,21 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="dock-window-2/0.0.1920.1050@0.0.1920.1050" timestamp="1602996543928" />
-    <state x="828" y="204" width="585" height="801" key="find.popup" timestamp="1603612275180">
+    <state x="828" y="204" width="879" height="801" key="find.popup" timestamp="1603897409980">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="828" y="204" width="585" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603612275180" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1603593569251">
+    <state x="828" y="204" width="879" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603897409980" />
+    <state width="600" height="428" key="javadoc.popup" timestamp="1603662965310">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603593569251" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1603585463063">
+    <state width="600" height="428" key="javadoc.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603662965310" />
+    <state x="616" y="237" key="run.anything.popup" timestamp="1603836017078">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603585463063" />
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603836017078" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1603778140494">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603778140494" />
   </component>
 </project>

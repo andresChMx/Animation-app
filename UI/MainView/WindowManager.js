@@ -116,8 +116,8 @@ function initUI(){
     PanelAnimation.PanelActionEditor.init();
 
     PanelInspector.init();
-    PanelInspector.SectionPropertiesEditor.init();
-    PanelInspector.SectionMenuAddKey.init();
+    //PanelInspector.SectionPropertiesEditor.init();
+    //PanelInspector.SectionMenuAddKey.init();
 
     PanelAssets.init();
     PanelAssets.SectionImageAssets.init();

@@ -31,12 +31,14 @@
             <div class="canvas-animator__object-configuration__entrance-settings">
                 <p class="canvas-animator__object-configuration__entrance-settings__title">Entrace Modes</p>
                 <div class="canvas-animator__object-configuration__entrance-settings__box-radio-buttons">
-                    <label for="none">None</label>
+                    <label id="label_none" for="none">None</label>
                     <input type="radio" name="entrace_mode" value="none" id="none" class="entrance-settings__box-radio-buttons__radio-button">
-                    <label for="drawn">Drawn</label>
+                    <label id="label_drawn" for="drawn">Drawn</label>
                     <input type="radio" name="entrace_mode" value="drawn" id="drawn" class="entrance-settings__box-radio-buttons__radio-button">
-                    <label for="dragged">Dragged</label>
+                    <label id="label_dragged" for="dragged">Dragged</label>
                     <input type="radio" name="entrace_mode" value="dragged" id="dragged" class="entrance-settings__box-radio-buttons__radio-button">
+                    <label id="label_typed" for="typed">Typed</label>
+                    <input type="radio" name="entrace_mode" value="typed" id="typed" class="entrance-settings__box-radio-buttons__radio-button">
                 </div>
                 <div class="canvas-animator__object-configuration__entrance-settings__box-options">
                     <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options none">
@@ -47,6 +49,9 @@
                     </div>
                     <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options dragged">
                         opciones del modo dragged
+                    </div>
+                    <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options typed">
+                        opciones del modo typed
                     </div>
                 </div>
                 <div class="canvas-animator__object-configuration__entrance-settings__box-buttons">
@@ -69,7 +74,10 @@
         <div class="panel-assets__sections-container">
             <div class="panel-assets__sections-container__section-image-assets">
             </div>
-            <div class="sections-container__section-second"></div>
+
+            <div class="panel-assets__sections-container__section-font-assets">
+                <div></div>
+            </div>
             <div class="sections-container__section-third"></div>
         </div>
         <button class="panel-assets__btn-add-resource">Add Resources</button>
@@ -97,63 +105,22 @@
                 </div>
         </div>
         <div class="panel-inspector__toolbox">
-            <div class="panel-inspector__toolbox__tool-item">
+            <div class="panel-inspector__toolbox__item">
                 <p class="toolbox__tool-item__title">Actions:</p>
-                <button class="toolbox__tool-item__button-save">Save</button>
-                <button class="toolbox__tool-item__button-preview">Preview</button>
-                <button class="toolbox__tool-item__button-export">Export</button>
+                <button class="toolbox__item__button-save">Save</button>
+                <button class="toolbox__item__button-preview">Preview</button>
+                <button class="toolbox__item__button-export">Export</button>
             </div>
-            <div class="panel-inspector__toolbox__tool-item">
+            <div class="panel-inspector__toolbox__item">
                 <p class="toolbox__tool-item__title">Zoom:</p>
                 <button class="toolbox__tool-item__button">+</button>
                 <button class="toolbox__tool-item__button">-</button>
             </div>
-        </div>  
-        <div class="panel-inspector__properties-editor">
-            <div class="properties-editor__properties-container">
-                <span class="properties-container__title" style="display:block;">Position</span>
-                <div class="properties-container__field-group">
-                    <label for="left">X:</label>
-                    <input type="text" name="left" />
-                </div>
-                <div class="properties-container__field-group">
-                        <label for="left">Y:</label>
-                        <input type="text" name="top" />
-                    </div>
+            <div class="panel-inspector__toolbox__item-text">
+                <p class="toolbox__item-text__title">Text:</p>
+                <button class="toolbox__item-text__button-add-text" action="add-text">Add Text</button>
+
             </div>
-            <div class="properties-editor__properties-container">
-                    <span class="properties-container__title" style="display:block;">Scale</span>
-                    <div class="properties-container__field-group">
-                        <label for="left">X:</label>
-                        <input type="text" name="scaleX" />
-                    </div>
-                    <div class="properties-container__field-group">
-                            <label for="left">Y:</label>
-                            <input type="text" name="scaleY"/>
-                        </div>
-                </div>
-            <div class="properties-editor__properties-container">
-                        <div class="properties-container__field-group">
-                            <label for="left">Rotation:</label>
-                            <input type="text" name="angle" />
-                        </div>
-                        <div class="properties-container__field-group">
-                                <label for="left">Opacity:</label>
-                                <input type="text" name="opacity"/>
-                            </div>
-                    </div>
-        </div>
-        <div class="panel-inspector__menu-add-keyframe">
-            <div class="menu-add-keyframe__inner-container">
-                <p class ="menu-add-keyframe__label">Add KeyFrame</p>
-                <ul class="menu-add-keyframe__options-list">
-                    <li class="menu-add-keyframe__options-list__option" name="position">Position</li>
-                    <li class="menu-add-keyframe__options-list__option" name="scale">Scale</li>
-                    <li class="menu-add-keyframe__options-list__option" name="angle">Rotation</li>
-                    <li class="menu-add-keyframe__options-list__option" name="opacity">Opacity</li>
-                </ul>
-            </div>
-            
         </div>
     </section>
 
@@ -178,34 +145,34 @@
                 <section class="action-editor">
                     <div class="action-editor__properties-area">
                         <div class="action-editor__properties-area__list">
-                            <div class="action-editor__properties-area__list__item">
+                            <div class="action-editor__properties-area__list__item" property="position">
                                 <span class="action-editor__properties-area__list__item__btn-add">+</span>
                                 <p class="action-editor__properties-area__list__item__label">Position</p>
                                 <div class="action-editor__properties-area__list__item__box-inputs">
-                                    <label>x:</label><input type="text">
-                                    <label>y:</label><input type="text">
+                                    <label>x:</label><input type="text" property="left">
+                                    <label>y:</label><input type="text" property="top">
                                 </div>
                             </div>
-                            <div class="action-editor__properties-area__list__item">
+                            <div class="action-editor__properties-area__list__item" property="scale">
                                 <span class="action-editor__properties-area__list__item__btn-add">+</span>
                                 <p class="action-editor__properties-area__list__item__label">Scale</p>
                                 <div class="action-editor__properties-area__list__item__box-inputs">
-                                    <label>x:</label><input type="text">
-                                    <label>y:</label><input type="text">
+                                    <label>x:</label><input type="text" property="scaleX">
+                                    <label>y:</label><input type="text" property="scaleY">
                                 </div>
                             </div>
-                            <div class="action-editor__properties-area__list__item">
+                            <div class="action-editor__properties-area__list__item" property="angle">
                                 <span class="action-editor__properties-area__list__item__btn-add">+</span>
                                 <p class="action-editor__properties-area__list__item__label">Angle</p>
                                 <div class="action-editor__properties-area__list__item__box-inputs">
-                                    <input type="text">
+                                    <input type="text" property="angle">
                                 </div>
                             </div>
-                            <div class="action-editor__properties-area__list__item">
+                            <div class="action-editor__properties-area__list__item" property="opacity">
                                 <span class="action-editor__properties-area__list__item__btn-add">+</span>
                                 <p class="action-editor__properties-area__list__item__label">Opacity</p>
                                 <div class="action-editor__properties-area__list__item__box-inputs">
-                                    <input type="text">
+                                    <input type="text" property="opacity">
                                 </div>
                             </div>
                         </div>
@@ -217,8 +184,6 @@
                             <div class="action-editor__timeline-area__time-bar__time-label-container"></div>
                         </div>
                         <div class="action-editor__timeline-area__keyframes-bar">
-                            <div class="keyframes-bar__property-lane"></div>
-                            <div class="keyframes-bar__property-lane"></div>
                             <div class="keyframes-bar__property-lane"></div>
                             <div class="keyframes-bar__property-lane"></div>
                             <div class="keyframes-bar__property-lane"></div>
@@ -330,11 +295,16 @@
     <script src="fabric.js"></script>
     <script src="./fabricCustom.js"></script>
 
+    <script src="common/fontsLoading/drawinData.js"></script>
 
+    <script src="common/fontsLoading/FontsLoader.js"></script>
+    <script src="common/fontsLoading/FontFaceObserver.js"></script>
+    <script src="common/SVGLoading/SVGFlattener.js"></script>
+    <script src="common/SVGLoading/SVGManager.js"></script>
+    <script src="common/SVGLoading/TextToSVGConverter.js"></script>
     <script src="./common/PathIllustrator.js"></script>
     <script src="./common/ControllerAnimator.js"></script>
-    <script src="./common/SVGManager.js"></script>
-    
+
     <script src="./controllers/AnimatorView/TimeLineController.js"></script>
     <script src="./controllers/PathDesignerView/PathDesignerController.js"></script>
     <script src="./controllers/PathDesignerView/DrawingManager.js"></script>
