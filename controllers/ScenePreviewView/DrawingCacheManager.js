@@ -4,10 +4,14 @@ var DrawingCacheManager=fabric.util.createClass({
         this.canvas=document.createElement("canvas");
         this.ctx=this.canvas.getContext("2d");
         this.canvas.style.display="none";
+        //this.canvas.style.position="absolute";
+        //this.canvas.style.zIndex=10000;
+        //this.canvas.style.background="white";
+
         this.listDrawableObjects=[];
         //this.canvas=new OffscreenCanvas(100,1);
         //this.ctx=this.canvas.getContext("2d"); 
-        document.body.append(this.canvas);
+        //document.body.append(this.canvas);
         
         this.pathIllustrator=null;
 
@@ -32,11 +36,10 @@ var DrawingCacheManager=fabric.util.createClass({
         this.ctx=this.canvas.getContext("2d");
         this.ctx.setTransform(this.PIXEL_RATIO, 0, 0, this.PIXEL_RATIO, 0, 0);
     },
-    wakeUp:function(imagesModelsToDraw,listScalerFactors,listDrawableObjects){
+    wakeUp:function(listDrawableObjects,listAnimableWithDrawnEntrance){
         this.listDrawableObjects=listDrawableObjects;
-        let illustratorDataAdapterCache=new IllustratorDataAdapterCache(imagesModelsToDraw,listScalerFactors);
+        let illustratorDataAdapterCache=new IllustratorDataAdapterCache(listAnimableWithDrawnEntrance);
         this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,illustratorDataAdapterCache,false);
-        this.pathIllustrator.setListObjectsToDraw(imagesModelsToDraw);
         this.pathIllustrator.registerOnDrawingNewObject(this);
         this.pathIllustrator.start();
     },
@@ -44,8 +47,8 @@ var DrawingCacheManager=fabric.util.createClass({
         this.OnIllustratorDrawingNewObject(lastObjIndex,newObjIndex,lastDataUrl);
     },
     OnIllustratorDrawingNewObject:function(lastObjIndex,newObjIndex,lastDataUrl){
-        this.setCanvasDimentions(this.pathIllustrator.data.scalerFactors[newObjIndex].x,
-                                this.pathIllustrator.data.scalerFactors[newObjIndex].y)
+        this.setCanvasDimentions(this.pathIllustrator.data.getWidthCanvasCacheOf(newObjIndex),
+                                this.pathIllustrator.data.getHeightCanvasCacheOf(newObjIndex))
         this.listDrawableObjects[lastObjIndex].setTurn(false,lastDataUrl);
         this.listDrawableObjects[newObjIndex].setTurn(true,lastDataUrl);
     },

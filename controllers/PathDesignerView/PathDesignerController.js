@@ -44,7 +44,7 @@ var PathDesignerController=fabric.util.createClass({
 
         this.canvasManager.wakeUp(this.imageModel,drawingData);
         this.drawingManager.wakeUp(this.imageModel,drawingData);
-        this.previewManager.wakeUp(this.imageModel,null);
+        this.previewManager.wakeUp(this.imageModel,null);//tiene acceso al drawinData ya que tiene referencia al canvasManager y drawingManager
         this.notifyOnSetupCompleted();
     },
     isSVG:function(urlstring){

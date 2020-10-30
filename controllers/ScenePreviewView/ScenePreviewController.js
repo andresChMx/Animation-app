@@ -17,7 +17,7 @@ var ScenePreviewController=fabric.util.createClass({
         this.UIPanelPreviewerCanvas=previewerCanvas;
         this.animator=new ControllerAnimator(this.UIPanelPreviewerCanvas);
     },
-    loadObjectsForAnimation:function(listForAnimator,listDrawableObjects,listImageModels,listScalerFactors){
+    loadObjectsForAnimation:function(listForAnimator,listDrawableObjects,listAnimableObjectDrawnEntrance){
         /*
         * Tenemos 3 tipos de objetos (ImageAnimable, TextAnimable, AnimableCamera ) que reciden en el canvas principal
         *   * Llevan la palabra Animable porque son animables por el ControllerAnimator, es decir por la linea de tiempo
@@ -56,9 +56,6 @@ var ScenePreviewController=fabric.util.createClass({
             let animableObjWithEntrance=CanvasManager.listAnimableObjectsWithEntrance[i];
             let tmpObject=null;
             if(animableObjWithEntrance.getEntranceMode()===EntranceModes.drawn){
-                animableObjWithEntrance.imageModel.paths.duration=animableObjWithEntrance.animator.entranceDuration;
-                animableObjWithEntrance.imageModel.paths.delay=animableObjWithEntrance.animator.entranceDelay;
-
                 this.loadDrawingDataOnDrawableObject(animableObjWithEntrance);
                 tmpObject=new DrawableImage({
                     cacheCanvas:this.drawingCacheManager.canvas,
@@ -73,8 +70,10 @@ var ScenePreviewController=fabric.util.createClass({
                     originY: 'top',
                     animations:animableObjWithEntrance.animator.dictAnimations});
                 listDrawableObjects[i]=tmpObject;
-                listImageModels[i]=animableObjWithEntrance.imageModel;
-                listScalerFactors[i]={x:animableObjWithEntrance.imageModel.imgHTML.naturalWidth,y:animableObjWithEntrance.imageModel.imgHTML.naturalHeight};
+                listAnimableObjectDrawnEntrance[i]=animableObjWithEntrance;
+                // listImageModels[i]=animableObjWithEntrance.imageModel;
+                // listTiming[i]={duration:animableObjWithEntrance.duration,delay:animableObjWithEntrance.delay}
+                // listScalerFactors[i]={x:animableObjWithEntrance.imageModel.imgHTML.naturalWidth,y:animableObjWithEntrance.imageModel.imgHTML.naturalHeight};
             }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.dragged){
                 //TODO Manager para objetos que entran arrastrados
             }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.text_drawn){
@@ -83,13 +82,13 @@ var ScenePreviewController=fabric.util.createClass({
                 this.counterCallBacksDrawableTexts++;
                 let self=this;
                 let index=i;
-                this.pointsGenerator.generateTextDrawingDataNoForcing(animableObjWithEntrance,animableObjWithEntrance.width,animableObjWithEntrance.height,function(result) {
+                this.pointsGenerator.generateTextDrawingDataNoForcing(animableObjWithEntrance,animableObjWithEntrance.getWidthInDrawingCache(),animableObjWithEntrance.getHeightInDrawingCache(),function(result) {
                     console.log("dentro del callback: " +index );
                     animableObjWithEntrance.imageModel.paths = result;
                     animableObjWithEntrance.imageModel.paths.duration=animableObjWithEntrance.animator.entranceDuration;
                     animableObjWithEntrance.imageModel.paths.delay=animableObjWithEntrance.animator.entranceDelay;
                     animableObjWithEntrance.imageModel.paths.type=TextType.PROVIDED;
-                    animableObjWithEntrance.imageModel.imgHTML=PanelAssets.SectionImageAssets.HTMLElement.children[0].children[0].children[0];
+                    animableObjWithEntrance.imageModel.imgHTML=self.pointsGenerator.generateTextBaseImage(animableObjWithEntrance);
                     let textDrawable=new DrawableImage({
                         cacheCanvas:self.drawingCacheManager.canvas,
                         left:animableObjWithEntrance.get("left"),
@@ -103,9 +102,11 @@ var ScenePreviewController=fabric.util.createClass({
                         originY: 'top',
                         animations:animableObjWithEntrance.animator.dictAnimations});
                     listDrawableObjects[index]=textDrawable;
-                    listImageModels[index]=animableObjWithEntrance.imageModel;
-                    listScalerFactors[index]={x:animableObjWithEntrance.calcTextWidth(),y:animableObjWithEntrance.calcTextHeight()};
-                    self.listDelayedObjects[index]=textDrawable;
+                    listAnimableObjectDrawnEntrance[index]=animableObjWithEntrance
+                    // listImageModels[index]=animableObjWithEntrance.imageModel;
+                    // listTiming[i]={duration:animableObjWithEntrance.duration,delay:animableObjWithEntrance.delay}
+                    // listScalerFactors[index]={x:animableObjWithEntrance.calcTextWidth(),y:animableObjWithEntrance.calcTextHeight()};
+                    // self.listDelayedObjects[index]=textDrawable;
                     self.counterCallBacksDrawableTexts--;
                 })
             }
@@ -150,10 +151,13 @@ var ScenePreviewController=fabric.util.createClass({
         let listForAnimator=[];// lista para el animator (contiene los elementos de listDrawableObjects)
         //listas para el DrawingCacheManager (dibujador)
         let listDrawableObjects=[]; //lista para objetos con efecto de dibujado, para el DrawingCacheManager, que orquestara el dibujado en orden de estos objetos
-        let listImageModels=[];     //lista para el PathIllustratos, ya que los iamgeModels tienen la data de dibujado, ira en orden pintando cada objeto. Sin embargo no accedera directamente a esa data (Adapters), solo a la iamgen html que reside tambien en estos objetos
-        let listScalerFactors=[];   //Indirectamente para el PathIllustrator, ya que esta lista sera el adapter, mediante al cual PathIllustrator accedera a la data
+        let listAnimableWithDrawnEntrance=[];
+        /*
+        * animable: objeto de la escena  que es animado con linea de timpo
+        * drawable : objeto para la previsualizacion, al que se le asigna las animaciones de una naimable object que tiene modo de entrada dibujado
+        * */
         CanvasManager.camera.animator.start(this.UIPanelPreviewerCanvas);
-        this.loadObjectsForAnimation(listForAnimator,listDrawableObjects,listImageModels,listScalerFactors);
+        this.loadObjectsForAnimation(listForAnimator,listDrawableObjects,listAnimableWithDrawnEntrance);
         (function Wait(){
             if(this.counterCallBacksDrawableTexts!==0){setTimeout(Wait.bind(this),1);return;}
             //TODO: ORDERlistDelayerObjects
@@ -161,7 +165,7 @@ var ScenePreviewController=fabric.util.createClass({
                 this.UIPanelPreviewerCanvas.add(listDrawableObjects[i]);
                 listForAnimator.push(listDrawableObjects[i]);
             }
-            this.drawingCacheManager.wakeUp(listImageModels,listScalerFactors,listDrawableObjects);
+            this.drawingCacheManager.wakeUp(listDrawableObjects,listAnimableWithDrawnEntrance);
             this.animator.setListObjectsToAnimate(listForAnimator);
 
             this.animator.setTotalProgress(0);
@@ -185,6 +189,9 @@ var ScenePreviewController=fabric.util.createClass({
 
 var GeneratorDrawingDataImageModel=fabric.util.createClass({
     initialize:function(){
+        this.canvasElem=document.createElement("canvas");
+        this.canvasElem.id="auxCanvas"
+        this.auxCanvasForTexts=new fabric.StaticCanvas("auxCanvas");
     },
     generateCtrlPoints:function(imageModel){
         imageModel.paths.ctrlPoints=this.generateCrtlPointsFromPointsMatrix(imageModel.paths.points);
@@ -323,8 +330,28 @@ var GeneratorDrawingDataImageModel=fabric.util.createClass({
     generateTextDrawingDataNoForcing:function(animableText,textWidth,textHeight,callback){
         let svgManager=new SVGManager;
         svgManager.fetchTextSVGData(animableText,function(responseSVG){
+            console.log(responseSVG);
             svgManager.calcDrawingDataFromString_forcePaths(responseSVG,textWidth,textHeight,3,callback);
         })
 
+    },
+    generateTextBaseImage:function(animableText){
+        let dimX=animableText.getWidthInDrawingCache();
+        let dimY=animableText.getHeightInDrawingCache();
+        this.auxCanvasForTexts.setWidth(dimX);
+        this.auxCanvasForTexts.setHeight(dimY);
+        let tmpText=new fabric.Text(animableText.text,{
+            left:0,
+            top:5,
+            fontFamily:animableText.fontFamily,
+            fontSize:animableText.fontSize
+        });
+        this.auxCanvasForTexts.add(tmpText);
+        let image=new Image();
+        image.src=this.auxCanvasForTexts.toDataURL({
+            format: 'png',
+        });
+        this.auxCanvasForTexts.clear();
+        return image;
     }
 });

@@ -20,31 +20,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/SVGLoading/SVGFlattener.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/SVGLoading/TextToSVGConverter.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/fontsLoading/FontFaceObserver.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/fontsLoading/FontsLoader.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/fontsLoading/drawinData.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/MainView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/AnimationPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/MainView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/AssetsPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/MainView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/CanvasManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/MainView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/InspectorPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/MainView/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/MainView/WindowManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/ControllerAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ControllerAnimator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/variables/globales.js" beforeDir="false" afterPath="$PROJECT_DIR$/variables/globales.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,7 +96,8 @@
       <workItem from="1603754252634" duration="19049000" />
       <workItem from="1603832999310" duration="4887000" />
       <workItem from="1603887256636" duration="55435000" />
-      <workItem from="1603990137878" duration="4274000" />
+      <workItem from="1603990137878" duration="5326000" />
+      <workItem from="1604004935884" duration="35820000" />
     </task>
     <servers />
   </component>
@@ -171,9 +157,9 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603836017078" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1603778140494">
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1604049273434">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603778140494" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1604049273434" />
   </component>
 </project>

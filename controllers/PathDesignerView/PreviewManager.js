@@ -42,9 +42,8 @@ var PreviewManager=fabric.util.createClass({
         this.scalerFactorX=this.canvas.width/this.canvasDrawingManager.canvasOriginalWidth;
         this.scalerFactorY=this.canvas.height/this.canvasDrawingManager.canvasOriginalHeight;
     
-        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this.scalerFactorX,this.scalerFactorY);
+        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this.scalerFactorX,this.scalerFactorY,this.imageModel);
         this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,this.illustratorDataAdapter,true);
-        this.pathIllustrator.setListObjectsToDraw([this.imageModel]);
         this.pathIllustrator.start();
     },
     sleep:function(){
@@ -69,15 +68,15 @@ var PreviewManager=fabric.util.createClass({
     notificationOnDurationChanged:function(value){
         this.pathIllustrator.counterInterruption=100;
         if(isNaN(value)){
-            this.pathIllustrator.listObjectsToDraw[0].paths.duration=3000;
+            this.pathIllustrator.data.duration=3000;
         }
         else if(value<2){
-            this.pathIllustrator.listObjectsToDraw[0].paths.duration=3000;
+            this.pathIllustrator.data.duration=3000;
         }
         else if(value>10){
-            this.pathIllustrator.listObjectsToDraw[0].paths.duration=3000;
+            this.pathIllustrator.data.duration=3000;
         }else{
-            this.pathIllustrator.listObjectsToDraw[0].paths.duration=value*1000;
+            this.pathIllustrator.data.duration=value*1000;
         }
 
     }

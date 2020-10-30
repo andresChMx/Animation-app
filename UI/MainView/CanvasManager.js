@@ -109,7 +109,6 @@ var CanvasManager={
             animObj=new TextAnimable("asdfasdfasdf",{
                 "left":100,
                 "top":100,
-                "width":200,
             })
             animObj.setEntranceMode(EntranceModes.text_drawn); //textos tambien tendran entrada siendo dibujados
         }

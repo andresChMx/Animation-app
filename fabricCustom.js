@@ -170,7 +170,13 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     getEntranceMode:function(){
         return this.entranceMode;
     },
-    getGlobalLeft:function(){
+    getWidthInDrawingCache:function(){
+        return this.imageModel.imgHTML.naturalWidth;
+    },
+    getHeightInDrawingCache:function(){
+        return this.imageModel.imgHTML.naturalHeight;
+    },
+    getGlobalLeft:function(){//used to get its location for html menu
         return this.left + this.canvas._offset.left;
     },
     getGlobalTop:function(){
@@ -222,13 +228,19 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
     },
     setFontSize:function(size){
         this.fontSize=size;
-        this.exitEditing()
+        this.exitEditing();
     },
     setEntranceMode:function(mode){
         this.entranceMode=mode;
     },
     getEntranceMode:function(){
         return this.entranceMode;
+    },
+    getWidthInDrawingCache:function(){
+        return this.calcTextWidth(); // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
+    },
+    getHeightInDrawingCache:function(){
+        return this.calcTextHeight(); // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
     },
     getGlobalLeft:function(){
         return this.left + this.canvas._offset.left;

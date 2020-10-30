@@ -203,6 +203,13 @@ var SVGManager=fabric.util.createClass({
             t=imgHeight
         }
 
+        layerIndex++;
+        result.strokesTypes.push([]);
+        result.points.push([]);
+        result.ctrlPoints.push([]);
+        result.linesWidths.push(strokeWidth/imgWidth);
+        result.pathsNames.push("Path " +layerIndex)
+
         for (var i = 0, len =pathObj.path.length; i < len; ++i) {
             current =pathObj.path[i];
             switch (current[0]) { // first letter
@@ -258,13 +265,14 @@ var SVGManager=fabric.util.createClass({
                     y += current[2];
                     subpathStartX = x;
                     subpathStartY = y;
-                    layerIndex++;
-                    result.strokesTypes.push([]);
-                    result.points.push([(x + l)/imgWidth,(y+t)/imgHeight]);
-                    result.ctrlPoints.push([]);
-                    result.linesWidths.push(strokeWidth/imgWidth);
-                    result.pathsNames.push("Path " +layerIndex)
 
+                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    if(i!==0){
+                        result.strokesTypes[layerIndex].push("m");
+                        result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
+                    }else{
+
+                    }
                     break;
 
                 case 'M': // moveTo, absolute
@@ -272,13 +280,14 @@ var SVGManager=fabric.util.createClass({
                     y = current[2];
                     subpathStartX = x;
                     subpathStartY = y;
-                    layerIndex++;
-                    result.strokesTypes.push([]);
-                    result.points.push([(x + l)/imgWidth,(y+t)/imgHeight]);
-                    result.ctrlPoints.push([]);
-                    result.linesWidths.push(strokeWidth/imgWidth);
-                    result.pathsNames.push("Path " +layerIndex)
 
+                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    if(i!==0){
+                        result.strokesTypes[layerIndex].push("m");
+                        result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
+                    }else{
+
+                    }
                     break;
 
                 case 'c': // bezierCurveTo, relative
