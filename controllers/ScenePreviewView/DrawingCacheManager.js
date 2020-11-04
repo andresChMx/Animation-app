@@ -11,7 +11,7 @@ var DrawingCacheManager=fabric.util.createClass({
         this.listDrawableObjects=[];
         //this.canvas=new OffscreenCanvas(100,1);
         //this.ctx=this.canvas.getContext("2d"); 
-        //document.body.append(this.canvas);
+        document.body.append(this.canvas);
         
         this.pathIllustrator=null;
 

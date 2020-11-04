@@ -514,13 +514,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
             this.timeBar_segmentLongitude=TIMELINE_MIN_LONGITUDE_STEPS;
         }
 
-        console.log("segment longitude: " + this.timeBar_segmentLongitude);
-        let timeLabelTmp=document.createElement("span");
-        timeLabelTmp.textContent="0";
-        timeLabelTmp.classList.add("timelabel");
-        this.HTMLtimeline_timeBar.children[1].append(timeLabelTmp);
-        timeLabelTmp.style.left=TIMELINE_PADDING-(timeLabelTmp.offsetWidth/2)+"px";
-        for(let i=1;i<=this.timeBar_numSegments;i++){
+        for(let i=0;i<=this.timeBar_numSegments;i++){
             let timeLabel=document.createElement("span");
             timeLabel.textContent=TIMELINE_TIMESTEPS*i/10;
             timeLabel.classList.add("timelabel");
@@ -557,7 +551,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         e.preventDefault();
         let duration;
         let target;
-        if(e.target.className=="panel-animation__top-menu__form-duration"){
+        if(e.target.className==="panel-animation__top-menu__form-duration"){
             target=e.target.children[1].value;
             duration=parseInt(e.target.children[1].value);
         }else{

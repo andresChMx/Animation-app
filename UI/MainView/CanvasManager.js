@@ -1,16 +1,18 @@
 var CanvasManager={
     HTMLElement:null,
     canvas:null,
-    listAnimableObjects:[],//NO TIENE UNA RAZON DE SER CLARA PERO SE ESPERA QUE CUANDO DENGAMOS QUE HACER ALGO EN LOS ELEMENTOS ANIMABLES, NO TENGMOS QUE RECORRER TODOS LOS ELEMENTOS DEL CANVAS, sino solo lso animables
-    listAnimableObjectsWithEntrance:[],
+    listAnimableObjects:[],//NO TIENE UNA RAZON DE SER CLARA PERO SE ESPERA QUE CUANDO DENGAMOS QUE HACER ALGO EN LOS ELEMENTOS ANIMABLES, NO TENGMOS QUE RECORRER TODOS LOS ELEMENTOS DEL CANVAS, sino solo lso animables, ademas son los que se muestran en el objects editor
+    listAnimableObjectsWithEntrance:[],// este es un subconjunto de la lista de arriba
     camera:null,
 
     listObserversOnObjSelectionUpdated:[],// cuando se crea, oculta o cambia a otro objeto
     listObserversOnObjModified:[],
     listObserversOnObjDeletedFromListWithEntrance:[], // cuando se elimina un objeto del canvas (entonces de las dos listas)
+    listObserversOnObjAddedToListWithEntrace:[],//cuando se agrego o elimina un elemento de la lista listAnimableObjectsWithEntraces
 
-    listObserversOnObjAddedToListWithEntrace:[], //
 
+    listObserversOnAnimableObjectDeleted:[],
+    listObserversOnAnimableObjectAdded:[],
     SectionFloatingMenu:null,
     init:function(){
         this.SectionFloatingMenu=SectionFloatingMenu;
@@ -23,22 +25,25 @@ var CanvasManager={
         this.initCanvas();
         this.initEvents();
         this.initCamera();
+
+        this.panningAndZoomBehaviour();
     },
     initCanvas:function(resolutionWidth,resolutionHeight){
-        let aspectRatio=0.7;
+        let aspectRatio=0.6;
         let windowWidth=window.innerWidth;
-        let trueWidth=windowWidth*0.6;
+        let trueWidth=windowWidth*0.65;
         let trueHeight=trueWidth*aspectRatio;
         this.canvas=new fabric.Canvas('c',{ width: trueWidth, height:trueHeight,backgroundColor: 'rgb(240,240,240)'});
         document.querySelector(".canvas-outterContainer").style.width=trueWidth + "px";
         this.canvas.preserveObjectStacking=true;
     },
     initEvents:function(){
-        this.canvas.on('selection:updated',this.notifyOnObjSelectionUpdated)
-        this.canvas.on('selection:created',this.notifyOnObjSelectionUpdated)
-        this.canvas.on('selection:cleared',this.notifyOnObjSelectionUpdated)
+        this.canvas.on('selection:updated',this.notifyOnObjSelectionUpdated);
+        this.canvas.on('selection:created',this.notifyOnObjSelectionUpdated);
+        this.canvas.on('selection:cleared',this.notifyOnObjSelectionUpdated);
         //this.canvas.on('object:removed',this.notifyOnObjDeleted)
-        this.canvas.on('object:modified',this.notifyOnObjModified)
+        this.canvas.on('object:modified',this.notifyOnObjModified);
+
         //PanelInspector.SectionPropertiesEditor.registerOnFieldInput(this);
         PanelActionEditor.SectionProperties.registerOnFieldPropertyInput(this);
         PanelAssets.SectionImageAssets.registerOnDummyDraggingEnded(this);
@@ -57,11 +62,75 @@ var CanvasManager={
             this.camera=animCamera;
             this.listAnimableObjects.push(animCamera);
             this.canvas.add(animCamera);
+            this.notifyOnAnimableObjectAdded(animCamera);
         }.bind(this));
+
+    },
+    panningAndZoomBehaviour:function(){
+        let isDragging=false;
+        let selection=false;
+        let lastPosX=false;
+        let lastPosY=false;
+        this.canvas.on('mouse:down', function(opt) {
+            var evt = opt.e;
+            if (evt.altKey === true) {
+                this.isDragging = true;
+                this.selection = false;
+                this.lastPosX = evt.clientX;
+                this.lastPosY = evt.clientY;
+            }
+        });
+        this.canvas.on('mouse:move', function(opt) {
+            if (isDragging) {
+                var e = opt.e;
+                var vpt = this.viewportTransform;
+                vpt[4] += e.clientX - this.lastPosX;
+                vpt[5] += e.clientY - this.lastPosY;
+                this.requestRenderAll();
+                this.lastPosX = e.clientX;
+                this.lastPosY = e.clientY;
+            }
+        });
+        this.canvas.on('mouse:up', function(opt) {
+            // on mouse up we want to recalculate new interaction
+            // for all objects, so we call setViewportTransform
+            this.setViewportTransform(this.viewportTransform);
+            this.isDragging = false;
+            this.selection = true;
+        });
+        this.canvas.on('mouse:wheel', function(opt) {
+            var delta = opt.e.deltaY;
+            var zoom = this.canvas.getZoom();
+            zoom *= 0.999 ** delta;
+            if (zoom > 20) zoom = 20;
+            if (zoom < 0.01) zoom = 0.01;
+            this.canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+            opt.e.preventDefault();
+            opt.e.stopPropagation();
+            var vpt = this.canvas.viewportTransform;
+            if (zoom < 400 / 1000) {
+                vpt[4] = 200 - 1000 * zoom / 2;
+                vpt[5] = 200 - 1000 * zoom / 2;
+            } else {
+                if (vpt[4] >= 0) {
+                    vpt[4] = 0;
+                } else if (vpt[4] < this.canvas.getWidth() - 1000 * zoom) {
+                    vpt[4] = this.canvas.getWidth() - 1000 * zoom;
+                }
+                if (vpt[5] >= 0) {
+                    vpt[5] = 0;
+                } else if (vpt[5] < this.canvas.getHeight() - 1000 * zoom) {
+                    vpt[5] = this.canvas.getHeight() - 1000 * zoom;
+                }
+            }
+        }.bind(this))
     },
     /*METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTOS DE ENTRADA (DRAWN Y DRAGGED)*/
     getListIndexObjectWithEntrance:function(obj){
         return this.listAnimableObjectsWithEntrance.indexOf(obj);
+    },
+    getListIndexAnimableObjects:function(obj){
+        return this.listAnimableObjects.indexOf(obj);
     },
     addItemToListObjectsWithEntrance:function(obj){
         this.listAnimableObjectsWithEntrance.push(obj);
@@ -119,6 +188,7 @@ var CanvasManager={
         self.canvas.add(animObj);
 
         self.notifyOnObjAddedToListObjectsWithEntrance(animObj);
+        self.notifyOnAnimableObjectAdded(animObj);
 
     },
     createAnimableText:function(){
@@ -137,6 +207,7 @@ var CanvasManager={
                 this.notifyOnObjDeletedFromListWithEntrance(indexInObjsWithEntrance);
             }
             this.canvas.remove(this.canvas.getActiveObject());
+            this.notifyOnAnimableObjectDeleted(indexInMainList);
         }
     },
     setCanvasOnAnimableObjects:function(){
@@ -152,16 +223,32 @@ var CanvasManager={
     registerOnObjDeletedFromListWidthEntraces:function(obj){
         this.listObserversOnObjDeletedFromListWithEntrance.push(obj);
     },
+    registerOnObjAddedToListWithEntrance:function(obj){
+        this.listObserversOnObjAddedToListWithEntrace.push(obj);
+    },
     registerOnObjModified:function(obj){
         this.listObserversOnObjModified.push(obj);
     },
-    registerOnObjAddedToListWithEntrance:function(obj){
-        this.listObserversOnObjAddedToListWithEntrace.push(obj);
+    registerOnAnimableObjectAdded:function(obj){
+        this.listObserversOnAnimableObjectAdded.push(obj);
+    },
+    registerOnAnimableObjectDeleted:function(obj){
+        this.listObserversOnAnimableObjectDeleted.push(obj);
     },
     notifyOnObjAddedToListObjectsWithEntrance:function(animObj){
         let self=CanvasManager;
         for(let i=0;i<self.listObserversOnObjAddedToListWithEntrace.length;i++){
             self.listObserversOnObjAddedToListWithEntrace[i].notificationOnObjAddedToListObjectsWithEntrance(animObj);
+        }
+    },
+    notifyOnAnimableObjectAdded:function(animObj){
+        for(let i=0;i<this.listObserversOnAnimableObjectAdded.length;i++){
+            this.listObserversOnAnimableObjectAdded[i].notificationOnAnimableObjectAdded(animObj);
+        }
+    },
+    notifyOnAnimableObjectDeleted:function(indexInAnimableObjectsList){
+        for(let i=0;i<this.listObserversOnAnimableObjectDeleted.length;i++){
+            this.listObserversOnAnimableObjectDeleted[i].notificationOnAnimableObjectDeleted(indexInAnimableObjectsList);
         }
     },
     notifyOnObjSelectionUpdated:function(opt){
@@ -295,9 +382,10 @@ var SectionFloatingMenu={
         let activeAnimableObject=CanvasManager.getSelectedAnimableObj();
         if(activeAnimableObject && activeAnimableObject.type!=="AnimableCamera"){
             this.lastAnimableObjectActive=activeAnimableObject;
+            let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
             this.showMenu(
-                this.lastAnimableObjectActive.getGlobalLeft(),
-                this.lastAnimableObjectActive.getGlobalTop()
+                positionInViewportCoords.x,
+                positionInViewportCoords.y
             );
         }else{
             this.hiddeMenu();
@@ -305,9 +393,10 @@ var SectionFloatingMenu={
     },
     notificationOnObjModified:function(obj){
         if(this.lastAnimableObjectActive){
+            let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
             this.showMenu(
-                this.lastAnimableObjectActive.getGlobalLeft(),
-                this.lastAnimableObjectActive.getGlobalTop()
+                positionInViewportCoords.x,
+                positionInViewportCoords.y
             );
         }else{
             this.hiddeMenu();

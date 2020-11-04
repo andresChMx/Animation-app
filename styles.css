@@ -18,7 +18,7 @@
 
 }
 :root {
-    --panel-animation-height:200px;
+    --panel-animation-height:140px;
     --panel-animation__top-menu_height:15%;
     --action-editor__timeline-area-width:80%;
     --keyframes-bar__property-lane-height:20px;
@@ -183,31 +183,45 @@
     padding:10px;
 }
 
-/*--------------objects-editor-----------*/
-.panel-inspector__objects-editor__box-items
+/*--------------objects-entrance-editor-----------*/
+.panel-inspector__objects-entrance-editor__box-items
 {
     background:white;
     height:300px;
     overflow: auto;
 }
-.panel-inspector__objects-editor__box-items__item{
+.panel-inspector__objects-entrance-editor__box-items__item{
     background:peru;
 }
-.panel-inspector__objects-editor__box-items__item__icon{
+.panel-inspector__objects-entrance-editor__box-items__item__icon{
     float:left;
     width:30%;
     padding:10px;
     box-sizing: border-box;
 }
-.panel-inspector__objects-editor__box-items__item__icon img{
+.panel-inspector__objects-entrance-editor__box-items__item__icon img{
     width:100%;
 }
-.panel-inspector__objects-editor__box-items__item__input-field{
+.panel-inspector__objects-entrance-editor__box-items__item__input-field{
     float:left;
     width:70%;
 }
-.panel-inspector__objects-editor__box-items #active-item{
+.panel-inspector__objects-entrance-editor__box-items #active-item{
     background:red;
+}
+/*--------------animable objects editor----------------*/
+.panel-inspector__animable-objects-editor__box-items{
+    background:white;
+    height:300px;
+    overflow: auto;
+}
+.panel-inspector__animable-objects-editor__box-items__item{
+    list-style: none;
+    border-bottom: 2px solid black;
+
+}
+.panel-inspector__animable-objects-editor__box-items #active-item{
+    background:red !important;
 }
 /*-------------toolbox--------------*/
 .panel-inspector__toolbox__tool-item{

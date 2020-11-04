@@ -159,7 +159,7 @@ var ScenePreviewController=fabric.util.createClass({
         CanvasManager.camera.animator.start(this.UIPanelPreviewerCanvas);
         this.loadObjectsForAnimation(listForAnimator,listDrawableObjects,listAnimableWithDrawnEntrance);
         (function Wait(){
-            if(this.counterCallBacksDrawableTexts!==0){setTimeout(Wait.bind(this),1);return;}
+            if(this.counterCallBacksDrawableTexts!==0){setTimeout(Wait.bind(this),5);return;}
             //TODO: ORDERlistDelayerObjects
             for(let i=0;i<listDrawableObjects.length;i++){
                 this.UIPanelPreviewerCanvas.add(listDrawableObjects[i]);
@@ -330,7 +330,6 @@ var GeneratorDrawingDataImageModel=fabric.util.createClass({
     generateTextDrawingDataNoForcing:function(animableText,textWidth,textHeight,callback){
         let svgManager=new SVGManager;
         svgManager.fetchTextSVGData(animableText,function(responseSVG){
-            console.log(responseSVG);
             svgManager.calcDrawingDataFromString_forcePaths(responseSVG,textWidth,textHeight,3,callback);
         })
 

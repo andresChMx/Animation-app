@@ -41,7 +41,13 @@ var PathDesignerController=fabric.util.createClass({
 
     },
     wakeUpComponentes:function(drawingData){
-
+        if(drawingData.pathsNames.length===0){
+            drawingData.strokesTypes.push([]);
+            drawingData.points.push([]);
+            drawingData.ctrlPoints.push([]);
+            drawingData.linesWidths.push(10);
+            drawingData.pathsNames.push("Path 1")
+        }
         this.canvasManager.wakeUp(this.imageModel,drawingData);
         this.drawingManager.wakeUp(this.imageModel,drawingData);
         this.previewManager.wakeUp(this.imageModel,null);//tiene acceso al drawinData ya que tiene referencia al canvasManager y drawingManager
@@ -68,11 +74,21 @@ var PathDesignerController=fabric.util.createClass({
                 this.imageModel.paths.strokesTypes=listPathStrokesType;
 
                 if(this.hasLoadedFromSVG || this.imageModel.paths.type===ImageType.CREATED_PATHLOADED){
-                    this.imageModel.paths.type=ImageType.CREATED_PATHLOADED;
-                    this.imageModel.paths.ctrlPoints=this.drawingManager.getMatrixCtrlPoints();
+                    if(this.getTotalStrokesAmount(matPoints)===0) {
+                        this.imageModel.paths.type=ImageType.CREATED_NOPATH;
+                    }else{
+                        this.imageModel.paths.type=ImageType.CREATED_PATHLOADED;
+                        this.imageModel.paths.ctrlPoints=this.drawingManager.getMatrixCtrlPoints();
+                    }
                 }else if(this.imageModel.paths.type===ImageType.CREATED_NOPATH){
-                    if(this.getTotalStrokesAmount(matPoints)>0) {
+                    if(this.getTotalStrokesAmount(matPoints)===0) {
+
+                    }else{
                         this.imageModel.paths.type = ImageType.CREATED_PATHDESIGNED;
+                    }
+                }else if(this.imageModel.paths.type===ImageType.CREATED_PATHDESIGNED){
+                    if(this.getTotalStrokesAmount(matPoints)===0) {
+                        this.imageModel.paths.type=ImageType.CREATED_NOPATH;
                     }
                 }
 
@@ -123,11 +139,7 @@ var PathDesignerController=fabric.util.createClass({
                     this.canvasManager.sleep();
 
                     Preprotocol.wantConsume=true;
-
-                    this.canvasManager.wakeUp(this.imageModel, svgLoadedData);
-                    this.drawingManager.wakeUp(this.imageModel,svgLoadedData);
-                    this.previewManager.wakeUp(this.imageModel,svgLoadedData);
-                    this.notifyOnSetupCompleted();
+                    this.wakeUpComponentes(svgLoadedData);
                 }.bind(self)())
 
             })
@@ -154,8 +166,9 @@ var PathDesignerController=fabric.util.createClass({
 
     },
     notifyOnSetupCompleted:function(){
+        let imageModelIsSVG=this.isSVG(this.imageModel.url);
         for(let i=0;i<this.listObserversOnSetupCompleted.length;i++){
-            this.listObserversOnSetupCompleted[i].notificationOnSetupCompleted(this.isSVG(this.imageModel.url));
+            this.listObserversOnSetupCompleted[i].notificationOnSetupCompleted(imageModelIsSVG);
         }
     },
     registerOnSetupCompleted:function(obj){

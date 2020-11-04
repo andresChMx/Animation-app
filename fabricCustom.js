@@ -135,6 +135,12 @@ var AnimatorCamera=fabric.util.createClass(Animator,{
         var vpt = this.canvasCamera.viewportTransform;
         let vtmp=[this.animableObject.get("scaleX"),0,0,this.animableObject.get("scaleX"),0,0]
         let inverseScale=this.invertTransform(vtmp);
+        /*
+        vpt[0]=Math.cos(-20/180*Math.PI);
+        vpt[1]=Math.sin(-20/180*Math.PI);
+        vpt[2]=-Math.sin(-20/180*Math.PI);
+        vpt[3]=Math.cos(-20/180*Math.PI);
+         */
         vpt[4] = -this.animableObject.get("left")*inverseScale[0];
         vpt[5] = -this.animableObject.get("top") *inverseScale[0];
         this.canvasCamera.zoomToPoint(new fabric.Point(0,0),inverseScale[0]);
@@ -160,6 +166,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
+        this.name="";
         this.entranceMode=null;
         this.imageModel=null;
         this.animator=new Animator(this);
@@ -176,13 +183,13 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     getHeightInDrawingCache:function(){
         return this.imageModel.imgHTML.naturalHeight;
     },
-    getGlobalLeft:function(){//used to get its location for html menu
-        return this.left + this.canvas._offset.left;
-    },
-    getGlobalTop:function(){
-        return this.top + this.canvas._offset.top;
-    },
+    getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS
+        let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
+        newPoint.x+=this.canvas._offset.left;
+        newPoint.y+=this.canvas._offset.top;
+        return newPoint;
 
+    },
     render:function(ctx){
         /*se sobreescribio por que cuando un objeto sale de vista, no se renderizaba, es tamos oviando eso
         esa parte del metodo render original*/
@@ -219,6 +226,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
     initialize:function(text,options){
         /*exact copy of animable object*/
         this.callSuper('initialize', text,options);
+        this.name="";
         this.entranceMode=null;
         this.imageModel=null;
         this.animator=new Animator(this);
@@ -229,6 +237,9 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
     setFontSize:function(size){
         this.fontSize=size;
         this.exitEditing();
+        if(this.canvas){//en cuanto es inicializado aun no tiene asignado un canvas, hasta que se llame a add en su canvas padre
+            this.canvas.renderAll();
+        }
     },
     setEntranceMode:function(mode){
         this.entranceMode=mode;
@@ -237,18 +248,20 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         return this.entranceMode;
     },
     getWidthInDrawingCache:function(){
-        return this.calcTextWidth(); // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
+        return this.width; // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
     },
     getHeightInDrawingCache:function(){
-        return this.calcTextHeight(); // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
+        return this.height; // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
     },
-    getGlobalLeft:function(){
-        return this.left + this.canvas._offset.left;
-    },
-    getGlobalTop:function(){
-        return this.top + this.canvas._offset.top;
+    getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS
+        let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
+        newPoint.x+=this.canvas._offset.left;
+        newPoint.y+=this.canvas._offset.top;
+        return newPoint;
+
     },
     render:function(ctx){
+
         /*se sobreescribio por que cuando un objeto sale de vista, no se renderizaba, es tamos oviando eso
         esa parte del metodo render original*/
         ctx.save();
@@ -344,7 +357,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         this.myTurn=false;
         this.lastSnapShot=new Image();
         this.lastSnapShot.src=this.cacheCanvas.toDataURL();
-
+        this.snapShotCurrent=new Image();
         this.width=options.width;
         this.height=options.height;
 
@@ -369,9 +382,10 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
             this._setOpacity(ctx);
             this.transform(ctx);
             if(this.myTurn){
+
                 ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
             }else{
-                ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);  
+                ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);
             }
         ctx.restore();
         
@@ -394,7 +408,8 @@ const EntranceModes={
 var AnimableCamera=fabric.util.createClass(ImageAnimable,{
     type:"AnimableCamera",
     initialize:function(element,options){
-        this.callSuper("initialize",element,options)
+        this.callSuper("initialize",element,options);
+        this.name="Camera"
         this.started=false;
         this.canvasCamera=null;
         this.entranceMode=EntranceModes.none;

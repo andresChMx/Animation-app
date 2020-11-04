@@ -22,6 +22,7 @@ var PathIllustrator=fabric.util.createClass({
         this.prevSnapshot=null
     },
     start:function(){
+        if(this.data.getObjectsToDrawLength()<=0){return};//SI NO HAY OBJECTOS PARA DIBUJAR NO INICIAMOS CUANDO NOS LO SOLICITEN
         this.prevPathSnapshot.src=this.canvas.toDataURL();
         this.endLoop=false;
         this._loop();
@@ -392,7 +393,9 @@ var PathIllustrator=fabric.util.createClass({
     },
     drawCompletePath:function(k,i,pAIndex){
         let self=this;
-        //this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
+        if(this.data.getEntraceModeOf(k)===EntranceModes.drawn){ //para los text-drawn no se debe hacer moveto en cada stroke
+            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
+        }
         var len = this.data.getPathLength(k,i); // number of points
         if(len<2){
             return;
@@ -426,7 +429,9 @@ var PathIllustrator=fabric.util.createClass({
     },
 
     drawCurveSegment:function(k,i,pAIndex,temperature){
-        //this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex));
+        if(this.data.getEntraceModeOf(k)===EntranceModes.drawn) { //para los text-drawn no se debe hacer moveto en cada stroke
+            this.ctx.moveTo(this.data.getStrokeCoordXAt(k, i, pAIndex), this.data.getStrokeCoordYAt(k, i, pAIndex));
+        }
         var len = this.data.getPathLength(k,i); // number of points
         if(len<2){return;}
         if(this.data.getStrokeTypeAt(k,i,pAIndex)=="l"){
@@ -655,10 +660,10 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
     getDelayOf:function(k){
         return this.listAnimableObjectsWithDrawnEntrances[k].animator.entranceDelay;
     },
-    getWidthCanvasCacheOf:function(k){
+    getWidthCanvasCacheOf:function(k){//usado por el drawinCacheManger
         return this.listAnimableObjectsWithDrawnEntrances[k].getWidthInDrawingCache();
     },
-    getHeightCanvasCacheOf:function(k){
+    getHeightCanvasCacheOf:function(k){//usado por el drawinCacheManger
         return this.listAnimableObjectsWithDrawnEntrances[k].getHeightInDrawingCache();
 
     },

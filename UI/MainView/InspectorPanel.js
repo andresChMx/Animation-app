@@ -141,10 +141,10 @@ let SectionToolBox={
         this.listObserversOnTextToolsPressed.push(obj);
     }
 }
-var SectionObjectsEditor={
+var SectoinObjectsEntraceEditor={
     HTMLElement:null,
     init:function(){
-        this.HTMLElement=document.querySelector(".panel-inspector__objects-editor__box-items");
+        this.HTMLElement=document.querySelector(".panel-inspector__objects-entrance-editor__box-items");
         this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
 
         this.lastActiveHTMLItem=null;
@@ -167,7 +167,7 @@ var SectionObjectsEditor={
     },
     createHTMLItem:function(animObjWithEntrance){
         let newItem=this.HTMLBoxItem.cloneNode(true);
-        let icon=newItem.querySelector(".panel-inspector__objects-editor__box-items__item__icon img");
+        let icon=newItem.querySelector(".panel-inspector__objects-entrance-editor__box-items__item__icon img");
         let inputDelay=newItem.querySelector(".box-items__item__input-field__input-element-delay");
         let inputDuration=newItem.querySelector(".box-items__item__input-field__input-element-duration");
         icon.setAttribute("src",animObjWithEntrance.imageModel.url);
@@ -196,9 +196,9 @@ var SectionObjectsEditor={
     },
     onHTMLItemClicked:function(e){
         let HTMLElem=e.target;
-        while(HTMLElem.className!=="panel-inspector__objects-editor__box-items__item clearfix"){
+        while(HTMLElem.className!=="panel-inspector__objects-entrance-editor__box-items__item clearfix"){
             HTMLElem=HTMLElem.parentNode;
-        };
+        }
         let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
         CanvasManager.canvas.setActiveObject(CanvasManager.listAnimableObjectsWithEntrance[trueIndex])
         CanvasManager.canvas.renderAll();
@@ -228,11 +228,76 @@ var SectionObjectsEditor={
         this.clearActivenessHTMLLastItem();
     }
 }
+var SectionAnimableObjectsEditor={
+    HTMLElement:null,
+    init:function(){
+        this.HTMLElement=document.querySelector(".panel-inspector__animable-objects-editor__box-items");
+        this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
+
+        this.lastActiveHTMLItem=null;
+        CanvasManager.registerOnAnimableObjectAdded(this);
+        CanvasManager.registerOnAnimableObjectDeleted(this);
+        CanvasManager.registerOnSelectionUpdated(this);
+        this.notificationOnAnimableObjectAdded(CanvasManager.camera); //ya que cuando se creo la camara este aun no se habia suscrito al CanvasManager, por eso lo haremos manualmente
+    },
+    createItem:function(animObject){
+      let newItem=this.HTMLBoxItem.cloneNode(this);
+      newItem.style.display="block";
+      let label=newItem.querySelector(".panel-inspector__animable-objects-editor__box-items__item__label-group p");
+      label.innerHTML=animObject.name!==""?animObject.name:"Object" + CanvasManager.listAnimableObjects.length;
+      newItem.addEventListener("click",this.OnItemClicked.bind(this))
+      this.HTMLElement.appendChild(newItem);
+    },
+    deleteItemAt:function(index){
+        this.HTMLElement.children[index+1].remove();
+    },
+    activeBoxObjectsHTMLItem:function(index){
+        this.clearActivenessHTMLLastItem();
+        let trueIndex=index+1;
+        console.log(trueIndex);
+        this.HTMLElement.children[trueIndex].id="active-item";
+        this.lastActiveHTMLItem=this.HTMLElement.children[trueIndex];
+    },
+    clearActivenessHTMLLastItem:function(){
+        if(this.lastActiveHTMLItem!=null){
+            this.lastActiveHTMLItem.id="";
+            this.lastActiveHTMLItem=null;
+        }
+    },
+    OnItemClicked:function(e){
+        let HTMLElem=e.target;
+        while(HTMLElem.className!=="panel-inspector__animable-objects-editor__box-items__item clearfix"){
+            HTMLElem=HTMLElem.parentNode;
+        }
+        let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
+        CanvasManager.canvas.setActiveObject(CanvasManager.listAnimableObjects[trueIndex]);
+        CanvasManager.canvas.renderAll();
+    },
+    notificationOnAnimableObjectAdded:function(animableObject){
+        this.createItem(animableObject);
+    },
+    notificationOnAnimableObjectDeleted:function(indexInAnimableObjectsList){
+        this.deleteItemAt(indexInAnimableObjectsList)
+    },
+    notificationOnSelectionUpdated:function(){
+        let animbleActiveObject=CanvasManager.getSelectedAnimableObj();
+        if(animbleActiveObject!=null){
+            let activeObjectIndex=CanvasManager.getListIndexAnimableObjects(animbleActiveObject);
+            if(activeObjectIndex!==-1){
+                this.activeBoxObjectsHTMLItem(activeObjectIndex);
+                return;
+            }
+        }
+        this.clearActivenessHTMLLastItem();
+    }
+
+}
 var PanelInspector={
     HTMLElement:null,
     htmlElementNormalHeight:0,
-    SectionObjectsEditor:SectionObjectsEditor,
+    SectoinObjectsEntraceEditor:SectoinObjectsEntraceEditor,
     SectionToolBox:SectionToolBox,
+    SectionAnimableObjectsEditor:SectionAnimableObjectsEditor,
     //SectionMenuAddKey:SectionMenuAddKey,
     //SectionPropertiesEditor:SectionPropertiesEditor,
     init:function(){
@@ -242,8 +307,8 @@ var PanelInspector={
         this.SectionToolBox.init();
         //this.SectionMenuAddKey.init();
         //this.SectionPropertiesEditor.init();
-        this.SectionObjectsEditor.init();
-
+        this.SectoinObjectsEntraceEditor.init();
+        this.SectionAnimableObjectsEditor.init();
         PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
         PanelDesignerOptions.SectionSettings.registerOnSettingActionClicked(this);
     },

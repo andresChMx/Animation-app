@@ -86,24 +86,6 @@
     ==========INSPECTOR PANEL=========
     ===============================-->
     <section class="panel-inspector">
-        <div class="panel-inspector__objects-editor">
-                <p class="panel-inspector__objects-editor__title">Objects with Effects</p>
-                <div class="panel-inspector__objects-editor__box-items ">
-                    <div class="panel-inspector__objects-editor__box-items__item clearfix" style="display:none;">
-                        <div class="panel-inspector__objects-editor__box-items__item__icon">
-                            <img src="" alt="" class="">
-                        </div>
-                        <div class="panel-inspector__objects-editor__box-items__item__input-field">
-                            <label for="">Delay</label>
-                            <input type="text" class="box-items__item__input-field__input-element-delay"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
-                        </div>
-                        <div class="panel-inspector__objects-editor__box-items__item__input-field">
-                            <label for="">Duration</label>
-                            <input type="text" class="box-items__item__input-field__input-element-duration"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
-                        </div>
-                    </div>
-                </div>
-        </div>
         <div class="panel-inspector__toolbox">
             <div class="panel-inspector__toolbox__item">
                 <p class="toolbox__tool-item__title">Actions:</p>
@@ -111,17 +93,52 @@
                 <button class="toolbox__item__button-preview">Preview</button>
                 <button class="toolbox__item__button-export">Export</button>
             </div>
+            <!--
             <div class="panel-inspector__toolbox__item">
                 <p class="toolbox__tool-item__title">Zoom:</p>
                 <button class="toolbox__tool-item__button">+</button>
                 <button class="toolbox__tool-item__button">-</button>
             </div>
+            -->
             <div class="panel-inspector__toolbox__item-text">
                 <p class="toolbox__item-text__title">Text:</p>
                 <button class="toolbox__item-text__button-add-text" action="add-text">Add Text</button>
 
             </div>
         </div>
+        <div class="panel-inspector__objects-entrance-editor">
+                <p class="panel-inspector__objects-entrance-editor__title">Objects with Effects</p>
+                <div class="panel-inspector__objects-entrance-editor__box-items ">
+                    <div class="panel-inspector__objects-entrance-editor__box-items__item clearfix" style="display:none;">
+                        <div class="panel-inspector__objects-entrance-editor__box-items__item__icon">
+                            <img src="" alt="" class="">
+                        </div>
+                        <div class="panel-inspector__objects-entrance-editor__box-items__item__input-field">
+                            <label for="">Delay</label>
+                            <input type="text" class="box-items__item__input-field__input-element-delay"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                        </div>
+                        <div class="panel-inspector__objects-entrance-editor__box-items__item__input-field">
+                            <label for="">Duration</label>
+                            <input type="text" class="box-items__item__input-field__input-element-duration"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                        </div>
+                    </div>
+                </div>
+        </div>
+        <div class="panel-inspector__animable-objects-editor">
+            <p class="panel-inspector__animable-objects-editor__title">Objects with</p>
+            <ul class="panel-inspector__animable-objects-editor__box-items ">
+                <li class="panel-inspector__animable-objects-editor__box-items__item clearfix" style="display:none;">
+                    <img src="" alt="" class="panel-inspector__animable-objects-editor__box-items__item__icon">
+                    <div class="panel-inspector__animable-objects-editor__box-items__item__label-group">
+                        <p>Object 1</p>
+                        <input type="text" style="display: none;">
+                    </div>
+                    <div class="panel-inspector__animable-objects-editor__box-items__item__btn-action-box">
+                    </div>
+                </li>
+            </ul>
+        </div>
+
     </section>
 
     <!--==============================

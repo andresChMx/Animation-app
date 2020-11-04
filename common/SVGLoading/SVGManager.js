@@ -6,7 +6,7 @@ var SVGManager=fabric.util.createClass({
             message: animableText.text,
             font_size:animableText.fontSize
         }
-        fetch("http://localhost:8080",{
+        fetch("https://wicked-nightmare-94207.herokuapp.com/",{
             method: 'POST',
             headers: {'Content-Type': 'application/json',},
             body: JSON.stringify(request),
@@ -75,6 +75,7 @@ var SVGManager=fabric.util.createClass({
                layerIndex=this.parsePath(group[i],imgWidth,imgHeight,strokeWidth,result,layerIndex,loadingMode);
             }
         }
+
         console.log(result);
     },
     utilParseArc :function(fx, fy, coords) {
