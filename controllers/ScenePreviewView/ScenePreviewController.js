@@ -46,7 +46,7 @@ var ScenePreviewController=fabric.util.createClass({
         let allCanvasObjects=CanvasManager.canvas.getObjects();
         for(let i=0;i<allCanvasObjects.length;i++){
             let canvasObject=allCanvasObjects[i];
-            if(canvasObject.type!=="AnimableCamera" && canvasObject.getEntranceMode()===EntranceModes.none){
+            if((canvasObject.type==="ImageAnimable" )&& canvasObject.getEntranceMode()===EntranceModes.none){
                 this.UIPanelPreviewerCanvas.add(canvasObject);      //Agremos al canvas de previsualizacion tdos los objetos animables (no el restangulo camara [AnimableCamara])
                 listForAnimator.push(canvasObject);                  // Agregamos todos los abjetos (incluido al AnimableCamara)
             }
@@ -149,6 +149,7 @@ var ScenePreviewController=fabric.util.createClass({
     },
     notificationOnBtnPreview:function(){
         let listForAnimator=[];// lista para el animator (contiene los elementos de listDrawableObjects)
+
         //listas para el DrawingCacheManager (dibujador)
         let listDrawableObjects=[]; //lista para objetos con efecto de dibujado, para el DrawingCacheManager, que orquestara el dibujado en orden de estos objetos
         let listAnimableWithDrawnEntrance=[];
@@ -330,7 +331,7 @@ var GeneratorDrawingDataImageModel=fabric.util.createClass({
     generateTextDrawingDataNoForcing:function(animableText,textWidth,textHeight,callback){
         let svgManager=new SVGManager;
         svgManager.fetchTextSVGData(animableText,function(responseSVG){
-            svgManager.calcDrawingDataFromString_forcePaths(responseSVG,textWidth,textHeight,3,callback);
+            svgManager.calcDrawingDataFromString_forcePaths(responseSVG,textWidth,textHeight,0,callback);
         })
 
     },

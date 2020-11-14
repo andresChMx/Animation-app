@@ -185,39 +185,28 @@ var PathIllustrator=fabric.util.createClass({
                 if(animPathDuration!=Infinity){//entrar si hay almenos un stroke
                     let nowTime=+new Date();
                     if(nowTime>animFinishTime){
-                        //
-                        // //// Completing not drawn lines
-                        // let animTrueProgress=animTotalProgress-this.listObjectsToDraw[k].paths.delay;
-                        // animTrueProgress=Math.max(0,animTrueProgress);
-                        // let indexPathTurn=parseInt(animTrueProgress/animPathDuration);
-                        // let cantJumps=(Math.round(this.listObjectsToDraw[k].paths.duration/animPathDuration)-1)-indexPathTurn;
-                        //
-                        // this.drawCurveSegment(k,i,j,1);
-                        // let oldValI=i;
-                        // let flagNewPath=false;
-                        // for(let p=0;p<cantJumps;p++){
-                        //     //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
-                        //     if(oldValI!=i){//se paso a otro path
-                        //         oldValI=i;
-                        //         this.drawCurrentStrokes(k);
-                        //         this.prevPathSnapshot.src=this.canvas.toDataURL();
-                        //         this.ctx.beginPath();
-                        //         this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
-                        //         flagNewPath=true;
-                        //         break;
-                        //     }
-                        //     let indexes=this.getNextPath(k,i,j,1);
-                        //     i=indexes[0];
-                        //     j=indexes[1];
-                        //     this.drawCompletePath(k,indexes[0],indexes[1]);
-                        // }
-                        //     this.ctx.drawImage(this.listObjectsToDraw[k].imgHTML,0,0,this.canvas.width,this.canvas.height)
-                        //     this.ctx.globalCompositeOperation="destination-in";
-                        //     this.ctx.stroke();
-                        //     this.ctx.globalCompositeOperation="source-over";
-                        //     this.ctx.drawImage(this.prevPathSnapshot,0,0);
-                            ///
+
+                        //// Completing not drawn lines
+                        if(this.data.getEntraceModeOf(k)===EntranceModes.drawn){
                             this.ctx.drawImage(this.data.getBaseImageOf(k),0,0,this.canvas.width,this.canvas.height);
+
+                        }else if(this.data.getEntraceModeOf(k)===EntranceModes.text_drawn){
+                            let animTrueProgress=animTotalProgress-this.data.getDelayOf(k);
+                            animTrueProgress=Math.max(0,animTrueProgress);
+                            let indexPathTurn=parseInt(animTrueProgress/animPathDuration);
+                            let cantJumps=(Math.round(this.data.getDurationOf(k)/animPathDuration)-1)-indexPathTurn;
+
+                            this.drawCurveSegment(k,i,j,1);
+                            let oldValI=i;
+                            let flagNewPath=false;
+                            for(let p=0;p<cantJumps;p++){
+                                let indexes=this.getNextPath(k,i,j,1);
+                                i=indexes[0];
+                                j=indexes[1];
+                                this.drawCompletePath(k,indexes[0],indexes[1]);
+                            }
+                            functionDrawingMode(k);
+                        }
                             k++;
                             if(k===this.data.getObjectsToDrawLength()){
                                 if(this.loopMode){
@@ -296,7 +285,7 @@ var PathIllustrator=fabric.util.createClass({
                                     j=indexes[1];
                                 }
                                 if(!flagNewPath){
-                                    if(oldValI!=i){//se paso a otro path
+                                    if(oldValI!==i){//se paso a otro path
 
                                         functionDrawingMode(k);
                                         this.prevPathSnapshot.src=this.canvas.toDataURL();
