@@ -145,18 +145,33 @@
     ==========TIMELINE================
     ===============================-->
     <section class="panel-animation">
-        <div class="panel-animation__top-menu">
-            <ul class="panel-animation__top-menu__list">
-                <li class="panel-animation__top-menu__list__item">Action</li>
-                <li class="panel-animation__top-menu__list__item">Scenes</li>
-                <li class="panel-animation__top-menu__list__item">Curves</li>
+        <div class="panel-animation__top-bar">
+             <ul class="panel-animation__top-bar__top-menu">
+                 <li class="panel-animation__top-bar__top-menu__item">Action</li>
+                 <li class="panel-animation__top-bar__top-menu__item">Scenes</li>
+                 <li class="panel-animation__top-bar__top-menu__item">Curves</li>
             </ul>
-            <form class="panel-animation__top-menu__form-duration">
-                <label class="panel-animation__top-menu__form-duration__label">Duration: </label>
-                <!--el input debe ser segundo hijo OnDurationForm panel action editor-->
-                <input type="text" class="panel-animation__top-menu__form-duration__input">
-                <input type="submit" style="display: none;">
-            </form>
+            <div class="panel-animation__top-bar__editors-menus">
+                <div class="action-editor-menu">
+                    <div class="action-editor-menu__keyframes-options">
+                        <button class="keyframes-options__delete">[]</button>
+                        <select name="keyframe-type" id="" class="keyframes-options__select">
+                            <option value="none" disabled selected style="display:none">----</option>
+                            <option value="ei">ease-in</option>
+                            <option value="eo">ease-out</option>
+                        </select>
+                    </div>
+                    <div class="action-editor-menu__timeline-options">
+                        <button class="action-editor-menu__timeline-options__zoom-in">+</button>
+                        <button class="action-editor-menu__timeline-options__zoom-out">-</button>
+                        <div class="action-editor-options__form-duration">
+                            <label class="editors-options__action-editor-options__form-duration__label">Duration: </label>
+                            <!--el input debe ser segundo hijo OnDurationInput panel action editor-->
+                            <input type="text" class="editors-options__action-editor-options__form-duration__input">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="panel-animation__editors-container">
                 <section class="action-editor">
@@ -178,7 +193,7 @@
                                     <label>y:</label><input type="text" property="scaleY">
                                 </div>
                             </div>
-                            <div class="action-editor__properties-area__list__item" property="angle">
+                            <div class="action-editor__properties-area__list__item" property="rotation">
                                 <span class="action-editor__properties-area__list__item__btn-add">+</span>
                                 <p class="action-editor__properties-area__list__item__label">Angle</p>
                                 <div class="action-editor__properties-area__list__item__box-inputs">
@@ -195,17 +210,7 @@
                         </div>
                     </div>
                     <div class="action-editor__timeline-area">
-                        <div class="margin"></div><div class="margin"></div>
-                        <div class="action-editor__timeline-area__time-bar">
-                            <div class="marker"><div class="marker__head"></div><div class="marker__body"></div></div>
-                            <div class="action-editor__timeline-area__time-bar__time-label-container"></div>
-                        </div>
-                        <div class="action-editor__timeline-area__keyframes-bar">
-                            <div class="keyframes-bar__property-lane"></div>
-                            <div class="keyframes-bar__property-lane"></div>
-                            <div class="keyframes-bar__property-lane"></div>
-                            <div class="keyframes-bar__property-lane"></div>
-                        </div>
+                        <canvas id="cTimeLine"></canvas>
                     </div>
                 </section>
                 <section class="scenes-editor">2</section>
@@ -335,6 +340,7 @@
     <script src="./UI/MainView/AnimationPanel.js"></script>
     <script src="./UI/MainView/InspectorPanel.js"></script>
     <script src="./UI/MainView/AssetsPanel.js"></script>
+    <script src="./UI/MainView/TimelineArea.js"></script>
     <script src="./UI/PathDesignView/DesignerOptionsPanel.js"></script>
     <script src="./UI/PathDesignView/PathDesignPanel.js"></script>
     <script src="./UI/PreviewerView/PreviewerPanel.js"></script>

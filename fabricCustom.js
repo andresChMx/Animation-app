@@ -10,26 +10,24 @@ var Animation=fabric.util.createClass({
     property:"",
     initialize:function(property,startValue,endValue,startMoment,endMoment){
         this.property=property;
+        this.initParameters(startValue,endValue,startMoment,endMoment)
+    },
+    initParameters:function(startValue,endValue,startMoment,endMoment){
         this.startValue=startValue;
         this.endValue=endValue;
-        
+
         this.startMoment=startMoment;
         this.endMoment=endMoment;
 
         this.localDuration=endMoment-startMoment;
         this.byValue=endValue-startValue;
     },
-    /*
-    updateValues:function(startValue,endValue,startMoment,endMoment){
-        this.startValue=startValue;
-        this.endValue=endValue;
+    updateMoments:function(startMoment,endMoment){
         this.startMoment=startMoment;
         this.endMoment=endMoment;
-
         this.localDuration=this.endMoment-this.startMoment;
-        this.byValue=this.endValue-this.startValue;
     },
-    */
+
     tick:function(currentTime){
         if(currentTime<this.startMoment){
             return "tiempoMenor";
@@ -110,6 +108,20 @@ var Animator=fabric.util.createClass({
         this.dictAnimations[property].push(new Animation(property,startValue,endValue,startMoment,endMoment));
         console.log("TOTAL CANT ANIMACIONES EN PROPEIDAD : " + property + this.dictAnimations[property].length);
     },
+    addAnimations:function(properties,startValues,endValues,startMoment,endMoment){
+        for(let i in properties){
+            this.addAnimation(properties[i],startValues[i],endValues[i],startMoment,endMoment)
+        }
+    },
+    updateAnimation:function(animIndex,property,startValue,endValue,startMoment,endMoment){
+        console.log(animIndex);
+        this.dictAnimations[property][animIndex].initParameters(startValue,endValue,startMoment,endMoment);
+    },
+    updateAnimations:function(animIndex,properties,startValues,endValues,startMoment,endMoment){
+        for (let i in properties){
+            this.updateAnimation(animIndex,properties[i],startValues[i],endValues[i],startMoment,endMoment);
+        }
+    },
     /*
     updateAnimation:function(property,indexAnimation, startValue,endValue,startMoment,endMoment){
         this.dictAnimations[property][indexAnimation].updateValues(startValue,endValue,startMoment,endMoment);
@@ -118,6 +130,27 @@ var Animator=fabric.util.createClass({
     hasPropertyAnimations:function(prop){
         return (this.dictAnimations[prop].length>0);
     },
+    onDurationChange:function(durationBefore,durationAfter){
+        if(this.hasAnimations() && durationBefore>durationAfter){
+            for(const prop in this.dictAnimations){
+                for(let i=0;i<this.dictAnimations[prop].length;i++){
+                    let listAnims=this.dictAnimations[prop];
+                    if(this.hasPropertyAnimations(prop)){
+                        if(listAnims[0].hasTwoKeys()){
+                            let percentStartMoment=listAnims[i].startMoment/durationBefore;
+                            let percentEndMoment=listAnims[i].endMoment/durationBefore;
+                            listAnims[i].updateMoments(durationAfter*percentStartMoment,durationAfter*percentEndMoment)
+                        }else{
+                            let percentStartTime=listAnims[0].startMoment/durationBefore;
+                            listAnims[0].updateMoments(durationAfter*percentStartTime,-1)
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+    }
 });
 var AnimatorCamera=fabric.util.createClass(Animator,{
     initialize:function(animableObject,canvasCamera){

@@ -7,7 +7,7 @@ var ScenePreviewController=fabric.util.createClass({
         this.animator=null;
         PanelInspector.SectionToolBox.registerOnBtnPreview(this);
         PanelPreviewer.registerOnBtnClose(this);
-        PanelActionEditor.registerOnDurationForm(this);
+        PanelActionEditor.registerOnDurationInput(this);
 
         this.counterCallBacksDrawableTexts=0;
         this.indexDrawableTexts=0;
@@ -182,8 +182,8 @@ var ScenePreviewController=fabric.util.createClass({
         CanvasManager.setCanvasOnAnimableObjects();
         this.clearDrawingDataOnDrawableObjects()
     },
-    notificationOnDurationForm:function(duration){
-        this.animator.setTotalDuration(duration);
+    notificationOnDurationInput:function(durationBefore,durationAfter){
+        this.animator.setTotalDuration(durationAfter);
     }
 });
 

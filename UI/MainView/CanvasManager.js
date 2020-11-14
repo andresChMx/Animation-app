@@ -45,10 +45,11 @@ var CanvasManager={
         this.canvas.on('object:modified',this.notifyOnObjModified);
 
         //PanelInspector.SectionPropertiesEditor.registerOnFieldInput(this);
-        PanelActionEditor.SectionProperties.registerOnFieldPropertyInput(this);
-        PanelAssets.SectionImageAssets.registerOnDummyDraggingEnded(this);
+        PanelActionEditor.registerOnDurationInput(this);
         PanelActionEditor.registerOnMarkerDragEnded(this);
+        PanelActionEditor.SectionProperties.registerOnFieldPropertyInput(this);
         PanelInspector.SectionToolBox.registerOnTextTools(this);
+        PanelAssets.SectionImageAssets.registerOnDummyDraggingEnded(this);
 
         WindowManager.registerOnKeyDeletePressed(this);
         },
@@ -293,6 +294,11 @@ var CanvasManager={
             this.listAnimableObjects[i].setCoords();
         }
     },
+    notificationOnDurationInput:function(durationBefore,durationAfter){
+        for(let i=0;i<this.listAnimableObjects.length;i++){
+            this.listAnimableObjects[i].animator.onDurationChange(durationBefore,durationAfter);
+        }
+    }
 
 }
 

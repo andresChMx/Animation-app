@@ -14,6 +14,8 @@ var WindowManager={
             onMouseUp:[],
             onMouseMove:[],
             onMouseDown:[],
+            onKeyDeleteUp:[],
+            onKeyEnterUp:[]
         },
         main:{
             onLoad:[],
@@ -21,7 +23,8 @@ var WindowManager={
             onMouseUp:[],
             onMouseMove:[],
             onMouseDown:[],
-            onKeyDeleteUp:[]
+            onKeyDeleteUp:[],
+            onKeyEnterUp:[]
         }
     },
 
@@ -70,6 +73,9 @@ var WindowManager={
         let self=WindowManager;
         self.listObservers[obsType].onKeyDeleteUp.push(obj);
     },
+    registerOnKeyEnterPressed:function(obj,obsType=ObserverType.main){
+        this.listObservers[obsType].onKeyEnterUp.push(obj);
+    },
     onWindowResize:function(){
         let self=WindowManager;
         for(var i=0;i<self.listObservers[self.activeObserverType].onResize.length;i++){
@@ -77,10 +83,10 @@ var WindowManager={
         }
         //PanelActionEditor.onWindowResize();
     },
-    onWindowMouseUp:function(){
+    onWindowMouseUp:function(e){
         let self=WindowManager;
         for(let i=0;i<self.listObservers[self.activeObserverType].onMouseUp.length;i++){
-            self.listObservers[self.activeObserverType].onMouseUp[i].notificationOnMouseUp();
+            self.listObservers[self.activeObserverType].onMouseUp[i].notificationOnMouseUp(e);
         }
     },
     onWindowMouseMove:function(e){
@@ -89,7 +95,7 @@ var WindowManager={
         self.mouse.y=e.clientY;
 
         for(let i=0;i<self.listObservers[self.activeObserverType].onMouseMove.length;i++){
-            self.listObservers[self.activeObserverType].onMouseMove[i].notificationOnMouseMove();
+            self.listObservers[self.activeObserverType].onMouseMove[i].notificationOnMouseMove(e);
         }
     },
     onWindowMouseDown:function(e){
@@ -103,6 +109,10 @@ var WindowManager={
         if(e.keyCode==46){
             for(let i=0;i<self.listObservers[self.activeObserverType].onKeyDeleteUp.length;i++){
                 self.listObservers[self.activeObserverType].onKeyDeleteUp[i].notificationOnKeyDeleteUp();
+            }
+        }else if (e.keyCode===13){
+            for(let i=0;i<self.listObservers[self.activeObserverType].onKeyEnterUp.length;i++){
+                self.listObservers[self.activeObserverType].onKeyEnterUp[i].notificationOnKeyEnterUp();
             }
         }
     }

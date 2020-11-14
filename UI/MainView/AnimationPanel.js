@@ -85,6 +85,69 @@ var SectionProperties={
         this.listObserversOnFieldInput.push(obj);
     }
 }
+var SectionActionEditorMenu={
+    HTMLBtnDeleteKeyFrame:null,
+    HTMLSelectFunctions:null,
+
+    listObserversOnDurationInput:[],
+    listObserversOnBtnDeleteKeyFrame:[],
+    parentClass:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
+        this.HTMLBtnDeleteKeyFrame=document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__delete");
+        this.HTMLSelectFunctions=document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__select");
+
+        this.HTMLBtnZoomInTimeline=document.querySelector(".action-editor-menu__timeline-options__zoom-in");
+        this.HTMLBtnZoomOutTimeline=document.querySelector(".action-editor-menu__timeline-options__zoom-out");
+
+        this.HTMLdurationFormInput=document.querySelector(".editors-options__action-editor-options__form-duration__input");
+        this.initEvents();
+    },
+    initEvents:function(){
+        this.HTMLBtnDeleteKeyFrame.addEventListener("click",this.onBtnDeleteKeyFrame.bind(this));
+        this.HTMLSelectFunctions.addEventListener("onchange",function(){});
+
+        this.HTMLBtnZoomInTimeline.addEventListener("click",function (){});
+        this.HTMLBtnZoomOutTimeline.addEventListener("click",function(){})
+        this.HTMLdurationFormInput.addEventListener("focusout",this.onDurationInput.bind(this))
+        WindowManager.registerOnKeyEnterPressed(this);
+    },
+    onBtnDeleteKeyFrame:function(){
+        this.notifyOnBtnDeleteKeyFrame();
+    },
+    onDurationInput:function(e){
+        let intInputValue=parseInt(e.target.value);
+        if(!isNaN(intInputValue)){
+            this.notifyOnDurationInput(intInputValue);
+        }else{
+            e.target.value=this.parentClass.getTimeLineDuration();
+        }
+    },
+    notifyOnDurationInput:function(intInputValue){
+        for(let i=0;i<this.listObserversOnDurationInput.length;i++){
+            this.listObserversOnDurationInput[i].notificationOnDurationInput(intInputValue);
+        }
+    },
+    notifyOnBtnDeleteKeyFrame:function(){
+        for(let i=0;i<this.listObserversOnBtnDeleteKeyFrame.length;i++){
+            this.listObserversOnBtnDeleteKeyFrame[i].notificationOnBtnDeleteKeyFrame();
+        }
+    },
+    notificationOnKeyEnterUp:function(){
+        let documentActiveElement=document.activeElement;
+        if(documentActiveElement===this.HTMLdurationFormInput){
+            documentActiveElement.blur();
+            this.onDurationInput({target:documentActiveElement});
+        }
+    },
+    registerOnDurationInput:function(obj){
+        this.listObserversOnDurationInput.push(obj);
+    },
+    registerOnBtnDeleteKeyFrame:function(obj){
+        this.listObserversOnBtnDeleteKeyFrame.push(obj);
+    }
+}
+/*=================================================================
 var Marker=function(selector,HTMLtimeline_timeBar,HTMLtimeline){
     this.HTMLElement=null;
     this.HTMLtimeline_timeBar=null;
@@ -427,7 +490,186 @@ var PropertyLane=function(properties,HTMLElement,HTMLTimeLineArea,timelineContro
     }
     this.init();
 }
+*/
+let SectionTimeLine={
+    HTMLElement:null,
 
+    timeLineComponent:null,
+    MODELLanesProperties:{"position":["left","top"],"scale":["scaleX","scaleY"],"rotation":["angle"],"opacity":["opacity"]},
+    currentSelectedAnimableObject:null,
+
+    listObserversOnMarkerDragging:[],
+    listObserversOnMarkerDragEnded:[],
+    parentClass:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
+        this.HTMLElement=document.querySelector(".action-editor__timeline-area");
+        this.timeLineComponent=new TimeLineProxy(WindowManager,"#cTimeLine",Object.keys(this.MODELLanesProperties));
+
+        CanvasManager.registerOnSelectionUpdated(this);
+        this.timeLineComponent.registerOnKeyFrameDragging(this);
+        this.timeLineComponent.registerOnKeyFrameDragEnded(this);
+        this.timeLineComponent.registerOnMarkerDragging(this);
+        this.timeLineComponent.registerOnMarkerDragEnded(this);
+        this.parentClass.SectionActionEditorMenu.registerOnBtnDeleteKeyFrame(this);
+    },
+    generateKeyFramesForNewObject:function(){
+        for(let keyModel in this.MODELLanesProperties){
+            let properties=this.MODELLanesProperties[keyModel];
+            let masterProperty=properties[0];
+            if(this.currentSelectedAnimableObject.animator.hasPropertyAnimations(masterProperty)){
+                if(!this.currentSelectedAnimableObject.animator.dictAnimations[masterProperty][0].hasTwoKeys()){
+                    let values=[];
+                    for(let k in properties){
+                        values.push(this.currentSelectedAnimableObject.animator.dictAnimations[properties[k]][0].startValue);
+                    }
+                    this.timeLineComponent.addKeyFrameOn(keyModel,values,this.currentSelectedAnimableObject.animator.dictAnimations[masterProperty][0].startMoment)
+                }else{
+                    for(let i=0;i<this.currentSelectedAnimableObject.animator.dictAnimations[masterProperty].length;i+=2){
+                        let firstPropertyAnim=this.currentSelectedAnimableObject.animator.dictAnimations[masterProperty][i];
+                        let startValues=[];
+                        let endValues=[];
+                        for(let k in properties){
+                            startValues.push(this.currentSelectedAnimableObject.animator.dictAnimations[properties[k]][i].startValue);
+                            endValues.push(this.currentSelectedAnimableObject.animator.dictAnimations[properties[k]][i].endValue);
+                        }
+                        this.timeLineComponent.addKeyFrameOn(keyModel,startValues,firstPropertyAnim.startMoment);
+                        this.timeLineComponent.addKeyFrameOn(keyModel,endValues,firstPropertyAnim.endMoment);
+                    }
+
+                    let animationsLength=this.currentSelectedAnimableObject.animator.dictAnimations[masterProperty].length;
+                    if(animationsLength%2===0){
+                        let values=[];
+                        for(let k in properties){
+                            values.push(this.currentSelectedAnimableObject.animator.dictAnimations[properties[k]][animationsLength-1].endValue);
+                        }
+                        let firstPropertyAnim=this.currentSelectedAnimableObject.animator.dictAnimations[masterProperty][animationsLength-1];
+                        this.timeLineComponent.addKeyFrameOn(keyModel,values,firstPropertyAnim.endMoment);
+                    }
+                }
+            }
+        }
+    },
+    generateObjectPropertiesAnimationsFromKeyFrames:function(laneName){
+        let lanePropeties=this.MODELLanesProperties[laneName];
+        this.timeLineComponent.sortLaneKeyFramesByTime(laneName);
+        for(let i in this.MODELLanesProperties[laneName]){this.currentSelectedAnimableObject.animator.dictAnimations[this.MODELLanesProperties[laneName][i]]=[];}
+        let laneActiveKeyFrames=this.timeLineComponent.getLaneActiveKeyFrames(laneName);
+        console.log(laneActiveKeyFrames);
+        if(laneActiveKeyFrames.length>0){
+            if(laneActiveKeyFrames.length===1){
+                for(let i in lanePropeties){
+                    this.currentSelectedAnimableObject.animator.addAnimation(lanePropeties[i],laneActiveKeyFrames[0].values[i],-1,laneActiveKeyFrames[0].timeLineTime,-1);
+                }
+            }else{
+                for(let i=0;i<laneActiveKeyFrames.length-1;i++){
+                    let key=laneActiveKeyFrames;
+                    this.currentSelectedAnimableObject.animator.addAnimations(lanePropeties,key[i].values,key[i+1].values,key[i].timeLineTime,key[i+1].timeLineTime);
+                }
+            }
+        }
+    },
+    updateObjectPropertiesAnimationsFromKeyFrames:function(laneName){
+        let lanePropeties=this.MODELLanesProperties[laneName];
+        this.timeLineComponent.sortLaneKeyFramesByTime(laneName);
+        let laneActiveKeyFrames=this.timeLineComponent.getLaneActiveKeyFrames(laneName);
+        if(laneActiveKeyFrames.length>0){
+            if(laneActiveKeyFrames.length===1){
+                for(let i in lanePropeties){
+                    this.currentSelectedAnimableObject.animator.updateAnimation(0,lanePropeties[i],laneActiveKeyFrames[0].values[i],-1,laneActiveKeyFrames[0].timeLineTime,-1)
+                }
+            }else{
+                for(let i=0;i<laneActiveKeyFrames.length-1;i++){
+                    let keyframe=laneActiveKeyFrames;
+                    this.currentSelectedAnimableObject.animator.updateAnimations(i,lanePropeties,keyframe[i].values,keyframe[i+1].values,keyframe[i].timeLineTime,keyframe[i+1].timeLineTime)
+                }
+            }
+        }
+    },
+    _addDummyObjectPropertiesAnimation:function(laneName){
+        let lanePropeties=this.MODELLanesProperties[laneName];
+        for(let i in lanePropeties){
+            this.currentSelectedAnimableObject.animator.addAnimation(lanePropeties[i],0,0,0,0);
+        }
+    },
+    discartAllKeyFrames:function(){
+        this.timeLineComponent.discartAllKeyFrames();
+    },
+    notifyOnMarkerDragging:function(time){
+        for(let i=0;i<this.listObserversOnMarkerDragging.length;i++){
+            this.listObserversOnMarkerDragging[i].notificationOnMarkerDragging(time);
+        }
+    },
+    notifyOnMarkerDragEnded:function(time){
+        for(let i=0;i<this.listObserversOnMarkerDragEnded.length;i++){
+            this.listObserversOnMarkerDragEnded[i].notificationOnMarkerDragEnded(time);
+        }
+    },
+    parentNotificationOnBtnKeyAddKey:function(laneName){
+        if(this.currentSelectedAnimableObject){
+            let propertiesValues=[];
+            for(let i=0;i<this.MODELLanesProperties[laneName].length;i++){
+                let propertyValue=this.currentSelectedAnimableObject.get(this.MODELLanesProperties[laneName][i]);
+                propertiesValues.push(propertyValue);
+            }
+            if(this.timeLineComponent.getLaneKeyFramesLength(laneName)!==1){
+                this._addDummyObjectPropertiesAnimation(laneName);
+            }
+            this.timeLineComponent.addKeyFrameOnMarker(laneName,propertiesValues);
+            this.updateObjectPropertiesAnimationsFromKeyFrames(laneName)
+        }
+
+    },
+    parentNotificationOnDurationChange:function(durationBefore,durationAfter){
+        this.timeLineComponent.setDuration(durationBefore,durationAfter);
+    },
+    notificationOnSelectionUpdated:function(obj){
+        let newSelectedObject=CanvasManager.getSelectedAnimableObj();
+        if(newSelectedObject!=null){
+            if(this.currentSelectedAnimableObject===newSelectedObject){
+                return;
+            }else{
+                this.currentSelectedAnimableObject=newSelectedObject;
+                this.timeLineComponent.discartAllKeyFrames();
+                this.generateKeyFramesForNewObject();
+            }
+        }else{
+            this.discartAllKeyFrames();
+            this.currentSelectedAnimableObject=null;
+        }
+    },
+    notificationOnKeyFrameDragging:function(laneName){
+
+    },
+    notificationOnKeyFrameDragEnded:function(dictLanesNames){
+        for(let key in dictLanesNames){
+            if(dictLanesNames[key]>0){
+                this.updateObjectPropertiesAnimationsFromKeyFrames(key);
+            }
+        }
+    },
+    notificationOnMarkerDragEnded:function(time){
+        this.notifyOnMarkerDragEnded(time);
+    },
+    notificationOnMarkerDragging:function(time){
+        this.notifyOnMarkerDragging(time);
+    },
+    notificationOnBtnDeleteKeyFrame:function(){
+        let dictCantLaneKeyFrames=this.timeLineComponent.discartSelectedKeyFrames();
+        for(let key in dictCantLaneKeyFrames){
+            if(dictCantLaneKeyFrames[key]>0){
+                this.generateObjectPropertiesAnimationsFromKeyFrames(key);
+            }
+        }
+    },
+    registerOnMarkerDragging:function(obj){
+      this.listObserversOnMarkerDragging.push(obj);
+    },
+    registerOnMarkerDragEnded:function(obj){
+        this.listObserversOnMarkerDragEnded.push(obj);
+    }
+
+}
 let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     HTMLElement:null,
     HTMLtimeline:null,
@@ -439,9 +681,11 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     marker:null,
 
     SectionProperties:SectionProperties,
+    SectionTimeLine:SectionTimeLine,
+    SectionActionEditorMenu:SectionActionEditorMenu,
 
     timelineController:null,
-    totalDuration:0,
+    timeLineDuration:3000,
     totalProgress:0,
 
     timeBar_numSegments:0,
@@ -452,122 +696,45 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     listObserversOnMarkerDragged:[],
     listObserversOnMarkerDragEnded:[],
 
-    listObserversOnDurationForm:[],
+    listObserversOnDurationInput:[],
     init:function(){
         this.SectionProperties.init();
-        this.HTMLdurationFormInput=document.querySelector(".panel-animation__top-menu__form-duration__input");
-        this.HTMLdurationForm=document.querySelector(".panel-animation__top-menu__form-duration");
+        this.SectionTimeLine.init(this);
+        this.SectionActionEditorMenu.init(this);
+        this.HTMLdurationFormInput=document.querySelector(".editors-options__action-editor-options__form-duration__input");
+        this.HTMLdurationForm=document.querySelector(".action-editor-options__form-duration");
         this.HTMLElement=document.querySelector(".action-editor");//todo el panel
         this.HTMLtimeline=document.querySelector(".action-editor__timeline-area");
-        this.HTMLtimeline_timeBar=document.querySelector(".action-editor__timeline-area__time-bar");
-        this.HTMLtimeline_keyframesBar=document.querySelector(".action-editor__timeline-area__keyframes-bar");
-        this.HTMLmarker=document.querySelector(".action-editor .marker");
 
-        this.setDuration(3000);
-        this._setupMarker();
-        this._setupPropertyLanes();
+        this.setDuration(3000,3000);
+        //this._setupFormDuration();
 
-        this._setupFormDuration();
 
         WindowManager.registerObserverOnResize(this);
-        // PanelInspector.SectionMenuAddKey.registerOnOptionClicked(this);
         this.SectionProperties.registerOnBtnAddKey(this);
-        this.marker.registerOnDragged(this);
-        this.marker.registerOnDragEnded(this);
+        this.SectionActionEditorMenu.registerOnDurationInput(this);
+        this.SectionTimeLine.registerOnMarkerDragging(this);
+        this.SectionTimeLine.registerOnMarkerDragEnded(this);
     },
     setTimelineController:function(obj){
         this.timelineController=obj;
     },
-    setDuration:function(duration){
-        if(this.marker){
-            this.marker.moveMe(0);
-        }
-        this.totalDuration=duration;
-        this.timelineController.animator.setTotalDuration(duration);
-        this._updateUI_timeline();
-    },
-    _setupFormDuration:function(){
-        //this.HTMLdurationForm.addEventListener("submit",this.OnDurationForm.bind(this));
-        this.HTMLdurationFormInput.addEventListener("focusout",this.OnDurationForm.bind(this));
-    },
-    _setupMarker:function(){
-        this.marker=new Marker(".action-editor .marker",this.HTMLtimeline_timeBar,this.HTMLtimeline)
-    },
-    _setupPropertyLanes:function(){
-        let HTMLPropertyLanes=document.querySelectorAll(".keyframes-bar__property-lane");
-        this.dictPropertyLanes["position"]=new PropertyLane(["left","top"],HTMLPropertyLanes[0],this.HTMLtimeline,this.timelineController);
-        this.dictPropertyLanes["scale"]=new PropertyLane(["scaleX","scaleY"],HTMLPropertyLanes[1],this.HTMLtimeline,this.timelineController);
-        this.dictPropertyLanes["angle"]=new PropertyLane(["angle"],HTMLPropertyLanes[2],this.HTMLtimeline,this.timelineController);
-        this.dictPropertyLanes["opacity"]=new PropertyLane(["opacity"],HTMLPropertyLanes[3],this.HTMLtimeline,this.timelineController);
-    },
-    _updateUI_timeline:function(){
-        this._UIupdateSizes_timelineComponents(true);
-        this._UIupdate_timeline_timebar_labels();
-        this._UIupdateSizes_timelineComponents(false);
-    },
-    _UIupdate_timeline_timebar_labels:function(){
-        this.HTMLtimeline_timeBar.children[1].innerHTML="";
-
-        this.timeBar_numSegments=this.totalDuration/TIMELINE_TIMESTEPS;
-        this.timeBar_segmentLongitude=(this.HTMLtimeline_timeBar.clientWidth-(TIMELINE_PADDING*2))/this.timeBar_numSegments;
-        if(this.timeBar_segmentLongitude<TIMELINE_MIN_LONGITUDE_STEPS){
-            this.timeBar_segmentLongitude=TIMELINE_MIN_LONGITUDE_STEPS;
-        }
-
-        for(let i=0;i<=this.timeBar_numSegments;i++){
-            let timeLabel=document.createElement("span");
-            timeLabel.textContent=TIMELINE_TIMESTEPS*i/10;
-            timeLabel.classList.add("timelabel");
-            this.HTMLtimeline_timeBar.children[1].append(timeLabel);
-            timeLabel.style.left=i*this.timeBar_segmentLongitude+TIMELINE_PADDING-(timeLabel.offsetWidth/2)+"px";
-        }
+    setDuration:function(durationBefore,durationAfter){
+        this.timelineController.animator.setTotalDuration(durationAfter);
+        this.SectionTimeLine.parentNotificationOnDurationChange(durationBefore,durationAfter);
+        this.timeLineDuration=durationAfter;
     },
 
-    _UIupdateSizes_timelineComponents:function(resetSizes){
-        let self=PanelActionEditor;
-        let masterWidth;
-        if(resetSizes){
-            masterWidth=self.HTMLtimeline.clientWidth;
-
-        }else{
-            masterWidth=self.HTMLtimeline.scrollWidth;
-        }
-        console.log("onresize: " +self.HTMLtimeline_timeBar.clientLeft );
-        let margins=document.querySelectorAll(".action-editor__timeline-area > .margin");
-        margins[0].style.left=0+"px";
-        margins[1].style.left=masterWidth-TIMELINE_PADDING + "px";
-        //console.log("scrollwidth:" +self.HTMLtimeline.scrollWidth);
-        margins[0].style.width=TIMELINE_PADDING + "px";
-        margins[1].style.width=TIMELINE_PADDING+ "px";
-
-        self.HTMLtimeline_timeBar.style.width=masterWidth + "px";
-        self.HTMLtimeline_keyframesBar.style.width=masterWidth+ "px";
-
-        //self.HTMLtimeline.calcBoundings();
-        //self.HTMLtimeline_timeBar.calcBoundings();
-        //self.HTMLtimeline_keyframesBar.calcBoundings();
+    getTimeLineDuration:function(){
+        return this.timeLineDuration;
     },
-    OnDurationForm:function(e){
-        e.preventDefault();
-        let duration;
-        let target;
-        if(e.target.className==="panel-animation__top-menu__form-duration"){
-            target=e.target.children[1].value;
-            duration=parseInt(e.target.children[1].value);
-        }else{
-            target=e.target;
-            duration=parseInt(e.target.value);
-        }
-        console.log(duration);
-        if(!isNaN(duration)){
-            this.setDuration(duration);
-            this.notifyOnDurationForm(duration);
-        }else{
-            target.value=3000;
+    notifyOnDurationInput:function(durationBefore,durationAfter){
+        for(let i=0;i<this.listObserversOnDurationInput.length;i++){
+            this.listObserversOnDurationInput[i].notificationOnDurationInput(durationBefore,durationAfter);
         }
     },
-    registerOnDurationForm:function(obj){
-        this.listObserversOnDurationForm.push(obj);
+    registerOnDurationInput:function(obj){
+        this.listObserversOnDurationInput.push(obj);
     },
     registerOnMarkerDragged:function(obj){
         this.listObserversOnMarkerDragged.push(obj);
@@ -575,12 +742,10 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     registerOnMarkerDragEnded:function(obj){
         this.listObserversOnMarkerDragEnded.push(obj);
     },
-    notificationOnMarkerDragged:function(markerPosition){
-
-        let progress=(markerPosition/(this.timeBar_numSegments*this.timeBar_segmentLongitude))*this.totalDuration;
+    notificationOnMarkerDragging:function(time){
         //console.log(progress);
         for(let i=0;i<this.listObserversOnMarkerDragged.length;i++){
-            this.listObserversOnMarkerDragged[i].notificationOnMarkerDragged(progress);
+            this.listObserversOnMarkerDragged[i].notificationOnMarkerDragged(time);
         }
     },
     notificationOnMarkerDragEnded:function(){
@@ -594,21 +759,12 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         //use the correct dictionary (according to selectoed object)
         this.dictPropertyLanes[property].generateKeyFrame(this.timelineController.animator.totalProgress);
     },*/
-    notificationOnBtnKeyAddKey:function(propertyName){
-      this.dictPropertyLanes[propertyName].generateKeyFrame(this.timelineController.animator.totalProgress)
+    notificationOnBtnKeyAddKey:function(btnNameAttr){
+        this.SectionTimeLine.parentNotificationOnBtnKeyAddKey(btnNameAttr)
     },
-    notificationOnObjSelected:function(obj){
-        let selectedObject=CanvasManager.getSelectedAnimableObj();
-        if(selectedObject!=null){
-
-        }else{
-
-        }
-    },
-    notifyOnDurationForm:function(duration){
-        for(let i=0;i<this.listObserversOnDurationForm.length;i++){
-            this.listObserversOnDurationForm[i].notificationOnDurationForm(duration);
-        }
+    notificationOnDurationInput:function(newDuration){
+        this.setDuration(this.timeLineDuration,newDuration);
+        this.notifyOnDurationInput(this.timeLineDuration,newDuration);
     },
     notifyOnMarkerDragEnded:function(){
         let self=PanelActionEditor;
