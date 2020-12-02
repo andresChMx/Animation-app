@@ -5,14 +5,17 @@ var ScenePreviewController=fabric.util.createClass({
         this.UIPanelPreviewerCanvas=null;
         this.pointsGenerator=new GeneratorDrawingDataImageModel();
         this.animator=null;
-        PanelInspector.SectionToolBox.registerOnBtnPreview(this);
-        PanelPreviewer.registerOnBtnClose(this);
-        PanelActionEditor.registerOnDurationInput(this);
+        MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnDurationInput,this)
+
+        MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnPreviewClicked,this);
+
+        MainMediator.registerObserver(PanelPreviewer.name,PanelPreviewer.events.OnBtnClose,this);
 
         this.counterCallBacksDrawableTexts=0;
         this.indexDrawableTexts=0;
         this.listDelayedObjects=[];
     },
+
     setPreviewerCanvas:function(previewerCanvas){
         this.UIPanelPreviewerCanvas=previewerCanvas;
         this.animator=new ControllerAnimator(this.UIPanelPreviewerCanvas);
@@ -46,7 +49,7 @@ var ScenePreviewController=fabric.util.createClass({
         let allCanvasObjects=CanvasManager.canvas.getObjects();
         for(let i=0;i<allCanvasObjects.length;i++){
             let canvasObject=allCanvasObjects[i];
-            if((canvasObject.type==="ImageAnimable" )&& canvasObject.getEntranceMode()===EntranceModes.none){
+            if((canvasObject.type!=="AnimableCamera" )&& canvasObject.getEntranceMode()===EntranceModes.none){
                 this.UIPanelPreviewerCanvas.add(canvasObject);      //Agremos al canvas de previsualizacion tdos los objetos animables (no el restangulo camara [AnimableCamara])
                 listForAnimator.push(canvasObject);                  // Agregamos todos los abjetos (incluido al AnimableCamara)
             }
@@ -147,7 +150,7 @@ var ScenePreviewController=fabric.util.createClass({
             }
         }
     },
-    notificationOnBtnPreview:function(){
+    notificationPanelInspectorOnBtnPreviewClicked:function(){
         let listForAnimator=[];// lista para el animator (contiene los elementos de listDrawableObjects)
 
         //listas para el DrawingCacheManager (dibujador)
@@ -174,7 +177,7 @@ var ScenePreviewController=fabric.util.createClass({
         }.bind(this)())
 
     },
-    notificationOnBtnClose:function(){
+    notificationPanelPreviewerOnBtnClose:function(){
         this.listDelayedObjects=[];
         CanvasManager.camera.animator.stop();
         this.animator.stopAnimation();
@@ -183,7 +186,8 @@ var ScenePreviewController=fabric.util.createClass({
         CanvasManager.setCanvasOnAnimableObjects();
         this.clearDrawingDataOnDrawableObjects()
     },
-    notificationOnDurationInput:function(durationBefore,durationAfter){
+    notificationPanelActionEditorOnDurationInput:function(args){
+        let durationBefore=args[0];let durationAfter=args[1];
         this.animator.setTotalDuration(durationAfter);
     }
 });

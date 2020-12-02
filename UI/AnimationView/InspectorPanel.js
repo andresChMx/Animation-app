@@ -1,112 +1,13 @@
-
-let SectionPropertiesEditor={
-    HTMLElement:null,
-    HTMLFields:null,
-    listObserversOnFieldInput:[],
-    init:function(){
-        this.HTMLElement=document.querySelector(".panel-inspector__properties-editor");
-        this.HTMLFields=document.querySelectorAll(".properties-editor__properties-container input");
-        for(let i=0;i<this.HTMLFields.length;i++){
-            this.HTMLFields[i].addEventListener("input",this.OnFieldsInput)
-        }
-        CanvasManager.registerOnSelectionUpdated(this);
-        CanvasManager.registerOnObjModified(this);
-    },
-    _desableFields:function(){
-        for(let i=0;i<this.HTMLFields.length;i++){
-            this.HTMLFields[i].setAttribute("disabled","");
-        }
-    },
-    _enableFields:function(){
-        for(let i=0;i<this.HTMLFields.length;i++){
-            this.HTMLFields[i].removeAttribute("disabled");
-        }
-    },
-    _populateFields:function(selectedAnimObj){
-        this.HTMLFields[0].value=selectedAnimObj.get("left");
-        this.HTMLFields[1].value=selectedAnimObj.get("top");
-        this.HTMLFields[2].value=selectedAnimObj.get("scaleX");
-        this.HTMLFields[3].value=selectedAnimObj.get("scaleY");
-        this.HTMLFields[4].value=selectedAnimObj.get("angle");
-        this.HTMLFields[5].value=selectedAnimObj.get("opacity");
-    },
-    registerOnFieldInput:function(obj){
-        let self=SectionPropertiesEditor;
-
-        self.listObserversOnFieldInput.push(obj);
-
-    },
-    notificationOnSelectionUpdated:function(){
-        let self=SectionPropertiesEditor;
-        let selectedAnimObj=CanvasManager.getSelectedAnimableObj();
-        if(!selectedAnimObj){
-            self._desableFields();
-        }else{
-            self._enableFields();
-            self._populateFields(selectedAnimObj);
-        }
-    },
-    notificationOnObjModified:function(){
-        let self=SectionPropertiesEditor;
-        let selectedAnimObj=CanvasManager.getSelectedAnimableObj();
-        if(!selectedAnimObj){
-            self._desableFields();
-        }else{
-            self._enableFields();
-            self._populateFields(selectedAnimObj);
-        }
-
-    },
-    notifyOnFieldInput:function(target){
-        let self=SectionPropertiesEditor;
-        for(let i=0;i<self.listObserversOnFieldInput.length;i++){
-            self.listObserversOnFieldInput[i].notificationOnFieldInput(target);
-        }
-    },
-    OnFieldsInput:function(e){
-        let self=SectionPropertiesEditor;
-        self.notifyOnFieldInput(e.target);
-    },
-}
-let SectionMenuAddKey={
-    HTMLElement:null,
-    HTMLButton:null,
-    HTMLOptions:null,
-
-    listObserversOnOptionClicked:[],
-    init:function(){
-        this.HTMLElement=document.querySelector(".menu-add-keyframe__inner-container");
-        this.HTMLButton=document.querySelector(".menu-add-keyframe__label");
-        this.HTMLOptions=document.querySelector(".menu-add-keyframe__options-list");
-        for(let i=0;i<this.HTMLOptions.children.length;i++){
-            this.HTMLOptions.children[i].addEventListener("click",this.OnOptionClicked)
-        }
-
-    },
-    registerOnOptionClicked:function(obj){
-        this.listObserversOnOptionClicked.push(obj);
-    },
-    OnOptionClicked:function(e){
-        let self=SectionMenuAddKey;
-        self.notifyOnOptionClicked(e.target.getAttribute("name"));
-    },
-    notifyOnOptionClicked:function(property){
-        let self=SectionMenuAddKey;
-        for(let i=0;i<self.listObserversOnOptionClicked.length;i++){
-            self.listObserversOnOptionClicked[i].notificationOnOptionClicked(property);
-        }
-    }
-
-}
 let SectionToolBox={
     HTMLElement:null,
     toolsActions:{
         projectTools:["preview"],
         textTools:["add-text"]
     },
-    listObserversOnBtnPreview:[],
-    listObserversOnTextToolsPressed:[],
-    init:function(){
+
+    parentClass:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".panel-inspector__toolbox");
         let btnPreview=document.querySelector(".toolbox__item__button-preview");
         btnPreview.addEventListener("click",this.notifyOnBtnPreview.bind(this));
@@ -124,33 +25,20 @@ let SectionToolBox={
       this.notifyOnTextToolsPressed(action)
     },
     notifyOnBtnPreview:function(){
-        for(let i=0;i<this.listObserversOnBtnPreview.length;i++){
-            this.listObserversOnBtnPreview[i].notificationOnBtnPreview();
-        }
+        this.parentClass.childNotificationOnBtnPreviewClicked();
     },
     notifyOnTextToolsPressed:function(action){
-        for(let i=0;i<this.listObserversOnTextToolsPressed.length;i++){
-            this.listObserversOnTextToolsPressed[i].notificationOnTextToolsPressed(action);
-        }
+        this.parentClass.childNotificationOnTextOptionClicked(action);
     },
-    registerOnBtnPreview:function(obj){
-
-        this.listObserversOnBtnPreview.push(obj);
-    },
-    registerOnTextTools:function(obj){
-        this.listObserversOnTextToolsPressed.push(obj);
-    }
 }
-var SectoinObjectsEntraceEditor={
+var SectionObjectsEntraceEditor={
     HTMLElement:null,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-inspector__objects-entrance-editor__box-items");
         this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
 
         this.lastActiveHTMLItem=null;
-        CanvasManager.registerOnObjAddedToListWithEntrance(this);
-        CanvasManager.registerOnObjDeletedFromListWidthEntraces(this);
-        CanvasManager.registerOnSelectionUpdated(this);
+
     },
 
     activeBoxObjectsHTMLItem:function(index){
@@ -235,9 +123,7 @@ var SectionAnimableObjectsEditor={
         this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
 
         this.lastActiveHTMLItem=null;
-        CanvasManager.registerOnAnimableObjectAdded(this);
-        CanvasManager.registerOnAnimableObjectDeleted(this);
-        CanvasManager.registerOnSelectionUpdated(this);
+
         this.notificationOnAnimableObjectAdded(CanvasManager.camera); //ya que cuando se creo la camara este aun no se habia suscrito al CanvasManager, por eso lo haremos manualmente
     },
     createItem:function(animObject){
@@ -293,29 +179,68 @@ var SectionAnimableObjectsEditor={
 
 }
 var PanelInspector={
+    name:'PanelInspector',
+    events:{
+        OnBtnPreviewClicked:'OnBtnPreviewClicked',
+        OnTextOptionClicked:'OnTextOptionClicked'
+    },
     HTMLElement:null,
     htmlElementNormalHeight:0,
-    SectoinObjectsEntraceEditor:SectoinObjectsEntraceEditor,
+
+    SectionObjectsEntraceEditor:SectionObjectsEntraceEditor,
     SectionToolBox:SectionToolBox,
     SectionAnimableObjectsEditor:SectionAnimableObjectsEditor,
-    //SectionMenuAddKey:SectionMenuAddKey,
-    //SectionPropertiesEditor:SectionPropertiesEditor,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-inspector");
         this.htmlElementNormalHeight=this.HTMLElement.offsetHeight;
 
-        this.SectionToolBox.init();
-        //this.SectionMenuAddKey.init();
-        //this.SectionPropertiesEditor.init();
-        this.SectoinObjectsEntraceEditor.init();
+        this.SectionToolBox.init(this);
+        this.SectionObjectsEntraceEditor.init();
         this.SectionAnimableObjectsEditor.init();
-        PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
-        PanelDesignerOptions.SectionSettings.registerOnSettingActionClicked(this);
-    },
-    notificationOnItemsMenu_designPaths:function(data){
+
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
+
+
+
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjAddedToListWithEntrance,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjDeletedFromListWidthEntraces,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnSelectionUpdated,this);
+
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnAnimableObjectAdded,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnAnimableObjectDeleted,this);
+        },
+    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(args){
         this.HTMLElement.style.display="none";
     },
-    notificationOnSettingActionClicked:function(data){
+    notificationPanelDesignerOptionsOnSettingActionClicked:function(data){
         this.HTMLElement.style.display="block"
+    },
+    notificationCanvasManagerOnObjAddedToListWithEntrance:function(args){
+        let animObjWithEntrance=args[0];
+        this.SectionObjectsEntraceEditor.notificationOnObjAddedToListObjectsWithEntrance(animObjWithEntrance);
+    },
+    notificationCanvasManagerOnObjDeletedFromListWidthEntraces:function(args){
+        let indexObjsWithEntranceList=args[0];
+        this.SectionObjectsEntraceEditor.notificationOnObjDeletedFromListWithEntrance(indexObjsWithEntranceList)
+    },
+    notificationCanvasManagerOnSelectionUpdated:function(){
+        this.SectionObjectsEntraceEditor.notificationOnSelectionUpdated();
+        this.SectionAnimableObjectsEditor.notificationOnSelectionUpdated();
+    },
+    notificationCanvasManagerOnAnimableObjectAdded:function(args){
+        let animableObject=args[0];
+        this.SectionAnimableObjectsEditor.notificationOnAnimableObjectAdded(animableObject);
+    },
+    notificationCanvasManagerOnAnimableObjectDeleted:function(args){
+        let indexInAnimableObjsList=args[0];
+        this.SectionAnimableObjectsEditor.notificationOnAnimableObjectDeleted(indexInAnimableObjsList);
+    },
+    childNotificationOnTextOptionClicked:function(action){
+        MainMediator.notify(this.name,this.events.OnTextOptionClicked,[action]);
+    },
+    childNotificationOnBtnPreviewClicked:function(){
+        MainMediator.notify(this.name,this.events.OnBtnPreviewClicked,[]);
     }
+
 }

@@ -20,9 +20,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/controllers/Mediators/MainMediator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/MainView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/MainView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/MainView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/MainView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/MainView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/MainView/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/WindowManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/PathDesignView/PathDesignPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PathDesignView/PathDesignPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/AnimatorView/TimeLineController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/AnimationView/AnimationController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +71,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\github\doodly-clone\UI" />
       <recent name="D:\github\doodly-clone\common\SVGLoading" />
       <recent name="D:\github\doodly-clone\common\fontsLoading" />
     </key>
@@ -116,6 +134,16 @@
       <workItem from="1604965334690" duration="599000" />
       <workItem from="1605280747345" duration="30227000" />
       <workItem from="1605373797478" duration="9015000" />
+      <workItem from="1605383708007" duration="107000" />
+      <workItem from="1605422377617" duration="4839000" />
+      <workItem from="1605623937525" duration="263000" />
+      <workItem from="1605675191150" duration="599000" />
+      <workItem from="1606621575723" duration="6014000" />
+      <workItem from="1606668720208" duration="27416000" />
+      <workItem from="1606725784282" duration="450000" />
+      <workItem from="1606758768588" duration="8108000" />
+      <workItem from="1606853653842" duration="15069000" />
+      <workItem from="1606923949250" duration="2934000" />
     </task>
     <servers />
   </component>
@@ -167,10 +195,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="dock-window-2/0.0.1920.1050@0.0.1920.1050" timestamp="1602996543928" />
-    <state x="828" y="204" width="879" height="801" key="find.popup" timestamp="1605321083003">
+    <state x="765" y="157" width="878" height="801" key="find.popup" timestamp="1606925157407">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="828" y="204" width="879" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1605321083003" />
+    <state x="765" y="157" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1606925157407" />
     <state width="600" height="428" key="javadoc.popup" timestamp="1603662965310">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

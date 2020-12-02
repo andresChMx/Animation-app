@@ -185,12 +185,14 @@ var DrawingManager=fabric.util.createClass({
         this.canvasManager.registerOnPointModified(this);
         this.canvasManager.registerOnMouseUp(this);
         
-        PanelDesignerOptions.SectionSettings.registerOnSettingToolClicked(this);
-        PanelDesignerOptions.SectionSettings.registerOnSettingLineWidthChanged(this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingToolClicked,this);
 
-        PanelDesignerOptions.SectionPaths.registerOnBtnAddPathClicked(this);
-        PanelDesignerOptions.SectionPaths.registerOnPathClicked(this);
-        PanelDesignerOptions.SectionPaths.registerOnBtnDeletePathClicked(this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingLineWidthChanged,this);
+
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnAddPathClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnPathClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnDeletePathClicked,this);
+
     },
     wakeUp:function(imageModel,drawingData){
         if(drawingData.type===ImageType.CREATED_NOPATH){
@@ -304,7 +306,8 @@ var DrawingManager=fabric.util.createClass({
     },
 
     //NOTIFICAIONES SETTINGS SECTION
-    notificationOnToolClicked:function(toolId){
+    notificationPanelDesignerOptionsOnSettingToolClicked:function(args){
+        let toolId=args[0];
         switch(toolId){
             case this.tools.selection:
                 this.currentTool=this.tools.selection;
@@ -317,17 +320,18 @@ var DrawingManager=fabric.util.createClass({
             break;
         }
     },
-    notificationOnLineWidthChanged:function(value){
+    notificationPanelDesignerOptionsOnSettingLineWidthChanged:function(value){
         this.canvasManager.setPathLineWidth(value,this.currentPathIndex);
         this.canvasManager.canvas.renderAll();
     },
-    notificationOnBtnAddPathClicked:function(){
+
+    notificationPanelDesignerOptionsOnBtnAddPathClicked:function(){
         this.addPathAtLast();
     },
-    notificationOnBtnDeletePathClicked:function(index){
+    notificationPanelDesignerOptionsOnBtnDeletePathClicked:function(index){
         this.removePathAt(index);
-    },  
-    notificationOnPathClicked:function(index){
+    },
+    notificationPanelDesignerOptionsOnPathClicked:function(index){
         this.currentPathIndex=index;
     },
 })

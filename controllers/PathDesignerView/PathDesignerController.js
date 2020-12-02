@@ -15,13 +15,16 @@ var PathDesignerController=fabric.util.createClass({
         this.svgManager=new SVGManager();
 
         this.hasLoadedFromSVG=false;
-        PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
-        PanelDesignerOptions.SectionSettings.registerOnSettingActionClicked(this);
-        PanelDesignerOptions.SectionPaths.registerOnBtnLoadSVGClicked(this);
+
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnLoadSVGClicked,this);
+
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
+
     },
-    notificationOnItemsMenu_designPaths:function(imageModel){
+    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(args){
+        let imageModel=args[0];
         this.imageModel=imageModel;
-        console.log(imageModel);
         if(imageModel.paths.type===ImageType.CREATED_NOPATH){
             this.wakeUpComponentes(imageModel.paths);
         }else if(imageModel.paths.type===ImageType.CREATED_PATHLOADED){
@@ -37,8 +40,6 @@ var PathDesignerController=fabric.util.createClass({
                 this.wakeUpComponentes(imageModel.paths);
             }
         }
-
-
     },
     wakeUpComponentes:function(drawingData){
         if(drawingData.pathsNames.length===0){
@@ -58,7 +59,8 @@ var PathDesignerController=fabric.util.createClass({
 
         return regex1.test(urlstring);
     },
-    notificationOnSettingActionClicked:function(actionId){
+    notificationPanelDesignerOptionsOnSettingActionClicked:function(args){
+        let actionId=args[0];
         switch (actionId){
             case "save":
                 //let matCtrlPoints=this.drawingManager.getMatrixCrtlPoints();
@@ -153,7 +155,7 @@ var PathDesignerController=fabric.util.createClass({
         }
         return totalCantPaths;
     },
-    notificationOnbtnLoadSVGClicked:function(){
+    notificationPanelDesignerOptionsOnBtnLoadSVGClicked:function(){
         let self=this;
         PanelDesignerOptions.SectionPathDesignerPopup.showMessage("", "loading mode:",[
             {

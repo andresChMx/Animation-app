@@ -275,7 +275,11 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         }
     },
     setEntranceMode:function(mode){
-        this.entranceMode=mode;
+        if(mode===EntranceModes.drawn){
+            this.entranceMode=EntranceModes.text_drawn;
+        }else{
+            this.entranceMode=mode;
+        }
     },
     getEntranceMode:function(){
         return this.entranceMode;

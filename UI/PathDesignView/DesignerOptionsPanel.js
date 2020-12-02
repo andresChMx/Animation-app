@@ -1,15 +1,9 @@
 var SectionSettings={
     HTMLElement:null,
 
-    listObserversOnActionClicked:[],
-
-    listObserversOnZoomOut:[],
-    listObserversOnZoomIn:[],
-
-    listObserversOnToolClicked:[],
-    listObserversOnLineWidthChanged:[],
-    listObserversOnDurationChanged:[],
-    init:function(){
+    parentClass:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".panel-designer-options__section-settings");
         this.setupHTMLSettingAction();
         this.setupHTMLSettingZoom();
@@ -48,66 +42,35 @@ var SectionSettings={
         slider.addEventListener("change",this.notifyOnDurationChanged.bind(this));
     },
     notifyOnActionClicked:function(e){
-        for(let i=0;i<this.listObserversOnActionClicked.length;i++){
-            this.listObserversOnActionClicked[i].notificationOnSettingActionClicked(e.target.id);
-        }
+        this.parentClass.childNotificationOnSettingActionClicked(e.target.id);
     },
     notifyOnZoomOut:function(){
-        for(let i=0;i<this.listObserversOnZoomOut.length;i++){
-            this.listObserversOnZoomOut[i].notificationOnZoomOut();
-        }
+
+        this.parentClass.childNotificationOnZoomOut();
     },
     notifyOnZoomIn:function(){
-        for(let i=0;i<this.listObserversOnZoomIn.length;i++){
-            this.listObserversOnZoomIn[i].notificationOnZoomIn();
-        }
+        this.parentClass.childNotificationOnZoomIn();
     },
     notifyOnToolClicked:function(e){
-        for(let i=0;i<this.listObserversOnToolClicked.length;i++){
-            this.listObserversOnToolClicked[i].notificationOnToolClicked(e.target.id);
-        }
+        this.parentClass.childNotificationOnToolClicked(e.target.id);
     },
     notifyOnLineWidthChanged:function(e){
-        for(let i=0;i<this.listObserversOnLineWidthChanged.length;i++){
-            this.listObserversOnLineWidthChanged[i].notificationOnLineWidthChanged(e.target.value);
-        }
+        this.parentClass.childNotificationOnLineWidthChanged(e.target.value);
     },
     notifyOnDurationChanged:function(e){
-        for(let i=0;i<this.listObserversOnDurationChanged.length;i++){
-            this.listObserversOnDurationChanged[i].notificationOnDurationChanged(e.target.value);
-        }
+        this.parentClass.childNotificationOnDurationChanged(e.target.value);
     },
-    registerOnSettingActionClicked:function(obj){
-        this.listObserversOnActionClicked.push(obj);
-    },
-    registerOnSettingZoomOut:function(obj){
-        this.listObserversOnZoomOut.push(obj);
-    },
-    registerOnSettingZoomIn:function(obj){
-        this.listObserversOnZoomIn.push(obj);
-    },
-    registerOnSettingToolClicked:function(obj){
-        this.listObserversOnToolClicked.push(obj);
-    },
-    registerOnSettingLineWidthChanged:function(obj){
-        this.listObserversOnLineWidthChanged.push(obj);
-    },
-    registerOnSettingDurationChanged:function(obj){
-        this.listObserversOnDurationChanged.push(obj);
-    }
+
 
 }
 let SectionPaths={
     HTMLElement:null,
 
-    listObserversOnBtnAddPathClicked:[],
-    listObserversOnPathClicked:[],
-    listObserversOnBtnDeletePathClicked:[],
-    listObserversOnBtnLoadSVGClicked:[],
-
     designerController:null,
     currentActiveHTMLPath:-1,
-    init:function(){
+    parentClass:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".panel-designer-options__section-paths");
         this.HTMLButtonAddPath=document.querySelector(".panel-designer-options__section-paths__button");
         this.HTMLPathsBox=document.querySelector(".panel-designer-options__section-paths__paths-box");
@@ -202,39 +165,20 @@ let SectionPaths={
     },
 
     notifyOnBtnAddPathClicked:function(){
-        for(let i=0;i<this.listObserversOnBtnAddPathClicked.length;i++){
-            this.listObserversOnBtnAddPathClicked[i].notificationOnBtnAddPathClicked();
-        }
+        this.parentClass.childNotificationOnBtnAddPathClicked();
     },
     notifyOnPathClicked:function(e){
         let indexPath=e.target.getAttribute("name");
-        for(let i=0;i<this.listObserversOnPathClicked.length;i++){
-            this.listObserversOnPathClicked[i].notificationOnPathClicked(indexPath);
-        }
+        this.parentClass.childNotificationOnPathClicked(indexPath);
     },
     notifyOnBtnDeletePathClicked:function(e){
         let indexPath=e.target.getAttribute("name");
-        for(let i=0;i<this.listObserversOnBtnDeletePathClicked.length;i++){
-            this.listObserversOnBtnDeletePathClicked[i].notificationOnBtnDeletePathClicked(indexPath);
-        }
+        this.parentClass.childNotificationOnBtnDeletePathClicked(indexPath)
     },
     notifyOnBtnLoadSVGClicked:function(){
-        for(let i=0;i<this.listObserversOnBtnLoadSVGClicked.length;i++){
-            this.listObserversOnBtnLoadSVGClicked[i].notificationOnbtnLoadSVGClicked();
-        }
+        this.parentClass.childNotificationOnBtnLoadSVGClicked();
     },
-    registerOnBtnAddPathClicked:function(obj){
-        this.listObserversOnBtnAddPathClicked.push(obj);
-    },
-    registerOnPathClicked:function(obj){
-        this.listObserversOnPathClicked.push(obj);
-    },
-    registerOnBtnDeletePathClicked:function(obj){
-        this.listObserversOnBtnDeletePathClicked.push(obj);
-    },
-    registerOnBtnLoadSVGClicked:function(obj){
-        this.listObserversOnBtnLoadSVGClicked.push(obj);
-    }
+
 }
 var SectionPathDesignerPopup={
     HTMLElement:null,
@@ -270,6 +214,20 @@ var SectionPathDesignerPopup={
     }
 }
 var PanelDesignerOptions={
+    name:'PanelDesignerOptions',
+    events:{
+        OnBtnAddPathClicked:'OnBtnAddPathClicked',
+        OnPathClicked:'OnPathClicked',
+        OnBtnDeletePathClicked:'OnBtnDeletePathClicked',
+        OnBtnLoadSVGClicked:'OnBtnLoadSVGClicked',
+
+        OnSettingActionClicked:'OnSettingActionClicked',
+        OnSettingZoomOut:'OnSettingZoomOut',
+        OnSettingZoomIn:'OnSettingZoomIn',
+        OnSettingToolClicked:'OnSettingToolClicked',
+        OnSettingLineWidthChanged:'OnSettingLineWidthChanged',
+        OnSettingDurationChanged:'OnSettingDurationChanged'
+    },
     HTMLElement:null,
 
     SectionSettings:SectionSettings,
@@ -278,25 +236,56 @@ var PanelDesignerOptions={
     designerController:null,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-designer-options");
-
-        PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
-        this.SectionSettings.registerOnSettingActionClicked(this);
+        this.SectionSettings.init(this);
+        this.SectionPathDesignerPopup.init(this);
+        this.SectionPaths.init(this);
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
     },
-    setDesignerController:function(obj){
+    setController:function(obj){
         this.designerController=obj;
         this.SectionPaths.designerController=obj;
         this.designerController.registerOnSetupCompleted(this);
     },
-    notificationOnItemsMenu_designPaths:function(imageModel){
+    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(args){
         this.HTMLElement.style.display="block";
+    },
 
-    },
-    notificationOnSettingActionClicked:function(){
-        this.HTMLElement.style.display="none";
-        this.SectionPaths.sleep();
-    },
     notificationOnSetupCompleted:function(designingSVG){
         this.SectionPaths.wakeUp(designingSVG);
+    },
 
-    }
+    childNotificationOnBtnAddPathClicked:function(){
+        MainMediator.notify(this.name,this.events.OnBtnAddPathClicked,[])
+    },
+    childNotificationOnPathClicked:function(indexPath){
+        MainMediator.notify(this.name,this.events.OnPathClicked,[indexPath]);
+    },
+    childNotificationOnBtnDeletePathClicked:function(indexPath){
+        MainMediator.notify(this.name,this.events.OnBtnDeletePathClicked,[indexPath]);
+    },
+    childNotificationOnBtnLoadSVGClicked:function(){
+        MainMediator.notify(this.name,this.events.OnBtnLoadSVGClicked,[])
+    },
+
+
+    childNotificationOnSettingActionClicked:function(targetId){
+        this.HTMLElement.style.display="none";
+        this.SectionPaths.sleep();
+        MainMediator.notify(this.name,this.events.OnSettingActionClicked,[targetId])
+    },
+    childNotificationOnZoomOut:function(){
+        MainMediator.notify(this.name,this.events.OnSettingZoomOut,[])
+    },
+    childNotificationOnZoomIn:function(){
+        MainMediator.notify(this.name,this.events.OnSettingZoomIn,[])
+    },
+    childNotificationOnToolClicked:function(targetId){
+        MainMediator.notify(this.name,this.events.OnSettingToolClicked,[targetId])
+    },
+    childNotificationOnLineWidthChanged:function(targetValue){
+        MainMediator.notify(this.name,this.events.OnSettingLineWidthChanged,[targetValue])
+    },
+    childNotificationOnDurationChanged:function(targetValue){
+        MainMediator.notify(this.name,this.events.OnSettingDurationChanged,[targetValue])
+    },
 }

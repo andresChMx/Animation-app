@@ -18,8 +18,9 @@ var CanvasDrawingManager=fabric.util.createClass({
         
         this.canvas=new fabric.Canvas('cPathsDesigner',{ width: window.innerWidth+200, height: window.innerHeight ,backgroundColor: 'rgb(123,123,123)',selection:false}); 
         
-        SectionSettings.registerOnSettingZoomIn(this);
-        SectionSettings.registerOnSettingZoomOut(this);
+
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingZoomOut,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingZoomIn,this);
 
 
     },
@@ -213,11 +214,11 @@ var CanvasDrawingManager=fabric.util.createClass({
     registerOnMouseUp:function(obj){
         this.listObserversOnMouseUp.push(obj);
     },
-    notificationOnZoomIn:function(){
+    notificationPanelDesignerOptionsOnSettingZoomOut:function(){
         this.canvasZoomVal*=1.1;
         this.setupCanvasDimensions();
     },
-    notificationOnZoomOut:function(){
+    notificationPanelDesignerOptionsOnSettingZoomIn:function(){
         this.canvasZoomVal*=0.9;
         this.setupCanvasDimensions();
     },

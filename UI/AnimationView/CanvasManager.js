@@ -1,18 +1,19 @@
 var CanvasManager={
+    name:'CanvasManager',
+    events:{
+        OnSelectionUpdated:'OnSelectionUpdated',// cuando se crea, oculta o cambia a otro objeto
+        OnObjDeletedFromListWidthEntraces:'OnObjDeletedFromListWidthEntraces', // cuando se elimina un objeto del canvas (entonces de las dos listas)
+        OnObjAddedToListWithEntrance:'OnObjAddedToListWithEntrance',//cuando se agrego o elimina un elemento de la lista listAnimableObjectsWithEntraces
+        OnObjModified:'OnObjModified',
+        OnAnimableObjectAdded:'OnAnimableObjectAdded',
+        OnAnimableObjectDeleted:'OnAnimableObjectDeleted'
+    },
     HTMLElement:null,
     canvas:null,
     listAnimableObjects:[],//NO TIENE UNA RAZON DE SER CLARA PERO SE ESPERA QUE CUANDO DENGAMOS QUE HACER ALGO EN LOS ELEMENTOS ANIMABLES, NO TENGMOS QUE RECORRER TODOS LOS ELEMENTOS DEL CANVAS, sino solo lso animables, ademas son los que se muestran en el objects editor
     listAnimableObjectsWithEntrance:[],// este es un subconjunto de la lista de arriba
     camera:null,
 
-    listObserversOnObjSelectionUpdated:[],// cuando se crea, oculta o cambia a otro objeto
-    listObserversOnObjModified:[],
-    listObserversOnObjDeletedFromListWithEntrance:[], // cuando se elimina un objeto del canvas (entonces de las dos listas)
-    listObserversOnObjAddedToListWithEntrace:[],//cuando se agrego o elimina un elemento de la lista listAnimableObjectsWithEntraces
-
-
-    listObserversOnAnimableObjectDeleted:[],
-    listObserversOnAnimableObjectAdded:[],
     SectionFloatingMenu:null,
     init:function(){
         this.SectionFloatingMenu=SectionFloatingMenu;
@@ -23,10 +24,12 @@ var CanvasManager={
         this.HTMLElement=document.querySelector(".canvas-animator");
         this.boundingClientRect=this.HTMLElement.getBoundingClientRect();
         this.initCanvas();
-        this.initEvents();
+
         this.initCamera();
 
         this.panningAndZoomBehaviour();
+
+        this.initEvents();
     },
     initCanvas:function(resolutionWidth,resolutionHeight){
         let aspectRatio=0.6;
@@ -38,19 +41,19 @@ var CanvasManager={
         this.canvas.preserveObjectStacking=true;
     },
     initEvents:function(){
-        this.canvas.on('selection:updated',this.notifyOnObjSelectionUpdated);
-        this.canvas.on('selection:created',this.notifyOnObjSelectionUpdated);
-        this.canvas.on('selection:cleared',this.notifyOnObjSelectionUpdated);
+        this.canvas.on('selection:updated',this.notifyOnObjSelectionUpdated.bind(this));
+        this.canvas.on('selection:created',this.notifyOnObjSelectionUpdated.bind(this));
+        this.canvas.on('selection:cleared',this.notifyOnObjSelectionUpdated.bind(this));
         //this.canvas.on('object:removed',this.notifyOnObjDeleted)
-        this.canvas.on('object:modified',this.notifyOnObjModified);
+        this.canvas.on('object:modified',this.notifyOnObjModified.bind(this));
 
         //PanelInspector.SectionPropertiesEditor.registerOnFieldInput(this);
-        PanelActionEditor.registerOnDurationInput(this);
-        PanelActionEditor.registerOnMarkerDragEnded(this);
-        PanelActionEditor.SectionProperties.registerOnFieldPropertyInput(this);
-        PanelInspector.SectionToolBox.registerOnTextTools(this);
-        PanelAssets.SectionImageAssets.registerOnDummyDraggingEnded(this);
+        MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnDurationInput,this);
+        MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this)
+        MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnFieldPropertyInput,this);
+        MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnTextOptionClicked,this);
 
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDummyDraggingEnded,this);
         WindowManager.registerOnKeyDeletePressed(this);
         },
     initCamera:function(){
@@ -63,7 +66,7 @@ var CanvasManager={
             this.camera=animCamera;
             this.listAnimableObjects.push(animCamera);
             this.canvas.add(animCamera);
-            this.notifyOnAnimableObjectAdded(animCamera);
+            this.notifyOnAnimableObjectAdded.bind(this)(animCamera);
         }.bind(this));
 
     },
@@ -135,7 +138,7 @@ var CanvasManager={
     },
     addItemToListObjectsWithEntrance:function(obj){
         this.listAnimableObjectsWithEntrance.push(obj);
-        this.notifyOnObjAddedToListObjectsWithEntrance(obj)
+        this.notifyOnObjAddedToListObjectsWithEntrance.bind(this)(obj)
     },
     removeFromListObjectsWithEntrance:function(object){
         let indexInListObjectsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(object);
@@ -188,8 +191,8 @@ var CanvasManager={
         self.listAnimableObjectsWithEntrance.push(animObj);
         self.canvas.add(animObj);
 
-        self.notifyOnObjAddedToListObjectsWithEntrance(animObj);
-        self.notifyOnAnimableObjectAdded(animObj);
+        self.notifyOnObjAddedToListObjectsWithEntrance.bind(this)(animObj);
+        self.notifyOnAnimableObjectAdded.bind(self)(animObj);
 
     },
     createAnimableText:function(){
@@ -218,63 +221,32 @@ var CanvasManager={
         }
         this.canvas.renderAll();
     },
-    registerOnSelectionUpdated:function(obj){
-        this.listObserversOnObjSelectionUpdated.push(obj);
-    },
-    registerOnObjDeletedFromListWidthEntraces:function(obj){
-        this.listObserversOnObjDeletedFromListWithEntrance.push(obj);
-    },
-    registerOnObjAddedToListWithEntrance:function(obj){
-        this.listObserversOnObjAddedToListWithEntrace.push(obj);
-    },
-    registerOnObjModified:function(obj){
-        this.listObserversOnObjModified.push(obj);
-    },
-    registerOnAnimableObjectAdded:function(obj){
-        this.listObserversOnAnimableObjectAdded.push(obj);
-    },
-    registerOnAnimableObjectDeleted:function(obj){
-        this.listObserversOnAnimableObjectDeleted.push(obj);
-    },
     notifyOnObjAddedToListObjectsWithEntrance:function(animObj){
-        let self=CanvasManager;
-        for(let i=0;i<self.listObserversOnObjAddedToListWithEntrace.length;i++){
-            self.listObserversOnObjAddedToListWithEntrace[i].notificationOnObjAddedToListObjectsWithEntrance(animObj);
-        }
+        MainMediator.notify(this.name,this.events.OnObjAddedToListWithEntrance,[animObj]);
     },
     notifyOnAnimableObjectAdded:function(animObj){
-        for(let i=0;i<this.listObserversOnAnimableObjectAdded.length;i++){
-            this.listObserversOnAnimableObjectAdded[i].notificationOnAnimableObjectAdded(animObj);
-        }
+        MainMediator.notify(this.name,this.events.OnAnimableObjectAdded,[animObj]);
     },
     notifyOnAnimableObjectDeleted:function(indexInAnimableObjectsList){
-        for(let i=0;i<this.listObserversOnAnimableObjectDeleted.length;i++){
-            this.listObserversOnAnimableObjectDeleted[i].notificationOnAnimableObjectDeleted(indexInAnimableObjectsList);
-        }
+        MainMediator.notify(this.name,this.events.OnAnimableObjectDeleted,[indexInAnimableObjectsList]);
     },
     notifyOnObjSelectionUpdated:function(opt){
-        let self=CanvasManager;
-        for(let i=0;i<self.listObserversOnObjSelectionUpdated.length;i++){
-            self.listObserversOnObjSelectionUpdated[i].notificationOnSelectionUpdated(opt.target);
-        }
+        MainMediator.notify(this.name,this.events.OnSelectionUpdated,[opt.target]);
     },
     /*Object deleted from every where*/
     notifyOnObjDeletedFromListWithEntrance:function(indexInObjsWithEntrance){
-        let self=CanvasManager;
-        for(let i=0;i<self.listObserversOnObjDeletedFromListWithEntrance.length;i++){
-            self.listObserversOnObjDeletedFromListWithEntrance[i].notificationOnObjDeletedFromListWithEntrance(indexInObjsWithEntrance);
-        }
+        MainMediator.notify(this.name,this.events.OnObjDeletedFromListWidthEntraces,[indexInObjsWithEntrance]);
     },
     notifyOnObjModified:function(opt){
-        let self=CanvasManager;
-        for(let i=0;i<self.listObserversOnObjModified.length;i++){
-            self.listObserversOnObjModified[i].notificationOnObjModified(opt.target);
-        }
+        MainMediator.notify(this.name,this.events.OnObjModified,[opt.target]);
     },
-    notificationOnTextToolsPressed:function(action){
-      this.createAnimableObject({url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603741009/text_xzcmse.png"},"TextAnimable")
+    notificationPanelInspectorOnTextOptionClicked:function(args){
+        let action=args[0];
+
+        this.createAnimableObject({url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603741009/text_xzcmse.png"},"TextAnimable")
     },
-    notificationOnFieldPropertyInput:function(propName,propNewValue){
+    notificationPanelActionEditorOnFieldPropertyInput:function(args){
+        let propName=args[0];let propNewValue=args[1];
         let activeAnimObj=this.getSelectedAnimableObj();
         if(activeAnimObj){
             activeAnimObj.set(propName,parseFloat(propNewValue));
@@ -285,21 +257,21 @@ var CanvasManager={
     notificationOnKeyDeleteUp:function(){
         this.removeActiveAnimableObject()
     },
-    notificationOnDummyDraggingEnded:function(model){
-        let self=CanvasManager;
-        self.createAnimableObject(model);
+    notificationPanelAssetsOnImageAssetDummyDraggingEnded:function(args){
+        let model=args[0];
+        this.createAnimableObject(model);
     },
-    notificationOnMarkerDragEnded:function(){
+    notificationPanelActionEditorOnMarkerDragEnded:function(){
         for(let i=0;i<this.listAnimableObjects.length;i++){
             this.listAnimableObjects[i].setCoords();
         }
     },
-    notificationOnDurationInput:function(durationBefore,durationAfter){
+    notificationPanelActionEditorOnDurationInput:function(args){
+        let durationBefore=args[0];let durationAfter=args[1];
         for(let i=0;i<this.listAnimableObjects.length;i++){
             this.listAnimableObjects[i].animator.onDurationChange(durationBefore,durationAfter);
         }
-    }
-
+    },
 }
 
 var SectionFloatingMenu={
@@ -340,13 +312,16 @@ var SectionFloatingMenu={
         this.HTMLElement=document.querySelector(".canvas-animator__object__menu-options");
         this.lastAnimableObjectActive=null;
         this.generateHTMLOptions();
-        CanvasManager.registerOnSelectionUpdated(this);
-        CanvasManager.registerOnObjModified(this)
+
         this.initEvents();
     },
     initEvents:function(){
-        PanelInspector.SectionToolBox.registerOnBtnPreview(this);
-        PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnSelectionUpdated,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjModified,this);
+        MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnPreviewClicked,this);
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
+
+
     },
     generateHTMLOptions:function(){
         for(let i=0;i<this.MODELOptions.length;i++){
@@ -384,7 +359,7 @@ var SectionFloatingMenu={
         let index=parseInt(e.target.getAttribute("index"));
         this.MODELOptions[index].action.bind(this)(this.lastAnimableObjectActive);
     },
-    notificationOnSelectionUpdated:function(){// and on canvas active Object deleted
+    notificationCanvasManagerOnSelectionUpdated:function(){// and on canvas active Object deleted
         let activeAnimableObject=CanvasManager.getSelectedAnimableObj();
         if(activeAnimableObject && activeAnimableObject.type!=="AnimableCamera"){
             this.lastAnimableObjectActive=activeAnimableObject;
@@ -397,7 +372,7 @@ var SectionFloatingMenu={
             this.hiddeMenu();
         }
     },
-    notificationOnObjModified:function(obj){
+    notificationCanvasManagerOnObjModified:function(obj){
         if(this.lastAnimableObjectActive){
             let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
             this.showMenu(
@@ -409,8 +384,8 @@ var SectionFloatingMenu={
         }
     },
     /*notificaiones solo para desativar el menu*/
-    notificationOnItemsMenu_designPaths:function(){this.hiddeMenu();CanvasManager.canvas.discardActiveObject().renderAll();},
-    notificationOnBtnPreview:function(){this.hiddeMenu();CanvasManager.canvas.discardActiveObject().renderAll();}
+    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(args){this.hiddeMenu();CanvasManager.canvas.discardActiveObject().renderAll();},
+    notificationPanelInspectorOnBtnPreviewClicked:function(){this.hiddeMenu();CanvasManager.canvas.discardActiveObject().renderAll();}
 }
 var SectionConfigureObject={
     HTMLElement:null,
@@ -486,6 +461,7 @@ var SectionConfigureObject={
                 this.currentAnimableObject.entranceMode===EntranceModes.none){
                 CanvasManager.addItemToListObjectsWithEntrance(this.currentAnimableObject);
             }
+
             this.currentAnimableObject.setEntranceMode(this.currentSelectedOptions.entranceMode);
         }
         this.hiddeModel();

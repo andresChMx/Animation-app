@@ -3,6 +3,16 @@ var ObserverType={
     main:"main",
 };
 var WindowManager={
+    name:'WindowManager',
+    events:{
+        OnLoad:'OnLoad',
+        OnResize:'OnResize',
+        OnMouseUp:'OnMouseUp',
+        OnMouseMove:'OnMouseMove',
+        OnMouseDown:'OnMouseDown',
+        OnKeyDeleteUp:'OnKeyDeleteUp',
+        OnKeyEnterUp:'OnKeyEnterUp'
+    },
     mouse:{
         x:0,y:0,click:false,
     },
@@ -31,17 +41,20 @@ var WindowManager={
     activeObserverType:ObserverType.main,
 
     init:function(){
-        window.addEventListener("load",initUI);
+        window.addEventListener("load",this.initUI.bind(this));
         window.addEventListener("resize",this.onWindowResize);
         window.addEventListener("mouseup",this.onWindowMouseUp);
         window.addEventListener("mousemove",this.onWindowMouseMove);
         window.addEventListener("mousedown",this.onWindowMouseDown);
 
         window.addEventListener("keyup",this.onKeyUp.bind(this))
-        PanelDesignerOptions.SectionSettings.registerOnSettingActionClicked(this);
-        PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
+
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
+
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
+
     },
-    notificationOnSettingActionClicked:function(actionId){
+    notificationPanelDesignerOptionsOnSettingActionClicked:function(actionId){
         let self=WindowManager;
         for(var obsListTmp in self.listObservers[ObserverType.temp] ){
             self.listObservers[ObserverType.temp][obsListTmp]=[];
@@ -49,9 +62,8 @@ var WindowManager={
         self.activeObserverType=ObserverType.main;
     },
     /*PanelAssets.SectionImageAssets*/
-    notificationOnItemsMenu_designPaths:function(){
-        let self=WindowManager;
-        self.activeObserverType=ObserverType.temp;
+    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(){
+        this.activeObserverType=ObserverType.temp;
     },
     registerObserverOnResize:function(obj,obsType=ObserverType.main){
         let self=WindowManager;
@@ -115,32 +127,28 @@ var WindowManager={
                 self.listObservers[self.activeObserverType].onKeyEnterUp[i].notificationOnKeyEnterUp();
             }
         }
+    },
+    initUI:function(){
+        document.body.style.width=window.innerWidth + "px";
+        document.body.style.height=window.innerHeight + "px";
+
+        /*ANIMATOR*/
+        PanelAnimation.init();
+        PanelAnimation.PanelActionEditor.init();
+
+        PanelInspector.init();
+        //PanelInspector.SectionPropertiesEditor.init();
+        //PanelInspector.SectionMenuAddKey.init();
+
+        PanelAssets.init();
+
+
+        /*paths desginer*/
+        PanelDesignerOptions.init();
+        PanelPathsDesigner.init();
+
+        /*pewviewer*/
+        PanelPreviewer.init();
+
     }
-}
-function initUI(){
-    document.body.style.width=window.innerWidth + "px";
-    document.body.style.height=window.innerHeight + "px";
-
-    /*ANIMATOR*/
-    PanelAnimation.init();
-    PanelAnimation.PanelActionEditor.init();
-
-    PanelInspector.init();
-    //PanelInspector.SectionPropertiesEditor.init();
-    //PanelInspector.SectionMenuAddKey.init();
-
-    PanelAssets.init();
-    PanelAssets.SectionImageAssets.init();
-
-
-    /*paths desginer*/
-    PanelDesignerOptions.init();
-    PanelDesignerOptions.SectionSettings.init();
-    PanelDesignerOptions.SectionPaths.init();
-    PanelDesignerOptions.SectionPathDesignerPopup.init();
-    PanelPathsDesigner.init();
-
-    /*pewviewer*/
-    PanelPreviewer.init();
-
 }

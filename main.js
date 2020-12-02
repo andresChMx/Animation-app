@@ -1,19 +1,17 @@
-
+  MainMediator.registerSubjects([WindowManager,PanelActionEditor,PanelAssets,CanvasManager,PanelInspector,PanelDesignerOptions,PanelPreviewer]);
   WindowManager.init();
   CanvasManager.init();
-
   var fontsLoader=new FontsLoader();
 
-  var timeLineController=new TimeLineController();
-  PanelActionEditor.setTimelineController(timeLineController);
 
 
+  /*-------------------CONTROLLERS--------------------*/
+
+  var animationController=new AnimationController();
+  PanelAnimation.setController(animationController);
 
   var pathDesignerController= new PathDesignerController();
-PanelDesignerOptions.setDesignerController(pathDesignerController);
+  PanelDesignerOptions.setController(pathDesignerController);
 
   var scenePreviewController=new ScenePreviewController();
-PanelPreviewer.setScenePreviewerController(scenePreviewController);
-
-
-
+  PanelPreviewer.setController(scenePreviewController);

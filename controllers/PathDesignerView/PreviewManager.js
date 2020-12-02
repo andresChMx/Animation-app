@@ -13,10 +13,10 @@ var PreviewManager=fabric.util.createClass({
         
         this.canvasDrawingManager.registerOnPointModified(this);
         this.canvasDrawingManager.registerOnMouseUp(this);
-        PanelDesignerOptions.SectionSettings.registerOnSettingLineWidthChanged(this);
-        PanelDesignerOptions.SectionPaths.registerOnBtnAddPathClicked(this);
-        PanelDesignerOptions.SectionPaths.registerOnBtnDeletePathClicked(this);
-        PanelDesignerOptions.SectionSettings.registerOnSettingDurationChanged(this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingLineWidthChanged,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnAddPathClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnDeletePathClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingDurationChanged,this);
 
         this.scalerFactorX;
         this.scalerFactorY;
@@ -56,16 +56,17 @@ var PreviewManager=fabric.util.createClass({
     notificationOnMouseUp:function(mouseX,mouseY){
         this.pathIllustrator.counterInterruption=100;
     },
-    notificationOnLineWidthChanged:function(value){
+    notificationPanelDesignerOptionsOnSettingLineWidthChanged:function(args){
         this.pathIllustrator.counterInterruption=100;
     },
-    notificationOnBtnAddPathClicked:function(){
+    notificationPanelDesignerOptionsOnBtnAddPathClicked:function(){
         this.pathIllustrator.counterInterruption=100;
     },
-    notificationOnBtnDeletePathClicked:function(index){
+    notificationPanelDesignerOptionsOnBtnDeletePathClicked:function(index){
         this.pathIllustrator.counterInterruption=100;
     },  
-    notificationOnDurationChanged:function(value){
+    notificationPanelDesignerOptionsOnSettingDurationChanged:function(args){
+        let value=args[0];
         this.pathIllustrator.counterInterruption=100;
         if(isNaN(value)){
             this.pathIllustrator.data.duration=3000;

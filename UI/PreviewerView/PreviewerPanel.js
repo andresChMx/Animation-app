@@ -1,4 +1,8 @@
 var PanelPreviewer={
+    name:'PanelPreviewer',
+    events:{
+        OnBtnClose:'OnBtnClose'
+    },
     HTMLElement:null,
     HTMLParent:null,
     scenePreviewerController:null,
@@ -7,8 +11,6 @@ var PanelPreviewer={
     resolutionHeight:800,
 
     canvas:null,
-
-    listObserversOnBtnClose:[],
     init:function(){
         this.HTMLElement=document.querySelector(".panel-previewer");
         this.HTMLParent=this.HTMLElement.parentNode;
@@ -18,15 +20,16 @@ var PanelPreviewer={
 
         let btnClose=document.querySelector(".panel-previewer__btn-close");
         btnClose.addEventListener("click",this.OnBtnCloseClicked.bind(this));
-        PanelInspector.SectionToolBox.registerOnBtnPreview(this);
 
+        MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnPreviewClicked,this);
         this.canvas=new CustomStaticCanvas('panel-previewer__canvas');
         this.scenePreviewerController.setPreviewerCanvas(this.canvas);
     },
-    setScenePreviewerController:function(controller){
+    setController:function(controller){
+        console.log(controller);
         this.scenePreviewerController=controller;
     },
-    notificationOnBtnPreview:function(){
+    notificationPanelInspectorOnBtnPreviewClicked:function(){
         this.setupDimentions(1400,800,15,20,10);
 
         this.HTMLParent.style.display="block";
@@ -51,11 +54,6 @@ var PanelPreviewer={
         this.notifyBtnClose();
     },
     notifyBtnClose:function(){
-        for(let i=0;i<this.listObserversOnBtnClose.length;i++){
-            this.listObserversOnBtnClose[i].notificationOnBtnClose();
-        }
+        MainMediator.notify(this.name,this.events.OnBtnClose,[]);
     },
-    registerOnBtnClose:function(obj){
-        this.listObserversOnBtnClose.push(obj);
-    }
 }

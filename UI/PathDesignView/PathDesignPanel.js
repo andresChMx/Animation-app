@@ -3,13 +3,14 @@ var PanelPathsDesigner={
     init:function(){
         this.HTMLElement=document.querySelector(".panel-paths-designer");
 
-        PanelAssets.SectionImageAssets.registerOnItemsMenu_designPaths(this);
-        PanelDesignerOptions.SectionSettings.registerOnSettingActionClicked(this);
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
+
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
     },
-    notificationOnSettingActionClicked:function(){
+    notificationPanelDesignerOptionsOnSettingActionClicked:function(){
         this.HTMLElement.style.display="none";
     },
-    notificationOnItemsMenu_designPaths:function(data){
+    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(args){
         this.HTMLElement.style.display="flex";
         this.resizeHTMLElement();
     },

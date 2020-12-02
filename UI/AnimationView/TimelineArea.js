@@ -398,8 +398,13 @@ let Padding = fabric.util.createClass(Component, {
     }
 })
 let TimeLineProxy=fabric.util.createClass({
-    initialize:function (WindowManager,htmlElementSelector,propertyLanesNames){
+    initialize:function (WindowManager,htmlElementSelector,propertyLanesNames,classParent){
         this.timeLineComponent=new TimeLineActions(WindowManager,htmlElementSelector,propertyLanesNames);
+
+        this.timeLineComponent.keysBarComponent.registerOnKeyFrameDragEnded(classParent);
+        this.timeLineComponent.keysBarComponent.registerOnKeyFrameDragging(classParent);
+        this.timeLineComponent.markerComponent.registerOnDragging(classParent);
+        this.timeLineComponent.markerComponent.registerOnDragEnded(classParent);
     },
     setDuration:function(durationBefore,durationAfter){
         this.timeLineComponent.globalState.time.duration=durationAfter;
@@ -429,18 +434,6 @@ let TimeLineProxy=fabric.util.createClass({
     getLaneActiveKeyFrames:function(laneName){
         let tmp =this.timeLineComponent.keysBarComponent.dictPropertiesLanes[laneName].getActiveKeyFrames();
         return tmp;
-    },
-    registerOnKeyFrameDragEnded:function(obj){
-        this.timeLineComponent.keysBarComponent.registerOnKeyFrameDragEnded(obj);
-    },
-    registerOnKeyFrameDragging:function(obj){
-        this.timeLineComponent.keysBarComponent.registerOnKeyFrameDragging(obj);
-    },
-    registerOnMarkerDragging:function(obj){
-        this.timeLineComponent.markerComponent.registerOnDragging(obj);
-    },
-    registerOnMarkerDragEnded:function(obj){
-        this.timeLineComponent.markerComponent.registerOnDragEnded(obj);
     }
 })
 let TimeLineActions = fabric.util.createClass({
