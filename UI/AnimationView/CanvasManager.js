@@ -6,7 +6,9 @@ var CanvasManager={
         OnObjAddedToListWithEntrance:'OnObjAddedToListWithEntrance',//cuando se agrego o elimina un elemento de la lista listAnimableObjectsWithEntraces
         OnObjModified:'OnObjModified',
         OnAnimableObjectAdded:'OnAnimableObjectAdded',
-        OnAnimableObjectDeleted:'OnAnimableObjectDeleted'
+        OnAnimableObjectDeleted:'OnAnimableObjectDeleted',
+
+        OnDesignPathOptionClicked:'OnDesignPathOptionClicked',
     },
     HTMLElement:null,
     canvas:null,
@@ -15,6 +17,8 @@ var CanvasManager={
     camera:null,
 
     SectionFloatingMenu:null,
+
+
     init:function(){
         this.SectionFloatingMenu=SectionFloatingMenu;
         this.SectionConfigureObject=SectionConfigureObject;
@@ -39,6 +43,8 @@ var CanvasManager={
         this.canvas=new fabric.Canvas('c',{ width: trueWidth, height:trueHeight,backgroundColor: 'rgb(240,240,240)'});
         document.querySelector(".canvas-outterContainer").style.width=trueWidth + "px";
         this.canvas.preserveObjectStacking=true;
+
+
     },
     initEvents:function(){
         this.canvas.on('selection:updated',this.notifyOnObjSelectionUpdated.bind(this));
@@ -58,16 +64,17 @@ var CanvasManager={
         },
     initCamera:function(){
         fabric.Image.fromURLCustom("https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599380/icons/camera_kykhid.svg",function(animCamera){
-            animCamera.left=0;
-            animCamera.top=0;
-            animCamera.width=1400;
-            animCamera.height=800;
-            animCamera.isCamera=true;
             this.camera=animCamera;
             this.listAnimableObjects.push(animCamera);
             this.canvas.add(animCamera);
             this.notifyOnAnimableObjectAdded.bind(this)(animCamera);
-        }.bind(this));
+        }.bind(this),{
+            left:0,
+            top:0,
+            width:1400,
+            height:800,
+            imageDrawingData:{'url':'http...',id:"",userid:"",imgHTML:""}
+        });
 
     },
     panningAndZoomBehaviour:function(){
@@ -170,22 +177,25 @@ var CanvasManager={
                     self.canvas.add(obj).renderAll();
                   });
                 */
+
+        //console.log(model);
         let animObj=null;
         if(type==="ImageAnimable"){
             animObj=new ImageAnimable(model.imgHTML,{
 
                 "left":WindowManager.mouse.x-this.canvas._offset.left,
-                "top":WindowManager.mouse.y-this.canvas._offset.top
+                "top":WindowManager.mouse.y-this.canvas._offset.top,
+                "imageDrawingData":model,
             })
-            animObj.setEntranceMode(EntranceModes.drawn); // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea
+             // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea
         }else{ //(type==="TextAnimable")
             animObj=new TextAnimable("asdfasdfasdf",{
                 "left":100,
                 "top":100,
+                "imageDrawingData":model,
             })
             animObj.setEntranceMode(EntranceModes.text_drawn); //textos tambien tendran entrada siendo dibujados
         }
-        animObj.imageModel=model;
         animObj.setCoords();
         self.listAnimableObjects.push(animObj);
         self.listAnimableObjectsWithEntrance.push(animObj);
@@ -240,6 +250,12 @@ var CanvasManager={
     notifyOnObjModified:function(opt){
         MainMediator.notify(this.name,this.events.OnObjModified,[opt.target]);
     },
+    notificationOnKeyDeleteUp:function(){
+        this.removeActiveAnimableObject()
+    },
+    childNotificationOnDesignPathOptionClicked:function(currentSelectedObject){
+        MainMediator.notify(this.name,this.events.OnDesignPathOptionClicked,[currentSelectedObject.imageDrawingData,currentSelectedObject])
+    },
     notificationPanelInspectorOnTextOptionClicked:function(args){
         let action=args[0];
 
@@ -253,9 +269,6 @@ var CanvasManager={
             activeAnimObj.setCoords();
             this.canvas.renderAll();
         }
-    },
-    notificationOnKeyDeleteUp:function(){
-        this.removeActiveAnimableObject()
     },
     notificationPanelAssetsOnImageAssetDummyDraggingEnded:function(args){
         let model=args[0];
@@ -295,16 +308,21 @@ var SectionFloatingMenu={
             icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/delete-icon_logtrc.png",
             description:"Remove",
             action:function (){
-                if(this.lastAnimableObjectActive){
-                    CanvasManager.removeActiveAnimableObject();
-                }
+                CanvasManager.removeActiveAnimableObject();
             }
         },
         {
             icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/settings-icon_jsw4qf.png",
-            description:"Configurate Object",
+            description:"Configure Object",
             action:function (animableObject){
                 CanvasManager.SectionConfigureObject.showModal(animableObject);
+            }
+        },
+        {
+            icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/settings-icon_jsw4qf.png",
+            description:"design path for this object",
+            action:function(animableObject){
+                CanvasManager.childNotificationOnDesignPathOptionClicked(animableObject);
             }
         }
     ],
@@ -318,10 +336,9 @@ var SectionFloatingMenu={
     initEvents:function(){
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnSelectionUpdated,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjModified,this);
+
         MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnPreviewClicked,this);
-        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
-
-
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
     },
     generateHTMLOptions:function(){
         for(let i=0;i<this.MODELOptions.length;i++){
@@ -384,7 +401,7 @@ var SectionFloatingMenu={
         }
     },
     /*notificaiones solo para desativar el menu*/
-    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(args){this.hiddeMenu();CanvasManager.canvas.discardActiveObject().renderAll();},
+    notificationCanvasManagerOnDesignPathOptionClicked:function(args){this.hiddeMenu();CanvasManager.canvas.discardActiveObject().renderAll();},
     notificationPanelInspectorOnBtnPreviewClicked:function(){this.hiddeMenu();CanvasManager.canvas.discardActiveObject().renderAll();}
 }
 var SectionConfigureObject={

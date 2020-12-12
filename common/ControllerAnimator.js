@@ -1,5 +1,6 @@
 var ControllerAnimator=fabric.util.createClass({
-    initialize:function(canvasToDisplay){
+    initialize:function(canvasToDisplay,parentClass){
+        this.parentClass=parentClass;
         this.canvasToDisplay=canvasToDisplay;
         this.objectsToAnimate=[];
         this.totalDuration=9000;
@@ -44,7 +45,9 @@ var ControllerAnimator=fabric.util.createClass({
             this.requestAnimFrameID=null;
         }
     },
-
+    calcNormalizedTotalProgress:function(){
+      return this.totalProgress/this.totalDuration;
+    },
     _loop:function(){
         let self=this;
         (function tick(){
@@ -53,6 +56,7 @@ var ControllerAnimator=fabric.util.createClass({
             //console.log(timelineCurrentTime);
             if(!(time>self.animFinishTime) || self.flagDoLastUpdate){
                 self._updateObjectsAccordAnims(self);
+                self.parentClass.childNotificationOnAnimatorTick(self.calcNormalizedTotalProgress());
                 //onAnimFrame();
                 //CanvasManager.canvas.renderAll();
                 self.canvasToDisplay.renderAll();
@@ -68,15 +72,15 @@ var ControllerAnimator=fabric.util.createClass({
     },
     _updateObjectsAccordAnims:function(self){
         for(var i=0;i<this.objectsToAnimate.length;i++){
-            if(this.objectsToAnimate[i].animator.hasAnimations()){
+            //if(this.objectsToAnimate[i].animator.hasAnimations()){
 
                 this.objectsToAnimate[i].animator.executeAnimations(self.totalProgress);
                 //if (!this.objectsToAnimate[i].isOnScreen()) {
                 //}
               //console.log(listAnimableObjects[i].listAnimations.length);
-            }else{
+            //}else{
               //no hacer nada
-            }
+            //}
         }
     }
 })

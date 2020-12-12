@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <script src="knockout.js"></script>
+    <script  src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-firestore.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyCsEgjXD5P01yKgppoubymvMxijwOqIaiA",
+            authDomain: "drawesome-29e1e.firebaseapp.com",
+            databaseURL: "https://drawesome-29e1e.firebaseio.com",
+            projectId: "drawesome-29e1e",
+            storageBucket: "drawesome-29e1e.appspot.com",
+            messagingSenderId: "272805254155",
+            appId: "1:272805254155:web:f13ba700248a82ac57e30e",
+            measurementId: "G-1MJ0XWKJ8K"
+        };
+        // Initialize Firebase
+        let app= firebase.initializeApp(firebaseConfig);
+        window.db = firebase.firestore(app);
+        //firebase.analytics();
+    </script>
+
     <style>
         *{
             margin:0;
@@ -18,6 +42,49 @@
  <link rel="stylesheet" href="stylesPathsDesigner.css">
 </head>
 <body>
+    <!--==============================
+    ========== AUTHENTICATION  =========
+    ===============================-->
+    <div class="panel-authentication__filter" style="display: none;">
+        <div class="panel-authentication">
+            <div class="panel-authentication__signup-section" >
+                <p class="panel-authentication__signup-section__title">Sign Up</p>
+                <form class="panel-authentication__signup-section__form" method="POST">
+                    <div class="form-group">
+                        <label for=""></label>
+                        <input type="email" class="email-input" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <label for=""></label>
+                        <input type="password" class="password-input" placeholder="Password">
+                    </div>
+                    <input type="submit" value="Sign Up" class="panel-authentication__auth-form__submit-button" >
+                </form>
+                <div class="panel-authentication__signup-section__footer">
+                    <p>New around here? <a href="" class="panel-authentication__signup-section__footer__login">Log In</a></p>
+                    <!--<p>Fogot your password? <a href="" class="panel-authentication__signup-section__footer__reset-pass">Reset password</a></p>-->
+                </div>
+            </div>
+            <div class="panel-authentication__login-section" style="display:none">
+                <p class="panel-authentication__login-section__title">Log In</p>
+                <form class="panel-authentication__login-section__form" method="POST">
+                    <div class="form-group">
+                        <label for=""></label>
+                        <input type="email" class="email-input" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for=""></label>
+                        <input type="password" class="password-input" placeholder="Password">
+                    </div>
+                    <input type="submit" value="Log In" class="panel-authentication__auth-form__submit-button">
+                </form>
+                <div class="panel-authentication__login-section__footer">
+                    <p>Already have an account<a href="" class="panel-authentication__login-section__footer__signup">Sign Up</a></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
     <!--==============================
     ========== MAIN CANVAS  =========
     ===============================-->
@@ -67,21 +134,39 @@
     ===============================-->
     <section class="panel-assets">
         <nav class="panel-assets__menu-sections">
-            <div class="panel-assets__menu-sections__item">Drawables</div>
             <div class="panel-assets__menu-sections__item">Images</div>
+            <div class="panel-assets__menu-sections__item">gifs</div>
             <div class="panel-assets__menu-sections__item">Sound</div>
         </nav>
         <div class="panel-assets__sections-container">
-            <div class="panel-assets__sections-container__section-image-assets">
+            <div class="panel-assets__sections-container__section-image-assets" data-bind="foreach: listAssets">
+                <div class="panel-assets__section-image-assets__item" data-bind="setupEvents: koBindingSetupHTML($element)" >
+                    <div class="panel-assets__section-image-assets__item__inner-container">
+                        <img src="" data-bind="attr:{src:model.url}" crossorigin alt="" class="panel-assets__section-image-assets__item__inner-container__image" >
+                        <button class="panel-assets__section-image-assets__item__btn-options"></button>
+                    </div>
+                </div>
             </div>
 
             <div class="panel-assets__sections-container__section-font-assets">
-                <div></div>
             </div>
             <div class="sections-container__section-third"></div>
         </div>
-        <button class="panel-assets__btn-add-resource">Add Resources</button>
+        <div class="panel-assets__buttons-add-resource">
+            <button class="panel-assets__buttons-add-resource__image-asset">Add Image</button>
+            <button class="panel-assets__buttons-add-resource__gifs-asset" style="display:none">Add Gif</button>
+            <button class="panel-assets__buttons-add-resource__sound-asset" style="display:none">Add Sound</button>
+        </div>
     </section>
+    <div class="panel-assets__modal-upload-image__filter">
+        <section class="panel-assets__modal-upload-image">
+            <div class="panel-assets__modal-upload-image__btn-close"></div>
+            <form class="panel-assets__modal-upload-image__form-uploader">
+                <input type="file" class="form-uploader__input-file" multiple>
+                <input type="submit" value="Upload" class="form-uploader__input-submit">
+            </form>
+        </section>
+    </div>
     <!--==============================
     ==========INSPECTOR PANEL=========
     ===============================-->
@@ -155,11 +240,19 @@
                 <div class="action-editor-menu">
                     <div class="action-editor-menu__keyframes-options">
                         <button class="keyframes-options__delete">[]</button>
-                        <select name="keyframe-type" id="" class="keyframes-options__select">
-                            <option value="none" disabled selected style="display:none">----</option>
-                            <option value="ei">ease-in</option>
-                            <option value="eo">ease-out</option>
-                        </select>
+                        <nav name="keyframe-type" id="" class="keyframes-options__list-functions">
+                            <p class="current-selection">-----</p>
+                            <ul>
+                            </ul>
+                        </nav>
+                        <div class="keyframes-options__tween-type-menu">
+                            <!--
+                            <button class="tween-type-menu__option" name="Linear">|</button>
+                            <button class="tween-type-menu__option" name="In">In</button>
+                            <button class="tween-type-menu__option" name="Out">Out</button>
+                            <button class="tween-type-menu__option" name="InOut">InOut</button>
+                            -->
+                        </div>
                     </div>
                     <div class="action-editor-menu__timeline-options">
                         <button class="action-editor-menu__timeline-options__zoom-in">+</button>
@@ -293,6 +386,7 @@
                     <canvas id="panel-previewer__canvas"></canvas>
                 </div>
                 <div class="panel-previewer__controls">
+                    <div class="panel-previewer__controls__play-btn">></div>
                     <div class="panel-previewer__controls__progress-bar"></div>
                 </div>
             </div>
@@ -309,9 +403,13 @@
 
     <div class="section-image-assets__item__menu-options">
     </div>
+    <div class="section-notifications">
+
+    </div>
 
 
-
+    <script src="Globals/Variables.js"></script>
+    <script src="Globals/NetworkManager.js"></script>
     <script src="./variables/globales.js"></script>
     <script src="./util.js"></script>
     <script src="fabric.js"></script>
@@ -326,6 +424,8 @@
     <script src="common/SVGLoading/TextToSVGConverter.js"></script>
     <script src="common/PathIllustrator.js"></script>
     <script src="common/ControllerAnimator.js"></script>
+    <script src="common/ImageModelDrawingDataGenerator.js"></script>
+
     <script src="controllers/Mediators/MainMediator.js"></script>
 
     <script src="controllers/AnimationView/AnimationController.js"></script>
@@ -337,6 +437,7 @@
     <script src="./controllers/ScenePreviewView/ScenePreviewController.js"></script>
 
     <script src="UI/WindowManager.js"></script>
+    <script src="UI/AuthenticationView/AuthenticationView.js"></script>
     <script src="UI/AnimationView/CanvasManager.js"></script>
     <script src="UI/AnimationView/AnimationPanel.js"></script>
     <script src="UI/AnimationView/InspectorPanel.js"></script>

@@ -20,26 +20,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/controllers/Mediators/MainMediator.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Globals/Variables.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/UI/AuthenticationView/AuthenticationView.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/knockout.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/doodly-clone.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/doodly-clone.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/MainView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/MainView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/MainView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/MainView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/MainView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/MainView/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/WindowManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/PathDesignView/PathDesignPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PathDesignView/PathDesignPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/AnimatorView/TimeLineController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/AnimationView/AnimationController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/WindowManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/ControllerAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ControllerAnimator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/NetworkManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/NetworkManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/AnimationView/AnimationController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/AnimationView/AnimationController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/Mediators/MainMediator.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/Mediators/MainMediator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/variables/globales.js" beforeDir="false" afterPath="$PROJECT_DIR$/variables/globales.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +83,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\github\doodly-clone\Globals" />
       <recent name="D:\github\doodly-clone\UI" />
       <recent name="D:\github\doodly-clone\common\SVGLoading" />
       <recent name="D:\github\doodly-clone\common\fontsLoading" />
@@ -143,7 +156,20 @@
       <workItem from="1606725784282" duration="450000" />
       <workItem from="1606758768588" duration="8108000" />
       <workItem from="1606853653842" duration="15069000" />
-      <workItem from="1606923949250" duration="2934000" />
+      <workItem from="1606923949250" duration="3511000" />
+      <workItem from="1606971868771" duration="3544000" />
+      <workItem from="1606999455647" duration="34821000" />
+      <workItem from="1607111554855" duration="2841000" />
+      <workItem from="1607187232461" duration="25146000" />
+      <workItem from="1607269778809" duration="27145000" />
+      <workItem from="1607350388709" duration="45287000" />
+      <workItem from="1607446451268" duration="9000" />
+      <workItem from="1607451621136" duration="23850000" />
+      <workItem from="1607526033169" duration="34949000" />
+      <workItem from="1607610149705" duration="25609000" />
+      <workItem from="1607707240461" duration="1336000" />
+      <workItem from="1607709901725" duration="16820000" />
+      <workItem from="1607744224975" duration="3880000" />
     </task>
     <servers />
   </component>
@@ -163,6 +189,10 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="713" y="346" key="#Notifications" timestamp="1606972173737">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="713" y="346" key="#Notifications/0.0.1920.1050@0.0.1920.1050" timestamp="1606972173737" />
     <state x="413" y="177" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1602962481446">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -179,10 +209,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="786" y="225" key="RollbackChangesDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1603601297477" />
-    <state x="460" y="155" key="SettingsEditor" timestamp="1602967926986">
+    <state x="460" y="155" key="SettingsEditor" timestamp="1607298926094">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="460" y="155" key="SettingsEditor/0.0.1920.1050@0.0.1920.1050" timestamp="1602967926986" />
+    <state x="460" y="155" key="SettingsEditor/0.0.1920.1050@0.0.1920.1050" timestamp="1607298926094" />
     <state x="569" y="201" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1603766122220">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -195,21 +225,21 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="dock-window-2/0.0.1920.1050@0.0.1920.1050" timestamp="1602996543928" />
-    <state x="765" y="157" width="878" height="801" key="find.popup" timestamp="1606925157407">
+    <state x="397" y="107" width="878" height="801" key="find.popup" timestamp="1607616011360">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="765" y="157" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1606925157407" />
+    <state x="397" y="107" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1607616011360" />
     <state width="600" height="428" key="javadoc.popup" timestamp="1603662965310">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="600" height="428" key="javadoc.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603662965310" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1605320537655">
+    <state x="616" y="237" key="run.anything.popup" timestamp="1607610858600">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1605320537655" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1604173438793">
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1607610858600" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1607726142755">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1604173438793" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1607726142755" />
   </component>
 </project>

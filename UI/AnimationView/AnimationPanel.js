@@ -78,26 +78,55 @@ var SectionActionEditorMenu={
     HTMLBtnDeleteKeyFrame:null,
     HTMLSelectFunctions:null,
 
+    MODELFunctionsMenu:Object.keys(EnumAnimationFunctionTypes),
+    MODELMenuTweenTypes:Object.keys(EnumAnimationTweenType),
+    selectedOptionInFunctionsMenu:null,
+    selectedOptionInTweenTypesMenu:null,
+
+    listSelectedKeyFramesAnimations:[],
     parentClass:null,
     init:function(parentClass){
         this.parentClass=parentClass;
-        this.HTMLBtnDeleteKeyFrame=document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__delete");
-        this.HTMLSelectFunctions=document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__select");
+        this.HTMLBtnDeleteKeyFrame= document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__delete");
+        this.HTMLFunctionsMenu=     document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__list-functions");
+        this.HTMLTweensMenu=         document.querySelector('.action-editor-menu__keyframes-options .keyframes-options__tween-type-menu')
 
-        this.HTMLBtnZoomInTimeline=document.querySelector(".action-editor-menu__timeline-options__zoom-in");
+        this.HTMLBtnZoomInTimeline= document.querySelector(".action-editor-menu__timeline-options__zoom-in");
         this.HTMLBtnZoomOutTimeline=document.querySelector(".action-editor-menu__timeline-options__zoom-out");
 
         this.HTMLdurationFormInput=document.querySelector(".editors-options__action-editor-options__form-duration__input");
+        this.initHTMLFunctionsMenu();
+        this.initHTMLMenuTweenTypes();
         this.initEvents();
     },
     initEvents:function(){
         this.HTMLBtnDeleteKeyFrame.addEventListener("click",this.onBtnDeleteKeyFrame.bind(this));
-        this.HTMLSelectFunctions.addEventListener("onchange",function(){});
-
+        this.HTMLFunctionsMenu.querySelector('ul').addEventListener("mouseup",this.onListFunctionsClicked.bind(this));
+        this.HTMLTweensMenu.addEventListener("click",this.OnTweensMenuClicked.bind(this))
         this.HTMLBtnZoomInTimeline.addEventListener("click",function (){});
         this.HTMLBtnZoomOutTimeline.addEventListener("click",function(){})
         this.HTMLdurationFormInput.addEventListener("focusout",this.onDurationInput.bind(this))
         WindowManager.registerOnKeyEnterPressed(this);
+    },
+    initHTMLFunctionsMenu:function(){
+        let list=this.HTMLFunctionsMenu.querySelector('ul');
+        for(let i=0;i<this.MODELFunctionsMenu.length;i++){
+            let li=document.createElement('li');
+            li.textContent=this.MODELFunctionsMenu[i];
+            li.setAttribute('name',this.MODELFunctionsMenu[i]);
+            li.setAttribute('index',i);
+            li.className='list-functions__option'
+            list.appendChild(li);
+        }
+    },
+    initHTMLMenuTweenTypes:function(){
+        for(let i=0;i<this.MODELMenuTweenTypes.length;i++){
+            let button=document.createElement('button');
+            button.textContent=this.MODELMenuTweenTypes[i];
+            button.setAttribute("name",this.MODELMenuTweenTypes[i]);
+            button.className='tween-type-menu__option';
+            this.HTMLTweensMenu.appendChild(button);
+        }
     },
     onBtnDeleteKeyFrame:function(){
         this.notifyOnBtnDeleteKeyFrame();
@@ -108,6 +137,59 @@ var SectionActionEditorMenu={
             this.notifyOnDurationInput(intInputValue);
         }else{
             e.target.value=this.parentClass.getTimeLineDuration();
+        }
+    },
+    onListFunctionsClicked:function(e){
+        if(this.listSelectedKeyFramesAnimations.length===0){return;}
+        if(e.target.className==="list-functions__option"){
+            let newFunctionName=e.target.getAttribute("name");
+            for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
+                this.listSelectedKeyFramesAnimations[i].setEaseFunctionType(newFunctionName);
+            }
+            this.activateMenuFunctionsOption(newFunctionName);
+        }
+    },
+    OnTweensMenuClicked:function(e){
+        if(this.listSelectedKeyFramesAnimations.length===0){return;}
+        if(e.target.className==='tween-type-menu__option'){
+            let tweenTypeName=e.target.getAttribute('name');
+            for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
+                this.listSelectedKeyFramesAnimations[i].setTweenType(tweenTypeName);
+            }
+            this.activateMenuTweenTypesOption(tweenTypeName);
+        }
+    },
+    activateMenuFunctionsOption:function(functionName){
+        if(this.selectedOptionInFunctionsMenu){
+            this.selectedOptionInFunctionsMenu.classList.remove('active');
+        }
+        if(functionName !== ''){
+            let liIndex=-1;
+            for(let i in this.MODELFunctionsMenu){
+                if(this.MODELFunctionsMenu[i]===functionName){liIndex=i;break}
+            }
+            this.selectedOptionInFunctionsMenu=this.HTMLFunctionsMenu.querySelector('ul').children[liIndex];
+            this.selectedOptionInFunctionsMenu.classList.add('active');
+            this.HTMLFunctionsMenu.querySelector(".current-selection").textContent=functionName;
+        }else{
+            this.selectedOptionInFunctionsMenu=null;
+            this.HTMLFunctionsMenu.querySelector(".current-selection").textContent='----------';
+
+        }
+    },
+    activateMenuTweenTypesOption:function(tweenTypeName){
+        if(this.selectedOptionInTweenTypesMenu){
+            this.selectedOptionInTweenTypesMenu.classList.remove('active');
+        }
+        if(tweenTypeName!==''){
+            let optIndex=-1;
+            for(let i in this.MODELMenuTweenTypes){
+                if(this.MODELMenuTweenTypes[i]===tweenTypeName){optIndex=i;break}
+            }
+            this.selectedOptionInTweenTypesMenu=this.HTMLTweensMenu.children[optIndex];
+            this.selectedOptionInTweenTypesMenu.classList.add('active');
+        }else{
+            this.selectedOptionInTweenTypesMenu=null;
         }
     },
     notifyOnDurationInput:function(intInputValue){
@@ -121,6 +203,37 @@ var SectionActionEditorMenu={
         if(documentActiveElement===this.HTMLdurationFormInput){
             documentActiveElement.blur();
             this.onDurationInput({target:documentActiveElement});
+        }
+    },
+    notificationOnKeyBarSelectionUpdated:function (listAnimations){
+        this.listSelectedKeyFramesAnimations=listAnimations;
+        if(this.listSelectedKeyFramesAnimations.length>0){
+            let firstType=this.listSelectedKeyFramesAnimations[0].easeFunctionType;
+            let firstTween=this.listSelectedKeyFramesAnimations[0].tweenType;
+            let flagMoreThanOneType=false;
+            let flagMoreThanOneTween=false;
+            for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
+                if(this.listSelectedKeyFramesAnimations[i].easeFunctionType!==firstType){
+                    flagMoreThanOneType=true;
+                }
+                if(this.listSelectedKeyFramesAnimations[i].tweenType!==firstTween){
+                    flagMoreThanOneTween=true;
+                }
+            }
+            if(flagMoreThanOneType){
+                this.activateMenuFunctionsOption('')
+
+            }else{
+                this.activateMenuFunctionsOption(firstType);
+            }
+            if(flagMoreThanOneTween){
+                this.activateMenuTweenTypesOption('');
+            }else{
+                this.activateMenuTweenTypesOption(firstTween);
+            }
+        }else{
+            this.activateMenuFunctionsOption('');
+            this.activateMenuTweenTypesOption('');
         }
     }
 }
@@ -221,6 +334,21 @@ let SectionTimeLine={
     discartAllKeyFrames:function(){
         this.timeLineComponent.discartAllKeyFrames();
     },
+    extractAnimationsFromSelectedKeyFrames:function(listSelectedKeyFrames,dictPropertiesLanesKeysLengths){
+        let listAnimations=[];
+        for(let i=0;i<listSelectedKeyFrames.length;i++){
+            let indexInParentList=listSelectedKeyFrames[i].indexInParentList
+            let laneName=listSelectedKeyFrames[i].laneName;
+            let propertiesForLaneName=this.MODELLanesProperties[laneName];
+            for(let k=0;k<propertiesForLaneName.length;k++){
+                if(indexInParentList < (dictPropertiesLanesKeysLengths[laneName]-1)){
+                    let anim=this.currentSelectedAnimableObject.animator.dictAnimations[propertiesForLaneName[k]][indexInParentList];
+                    listAnimations.push(anim);
+                }
+            }
+        }
+        return listAnimations;
+    },
     notificationOnBtnKeyAddKey:function(laneName){
         if(this.currentSelectedAnimableObject){
             let propertiesValues=[];
@@ -272,6 +400,10 @@ let SectionTimeLine={
                 this.updateObjectPropertiesAnimationsFromKeyFrames(key);
             }
         }
+    },
+    notificationOnKeyBarSelectionUpdated:function(listSelectedKeyFrames,dictPropertiesLanesKeysLengths) {
+        let listAnimations = this.extractAnimationsFromSelectedKeyFrames(listSelectedKeyFrames, dictPropertiesLanesKeysLengths);
+        this.parentClass.childNotificationOnKeyBarSelectionUpdated(listSelectedKeyFrames,listAnimations);
     },
     notificationOnMarkerDragEnded:function(time){
         this.parentClass.childNotificationOnMarkerDragEnded(time);
@@ -367,6 +499,9 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     childNotificationOnFieldPropertyInput:function(propName,propNewValue){
         MainMediator.notify(this.name,this.events.OnFieldPropertyInput,[propName,propNewValue]);
     },
+    childNotificationOnKeyBarSelectionUpdated:function(listKeyFrames,listAnimations){
+        this.SectionActionEditorMenu.notificationOnKeyBarSelectionUpdated(listAnimations);
+    },
     notificationCanvasManagerOnSelectionUpdated:function(){
         this.SectionProperties.notificationOnSelectionUpdated();
         this.SectionTimeLine.notificationOnSelectionUpdated();
@@ -383,7 +518,7 @@ var PanelAnimation={//LA VENTANA COMPLETA
     init:function(){
         this.HTMLElement=document.querySelector(".panel-animation");
         this.HTMLElement.style.width=window.innerWidth + "px";
-        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
     },
     setController:function(obj){
@@ -394,7 +529,7 @@ var PanelAnimation={//LA VENTANA COMPLETA
         let self=PanelAnimation;
         this.HTMLElement.style.display="block";
     },
-    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(args){
+    notificationCanvasManagerOnDesignPathOptionClicked:function(args){
         let self=PanelAnimation;
         self.HTMLElement.style.display="none";
     }

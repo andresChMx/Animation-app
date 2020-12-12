@@ -194,16 +194,16 @@ var DrawingManager=fabric.util.createClass({
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnDeletePathClicked,this);
 
     },
-    wakeUp:function(imageModel,drawingData){
-        if(drawingData.type===ImageType.CREATED_NOPATH){
+    wakeUp:function(imageDrawingData){
+        if(imageDrawingData.type===ImageType.CREATED_NOPATH){
             this.initPathsNamesAsEmpty();
             this.ctrlPointsManager.initCtrlPointsAsEmpty()
-        }else if(drawingData.type===ImageType.CREATED_PATHDESIGNED){
-            this.loadPathsNames(drawingData);
+        }else if(imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
+            this.loadPathsNames(imageDrawingData);
             this.ctrlPointsManager.generateCrtlPointsFromPointsMatrix(this.canvasManager.listPoints)
-        }else if(drawingData.type===ImageType.CREATED_PATHLOADED){
-            this.loadPathsNames(drawingData);
-            this.ctrlPointsManager.generateCrtlPointsFromLoadedData(drawingData,imageModel.imgHTML.naturalWidth,imageModel.imgHTML.naturalHeight)
+        }else if(imageDrawingData.type===ImageType.CREATED_PATHLOADED){
+            this.loadPathsNames(imageDrawingData);
+            this.ctrlPointsManager.generateCrtlPointsFromLoadedData(imageDrawingData,imageDrawingData.imgHTML.naturalWidth,imageDrawingData.imgHTML.naturalHeight)
         }
 
         this.canvasManager.updatePathData(this.ctrlPointsManager.list,this.canvasManager.listPoints);
@@ -221,8 +221,8 @@ var DrawingManager=fabric.util.createClass({
     initPathsNamesAsEmpty:function(){
         this.listPathsNames.push("Path uno");
     },
-    loadPathsNames:function(drawingData){
-        this.listPathsNames=drawingData.pathsNames.slice(0);
+    loadPathsNames:function(imageDrawingData){
+        this.listPathsNames=imageDrawingData.pathsNames.slice(0);
     },
     getMatrixPathsPoints:function(){
         let mat=[];
@@ -266,7 +266,7 @@ var DrawingManager=fabric.util.createClass({
             if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),5);return;}
                 Preprotocol.wantConsume=false;
 
-                if(this.totalAmountPaths==1 || this.index>=this.totalAmountPaths){
+                if(this.totalAmountPaths===1 || this.index>=this.totalAmountPaths){
                     Preprotocol.wantConsume=true;
                     return;
                 }
@@ -274,7 +274,7 @@ var DrawingManager=fabric.util.createClass({
                 this.ctrlPointsManager.removePathAt(index);
                 this.listPathsNames.splice(index,1)
                 if(index<=this.currentPathIndex){
-                    this.currentPathIndex=this.currentPathIndex==0?0:this.currentPathIndex-1;
+                    this.currentPathIndex=this.currentPathIndex===0?0:this.currentPathIndex-1;
                 }
                 this.totalAmountPaths--;
                 
@@ -320,18 +320,21 @@ var DrawingManager=fabric.util.createClass({
             break;
         }
     },
-    notificationPanelDesignerOptionsOnSettingLineWidthChanged:function(value){
-        this.canvasManager.setPathLineWidth(value,this.currentPathIndex);
+    notificationPanelDesignerOptionsOnSettingLineWidthChanged:function(args){
+        let newVal=args[0];
+        this.canvasManager.setPathLineWidth(newVal,this.currentPathIndex);
         this.canvasManager.canvas.renderAll();
     },
 
     notificationPanelDesignerOptionsOnBtnAddPathClicked:function(){
         this.addPathAtLast();
     },
-    notificationPanelDesignerOptionsOnBtnDeletePathClicked:function(index){
-        this.removePathAt(index);
+    notificationPanelDesignerOptionsOnBtnDeletePathClicked:function(args){
+        let indexLayer=args[0];
+        this.removePathAt(indexLayer);
     },
-    notificationPanelDesignerOptionsOnPathClicked:function(index){
-        this.currentPathIndex=index;
+    notificationPanelDesignerOptionsOnPathClicked:function(args){
+        let indexLayer=args[0];
+        this.currentPathIndex=indexLayer;
     },
 })

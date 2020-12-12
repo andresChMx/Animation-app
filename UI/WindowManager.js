@@ -5,6 +5,7 @@ var ObserverType={
 var WindowManager={
     name:'WindowManager',
     events:{
+        OnUILoaded:'OnUILoaded',
         OnLoad:'OnLoad',
         OnResize:'OnResize',
         OnMouseUp:'OnMouseUp',
@@ -51,7 +52,7 @@ var WindowManager={
 
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
 
-        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
 
     },
     notificationPanelDesignerOptionsOnSettingActionClicked:function(actionId){
@@ -62,7 +63,7 @@ var WindowManager={
         self.activeObserverType=ObserverType.main;
     },
     /*PanelAssets.SectionImageAssets*/
-    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(){
+    notificationCanvasManagerOnDesignPathOptionClicked:function(){
         this.activeObserverType=ObserverType.temp;
     },
     registerObserverOnResize:function(obj,obsType=ObserverType.main){
@@ -131,7 +132,8 @@ var WindowManager={
     initUI:function(){
         document.body.style.width=window.innerWidth + "px";
         document.body.style.height=window.innerHeight + "px";
-
+        /*AUTHENTICATION*/
+        PanelAuthentication.init();
         /*ANIMATOR*/
         PanelAnimation.init();
         PanelAnimation.PanelActionEditor.init();
@@ -150,5 +152,6 @@ var WindowManager={
         /*pewviewer*/
         PanelPreviewer.init();
 
+        MainMediator.notify(this.name,this.events.OnUILoaded,[]);
     }
 }

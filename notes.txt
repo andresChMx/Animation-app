@@ -1,0 +1,2 @@
+el establecer dimenciones del canvas resetea el valor de lineCap del context
+el problema de que el canvas cache rederizaba pixeleado se suluciono con un ctx.clearRect() antes de renderizar la imagen clippeada en el path

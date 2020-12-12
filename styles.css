@@ -24,10 +24,33 @@
     --keyframes-bar__property-lane-height:20px;
   }
   body{
-      overflow: hidden;
+      /*overflow: hidden;*/
       position:relative;
       font-family:Verdana, Geneva, Tahoma, sans-serif;
   }
+/*================================*/
+/*AUTHENTICATION*/
+/*================================*/
+.panel-authentication__filter{
+    position:absolute;
+    width:100%;
+    height:100vh;
+    left:0;
+    top:0;
+    z-index:4000;
+    background:rgba(0,0,0,.5);
+}
+.panel-authentication{
+    position:absolute;
+    background: white;
+    width:500px;
+    height:500px;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    margin:auto;
+}
 .panel-animation{
     background:#727376;
     width:100%;
@@ -72,11 +95,45 @@
 }
 .panel-animation__top-bar__editors-menus .action-editor-menu__keyframes-options{
     margin-right:40px;
+    display: flex;
+}
+.panel-animation__top-bar__editors-menus .keyframes-options__list-functions{
+    position:relative;
+    border:1px solid white;
+    width:90px;
+    margin:0 10px;
+}
+
+.panel-animation__top-bar__editors-menus .keyframes-options__list-functions ul{
+    position:absolute;
+    list-style: none;
+    display: none;
+    background:yellow;
+    bottom:20px;
+    left:0;
+}
+.panel-animation__top-bar__editors-menus .keyframes-options__list-functions ul .list-functions__option{
+    background:transparent;
+}
+.panel-animation__top-bar__editors-menus .keyframes-options__list-functions ul .list-functions__option:hover{
+    background:peru;
+}
+.panel-animation__top-bar__editors-menus .keyframes-options__list-functions ul .list-functions__option.active{
+    background: red;
+}
+.panel-animation__top-bar__editors-menus .keyframes-options__list-functions:hover > ul{
+    display:block !important;
+
+}
+.panel-animation__top-bar__editors-menus .keyframes-options__tween-type-menu .tween-type-menu__option{
+    background:yellow;
+}
+.panel-animation__top-bar__editors-menus .keyframes-options__tween-type-menu .tween-type-menu__option.active{
+    background:red;
 }
 .panel-animation__top-bar__editors-menus .action-editor-menu__timeline-options{
     display:flex;
 }
-
 
 .panel-animation__editors-container{
     height:calc( 100% - var(--panel-animation__top-menu_height));
@@ -186,6 +243,7 @@
 .action-editor__properties-area__list__item__box-inputs input{
     width:20%;
 }
+
 /*===================
 ==== inspector panel
 ====================*/
@@ -318,11 +376,10 @@
     background:red;
     padding:10px;
     display:flex;
-    flex-direction: column;
+    flex-direction: column !important;
 }
 .panel-assets__menu-sections{
-    width:100%;
-    display:flex;
+    display: flex;
     justify-content: space-evenly;
 }
 .panel-assets__menu-sections__item{
@@ -332,8 +389,8 @@
 }
 .panel-assets__sections-container{
     background:rgb(134, 134, 37);
-    width:100%;
-    height:100%;
+    overflow: auto;
+    flex-grow: 1;
     position:relative;
 }
 .panel-assets__sections-container__section-image-assets{
@@ -398,14 +455,45 @@
     left:-200px;
     top:-200px;
 }
-.panel-assets__btn-add-resource{
+.panel-assets__buttons-add-resource button{
     background:peru;
     position:absolute;
     padding:5px 40px;
     bottom:40px;
+    right:20px;
+}
+.panel-assets__buttons-add-resource__image-asset{
+
+}
+/*upload modal panel*/
+.panel-assets__modal-upload-image__filter{
+    position:absolute;
+    width:100%;
+    height:100vh;
+    left:0;
+    top:0;
+    z-index:3000;
+    background:rgba(0,0,0,.5);
+}
+.panel-assets__modal-upload-image{
+    position:absolute;
+    background: white;
+    width:500px;
+    height:500px;
+    top:0;
     left:0;
     right:0;
+    bottom:0;
     margin:auto;
+}
+
+.panel-assets__modal-upload-image__btn-close{
+    width:20px;
+    height:20px;
+    background: #ff0000;
+    position:absolute;
+    right:10px;
+    top:10px;
 }
 /*=======================
 ==== PANEL PATHS DESIGNER=====
@@ -482,18 +570,36 @@
     right:0;
     top:0;
 }
+.panel-previewer__canvas-container{
+
+}
 #panel-previewer__canvas{
     background:white;
-    border:1px solid black;
+    outline:1px solid black;
+    margin:0 !important;
+    padding:0 !important;
 }
 .panel-previewer__controls{
-    padding:10px 0;
     width:100%;
+    display:flex;
+    align-items: center;
 }
 .panel-previewer__controls__progress-bar{
-    width:100%;
-    height:20px;
+
     background:red;
+}
+.panel-previewer__controls__play-btn{
+    border-radius: 50%;
+    border:1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 5px;
+    background: green;
+
+}
+.panel-previewer__controls__play-btn.pause{
+    background: red;
 }
 /*======================
 ==== canvas-animator==

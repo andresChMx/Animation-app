@@ -16,22 +16,21 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.canvasOriginalHeight=0;
         this.drawingPath=null;
         
-        this.canvas=new fabric.Canvas('cPathsDesigner',{ width: window.innerWidth+200, height: window.innerHeight ,backgroundColor: 'rgb(123,123,123)',selection:false}); 
-        
+        this.canvas=new fabric.Canvas('cPathsDesigner',{ width: window.innerWidth+200, height: window.innerHeight ,backgroundColor: 'rgb(123,123,123)',selection:false});
 
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingZoomOut,this);
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingZoomIn,this);
 
 
     },
-    wakeUp:function(imageModel,drawingData){
+    wakeUp:function(imageDrawingData){
         this.canvasZoomVal=1;
         this.canvas.on("mouse:move",this.OnMouseMoved.bind(this))
         this.canvas.on("mouse:up",this.OnMouseUp.bind(this))
 
-        this.canvasOriginalWidth=imageModel.imgHTML.naturalWidth;
-        this.canvasOriginalHeight=imageModel.imgHTML.naturalHeight;
-        let oImg=new fabric.Image(imageModel.imgHTML,{
+        this.canvasOriginalWidth=imageDrawingData.imgHTML.naturalWidth;
+        this.canvasOriginalHeight=imageDrawingData.imgHTML.naturalHeight;
+        let oImg=new fabric.Image(imageDrawingData.imgHTML,{
             "left":0,
             "top":0,
             "selectable":false,
@@ -41,13 +40,12 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.setupCanvasDimensions();
         this.initDrawingPath();
 
-        if(drawingData.type===ImageType.CREATED_NOPATH){
+        if(imageDrawingData.type===ImageType.CREATED_NOPATH){
             this.initDrawingDataAsEmpty();
-
         }else{
-            this.loadPaths(drawingData);
-            this.loadPathStrokesType(drawingData);
-            this.loadLinesWidths(drawingData);
+            this.loadPaths(imageDrawingData);
+            this.loadPathStrokesType(imageDrawingData);
+            this.loadLinesWidths(imageDrawingData);
         }
 
     },
@@ -83,24 +81,24 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.canvas.setHeight(this.canvasOriginalHeight*this.canvasZoomVal);
         
     },
-    loadPaths:function(drawingData){
+    loadPaths:function(imageDrawingData){
         this.listPoints=[];
-        for(let i=0;i<drawingData.points.length;i++){
+        for(let i=0;i<imageDrawingData.points.length;i++){
             this.listPoints.push([]);
             this.listPathsColors.push(this.genearteRandomColor());
-            for(let j=0;j<drawingData.points[i].length/2;j++){
-                let pathPoints=drawingData.points[i];
+            for(let j=0;j<imageDrawingData.points[i].length/2;j++){
+                let pathPoints=imageDrawingData.points[i];
                 this.addPoint(pathPoints[2*j]*this.canvasOriginalWidth,pathPoints[(2*j)+1]*this.canvasOriginalHeight,i);
             }
         }
     },
-    loadLinesWidths:function(drawingData){
-        this.listLinesWidths=drawingData.linesWidths.map(function(width){return width*this.canvasOriginalWidth}.bind(this));
+    loadLinesWidths:function(imageDrawingData){
+        this.listLinesWidths=imageDrawingData.linesWidths.map(function(width){return width*this.canvasOriginalWidth}.bind(this));
     },
-    loadPathStrokesType:function(drawingData){
+    loadPathStrokesType:function(imageDrawingData){
         this.listPathStrokesType=[];
-        for(let i=0;i<drawingData.strokesTypes.length;i++){
-            this.listPathStrokesType.push(drawingData.strokesTypes[i].slice(0));
+        for(let i=0;i<imageDrawingData.strokesTypes.length;i++){
+            this.listPathStrokesType.push(imageDrawingData.strokesTypes[i].slice(0));
         }
     },
     getLinesWidthsNormalized:function(){
@@ -255,6 +253,7 @@ var DrawingPath = fabric.util.createClass(fabric.Object, {
             var len = this.pts[i].length; // number of points
             if (len < 2) continue;
             ctx.beginPath();
+            ctx.lineCap = "round";
             ctx.strokeStyle=this.listPathsColors[i];
             ctx.lineWidth=this.listLinesWidths[i];
             ctx.moveTo(this.pts[i][0].get("left"), this.pts[i][0].get("top"));

@@ -5,7 +5,7 @@ var PreviewManager=fabric.util.createClass({
         this.prevPathSnapshot=new Image();
         this.actualSnapshot=new Image();
         this.parentWidth=300 -10-10;
-        this.imageModel=null;
+        this.imageDrawingData=null;
         
         this.drawingManager=drawingManager;
         this.canvasDrawingManager=canvasDrawingManager;
@@ -23,11 +23,10 @@ var PreviewManager=fabric.util.createClass({
         this.scalerLineWidth;
 
     },
-    wakeUp:function(imageModel,drawingData){
-        this.imageModel=imageModel;
-        this.animTotalDuration=imageModel.paths.duration;
-        let imgWidth=imageModel.imgHTML.naturalWidth;
-        let imgHeight=imageModel.imgHTML.naturalHeight;
+    wakeUp:function(imageDrawingData){
+        this.imageDrawingData=imageDrawingData;
+        let imgWidth=imageDrawingData.imgHTML.naturalWidth;
+        let imgHeight=imageDrawingData.imgHTML.naturalHeight;
         let aspect=imgWidth/imgHeight;
         if(imgWidth>imgHeight){
             this.canvas.width=this.parentWidth;
@@ -42,7 +41,7 @@ var PreviewManager=fabric.util.createClass({
         this.scalerFactorX=this.canvas.width/this.canvasDrawingManager.canvasOriginalWidth;
         this.scalerFactorY=this.canvas.height/this.canvasDrawingManager.canvasOriginalHeight;
     
-        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this.scalerFactorX,this.scalerFactorY,this.imageModel);
+        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this.scalerFactorX,this.scalerFactorY,this.imageDrawingData.imgHTML);
         this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,this.illustratorDataAdapter,true);
         this.pathIllustrator.start();
     },

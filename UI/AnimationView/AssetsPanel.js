@@ -1,3 +1,100 @@
+let ModalUploadImage={
+    name:'SectionUplaodImage',
+    events:{
+
+    },
+    parentClass:null,
+
+    init:function(parentClass){
+        this.parentClass=parentClass;
+        this.HTMLElement=document.querySelector(".panel-assets__modal-upload-image");
+        this.HTMLFormUploader=document.querySelector(".panel-assets__modal-upload-image__form-uploader");
+        this.HTMLFormFileInput=this.HTMLFormUploader.querySelector('.form-uploader__input-file');
+        this.HTMLCloseBtn=document.querySelector(".panel-assets__modal-upload-image__btn-close");
+        this.initEvents();
+    },
+    initEvents:function(){
+        this.HTMLFormUploader.addEventListener("submit",this.OnFormUploaderSubmit.bind(this));
+        this.HTMLCloseBtn.addEventListener("click",this.OnCloseButtonClicked.bind(this));
+    },
+    OnCloseButtonClicked:function(e){
+        this.hiddeModal();
+    },
+    OnFormUploaderSubmit:function(e){
+        let self=this;
+        e.preventDefault();
+        let collectionNewDocs=[];
+        NetworkManager.UploadImageFile(this.HTMLFormFileInput.files)
+            .then(function(data){
+                for(let i=0;i<data.length;i++){
+                    if(data[i]!==undefined){
+                        let jsonData=JSON.parse(data[i]);
+                        if(jsonData.error){
+                            alert(jsonData.error.message);
+                        }else{
+                            console.log(jsonData.url);
+                            let newDoc={
+                                id:"",
+                                url:jsonData.url,
+                                userid:USER_ID
+                            }
+                            collectionNewDocs.push(newDoc);
+                            //TODO: notification,taibmen en el bloque if positivo
+                        }
+                    }else{
+                        alert("Error trying to upload an image");
+                    }
+                }
+                if(collectionNewDocs.length>0){
+                    let promises=[];
+                    for(let i=0;i<collectionNewDocs.length;i++){
+                        promises.push(
+                            NetworkManager.insertToFirestoreImageAsset(collectionNewDocs[i])
+                            .then(function(docRef) {
+                                return docRef.id;
+                            })
+                            .catch(function(error) {
+                                return error;
+                            })
+                        );
+                    }
+                    return Promise.all(promises).then(function(data){
+                        return data;
+                    })
+                }
+            })
+            .then(function(listDocsIds){
+                self.parentClass.childNotificationOnImageAssetDBInserted(collectionNewDocs,listDocsIds);
+                self.hiddeModal();
+            })
+            .catch(function(err){
+                console.log(err);
+                self.hiddeModal();
+            })
+
+    },
+    showModal:function(){
+        this.HTMLElement.parentNode.style.display="block";
+    },
+    hiddeModal:function(){
+        this.HTMLElement.parentNode.style.display="none";
+        this.clearInputFile(this.HTMLFormFileInput);
+    },
+    clearInputFile(f){
+    if(f.value){
+        try{
+            f.value = ''; //for IE11, latest Chrome/Firefox/Opera...
+        }catch(err){ }
+        if(f.value){ //for IE5 ~ IE10
+            var form = document.createElement('form'),
+                parentNode = f.parentNode, ref = f.nextSibling;
+            form.appendChild(f);
+            form.reset();
+            parentNode.insertBefore(f,ref);
+        }
+    }
+}
+}
 let SectionImageAssets={
 
     HTMLElement:null,
@@ -13,29 +110,29 @@ let SectionImageAssets={
     //https://www.alamy.com/happy-family-with-young-children-hand-drawn-doodle-vector-illustration-sketch-drawing-family-isolated-on-white-background-young-family-with-son-and-daughter-image344422627.html
     MODELItemAssets:[
         {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603391302/700_FO49918911_12cfed34802ecb4daaa7a7b7fddd464d_w2lfrh.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603343397/sample.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348016/characters/man-chatting_tm5goo.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-driving_apauqe.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-flying_nn8kls.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-travel-world_oyajkr.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/woman-vacation_zglkwg.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-pilot_i4ueol.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/book2_exm9ix.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/book_w9pqvy.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/laptop_uggkg9.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/paper-plane_zmao5u.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347887/food/cangre_zw3xud.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347861/food/tomato_tf8ydk.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347600/food/bread_b3bevl.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347841/food/sandwich2_hfrzew.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347831/food/wine_yg6g9u.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347600/food/bread_b3bevl.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347598/food/uvo_koaxdq.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347598/food/water_dnnaa0.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347599/food/banana_dlyh07.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/pina_g1z6li.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/sandwich_soqxls.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/pear_xocq7t.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603343397/sample.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348016/characters/man-chatting_tm5goo.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-driving_apauqe.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-flying_nn8kls.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-travel-world_oyajkr.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/woman-vacation_zglkwg.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348017/characters/man-pilot_i4ueol.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/book2_exm9ix.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/book_w9pqvy.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/laptop_uggkg9.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603348322/school/paper-plane_zmao5u.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347887/food/cangre_zw3xud.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347861/food/tomato_tf8ydk.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347600/food/bread_b3bevl.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347841/food/sandwich2_hfrzew.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347831/food/wine_yg6g9u.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347600/food/bread_b3bevl.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347598/food/uvo_koaxdq.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347598/food/water_dnnaa0.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347599/food/banana_dlyh07.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/pina_g1z6li.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/sandwich_soqxls.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347597/food/pear_xocq7t.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
         {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603347596/food/icecream_abwou8.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
         // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603778695/black_dll5gm.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
         // {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603235822/characters/suit-man-contract_oau3t6.svg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
@@ -70,14 +167,6 @@ let SectionImageAssets={
     //state:imported-empty,imported-designed,ours, bitmap-empty,bitmap-designed,svg-emtpy,svg-designed,svg-custom,
     MODELItemMenuOptions:[
         {
-            label:"Design Drawing path",
-            action:function(modelItem){
-                let self=SectionImageAssets;
-                self.notifyOnItemsMenu_designPaths(modelItem);
-
-            }
-        },
-        {
             label:"Delete Asset",
             action:function(){
                 let self=SectionImageAssets;
@@ -85,16 +174,20 @@ let SectionImageAssets={
             }
         }
     ],
-    listAssets:[],
+    listAssets:ko.observableArray([]),
     parentClass:null,
+
+    ModalUploadImage:ModalUploadImage,
     init:function(parentClass){
+
         this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".panel-assets__sections-container__section-image-assets");
         this.HTMLDummyAssetDrag=document.querySelector(".section-image-assets__dummy-drag-asset");
         this.HTMLItemMenu=document.querySelector(".section-image-assets__item__menu-options");
-        //this.generateHTMLItemsCollection(this.MODELItemAssets);
+        this.HTMLBtnUploadImageAsset=document.querySelector(".panel-assets__buttons-add-resource__image-asset")
         this.generateImageAssets(this.MODELItemAssets);
         this.generateHTMLMenuOptionsCollection(this.MODELItemMenuOptions);
+        this.initEvents();
 
         this.HTMLDummyAssetDrag.style.width=this.HTMLElement.children[0].offsetWidth + "px";
         this.HTMLDummyAssetDrag.style.height=this.HTMLElement.children[0].offsetWidth + "px";
@@ -102,6 +195,11 @@ let SectionImageAssets={
         WindowManager.registerOnMouseUp(this);
         WindowManager.registerOnMouseDown(this);
         WindowManager.registerOnMouseMove(this);
+
+        this.ModalUploadImage.init(this);
+    },
+    initEvents:function(){
+        this.HTMLBtnUploadImageAsset.addEventListener("click",this.OnButtonAddImageClicked.bind(this))
     },
     generateHTMLMenuOptionsCollection:function(MODEL){
         for(var i=0;i<MODEL.length;i++){
@@ -115,10 +213,8 @@ let SectionImageAssets={
     },
     generateImageAssets:function(MODEL){
         for(var i=0;i<MODEL.length;i++){
-            let asset=new AssetImage(MODEL[i]);
-            asset.registerOnDraggingStarted(this);
-            asset.registerOnMenuPressed(this);
-            asset.appendAsset(this.HTMLElement);
+            let asset=new AssetImage(MODEL[i],this);
+            this.listAssets.push(asset);
         }
     },
     setPositionHTMLDummyAsset:function(x,y){
@@ -148,6 +244,9 @@ let SectionImageAssets={
 
         self.hiddeHTMLItemMenu();
     },
+    OnButtonAddImageClicked:function(){
+        this.ModalUploadImage.showModal();
+    },
     notificationOnMouseUp:function(){
         let self=SectionImageAssets;
 
@@ -166,20 +265,20 @@ let SectionImageAssets={
     notificationOnMouseDown:function(e){
         let self=SectionImageAssets;
         let classAssetMenuOption="section-image-assets__item__menu-options__option"
-        if(e.target.className!=classAssetMenuOption){
+        if(e.target.className!==classAssetMenuOption){
             if(self.isItemBtnActive){
                 self.hiddeHTMLItemMenu();
             }
         }
 
     },
-    notificationOnAssetDraggingStarted:function(model){
+    childNotificationOnAssetDraggingStarted:function(model){
         let self=SectionImageAssets;
         self.lastModelOnItemDragged=model;
         self.isItemPressed=true;
         self.HTMLDummyAssetDrag.style.display="block";
     },
-    notificationOnAssetMenuPressed:function(model){
+    childNotificationOnAssetMenuPressed:function(model){
         let self=SectionImageAssets;
         self.lastModelOnItemMenuBtnClicked=model
         self.isItemBtnActive=false;//lock
@@ -187,19 +286,28 @@ let SectionImageAssets={
         self.HTMLItemMenu.style.display="block";
         self.setPositionHTMLItemMenu(WindowManager.mouse.x,WindowManager.mouse.y);
     },
+    childNotificationOnImageAssetDBInserted:function(collectionNewDocs,listDocsId){
+        //CONVERTING ENTITY TO TDO
+        if(collectionNewDocs.length>0){
+            let mappedDocs=collectionNewDocs.map(function(value,index){
+                return {
+                    id:listDocsId[index],
+                    url:value.url,
+                    userid:value.userid
+                };
+            })
+            this.generateImageAssets(mappedDocs);
+        }
+    },
     notifyOnDummyDraggingEnded:function(){
         this.parentClass.childNotificationOnImageAssetDummyDraggingEnded(this.lastModelOnItemDragged);
     },
-    notifyOnItemsMenu_designPaths:function(modelItem){
-        this.parentClass.childNotificationOnImageAssetDesignPathsClicked(modelItem);
-    }
 
 }
 var PanelAssets={
     name:'PanelAssets',
     events:{
         OnImageAssetDummyDraggingEnded:'OnImageAssetDummyDraggingEnded',
-        OnImageAssetDesignPathsClicked:'OnImageAssetDesignPathsClicked'
     },
     HTMLElement:null,
     htmlElementNormalHeight:0,
@@ -215,61 +323,39 @@ var PanelAssets={
         this.HTMLElement.style.height=this.htmlElementNormalHeight;
     },
     childNotificationOnImageAssetDummyDraggingEnded:function(lastModelOnItemDragged){
-        MainMediator.notify(this.name,this.events.OnImageAssetDummyDraggingEnded,[lastModelOnItemDragged]);
-    },
-    childNotificationOnImageAssetDesignPathsClicked:function(modelItem){
-        this.HTMLElement.style.height=window.innerHeight + "px";
 
-        MainMediator.notify(this.name,this.events.OnImageAssetDesignPathsClicked,[modelItem]);
+        MainMediator.notify(this.name,this.events.OnImageAssetDummyDraggingEnded,[lastModelOnItemDragged]);
     }
 }
 
 
-var AssetImage=function(model){
+var AssetImage=function(model,parentClass){
     this.HTMLElement=null;
     this.HTMLDraggable=null;
     this.HTMLBtnMenu=null;
 
     this.model=null;
 
-    this.listObserversOnDraggingStarted=[];
-    this.listObserversOnMenuPressed=[];
-
-    this.init=function(){
+    this.observerOnDraggingStarted=[];
+    this.observerOnMenuPressed=[];
+    this.parentClass=null;
+    this.constructor=function(){
         this.model=model;
-
-        this.HTMLElement=this.generateHTML();
+        this.parentClass=parentClass;
+    }
+    this.koBindingSetupHTML=function(HTMLContainer){
+        this.HTMLElement=HTMLContainer;
+        this.HTMLElement.style.height=this.HTMLElement.offsetWidth + "px";
         this.HTMLDraggable=this.HTMLElement.children[0];
         this.HTMLBtnMenu=this.HTMLElement.children[0].children[1];
 
         this.model.imgHTML=this.HTMLDraggable.children[0];
+        //TODO: Quitar el campo imgHTML del DTO para convertirlo en entity para subirlo a la db
         this.HTMLDraggable.children[0].ondragstart=function(){return false;}
         this.HTMLDraggable.addEventListener("mousedown",this.OnMouseDown.bind(this));
     }
-    this.generateHTML=function(){
-        console.log("FROM ASET : " + this.model.url);
-        let btnOpts=document.createElement("button");
-        btnOpts.classList.add("panel-assets__section-image-assets__item__btn-options");
-        let innerContainer=document.createElement("div");
-        innerContainer.classList.add("panel-assets__section-image-assets__item__inner-container");
-        let img=document.createElement("img");
-        img.classList.add("panel-assets__section-image-assets__item__inner-container__image");
-        img.setAttribute("src",this.model.url + '?' + new Date().getTime());
-        img.setAttribute('crossOrigin', '');
-        let container=document.createElement("div");
-        container.classList.add("panel-assets__section-image-assets__item");
-        innerContainer.append(img);
-        innerContainer.append(btnOpts);
-        container.append(innerContainer);
-        container.style.height=container.offsetWidth + "px";
-        return container;
-    }
-    this.appendAsset=function(parentNode){
-        parentNode.append(this.HTMLElement);
-        this.HTMLElement.style.height=this.HTMLElement.offsetWidth + "px";
-    }
     this.OnMouseDown=function(e){
-        if(e.target===this.HTMLDraggable || e.target==this.HTMLDraggable.children[0]){
+        if(e.target===this.HTMLDraggable || e.target===this.HTMLDraggable.children[0]){
             this.notifyOnDraggingStarted();
         }
         else if(e.target===this.HTMLBtnMenu){
@@ -277,25 +363,19 @@ var AssetImage=function(model){
         }
     }
     this.notifyOnDraggingStarted=function(){
-
-        for(let i=0;i<this.listObserversOnDraggingStarted.length;i++){
-            this.listObserversOnDraggingStarted[i].notificationOnAssetDraggingStarted(this.model);
-        }
+        this.parentClass.childNotificationOnAssetDraggingStarted(this.model);
     }
     this.notifyOnMenuPressed=function(){
-        for(let i=0;i<this.listObserversOnMenuPressed.length;i++){
-            this.listObserversOnMenuPressed[i].notificationOnAssetMenuPressed(this.model);
-        }
+        this.parentClass.childNotificationOnAssetMenuPressed(this.model);
     }
-    this.registerOnMenuPressed=function(obj){
-        this.listObserversOnMenuPressed.push(obj);
-    }
-    this.registerOnDraggingStarted=function(obj){
-        this.listObserversOnDraggingStarted.push(obj);
-    }
-
-    this.init();
+    this.constructor();
 }
 var AssetAudio=function(){
 
+};
+ko.bindingHandlers.setupEvents={
+    init:function(element,valueAccesor,allBindings){
+        valueAccesor();
+    }
 }
+ko.applyBindings(SectionImageAssets);

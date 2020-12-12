@@ -18,13 +18,10 @@ var MainMediator={
 
     },
     registerObserver:function(className,event,obj){
-        console.log(className);
-        console.log(this.members[className]);
         this.members[className][event].push(obj);
     },
     notify:function(className,event,args){
         let observerMethod="notification" + className + event;
-        console.log(observerMethod + "   sadfasdfsadfa");
         for(let i in this.members[className][event]){
             this.members[className][event][i][observerMethod](args);
         }

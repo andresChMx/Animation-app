@@ -37,12 +37,15 @@ var SVGManager=fabric.util.createClass({
         }
         let f=function(objects, options) {
             var obj = fabric.util.groupSVGElements(objects, options);
-
+            let listObjects=[]
             if(obj.type==="path"){
-                this.parseFabricGroup([obj],imgWidth,imgHeight,strokeWidth,loadingMode,result);
+                listObjects=[obj];
             }else if(obj.type==="group"){
-                this.parseFabricGroup(obj.getObjects(),imgWidth,imgHeight,strokeWidth,loadingMode,result);
+                listObjects=obj.getObjects();
+            }else{
+                alert("ERROORR conocido: el objeto retornado por fabric es otra cosa no contemplada wdf" );
             }
+            this.parseFabricGroup(listObjects,imgWidth,imgHeight,strokeWidth,loadingMode,result);
             callback(result);
         }.bind(this);
 

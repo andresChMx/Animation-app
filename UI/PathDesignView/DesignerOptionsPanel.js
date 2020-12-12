@@ -169,10 +169,12 @@ let SectionPaths={
     },
     notifyOnPathClicked:function(e){
         let indexPath=e.target.getAttribute("name");
+        indexPath=parseInt(indexPath);
         this.parentClass.childNotificationOnPathClicked(indexPath);
     },
     notifyOnBtnDeletePathClicked:function(e){
         let indexPath=e.target.getAttribute("name");
+        indexPath=parseInt(indexPath);
         this.parentClass.childNotificationOnBtnDeletePathClicked(indexPath)
     },
     notifyOnBtnLoadSVGClicked:function(){
@@ -239,14 +241,14 @@ var PanelDesignerOptions={
         this.SectionSettings.init(this);
         this.SectionPathDesignerPopup.init(this);
         this.SectionPaths.init(this);
-        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
     },
     setController:function(obj){
         this.designerController=obj;
         this.SectionPaths.designerController=obj;
         this.designerController.registerOnSetupCompleted(this);
     },
-    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(args){
+    notificationCanvasManagerOnDesignPathOptionClicked:function(args){
         this.HTMLElement.style.display="block";
     },
 

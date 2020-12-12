@@ -58,7 +58,7 @@ var SectionObjectsEntraceEditor={
         let icon=newItem.querySelector(".panel-inspector__objects-entrance-editor__box-items__item__icon img");
         let inputDelay=newItem.querySelector(".box-items__item__input-field__input-element-delay");
         let inputDuration=newItem.querySelector(".box-items__item__input-field__input-element-duration");
-        icon.setAttribute("src",animObjWithEntrance.imageModel.url);
+        icon.setAttribute("src",animObjWithEntrance.imageDrawingData.url);
         inputDelay.value=animObjWithEntrance.animator.entranceDelay;
         inputDuration.value=animObjWithEntrance.animator.entranceDuration;
         newItem.style.display="block";
@@ -197,11 +197,8 @@ var PanelInspector={
         this.SectionToolBox.init(this);
         this.SectionObjectsEntraceEditor.init();
         this.SectionAnimableObjectsEditor.init();
-
-        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDesignPathsClicked,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
-
-
 
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjAddedToListWithEntrance,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjDeletedFromListWidthEntraces,this);
@@ -210,7 +207,7 @@ var PanelInspector={
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnAnimableObjectAdded,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnAnimableObjectDeleted,this);
         },
-    notificationPanelAssetsOnImageAssetDesignPathsClicked:function(args){
+    notificationCanvasManagerOnDesignPathOptionClicked:function(args){
         this.HTMLElement.style.display="none";
     },
     notificationPanelDesignerOptionsOnSettingActionClicked:function(data){

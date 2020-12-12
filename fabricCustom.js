@@ -1,3 +1,18 @@
+var EnumAnimationFunctionTypes={
+    Sine:'Sine',
+    Cubic:'Cubic',
+    Quint:'Quint',
+    Circ:'Circ',
+    Back:'Back',
+    Elastic:'Elastic',
+    Bounce:'Bounce',
+}
+var EnumAnimationTweenType={
+    In:'In',
+    Out:'Out',
+    InOut:'InOut',
+    Linear:'Linear',
+}
 var Animation=fabric.util.createClass({
     startValue:-1,
     endValue:-1,
@@ -8,6 +23,9 @@ var Animation=fabric.util.createClass({
     
 
     property:"",
+    functionName:'easeInSine',
+    easeFunctionType:'Sine', // sine,quart, etc...
+    tweenType:'In',  // In | Out | InOut | linear
     initialize:function(property,startValue,endValue,startMoment,endMoment){
         this.property=property;
         this.initParameters(startValue,endValue,startMoment,endMoment)
@@ -27,7 +45,29 @@ var Animation=fabric.util.createClass({
         this.endMoment=endMoment;
         this.localDuration=this.endMoment-this.startMoment;
     },
-
+    setEaseFunctionType:function(functionTypeName){
+        let name=EnumAnimationFunctionTypes[functionTypeName];
+        if(name===undefined){
+            name=EnumAnimationFunctionTypes.Sine;
+        }
+        this.easeFunctionType=name;
+        this.assembleFunctionName();
+    },
+    setTweenType:function(tweenType){
+        let type=EnumAnimationTweenType[tweenType];
+        if(type===undefined){
+            type=EnumAnimationTweenType.In;
+        }
+        this.tweenType=type;
+        this.assembleFunctionName();
+    },
+    assembleFunctionName:function(){
+        if(this.tweenType===EnumAnimationTweenType.Linear){
+            this.functionName='Linear';
+        }else{
+            this.functionName='ease' + this.tweenType + this.easeFunctionType;
+        }
+    },
     tick:function(currentTime){
         if(currentTime<this.startMoment){
             return "tiempoMenor";
@@ -35,7 +75,7 @@ var Animation=fabric.util.createClass({
             return "tiempoMayor";
         }else{
             let currentTimeLocalAnim=currentTime-this.startMoment;
-            let currentValue = fabric.util.ease.easeInOutSine(currentTimeLocalAnim, this.startValue, this.byValue, this.localDuration);
+            let currentValue = fabric.util.ease[this.functionName](currentTimeLocalAnim, this.startValue, this.byValue, this.localDuration);
             return currentValue;
         }
     },
@@ -43,6 +83,9 @@ var Animation=fabric.util.createClass({
         return this.endMoment!=-1 && this.endValue!=-1;
     }
 });
+fabric.util.ease.Linear=function(t,b,c,d){
+    return (t/d)*c + b;
+}
 var Animator=fabric.util.createClass({
     initialize:function(animableObject){
         this.dictAnimations={
@@ -114,7 +157,6 @@ var Animator=fabric.util.createClass({
         }
     },
     updateAnimation:function(animIndex,property,startValue,endValue,startMoment,endMoment){
-        console.log(animIndex);
         this.dictAnimations[property][animIndex].initParameters(startValue,endValue,startMoment,endMoment);
     },
     updateAnimations:function(animIndex,properties,startValues,endValues,startMoment,endMoment){
@@ -133,18 +175,19 @@ var Animator=fabric.util.createClass({
     onDurationChange:function(durationBefore,durationAfter){
         if(this.hasAnimations() && durationBefore>durationAfter){
             for(const prop in this.dictAnimations){
-                for(let i=0;i<this.dictAnimations[prop].length;i++){
-                    let listAnims=this.dictAnimations[prop];
-                    if(this.hasPropertyAnimations(prop)){
-                        if(listAnims[0].hasTwoKeys()){
-                            let percentStartMoment=listAnims[i].startMoment/durationBefore;
-                            let percentEndMoment=listAnims[i].endMoment/durationBefore;
-                            listAnims[i].updateMoments(durationAfter*percentStartMoment,durationAfter*percentEndMoment)
-                        }else{
-                            let percentStartTime=listAnims[0].startMoment/durationBefore;
-                            listAnims[0].updateMoments(durationAfter*percentStartTime,-1)
+                if(this.hasPropertyAnimations(prop)) {
+                    for (let i = 0; i < this.dictAnimations[prop].length; i++) {
+                        let listAnims = this.dictAnimations[prop];
+                        if (listAnims[0].hasTwoKeys()) {
+                            let percentStartMoment = listAnims[i].startMoment / durationBefore;
+                            let percentEndMoment = listAnims[i].endMoment / durationBefore;
+                            listAnims[i].updateMoments(durationAfter * percentStartMoment, durationAfter * percentEndMoment)
+                        } else {
+                            let percentStartTime = listAnims[0].startMoment / durationBefore;
+                            listAnims[0].updateMoments(durationAfter * percentStartTime, -1)
                             break;
                         }
+
                     }
                 }
             }
@@ -201,8 +244,61 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.callSuper('initialize', element,options);
         this.name="";
         this.entranceMode=null;
-        this.imageModel=null;
+        this.imageDrawingData=this.convertEntityToDTO(options.imageDrawingData);
         this.animator=new Animator(this);
+        this.setEntranceMode(EntranceModes.drawn); //debe estar a drawn antes de generar la imagen final mascarada (la siguiente funcion invocada)
+        if(this.type==="ImageAnimable"){ // since the subclasse (AnimableCamera) are invoking this constructor ()
+            this.generateFinalMaskedImage();
+        }
+    },
+    convertEntityToDTO:function(entityDrawingData){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHTML
+        let DTO={
+            id:entityDrawingData.id,
+            url:entityDrawingData.url,
+            userid:entityDrawingData.userid,
+
+            imgHTML:entityDrawingData.imgHTML,
+            imgMasked:null,
+            points:[],
+            linesWidths:[],
+            pathsNames:[],
+            strokesTypes:[],
+            ctrlPoints:[],
+            type:ImageType.CREATED_NOPATH
+        }
+        return DTO;
+    },
+    generateFinalMaskedImage:function(){
+        let dataGenerator=new ImageModelDrawingDataGenerator();
+        if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
+            //calculate points and ctrlPoints and strokestyes (para el pathillustrator)
+            this.imageDrawingData.imgMasked=this.imageDrawingData.imgHTML;
+            return;
+        }else if(this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
+            // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
+            this.imageDrawingData.ctrlPoints=dataGenerator.generateCrtlPointsFromPointsMatrix(this.imageDrawingData.points);
+        }
+        else if(this.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
+            //NOTHING BECAUSE POINTS AND CTRLPOINTS ARE ALREADY CALCULATED
+        }
+        let canvas=document.createElement("canvas");
+        let ctx=canvas.getContext("2d");
+        let illustratorDataAdapterCache=new IllustratorDataAdapterCache([this]);
+        let pathIllustrator=new PathIllustrator(canvas,ctx,illustratorDataAdapterCache,false);
+        pathIllustrator.generateFinalImage(function(dataUrl){
+            /*
+            var link = document.createElement("a");
+            link.download = name;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            delete link;
+            */
+            this.imageDrawingData.imgMasked=new Image();
+            this.imageDrawingData.imgMasked.src=dataUrl;
+            //canvas.remove();
+        }.bind(this))
     },
     setEntranceMode:function(mode){
         this.entranceMode=mode;
@@ -211,10 +307,10 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         return this.entranceMode;
     },
     getWidthInDrawingCache:function(){
-        return this.imageModel.imgHTML.naturalWidth;
+        return this.imageDrawingData.imgHTML.naturalWidth;
     },
     getHeightInDrawingCache:function(){
-        return this.imageModel.imgHTML.naturalHeight;
+        return this.imageDrawingData.imgHTML.naturalHeight;
     },
     getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS
         let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
@@ -261,11 +357,28 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         this.callSuper('initialize', text,options);
         this.name="";
         this.entranceMode=null;
-        this.imageModel=null;
+        this.imageDrawingData=this.convertEntityToDTO(options.imageDrawingData);
         this.animator=new Animator(this);
         this.fontFamily="parisienne";
         this.setFontSize(72);
         /*---------------------------*/
+    },
+    convertEntityToDTO:function(entityDrawingData){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHTML
+        let DTO={
+            //id:entityDrawingData.id,
+            url:entityDrawingData.url,
+            //userid:entityDrawingData.userid,
+
+            //imgHTML:entityDrawingData.imgHTML,
+            //imgMasked:null,
+            points:[],
+            linesWidths:[],
+            pathsNames:[],
+            strokesTypes:[],
+            ctrlPoints:[],
+            type:ImageType.CREATED_NOPATH
+        }
+        return DTO;
     },
     setFontSize:function(size){
         this.fontSize=size;
@@ -327,6 +440,32 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         ctx.restore();
     },
 });
+const EntranceModes={
+    drawn:"drawn",
+    dragged:"dragged",
+    none:"none",
+
+    text_drawn:"text_drawn",
+    text_typed:"text_typed"
+}
+var AnimableCamera=fabric.util.createClass(ImageAnimable,{
+    type:"AnimableCamera",
+    initialize:function(element,options){
+        this.callSuper("initialize",element,options);
+        this.name="Camera";
+        this.isCamera=true;
+        this.started=false;
+        this.canvasCamera=null;
+        this.entranceMode=EntranceModes.none;
+
+        this.lockUniScaling=true;
+        this.lockRotation=true;
+        this.cornerStyle="rect";
+        this.cornerColor="rgba(200,100,0,0.9)"
+        this.cornerSize=20;
+        this.animator=new AnimatorCamera(this,this.canvasCamera);
+    },
+})
 fabric.util.object.extend(fabric.Image,{
     fromURLCustom:function(url, callback, imgOptions){
       fabric.util.loadImage(url, function(img) {
@@ -384,6 +523,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
     type: 'DrawableImage',
     // initialize can be of type function(options) or function(property, options), like for text.
     // no other signatures allowed.
+    //
     initialize: function(options) {
         options || (options = { });
         this.callSuper('initialize',options);
@@ -394,16 +534,24 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         this.myTurn=false;
         this.lastSnapShot=new Image();
         this.lastSnapShot.src=this.cacheCanvas.toDataURL();
-        this.snapShotCurrent=new Image();
+        this.currentSnapShot=new Image();
+        this.currentSnapShot.src=this.cacheCanvas.toDataURL();
+        this.snapShot=new Image();
+        this.snapShot.src=this.cacheCanvas.toDataURL();
+        this.flagCurrentSnapReady=true;
+
         this.width=options.width;
         this.height=options.height;
 
         this.animator=new Animator(this);
         this.animator.dictAnimations=options.animations;
+
+        this.flaglastSnapShotReady=false;
     },
-    setTurn:function(is,lastDataUrl){
+    setTurn:function(is,finalImageMask){
+        this.flaglastSnapShotReady=false;
         if(!is){
-            this.lastSnapShot.src=lastDataUrl;
+            this.lastSnapShot=finalImageMask
         }
         this.myTurn=is;
     },
@@ -414,16 +562,29 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
     },
     
     render:function(ctx){
-        
         ctx.save();
-            this._setOpacity(ctx);
-            this.transform(ctx);
-            if(this.myTurn){
-
-                ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
-            }else{
-                ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);
-            }
+        this._setOpacity(ctx);
+        this.transform(ctx);
+        ctx.imageSmoothingEnabled = false;
+        if(this.myTurn){
+            ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2)
+            // if(this.flagCurrentSnapReady){
+            //     this.flagCurrentSnapReady=false;
+            //     this.currentSnapShot.src=this.cacheCanvas.toDataURL("image/png",1);
+            //     this.currentSnapShot.onload=function(img){
+            //         this.snapShot=img.target.cloneNode();
+            //         if(this.myTurn){
+            //             ctx.drawImage(this.snapShot,-this.width/2,-this.height/2);
+            //         }
+            //         this.flagCurrentSnapReady=true;
+            //     }.bind(this);
+            //     ctx.drawImage(this.snapShot,-this.width/2,-this.height/2);
+            // }else{
+            //     ctx.drawImage(this.snapShot,-this.width/2,-this.height/2);
+            // }
+        }else{
+            ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);
+        }
         ctx.restore();
         
        /*
@@ -434,31 +595,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
        }*/
     },
   });
-const EntranceModes={
-    drawn:"drawn",
-    dragged:"dragged",
-    none:"none",
 
-    text_drawn:"text_drawn",
-    text_typed:"text_typed"
-}
-var AnimableCamera=fabric.util.createClass(ImageAnimable,{
-    type:"AnimableCamera",
-    initialize:function(element,options){
-        this.callSuper("initialize",element,options);
-        this.name="Camera"
-        this.started=false;
-        this.canvasCamera=null;
-        this.entranceMode=EntranceModes.none;
-
-        this.lockUniScaling=true;
-        this.lockRotation=true;
-        this.cornerStyle="rect";
-        this.cornerColor="rgba(200,100,0,0.9)"
-        this.cornerSize=20;
-        this.animator=new AnimatorCamera(this,this.canvasCamera);
-    },
-})
 /*
 * Canvas en el que se toma en cuenta la opacidad, la cual es aplicar a todos los objetos. Usado para el canvas previewer
 * */

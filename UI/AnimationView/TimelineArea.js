@@ -82,7 +82,6 @@ var Component = fabric.util.createClass({
                     this.onMouseFixedClick(e);
                 }
             }
-
         }
         if (this.isPressed && this.hasBeenDragged) {
             this.onMouseDragEnded(e);
@@ -405,6 +404,7 @@ let TimeLineProxy=fabric.util.createClass({
         this.timeLineComponent.keysBarComponent.registerOnKeyFrameDragging(classParent);
         this.timeLineComponent.markerComponent.registerOnDragging(classParent);
         this.timeLineComponent.markerComponent.registerOnDragEnded(classParent);
+        this.timeLineComponent.keysBarComponent.registerOnSelectionUpdated(classParent);
     },
     setDuration:function(durationBefore,durationAfter){
         this.timeLineComponent.globalState.time.duration=durationAfter;
@@ -723,10 +723,10 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         this.listLanesName = listLanesName;
 
         this.selectedKeyframes = [];
-        this.keyframeSelected = null;
 
         this.listObserversOnKeyFrameDragging=[];
         this.listObserversOnKeyFrameDragEnded=[];
+        this.observerOnSelectionUpdated=[];
         this.canvas.addComponent(this);
 
         this.initComponents();
@@ -760,11 +760,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             }
             this.selectedKeyframes = [];
         }
-        if (this.keyframeSelected) {
-            this.keyframeSelected.deselect();
-            this.keyframeSelected = null;
-        }
-
+        this.canvas.requestRenderAll();
     },
     findKeyframesInsideBoxSelection: function () {
         for (let i in this.dictPropertiesLanes) {
@@ -778,18 +774,13 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     },
     discartSelectedKeyFrames: function () {
         let tmpDictCantLanesKeyFrames=this._countSelectedKeyFramesByLane();
-
         if (this.selectedKeyframes.length > 0) {
             for (let i = 0; i < this.selectedKeyframes.length; i++) {
                 this.dictPropertiesLanes[this.selectedKeyframes[i].laneName].discartKeyFrame(this.selectedKeyframes[i]);
             }
             this.selectedKeyframes = [];
-        }else{
-            if (this.keyframeSelected) {
-                this.dictPropertiesLanes[this.keyframeSelected.laneName].discartKeyFrame(this.keyframeSelected);
-                this.keyframeSelected = null;
-            }
         }
+        this.notifyOnKeyframeSelectionUpdated();
         this.canvas.requestRenderAll();
         return tmpDictCantLanesKeyFrames;
     },
@@ -799,11 +790,6 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             for (let i = 0; i < this.selectedKeyframes.length; i++) {
                 let cantLaneKeyFrames=tmpDictLanesNames[this.selectedKeyframes[i].laneName];
                 tmpDictLanesNames[this.selectedKeyframes[i].laneName]=cantLaneKeyFrames!==undefined?cantLaneKeyFrames+1:1;
-            }
-        }else{
-            if (this.keyframeSelected) {
-                let cantLaneKeyFrames=tmpDictLanesNames[this.keyframeSelected.laneName];
-                tmpDictLanesNames[this.keyframeSelected.laneName]=cantLaneKeyFrames!==undefined?cantLaneKeyFrames+1:1;
             }
         }
         return tmpDictLanesNames;
@@ -817,7 +803,9 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         for(let i in this.dictPropertiesLanes){
             this.dictPropertiesLanes[i].discartAllKeyFrames();
         }
+
         this.canvas.requestRenderAll();
+        this.notifyOnKeyframeSelectionUpdated();
     },
     addKeyFrame: function (laneName, markerTimeLineTime,values) {
         this.dictPropertiesLanes[laneName].retrieveKeyFrame(markerTimeLineTime,values);
@@ -876,27 +864,16 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             this.dictPropertiesLanes[key].notificationOnDurationChange(durationBefore,durationAfter);
         }
     },
-    notificationOnKeyframeMouseDown: function (keyframe) {
-        if (keyframe !== this.keyframeSelected && this.selectedKeyframes.length === 0) {
-            if (this.keyframeSelected) {
-                this.keyframeSelected.deselect();
-            }
-            keyframe.select();
-            this.keyframeSelected = keyframe;
-            this.notifyOnKeyframeSelectionUpdated();
-        } else {
-            if (!keyframe.isSelected) {
-                this.deselectCurrentSelection();
-                keyframe.select();
-                this.keyframeSelected = keyframe;
-                this.notifyOnKeyframeSelectionUpdated();
-            }
-        }
-
-    },
-
     notifyOnKeyframeSelectionUpdated: function () {
-        this.canvas.renderAll();
+        let dictPropertiesLanesKeysLengths={};
+        for(let prop in this.dictPropertiesLanes){
+            for(let i=0;i<this.dictPropertiesLanes[prop].counterActiveKeyFrames;i++){
+                this.dictPropertiesLanes[prop].keyFrames[i].indexInParentList=i;
+            }
+            dictPropertiesLanesKeysLengths[prop]=this.dictPropertiesLanes[prop].counterActiveKeyFrames;
+        }
+        this.observerOnSelectionUpdated.notificationOnKeyBarSelectionUpdated(this.selectedKeyframes,dictPropertiesLanesKeysLengths);
+
     },
     notifyOnKeyFrameDragging:function(laneName){
       for(let i=0;i<this.listObserversOnKeyFrameDragging.length;i++){
@@ -917,8 +894,31 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             this.dictPropertiesLanes[key].notificationOnScrollBarResize();
         }
     },
+    notificationOnKeyframeMouseDown: function (keyframe) {
+        //si no hay seleccion multiple, y si el keyframe trigger es diferente al seleccionado
+        //if (keyframe !== this.keyframeSelected && this.selectedKeyframes.length === 0) {
+        if ( (this.selectedKeyframes.length === 1 && this.selectedKeyframes[0]!==keyframe) || this.selectedKeyframes.length===0 ) {
+            if (this.selectedKeyframes.length === 1) {
+                this.selectedKeyframes[0].deselect();
+                this.selectedKeyframes[0]=keyframe;
+            }else{
+                this.selectedKeyframes.push(keyframe);
+            }
+            keyframe.select();
+            this.notifyOnKeyframeSelectionUpdated();
+        } else {
+            if (!keyframe.isSelected) {
+                this.deselectCurrentSelection();
+                keyframe.select();
+                this.selectedKeyframes.push(keyframe);
+                this.notifyOnKeyframeSelectionUpdated();
+            }
+        }
+        this.canvas.requestRenderAll();
+
+    },
     notificationOnKeyframeDragStarted: function (keyframe) {
-        if (keyframe.isSelected && this.selectedKeyframes.length > 0) {
+        if (keyframe.isSelected && this.selectedKeyframes.length > 1) {
             for (let i = 0; i < this.selectedKeyframes.length; i++) {
                 if (this.selectedKeyframes[i] !== keyframe) {
                     this.selectedKeyframes[i].simulateDragStarted();
@@ -927,7 +927,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         }
     },
     notificationOnKeyframeDragging: function (keyframe) {
-        if (keyframe.isSelected && this.selectedKeyframes.length > 0) {
+        if (keyframe.isSelected && this.selectedKeyframes.length > 1) {
             for (let i = 0; i < this.selectedKeyframes.length; i++) {
                 if (this.selectedKeyframes[i] !== keyframe) {
                     this.selectedKeyframes[i].simulateDragging()
@@ -939,7 +939,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     notificationOnKeyframeDragEnded: function (keyframe) {
         let dictLaneNames={};
         for(let i in this.listLanesName){dictLaneNames[this.listLanesName[i]]=0;}
-        if (keyframe.isSelected && this.selectedKeyframes.length > 0) {
+        if (keyframe.isSelected && this.selectedKeyframes.length > 1) {
             for (let i = 0; i < this.selectedKeyframes.length; i++) {
                 if (this.selectedKeyframes[i] !== keyframe) {
                     this.selectedKeyframes[i].simulateDragEnded();
@@ -951,11 +951,12 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         this.notifyOnKeyFrameDragEnded(dictLaneNames);
     },
     notificationOnKeyframeFixedClick: function (keyframe,laneName) {//click sin dragging, si se hizo dragging no se notifica
-        if (this.selectedKeyframes.length !== 0) {
+        if (this.selectedKeyframes.length > 1) {
             this.deselectCurrentSelection();
             keyframe.select();
-            this.keyframeSelected = keyframe;
+            this.selectedKeyframes.push(keyframe);
             this.notifyOnKeyframeSelectionUpdated();
+            this.canvas.requestRenderAll();
         }
     },
     notificationOnMouseMove: function (e) {
@@ -985,6 +986,9 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     },
     registerOnKeyFrameDragEnded:function(obj){
         this.listObserversOnKeyFrameDragEnded.push(obj);
+    },
+    registerOnSelectionUpdated:function(obj){
+        this.observerOnSelectionUpdated=obj;
     }
 });
 var KeyBarPropertyLane = fabric.util.createClass(Component, {
@@ -1140,6 +1144,8 @@ var KeyFrame = fabric.util.createClass(Component, {
         this.isSelected = false;
 
         this.wasDragged = false;
+
+        this.indexInParentList=-1; //solo se actualiza cuando se actualizo la seleccion en el KeyBar component
     },
     activate: function (timeLineTime,values) {
         this.isActive = true;
