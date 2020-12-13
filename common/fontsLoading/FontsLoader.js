@@ -1,6 +1,6 @@
 let FontsLoader=function(){
     this.init=function(){
-        var myfont = new FontFaceObserver("parisienne")
+        var myfont = new FontFaceObserver("bauhs 93")
         myfont.load()
             .then(function() {
                 // when font is loaded, use it.

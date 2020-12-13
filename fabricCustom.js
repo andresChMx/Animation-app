@@ -269,11 +269,22 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         return DTO;
     },
     generateFinalMaskedImage:function(){
+        let canvas=document.createElement("canvas");
+        let ctx=canvas.getContext("2d");
         let dataGenerator=new ImageModelDrawingDataGenerator();
         if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
             //calculate points and ctrlPoints and strokestyes (para el pathillustrator)
-            this.imageDrawingData.imgMasked=this.imageDrawingData.imgHTML;
+            canvas.width=this.imageDrawingData.imgHTML.naturalWidth;
+            canvas.height=this.imageDrawingData.imgHTML.naturalHeight;
+            ctx.drawImage(this.imageDrawingData.imgHTML,0,0);
+            this.imageDrawingData.imgMasked=new Image();
+            this.imageDrawingData.imgMasked.src=canvas.toDataURL();
+            canvas.remove();
             return;
+            //dataGenerator.generateDefaultDrawingPointsAndLineWidth(this.imageDrawingData, 35)
+            //this.imageDrawingData.ctrlPoints=dataGenerator.generateCrtlPointsFromPointsMatrix(this.imageDrawingData.points);
+            //this.imageDrawingData.strokesTypes=dataGenerator.generateStrokesTypesFromPoints(this.imageDrawingData.points);
+            //this.imageDrawingData.pathsNames=dataGenerator.generateLayerNames(this.imageDrawingData.points)
         }else if(this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
             // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
             this.imageDrawingData.ctrlPoints=dataGenerator.generateCrtlPointsFromPointsMatrix(this.imageDrawingData.points);
@@ -281,8 +292,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         else if(this.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
             //NOTHING BECAUSE POINTS AND CTRLPOINTS ARE ALREADY CALCULATED
         }
-        let canvas=document.createElement("canvas");
-        let ctx=canvas.getContext("2d");
+
         let illustratorDataAdapterCache=new IllustratorDataAdapterCache([this]);
         let pathIllustrator=new PathIllustrator(canvas,ctx,illustratorDataAdapterCache,false);
         pathIllustrator.generateFinalImage(function(dataUrl){
@@ -297,7 +307,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             */
             this.imageDrawingData.imgMasked=new Image();
             this.imageDrawingData.imgMasked.src=dataUrl;
-            //canvas.remove();
+            canvas.remove();
         }.bind(this))
     },
     setEntranceMode:function(mode){
@@ -359,10 +369,10 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         this.entranceMode=null;
         this.imageDrawingData=this.convertEntityToDTO(options.imageDrawingData);
         this.animator=new Animator(this);
-        this.fontFamily="parisienne";
         this.setFontSize(72);
+        this.setFontFamily(FontsNames["bauhs 93"]);
         /*---------------------------*/
-    },
+    },//exitEditing
     convertEntityToDTO:function(entityDrawingData){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHTML
         let DTO={
             //id:entityDrawingData.id,
@@ -380,9 +390,15 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         }
         return DTO;
     },
+    setFontFamily:function(fontname){ //Cargando Font Object y guardandolo, solo si aun no esta cargado
+        if(!FontsFileName[fontname]){fontname=Object.keys(FontsFileName)[0];} //validando que nombre sea uno valido
+
+        this.fontFamily=fontname;
+        OpenTypeFontManager.LoadOpenTypeFont(FontsFileName[fontname]);
+    },
     setFontSize:function(size){
         this.fontSize=size;
-        this.exitEditing();
+        //this.exitEditing();
         if(this.canvas){//en cuanto es inicializado aun no tiene asignado un canvas, hasta que se llame a add en su canvas padre
             this.canvas.renderAll();
         }

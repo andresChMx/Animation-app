@@ -185,6 +185,8 @@ var CanvasManager={
 
                 "left":WindowManager.mouse.x-this.canvas._offset.left,
                 "top":WindowManager.mouse.y-this.canvas._offset.top,
+                "originX":'center',
+                "originY":'center',
                 "imageDrawingData":model,
             })
              // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea

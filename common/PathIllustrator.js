@@ -125,7 +125,7 @@ var PathIllustrator=fabric.util.createClass({
                         this.drawCompletePath(this.k,indexes[0],indexes[1]);
                     }
                     this.functionDrawingMode(this.k);
-                    imageFinalFrame.src=this.canvas.toDataURL();
+                    imageFinalFrame=this.data.getFinalMaskedImageOf(this.k);
                 }
             }else{
                 imageFinalFrame.src=this.canvas.toDataURL();
@@ -426,7 +426,7 @@ var PathIllustrator=fabric.util.createClass({
     },
 
     drawCurrentStrokes:function(k){
-        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height)
+        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
         this.ctx.drawImage(this.data.getBaseImageOf(k),0,0,this.canvas.width,this.canvas.height)
         this.ctx.globalCompositeOperation="destination-in";
         this.ctx.stroke();
@@ -435,6 +435,9 @@ var PathIllustrator=fabric.util.createClass({
 
     },
     drawCurrentFills:function(k){
+        //this.ctx.strokeStyle="red";
+        //this.ctx.lineWidth="2";
+        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
         this.ctx.drawImage(this.data.getBaseImageOf(k),0,0,this.canvas.width,this.canvas.height)
         this.ctx.globalCompositeOperation="source-in";
         this.ctx.fill();

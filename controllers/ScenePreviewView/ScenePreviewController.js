@@ -73,8 +73,8 @@ var ScenePreviewController=fabric.util.createClass({
                     angle:animableObjWithEntrance.get("angle"),
                     scaleX:animableObjWithEntrance.get("scaleX"),
                     scaleY:animableObjWithEntrance.get("scaleY"),
-                    originX: 'left',
-                    originY: 'top',
+                    originX: 'center',
+                    originY: 'center',
                     animations:animableObjWithEntrance.animator.dictAnimations});
                 listDrawableObjects[i]=tmpObject;
                 listAnimableObjectDrawnEntrance[i]=animableObjWithEntrance;
@@ -82,30 +82,29 @@ var ScenePreviewController=fabric.util.createClass({
                 //TODO Manager para objetos que entran arrastrados
             }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.text_drawn){
                 /*Loading drawing data of text*/
-                this.counterCallBacksDrawableTexts++;
                 let self=this;
                 let index=i;
-                this.pointsGenerator.generateTextDrawingDataNoForcing(animableObjWithEntrance,animableObjWithEntrance.getWidthInDrawingCache(),animableObjWithEntrance.getHeightInDrawingCache(),function(result) {
-                    //console.log("dentro del callback: " +index );
-                    animableObjWithEntrance.imageDrawingData = result;
-                    animableObjWithEntrance.imageDrawingData.type=TextType.PROVIDED;
-                    animableObjWithEntrance.imageDrawingData.imgHTML=self.pointsGenerator.generateTextBaseImage(animableObjWithEntrance);
-                    let textDrawable=new DrawableImage({
-                        cacheCanvas:self.drawingCacheManager.canvas,
-                        left:animableObjWithEntrance.get("left"),
-                        top:animableObjWithEntrance.get("top"),
-                        width:animableObjWithEntrance.get("width"),
-                        height:animableObjWithEntrance.get("height"),
-                        angle:animableObjWithEntrance.get("angle"),
-                        scaleX:animableObjWithEntrance.get("scaleX"),
-                        scaleY:animableObjWithEntrance.get("scaleY"),
-                        originX: 'left',
-                        originY: 'top',
-                        animations:animableObjWithEntrance.animator.dictAnimations});
-                    listDrawableObjects[index]=textDrawable;
-                    listAnimableObjectDrawnEntrance[index]=animableObjWithEntrance
-                    self.counterCallBacksDrawableTexts--;
-                })
+                let result=this.pointsGenerator.generateTextDrawingData(animableObjWithEntrance,animableObjWithEntrance.getWidthInDrawingCache(),animableObjWithEntrance.getHeightInDrawingCache());
+                console.log(result);
+                animableObjWithEntrance.imageDrawingData = result;
+                animableObjWithEntrance.imageDrawingData.type=TextType.PROVIDED;
+                animableObjWithEntrance.imageDrawingData.imgHTML=self.pointsGenerator.generateTextBaseImage(animableObjWithEntrance);
+                animableObjWithEntrance.imageDrawingData.imgMasked=animableObjWithEntrance.imageDrawingData.imgHTML;
+
+                let textDrawable=new DrawableImage({
+                    cacheCanvas:self.drawingCacheManager.canvas,
+                    left:animableObjWithEntrance.get("left"),
+                    top:animableObjWithEntrance.get("top"),
+                    width:animableObjWithEntrance.get("width"),
+                    height:animableObjWithEntrance.get("height"),
+                    angle:animableObjWithEntrance.get("angle"),
+                    scaleX:animableObjWithEntrance.get("scaleX"),
+                    scaleY:animableObjWithEntrance.get("scaleY"),
+                    originX: 'left',
+                    originY: 'top',
+                    animations:animableObjWithEntrance.animator.dictAnimations});
+                listDrawableObjects[index]=textDrawable;
+                listAnimableObjectDrawnEntrance[index]=animableObjWithEntrance
             }
 
         }
@@ -118,7 +117,7 @@ var ScenePreviewController=fabric.util.createClass({
             this.pointsGenerator.generateDefaultDrawingPointsAndLineWidth(animableObj.imageDrawingData, 35)
             animableObj.imageDrawingData.ctrlPoints=this.pointsGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageDrawingData.points);
             animableObj.imageDrawingData.strokesTypes=this.pointsGenerator.generateStrokesTypesFromPoints(animableObj.imageDrawingData.points);
-            animableObj.imageDrawingData.pathsNames=this.pointsGenerator.generateLayerNames(animableObj.imageDrawingData.points)
+            //animableObj.imageDrawingData.pathsNames=this.pointsGenerator.generateLayerNames(animableObj.imageDrawingData.points)
         }else if(animableObj.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
             // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
             animableObj.imageDrawingData.ctrlPoints=this.pointsGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageDrawingData.points);
