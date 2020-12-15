@@ -98,18 +98,26 @@
             <div class="canvas-animator__object-configuration__entrance-settings">
                 <p class="canvas-animator__object-configuration__entrance-settings__title">Entrace Modes</p>
                 <div class="canvas-animator__object-configuration__entrance-settings__box-radio-buttons">
-                    <label id="label_none" for="none">None</label>
-                    <input type="radio" name="entrace_mode" value="none" id="none" class="entrance-settings__box-radio-buttons__radio-button">
-                    <label id="label_drawn" for="drawn">Drawn</label>
-                    <input type="radio" name="entrace_mode" value="drawn" id="drawn" class="entrance-settings__box-radio-buttons__radio-button">
-                    <label id="label_dragged" for="dragged">Dragged</label>
-                    <input type="radio" name="entrace_mode" value="dragged" id="dragged" class="entrance-settings__box-radio-buttons__radio-button">
-                    <label id="label_typed" for="typed">Typed</label>
-                    <input type="radio" name="entrace_mode" value="typed" id="typed" class="entrance-settings__box-radio-buttons__radio-button">
+                    <div class="form-group"><!--el radio box debe ser segundo hijo-->
+                        <label id="label_none" for="none">None</label>
+                        <input type="radio" name="entrace_mode" value="none" id="none" class="entrance-settings__box-radio-buttons__radio-button ">
+                    </div>
+                    <div class="form-group">
+                        <label id="label_drawn" for="drawn">Drawn</label>
+                        <input type="radio" name="entrace_mode" value="drawn" id="drawn" class="entrance-settings__box-radio-buttons__radio-button ">
+                    </div>
+                    <div class="form-group">
+                        <label id="label_dragged" for="dragged">Dragged</label>
+                        <input type="radio" name="entrace_mode" value="dragged" id="dragged" class="entrance-settings__box-radio-buttons__radio-button ">
+                    </div>
+                    <div class="form-group">
+                        <label id="label_typed" for="typed">Typed</label>
+                        <input type="radio" name="entrace_mode" value="typed" id="typed" class="entrance-settings__box-radio-buttons__radio-button ">
+                    </div>
                 </div>
                 <div class="canvas-animator__object-configuration__entrance-settings__box-options">
                     <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options none">
-
+                        opciones de el modo none
                     </div>
                     <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options drawn">
                         opciones de el modo drawn
@@ -121,10 +129,51 @@
                         opciones del modo typed
                     </div>
                 </div>
-                <div class="canvas-animator__object-configuration__entrance-settings__box-buttons">
-                    <button class="btn-accept">Accept</button>
-
+            </div>
+            <div class="canvas-animator__object-configuration__appearance-settings">
+                <p class="canvas-animator__object-configuration__apearance-settings__title">Appareance</p>
+                <div class="canvas-animator__object-configuration__appearance-settings__box-options">
+                    <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options ImageAnimable">
+                        opciones de objetos de tipo ImageAnimable
+                    </div>
+                    <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options TextAnimable">
+                        <div class="form-group ImageAnimable-widged__font-family">
+                            <label for="font-family">Font Family:</label>
+                            <select id="font-family" class="">
+                                <option value="bauhs 93">Bauhs 93</option>
+                                <option value="arial">Arial</option>
+                                <option value="Verdana">Verdana</option>
+                            </select>
+                        </div>
+                        <div class="form-group ImageAnimable-widged__text-alignment">
+                            <label for="">Text Alignment:</label>
+                            <div class="text-alignment__options">
+                                <span id="left">L</span>
+                                <span id="center">C</span>
+                                <span id="right">R</span>
+                            </div>
+                        </div>
+                        <div class="form-group ImageAnimable-widged__font-size">
+                            <label for="text-size">Text Size:</label>
+                            <input id="text-size" type="number" value="16">
+                        </div>
+                        <div class="form-group ImageAnimable-widged__line-height">
+                            <label for="line-height">Line Height:</label>
+                            <input id="line-height" type="number" value="1.16">
+                        </div>
+                        <div class="form-group ImageAnimable-widged__fill-color">
+                            <label for="fill-color">Color:</label>
+                            <input id="fill-color" type="color">
+                        </div>
+                    </div>
+                    <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options CameraAnimable">
+                        opciones de objetos de tipo CameraAnimable
+                    </div>
                 </div>
+            </div>
+            <div class="canvas-animator__object-configuration__box-buttons">
+                <button class="btn-accept">Accept</button>
+
             </div>
         </div>
     </div>

@@ -28,7 +28,6 @@ var PathIllustrator=fabric.util.createClass({
         this.prevStrokeTurnIndex=0;
         this.functionDrawingMode=null;
         this.flagFirstTime=false;
-        this.flagImageReady=true;
         let self=this;
         this.animator={
             executeAnimations:this._executeAnimations.bind(self)
@@ -99,7 +98,6 @@ var PathIllustrator=fabric.util.createClass({
 
     },
     _executeAnimations:function(nowTime){
-        if(!this.flagImageReady){return;}
         if(this.endLoop || this.data.getObjectsToDrawLength()<=0){return;}
         if(nowTime>=this.animFinishTime || this.flagFirstTime){ // siguiente imagen o primera vez
             let imageFinalFrame=new Image();
@@ -156,22 +154,21 @@ var PathIllustrator=fabric.util.createClass({
             //Buscando los indicices del primer stroke
             this.i=this.getFirstPathListIndex(this.k,-1);
             this.j=0;
+            //Setting up canvas for new image (cleaning, empty snapshot, setup linewidth)
+            this.ctx.beginPath();
+            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+            this.prevPathSnapshot.src=this.canvas.toDataURL();
+            if(this.data.getListLinesWidthsLength(this.k)>0){
+                this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
+            }
+            this.ctx.lineCap = "round";
             // pintara un texto o una imagen
             if(this.data.getEntraceModeOf(this.k)===EntranceModes.drawn){
                 this.functionDrawingMode=this.drawCurrentStrokes.bind(this);
             }else if(this.data.getEntraceModeOf(this.k)===EntranceModes.text_drawn){
                 this.functionDrawingMode=this.drawCurrentFills.bind(this);
+                this.ctx.fillStyle=this.data.getTextFillColor(this.k);
             }
-            //Setting up canvas for new image (cleaning, empty snapshot, setup linewidth)
-            this.ctx.beginPath();
-            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-            this.prevPathSnapshot.src=this.canvas.toDataURL();
-            this.flagImageReady=false;
-            this.prevPathSnapshot.onload=function(){this.flagImageReady=true}.bind(this);
-            if(this.data.getListLinesWidthsLength(this.k)>0){
-                this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
-            }
-            this.ctx.lineCap = "round";
             ////// Calculando tiempo de cada stroke
             let totalCantPathStrokes=this.getTotalStrokesInImage(this.k);
             this.animStrokeDuration=this.data.getDurationOf(this.k)/totalCantPathStrokes;
@@ -199,8 +196,6 @@ var PathIllustrator=fabric.util.createClass({
 
                             this.functionDrawingMode(this.k);
                             this.prevPathSnapshot.src=this.canvas.toDataURL();
-                            this.flagImageReady=false;
-                            this.prevPathSnapshot.onload=function(){this.flagImageReady=true}.bind(this);
                             this.ctx.beginPath();
                             this.ctx.clearRect(0,0,this.canvas.width,this.canvas.he);
                             this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
@@ -217,8 +212,6 @@ var PathIllustrator=fabric.util.createClass({
                         if(oldValI!==this.i){//se paso a otro path
                             this.functionDrawingMode(this.k);
                             this.prevPathSnapshot.src=this.canvas.toDataURL();
-                            this.flagImageReady=false;
-                            this.prevPathSnapshot.onload=function(){this.flagImageReady=true}.bind(this);
                             this.ctx.beginPath();
                             this.ctx.clearRect(0,0,this.canvas.width,this.canvas.he);
                             this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
@@ -435,11 +428,12 @@ var PathIllustrator=fabric.util.createClass({
 
     },
     drawCurrentFills:function(k){
-        //this.ctx.strokeStyle="red";
-        //this.ctx.lineWidth="2";
+        // this.ctx.strokeStyle="red";
+        // this.ctx.lineWidth="2";
         this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
         this.ctx.drawImage(this.data.getBaseImageOf(k),0,0,this.canvas.width,this.canvas.height)
         this.ctx.globalCompositeOperation="source-in";
+        //this.ctx.stroke();
         this.ctx.fill();
         this.ctx.globalCompositeOperation="source-over";
         this.ctx.drawImage(this.prevPathSnapshot,0,0);
@@ -774,5 +768,13 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
     },
     getEntraceModeOf:function(k){
         return this.listAnimableObjectsWithDrawnEntrances[k].getEntranceMode();
+    },
+    getTextFillColor:function(k){
+        if(this.listAnimableObjectsWithDrawnEntrances[k].type==="TextAnimable"){
+            return this.listAnimableObjectsWithDrawnEntrances[k].fill;
+        }else{
+            alert("ERROR CONOCIDOO: el pathillustrator solicito fill color a un obj no TextAnimable");
+            return "#000000";
+        }
     }
 })

@@ -264,6 +264,7 @@
     height:300px;
     overflow: auto;
 }
+
 .panel-inspector__objects-entrance-editor__box-items__item{
     background:peru;
 }
@@ -662,6 +663,12 @@
     position:absolute;
     right:10px;
     top:10px;
+}
+.canvas-animator__object-configuration__entrance-settings .form-group{
+    display:inline-block;
+}
+.canvas-animator__object-configuration__appearance-settings .text-alignment__options .active{
+    background:red;
 }
 /*======================
 ==== JS helper clasess==

@@ -13,3 +13,13 @@ function insertionSort(inputArr,numActiveFrames) {
         }
     return inputArr;
 }
+function rgbToHex(rgbColor){
+    let reg=/\((\d+),(\d+),(\d+)\)/;
+
+    let arrVals=rgbColor.match(reg);
+    let rhex=parseInt(arrVals[1]).toString(16); rhex=rhex.length===1?"0"+rhex:rhex;
+    let ghex=parseInt(arrVals[2]).toString(16); ghex=ghex.length===1?"0"+ghex:ghex;
+    let bhex=parseInt(arrVals[3]).toString(16); bhex=bhex.length===1?"0"+bhex:bhex;
+
+    return "#"+rhex+ghex+bhex;
+}

@@ -26,7 +26,7 @@ var ScenePreviewController=fabric.util.createClass({
     },
     loadObjectsForAnimation:function(listForAnimator,listDrawableObjects,listAnimableObjectDrawnEntrance){
         /*
-        * Tenemos 3 tipos de objetos (ImageAnimable, TextAnimable, AnimableCamera ) que reciden en el canvas principal
+        * Tenemos 3 tipos de objetos (ImageAnimable, TextAnimable, CameraAnimable ) que reciden en el canvas principal
         *   * Llevan la palabra Animable porque son animables por el ControllerAnimator, es decir por la linea de tiempo
         * Tenemos 1 objeto especial DrawableImage, que reemplaza a los objetos ImageAnimable en el canvas de previsualizacion, que tienen un modo de entrada drawn
         * es decir se creara un DrawableImage por cada ImageAnimable que tenga activo un modo de entrada drawn, es decir que entrara dibujandose
@@ -53,7 +53,7 @@ var ScenePreviewController=fabric.util.createClass({
         let allCanvasObjects=CanvasManager.canvas.getObjects();
         for(let i=0;i<allCanvasObjects.length;i++){
             let canvasObject=allCanvasObjects[i];
-            if(canvasObject.getEntranceMode()===EntranceModes.none && canvasObject.type!=="AnimableCamera"){
+            if(canvasObject.getEntranceMode()===EntranceModes.none && canvasObject.type!=="CameraAnimable"){
                 this.UIPanelPreviewerCanvas.add(canvasObject);      //Agremos al canvas de previsualizacion tdos los objetos animables (no el restangulo camara [AnimableCamara])
                 listForAnimator.push(canvasObject);                  // Agregamos todos los abjetos (incluido al AnimableCamara)
             }
@@ -85,8 +85,9 @@ var ScenePreviewController=fabric.util.createClass({
                 let self=this;
                 let index=i;
                 let result=this.pointsGenerator.generateTextDrawingData(animableObjWithEntrance,animableObjWithEntrance.getWidthInDrawingCache(),animableObjWithEntrance.getHeightInDrawingCache());
-                console.log(result);
+                let tmpUrl=animableObjWithEntrance.imageDrawingData.url;
                 animableObjWithEntrance.imageDrawingData = result;
+                animableObjWithEntrance.imageDrawingData.url=tmpUrl;
                 animableObjWithEntrance.imageDrawingData.type=TextType.PROVIDED;
                 animableObjWithEntrance.imageDrawingData.imgHTML=self.pointsGenerator.generateTextBaseImage(animableObjWithEntrance);
                 animableObjWithEntrance.imageDrawingData.imgMasked=animableObjWithEntrance.imageDrawingData.imgHTML;
@@ -100,8 +101,8 @@ var ScenePreviewController=fabric.util.createClass({
                     angle:animableObjWithEntrance.get("angle"),
                     scaleX:animableObjWithEntrance.get("scaleX"),
                     scaleY:animableObjWithEntrance.get("scaleY"),
-                    originX: 'left',
-                    originY: 'top',
+                    originX: 'center',
+                    originY: 'center',
                     animations:animableObjWithEntrance.animator.dictAnimations});
                 listDrawableObjects[index]=textDrawable;
                 listAnimableObjectDrawnEntrance[index]=animableObjWithEntrance

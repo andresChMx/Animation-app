@@ -224,8 +224,10 @@ var ImageModelDrawingDataGenerator=fabric.util.createClass({
             left:0,
             top:0,
             textAlign:animableText.textAlign,
+            lineHeight:animableText.lineHeight,
             fontFamily:animableText.fontFamily,
-            fontSize:animableText.fontSize
+            fontSize:animableText.fontSize,
+            fill:animableText.fill
         });
         this.auxCanvasForTexts.add(tmpText);
         let image=new Image();

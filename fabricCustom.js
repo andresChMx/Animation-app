@@ -238,7 +238,9 @@ var AnimatorCamera=fabric.util.createClass(Animator,{
         this.startCameraAnimation=false;
     },
 });
+
 var ImageAnimable=fabric.util.createClass(fabric.Image,{
+    applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
@@ -247,7 +249,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.imageDrawingData=this.convertEntityToDTO(options.imageDrawingData);
         this.animator=new Animator(this);
         this.setEntranceMode(EntranceModes.drawn); //debe estar a drawn antes de generar la imagen final mascarada (la siguiente funcion invocada)
-        if(this.type==="ImageAnimable"){ // since the subclasse (AnimableCamera) are invoking this constructor ()
+        if(this.type==="ImageAnimable"){ // since the subclasse (CameraAnimable) are invoking this constructor ()
             this.generateFinalMaskedImage();
         }
     },
@@ -269,11 +271,11 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         return DTO;
     },
     generateFinalMaskedImage:function(){
+        let dataGenerator=new ImageModelDrawingDataGenerator();
+
         let canvas=document.createElement("canvas");
         let ctx=canvas.getContext("2d");
-        let dataGenerator=new ImageModelDrawingDataGenerator();
         if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
-            //calculate points and ctrlPoints and strokestyes (para el pathillustrator)
             canvas.width=this.imageDrawingData.imgHTML.naturalWidth;
             canvas.height=this.imageDrawingData.imgHTML.naturalHeight;
             ctx.drawImage(this.imageDrawingData.imgHTML,0,0);
@@ -281,10 +283,6 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             this.imageDrawingData.imgMasked.src=canvas.toDataURL();
             canvas.remove();
             return;
-            //dataGenerator.generateDefaultDrawingPointsAndLineWidth(this.imageDrawingData, 35)
-            //this.imageDrawingData.ctrlPoints=dataGenerator.generateCrtlPointsFromPointsMatrix(this.imageDrawingData.points);
-            //this.imageDrawingData.strokesTypes=dataGenerator.generateStrokesTypesFromPoints(this.imageDrawingData.points);
-            //this.imageDrawingData.pathsNames=dataGenerator.generateLayerNames(this.imageDrawingData.points)
         }else if(this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
             // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
             this.imageDrawingData.ctrlPoints=dataGenerator.generateCrtlPointsFromPointsMatrix(this.imageDrawingData.points);
@@ -310,24 +308,24 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             canvas.remove();
         }.bind(this))
     },
-    setEntranceMode:function(mode){
-        this.entranceMode=mode;
-    },
-    getEntranceMode:function(){
-        return this.entranceMode;
-    },
+
     getWidthInDrawingCache:function(){
         return this.imageDrawingData.imgHTML.naturalWidth;
     },
     getHeightInDrawingCache:function(){
         return this.imageDrawingData.imgHTML.naturalHeight;
     },
-    getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS
+    setEntranceMode:function(mode){
+        this.entranceMode=mode;
+    },
+    getEntranceMode:function(){
+        return this.entranceMode;
+    },
+    getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
         let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
         newPoint.x+=this.canvas._offset.left;
         newPoint.y+=this.canvas._offset.top;
         return newPoint;
-
     },
     render:function(ctx){
         /*se sobreescribio por que cuando un objeto sale de vista, no se renderizaba, es tamos oviando eso
@@ -339,20 +337,20 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this._setOpacity(ctx);
         this._setShadow(ctx, this);
         if (this.transformMatrix) {
-          ctx.transform.apply(ctx, this.transformMatrix);
+            ctx.transform.apply(ctx, this.transformMatrix);
         }
         this.clipTo && fabric.util.clipContext(this, ctx);
         if (this.shouldCache()) {
-          this.renderCache();
-          this.drawCacheOnCanvas(ctx);
+            this.renderCache();
+            this.drawCacheOnCanvas(ctx);
         }
         else {
-          this._removeCacheCanvas();
-          this.dirty = false;
-          this.drawObject(ctx);
-          if (this.objectCaching && this.statefullCache) {
-            this.saveState({ propertySet: 'cacheProperties' });
-          }
+            this._removeCacheCanvas();
+            this.dirty = false;
+            this.drawObject(ctx);
+            if (this.objectCaching && this.statefullCache) {
+                this.saveState({ propertySet: 'cacheProperties' });
+            }
         }
         this.clipTo && ctx.restore();
         ctx.restore();
@@ -361,11 +359,13 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
 })
 
 var TextAnimable=fabric.util.createClass(fabric.IText, {
+    applicableEntrenceModes: [EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged,EntranceModes.text_typed],//FOR UI
     type:"TextAnimable",
     initialize:function(text,options){
         /*exact copy of animable object*/
         this.callSuper('initialize', text,options);
         this.name="";
+        this.fill="#000000";
         this.entranceMode=null;
         this.imageDrawingData=this.convertEntityToDTO(options.imageDrawingData);
         this.animator=new Animator(this);
@@ -404,11 +404,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         }
     },
     setEntranceMode:function(mode){
-        if(mode===EntranceModes.drawn){
-            this.entranceMode=EntranceModes.text_drawn;
-        }else{
-            this.entranceMode=mode;
-        }
+        this.entranceMode=mode;
     },
     getEntranceMode:function(){
         return this.entranceMode;
@@ -419,23 +415,22 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
     getHeightInDrawingCache:function(){
         return this.height; // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
     },
-    getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS
+
+    getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
         let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
         newPoint.x+=this.canvas._offset.left;
         newPoint.y+=this.canvas._offset.top;
         return newPoint;
-
     },
     render:function(ctx){
-
         /*se sobreescribio por que cuando un objeto sale de vista, no se renderizaba, es tamos oviando eso
         esa parte del metodo render original*/
         ctx.save();
-        //this._setupCompositeOperation(ctx);
+        this._setupCompositeOperation(ctx);
         this.drawSelectionBackground(ctx);
         this.transform(ctx);
         this._setOpacity(ctx);
-        //this._setShadow(ctx, this);
+        this._setShadow(ctx, this);
         if (this.transformMatrix) {
             ctx.transform.apply(ctx, this.transformMatrix);
         }
@@ -456,16 +451,9 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         ctx.restore();
     },
 });
-const EntranceModes={
-    drawn:"drawn",
-    dragged:"dragged",
-    none:"none",
-
-    text_drawn:"text_drawn",
-    text_typed:"text_typed"
-}
-var AnimableCamera=fabric.util.createClass(ImageAnimable,{
-    type:"AnimableCamera",
+var CameraAnimable=fabric.util.createClass(ImageAnimable,{
+    applicableEntrenceModes:[EntranceModes.none],//FOR UI
+    type:"CameraAnimable",
     initialize:function(element,options){
         this.callSuper("initialize",element,options);
         this.name="Camera";
@@ -485,7 +473,7 @@ var AnimableCamera=fabric.util.createClass(ImageAnimable,{
 fabric.util.object.extend(fabric.Image,{
     fromURLCustom:function(url, callback, imgOptions){
       fabric.util.loadImage(url, function(img) {
-        callback && callback(new AnimableCamera(img, imgOptions));
+        callback && callback(new CameraAnimable(img, imgOptions));
       }, null, imgOptions && imgOptions.crossOrigin);
     }
 })
@@ -581,7 +569,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         ctx.save();
         this._setOpacity(ctx);
         this.transform(ctx);
-        ctx.imageSmoothingEnabled = false;
+        //ctx.imageSmoothingEnabled = false;
         if(this.myTurn){
             ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2)
             // if(this.flagCurrentSnapReady){

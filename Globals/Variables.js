@@ -9,7 +9,15 @@ var FontsFileName={
     "bauhs 93":'BAUHS93.ttf'
 }
 
-var ImageType={
+const EntranceModes={/*Entrance modes are only applicable to Escene objects (ImageAnimable, TextAnimable, CameraAnimable)*/
+    drawn:"drawn",
+    dragged:"dragged",
+    none:"none",
+
+    text_drawn:"text_drawn",
+    text_typed:"text_typed"
+}
+var ImageType={/*ImageTypes are used when an object has entreancemode drawn or text_drawn*/
     PROVIDED:"PROVIDED",
     CREATED_PATHLOADED:"CREATED_PATHLOADED",
     CREATED_PATHDESIGNED:"CREATED_PATHDESIGNED",

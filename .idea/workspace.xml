@@ -20,18 +20,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Globals/OpenTypeFontManager.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/OpenType.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Globals/Variables.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/Variables.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/fontsLoading/FontsLoader.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/fontsLoading/FontsLoader.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/util.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,7 +151,9 @@
       <workItem from="1607744224975" duration="7646000" />
       <workItem from="1607782128466" duration="339000" />
       <workItem from="1607782520815" duration="35027000" />
-      <workItem from="1607866700149" duration="7312000" />
+      <workItem from="1607866700149" duration="18711000" />
+      <workItem from="1607905673629" duration="21029000" />
+      <workItem from="1607953410436" duration="21515000" />
     </task>
     <servers />
   </component>
@@ -184,10 +185,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="DiffContextDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1603911902248" />
-    <state x="739" y="277" key="FileChooserDialogImpl" timestamp="1604871474778">
+    <state x="739" y="277" key="FileChooserDialogImpl" timestamp="1607913452052">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="739" y="277" key="FileChooserDialogImpl/0.0.1920.1050@0.0.1920.1050" timestamp="1604871474778" />
+    <state x="739" y="277" key="FileChooserDialogImpl/0.0.1920.1050@0.0.1920.1050" timestamp="1607913452052" />
     <state x="786" y="225" key="RollbackChangesDialog" timestamp="1603601297477">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -208,21 +209,21 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="dock-window-2/0.0.1920.1050@0.0.1920.1050" timestamp="1602996543928" />
-    <state x="397" y="107" width="878" height="801" key="find.popup" timestamp="1607802399394">
+    <state x="397" y="107" width="878" height="801" key="find.popup" timestamp="1607916230767">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="397" y="107" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1607802399394" />
+    <state x="397" y="107" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1607916230767" />
     <state width="600" height="428" key="javadoc.popup" timestamp="1603662965310">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="600" height="428" key="javadoc.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603662965310" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1607827536686">
+    <state x="616" y="237" key="run.anything.popup" timestamp="1607980823947">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1607827536686" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1607726142755">
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1607980823947" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1607913033297">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1607726142755" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1607913033297" />
   </component>
 </project>

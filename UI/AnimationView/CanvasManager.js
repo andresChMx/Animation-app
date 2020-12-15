@@ -157,7 +157,7 @@ var CanvasManager={
     /*FIN-METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTSO DE ENTRADA (DRAWN Y DRAGGED)*/
     getSelectedAnimableObj:function(){
         let activeObj=this.canvas.getActiveObject()
-        if(activeObj && (activeObj.type==="ImageAnimable" || activeObj.type==="AnimableCamera" || activeObj.type==="TextAnimable")){
+        if(activeObj && (activeObj.type==="ImageAnimable" || activeObj.type==="CameraAnimable" || activeObj.type==="TextAnimable")){
             return activeObj
         }else{
             return null;
@@ -194,6 +194,8 @@ var CanvasManager={
             animObj=new TextAnimable("asdfasdfasdf",{
                 "left":100,
                 "top":100,
+                "originX":"center",
+                "originY":"center",
                 "imageDrawingData":model,
             })
             animObj.setEntranceMode(EntranceModes.text_drawn); //textos tambien tendran entrada siendo dibujados
@@ -297,35 +299,40 @@ var SectionFloatingMenu={
             description:"Move forward",
             action:function(animableObject){
                 CanvasManager.canvas.bringForward(animableObject);
-            }
+            },
+            HTMLElement:null
         },
         {
             icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/send-back-icon_acfzvo.png",
             description:"Move backward",
             action:function (animableObject){
                 CanvasManager.canvas.sendBackwards(animableObject);
-            }
+            },
+            HTMLElement:null
         },
         {
             icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/delete-icon_logtrc.png",
             description:"Remove",
             action:function (){
                 CanvasManager.removeActiveAnimableObject();
-            }
+            },
+            HTMLElement:null
         },
         {
             icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/settings-icon_jsw4qf.png",
             description:"Configure Object",
             action:function (animableObject){
                 CanvasManager.SectionConfigureObject.showModal(animableObject);
-            }
+            },
+            HTMLElement:null
         },
         {
             icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/settings-icon_jsw4qf.png",
             description:"design path for this object",
             action:function(animableObject){
                 CanvasManager.childNotificationOnDesignPathOptionClicked(animableObject);
-            }
+            },
+            HTMLElement:null
         }
     ],
     init:function(){
@@ -357,6 +364,8 @@ var SectionFloatingMenu={
         newOpt.setAttribute("index",id)
         this.HTMLElement.appendChild(newOpt);
 
+        model.HTMLElement=newOpt;
+
     },
     showMenu:function(posx,posy){
         posx=posx-this.HTMLElement.parentNode.offsetLeft-this.HTMLElement.offsetWidth;
@@ -378,16 +387,30 @@ var SectionFloatingMenu={
         let index=parseInt(e.target.getAttribute("index"));
         this.MODELOptions[index].action.bind(this)(this.lastAnimableObjectActive);
     },
+    desableOptions:function(optionsToDisable){
+        for(let i=0;i<optionsToDisable.length;i++){
+            if(optionsToDisable[i]===0){
+                this.MODELOptions[i].HTMLElement.style.display="none";
+            }else{
+                this.MODELOptions[i].HTMLElement.style.display="block";
+            }
+        }
+    },
     notificationCanvasManagerOnSelectionUpdated:function(){// and on canvas active Object deleted
         let activeAnimableObject=CanvasManager.getSelectedAnimableObj();
-        if(activeAnimableObject && activeAnimableObject.type!=="AnimableCamera"){
+        if(!activeAnimableObject){this.hiddeMenu();return;}
+        if(activeAnimableObject.type==='ImageAnimable'){
             this.lastAnimableObjectActive=activeAnimableObject;
             let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
-            this.showMenu(
-                positionInViewportCoords.x,
-                positionInViewportCoords.y
-            );
-        }else{
+            this.desableOptions([1,1,1,1,1]);
+            this.showMenu(positionInViewportCoords.x, positionInViewportCoords.y);
+        }else if(activeAnimableObject.type==="TextAnimable"){
+            this.lastAnimableObjectActive=activeAnimableObject;
+            let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
+            this.desableOptions([1,1,1,1,0]);
+            this.showMenu(positionInViewportCoords.x, positionInViewportCoords.y);
+
+        }else if(activeAnimableObject.type==="CameraAnimable"){
             this.hiddeMenu();
         }
     },
@@ -412,36 +435,133 @@ var SectionConfigureObject={
         this.HTMLElement=document.querySelector(".canvas-animator__object-configuration__filter");
         this.HTMLAreaEntranceSettings=document.querySelector(".canvas-animator__object-configuration__entrance-settings")
         this.HTMLCollectionRadioButtons=document.querySelectorAll(".entrance-settings__box-radio-buttons__radio-button")
-        this.HTMLCollectionModesOptions=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-options__mode-options")
+        this.HTMLCollectionModesAreas=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-options__mode-options")
+        this.HTMLCollectionObjectAppearanceAreas=document.querySelectorAll(".canvas-animator__object-configuration__appearance-settings__box-options__object-type-options");
+        this.widgetsEntraceMode={
+            modeSelector:{
+                value:"",
+                htmlElem:document.querySelector(".canvas-animator__object-configuration__entrance-settings__box-radio-buttons"),
+                initEvent:function(){
+                    console.log(this.htmlElem);
+                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].children[1].addEventListener("change",this.OnTriggered.bind(this));}
+                },
+                removeEvent:function(){
+                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].children[1].removeEventListener("change",this.OnTriggered.bind(this));}
+                },
+                OnTriggered:function(e){this.setVal(e.target.value);},
+                setVal:function(normalizedEntranceModeName){
+                    let HTMLCollectionEntraceModesAreas=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-options__mode-options");
+                    for(let i=0;i<this.htmlElem.children.length;i++){
+                        if(this.htmlElem.children[i].children[1].value===normalizedEntranceModeName){
+                            HTMLCollectionEntraceModesAreas[i].style.display="block";
+                            this.value=normalizedEntranceModeName;
+                        }else{HTMLCollectionEntraceModesAreas[i].style.display="none";}
+                    }
+                    this.htmlElem.querySelector("#" + normalizedEntranceModeName).checked=true;
+                },
+                getVal:function(){return this.value;},
+            }
+        }
+
+        this.widgetsTextAnimableObjectAppareance={
+            fontFamily:{
+                htmlElem:document.querySelector(".ImageAnimable-widged__font-family select"),
+                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
+                removeEvent:function(){this.htmlElem.removeEventListener("change",this.OnTriggered.bind(this))},
+                OnTriggered:function(e){},
+                setVal:function(val){this.htmlElem.value=val},
+                getVal:function(){return this.htmlElem.value},
+                },
+            textAlign:{
+                value:"",
+                htmlElem:document.querySelector(".ImageAnimable-widged__text-alignment .text-alignment__options"),
+                initEvent:function(){
+                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].addEventListener("click",this.OnTriggered.bind(this))}
+                },
+                removeEvent:function(){
+                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].removeEventListener("click",this.OnTriggered.bind(this))}
+                },
+                OnTriggered:function(e){
+                    this.setVal(e.target.id);
+                },
+                setVal:function(val){
+                    this.value=val;
+                    for(let i=0;i< this.htmlElem.children.length;i++){this.htmlElem.children[i].classList.remove("active")};
+                    this.htmlElem.querySelector("#" + val).classList.add("active");
+                },
+                getVal:function(){return this.value},
+                },
+            fontSize:{
+                htmlElem:document.querySelector(".ImageAnimable-widged__font-size input"),
+                initEvent:function(){this.htmlElem.addEventListener("input",this.OnTriggered.bind(this))},
+                removeEvent:function(){this.htmlElem.removeEventListener("input",this.OnTriggered.bind(this))},
+                OnTriggered:function(e){},
+                setVal:function(val){this.htmlElem.value=val},
+                getVal:function(){return this.htmlElem.value},
+                },
+            lineHeight:{
+                htmlElem:document.querySelector(".ImageAnimable-widged__line-height input"),
+                initEvent:function(){this.htmlElem.addEventListener("input",this.OnTriggered.bind(this))},
+                removeEvent:function(){this.htmlElem.removeEventListener("input",this.OnTriggered.bind(this))},
+                OnTriggered:function(e){},
+                setVal:function(val){this.htmlElem.value=val},
+                getVal:function(){return this.htmlElem.value},
+            },
+            fillColor:{htmlElem:document.querySelector(".ImageAnimable-widged__fill-color input"),
+                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
+                removeEvent:function(){this.htmlElem.removeEventListener("change",this.OnTriggered.bind(this))},
+                OnTriggered:function(e){},
+                setVal:function(val){this.htmlElem.value=val},
+                getVal:function(){return this.htmlElem.value},
+                },
+        }
+
         this.HTMLcloseBtn=document.querySelector(".canvas-animator__object-configuration__btn-close");
-        this.HTMLAcceptBtn=document.querySelector(".canvas-animator__object-configuration__entrance-settings__box-buttons .btn-accept")
+        this.HTMLAcceptBtn=document.querySelector(".canvas-animator__object-configuration__box-buttons .btn-accept")
         this.currentAnimableObject=null;
         this.currentSelectedOptions={};
         this.initEvents();
     },
     initEvents:function(){
         this.HTMLcloseBtn.addEventListener("click",this.OnBtnCloseClicked.bind(this));
-        for(let i=0;i<this.HTMLCollectionRadioButtons.length;i++){
-            this.HTMLCollectionRadioButtons[i].addEventListener("change",this.OnRadioButtonModePressed.bind(this))
-        }
+
         this.HTMLAcceptBtn.addEventListener("click",this.OnBtnAcceptClicked.bind(this))
+
+        //INIT WIDGETS
+    },
+    initEventsWidgetsEntranceModes:function(){
+        this.widgetsEntraceMode.modeSelector.initEvent();
+    },
+    removeEventsWidgetsEntranceModes:function (){
+        this.widgetsEntraceMode.modeSelector.removeEvent();
+    },
+    initEventsWidgetsTextAnimable:function(){
+        for(let i in this.widgetsTextAnimableObjectAppareance){
+            this.widgetsTextAnimableObjectAppareance[i].initEvent();
+        }
+    },
+    removeEventsWidgetsTextAnimable:function(){
+        for(let i in this.widgetsTextAnimableObjectAppareance){
+            this.widgetsTextAnimableObjectAppareance[i].removeEvent();
+        }
     },
     showModal:function(animableObject){
         if(animableObject){
             this.currentAnimableObject=animableObject;
-            this.currentSelectedOptions={
-                entranceMode:animableObject.getEntranceMode()
-            };
-            let objEntranceMode=animableObject.getEntranceMode();
-            if(animableObject.type==="TextAnimable"){
-                if(animableObject.getEntranceMode()==="text_drawn"){objEntranceMode="drawn";}
-                this.HTMLAreaEntranceSettings.querySelector("#label_typed").style.display="inline";
-                this.HTMLAreaEntranceSettings.querySelector("#typed").style.display="inline";
-            }else{
-                this.HTMLAreaEntranceSettings.querySelector("#label_typed").style.display="none";
-                this.HTMLAreaEntranceSettings.querySelector("#typed").style.display="none";
+            this.activateEntraceModeRadios(animableObject);
+            this.activateObjectAppareanceArea(animableObject.type);
+
+            this.initEventsWidgetsEntranceModes();
+            this.fillWidgetsEntranceMode(animableObject);
+
+            if(animableObject.type==="ImageAnimable"){
+
+            }else if(animableObject.type==="TextAnimable"){
+                this.initEventsWidgetsTextAnimable()
+                this.fillWidgetsObjectAppareanceTextAnimable(animableObject);
+            }else if(animableObject.type==="CameraAnimable"){
+
             }
-            this.HTMLAreaEntranceSettings.querySelector("#" + objEntranceMode).checked=true;
             this.HTMLElement.style.display="block";
         }
     },
@@ -450,44 +570,90 @@ var SectionConfigureObject={
         this.currentSelectedOptions=null;
         this.HTMLElement.style.display="none";
     },
-    activateEntranceModeOptions:function(index){
-        this.HTMLCollectionModesOptions[index].style.display="block";
+    fillWidgetsEntranceMode:function(animableObject){
+        this.widgetsEntraceMode.modeSelector.setVal(this.normalizeObjectEntraceMode(animableObject.getEntranceMode()));
+        //todo fill widgets by entrance mode
     },
-    desactivateEntraceModeOptions:function(index){
-        this.HTMLCollectionModesOptions[index].style.display="none";
+    fillWidgetsObjectAppareanceTextAnimable:function(animableObject){
+        this.widgetsTextAnimableObjectAppareance.fontFamily.setVal(animableObject.fontFamily);
+        this.widgetsTextAnimableObjectAppareance.textAlign.setVal(animableObject.textAlign);
+        this.widgetsTextAnimableObjectAppareance.fontSize.setVal(animableObject.fontSize);
+        this.widgetsTextAnimableObjectAppareance.lineHeight.setVal(animableObject.lineHeight);
+        this.widgetsTextAnimableObjectAppareance.fillColor.setVal(animableObject.fill);
+    },
+    activateEntraceModeRadios:function(animableObject){
+        for(let i=0;i<this.HTMLCollectionRadioButtons.length;i++) {
+            this.HTMLCollectionRadioButtons[i].parentNode.style.display="none";
+        }
+        for(let i=0;i<animableObject.applicableEntrenceModes.length;i++){
+            let applicableEntraceMode=this.normalizeObjectEntraceMode(animableObject.applicableEntrenceModes[i]);
+            this.HTMLAreaEntranceSettings.querySelector("#" + applicableEntraceMode).parentNode.style.display="inline";
+        }
+    },
+    activateObjectAppareanceArea:function(animableObjectType){
+        for(let i=0;i<this.HTMLCollectionObjectAppearanceAreas.length;i++){
+            if(this.HTMLCollectionObjectAppearanceAreas[i].classList.contains(animableObjectType)){
+                this.HTMLCollectionObjectAppearanceAreas[i].style.display="block";
+            }else{
+                this.HTMLCollectionObjectAppearanceAreas[i].style.display="none";
+            }
+        }
     },
     OnBtnCloseClicked:function(){
         this.hiddeModel();
     },
-    OnRadioButtonModePressed:function(e){
-        for(let i=0;i<this.HTMLCollectionRadioButtons.length;i++){
-            if(this.HTMLCollectionRadioButtons[i].value===e.target.value){
-                this.activateEntranceModeOptions(i);
-                this.currentSelectedOptions.entranceMode=e.target.value;
-            }else{
-                this.desactivateEntraceModeOptions(i);
-            }
-        }
-    },
     /*SE PROCESA LA INFORMACION EDITADA*/
     OnBtnAcceptClicked:function(){
         if(this.currentAnimableObject){
-            if(this.currentSelectedOptions.entranceMode===EntranceModes.none && this.currentAnimableObject.getEntranceMode()!==EntranceModes.none){
-                CanvasManager.removeFromListObjectsWithEntrance(this.currentAnimableObject);
+            // entrace mode widgets processing
+            let entranceModeChoosen= this.unnormalizeUIEntraceMode(this.widgetsEntraceMode.modeSelector.getVal());
+            if(this.currentAnimableObject.getEntranceMode() !==entranceModeChoosen){
+                if(entranceModeChoosen===EntranceModes.none && this.currentAnimableObject.getEntranceMode()!==EntranceModes.none){
+                    CanvasManager.removeFromListObjectsWithEntrance(this.currentAnimableObject);
+                }
+                else if(this.currentAnimableObject.entranceMode===EntranceModes.none && entranceModeChoosen!==EntranceModes.none){
+                    CanvasManager.addItemToListObjectsWithEntrance(this.currentAnimableObject);
+                }
+                this.currentAnimableObject.setEntranceMode(entranceModeChoosen);
             }
-            else if((this.currentSelectedOptions.entranceMode===EntranceModes.drawn ||
-                this.currentSelectedOptions.entranceMode===EntranceModes.dragged) &&
-                this.currentAnimableObject.entranceMode===EntranceModes.none){
-                CanvasManager.addItemToListObjectsWithEntrance(this.currentAnimableObject);
+            console.log(entranceModeChoosen);
+            // appareance options
+            if(this.currentAnimableObject.type==="ImageAnimable"){
+
+            }
+            else if(this.currentAnimableObject.type==="TextAnimable"){
+                this.currentAnimableObject.setFontFamily(this.widgetsTextAnimableObjectAppareance.fontFamily.getVal());
+                this.currentAnimableObject.fontSize=this.widgetsTextAnimableObjectAppareance.fontSize.getVal();
+                this.currentAnimableObject.lineHeight=this.widgetsTextAnimableObjectAppareance.lineHeight.getVal();
+                this.currentAnimableObject.textAlign=this.widgetsTextAnimableObjectAppareance.textAlign.getVal();
+                this.currentAnimableObject.set({"fill":this.widgetsTextAnimableObjectAppareance.fillColor.getVal()});
+
+                this.currentAnimableObject.exitEditing();
+                CanvasManager.canvas.renderAll();
+                this.removeEventsWidgetsTextAnimable();
+
             }
 
-            this.currentAnimableObject.setEntranceMode(this.currentSelectedOptions.entranceMode);
         }
+        this.removeEventsWidgetsEntranceModes();
+
         this.hiddeModel();
+    },
+    normalizeObjectEntraceMode:function(objectEntraceModeName){
+        if(objectEntraceModeName===EntranceModes.text_drawn){return EntranceModes.drawn}
+        else if(objectEntraceModeName===EntranceModes.text_typed){return 'typed'}
+        else{return objectEntraceModeName;}
+    },
+    unnormalizeUIEntraceMode:function(UIentraceModeName){
+        if(UIentraceModeName===EntranceModes.drawn){
+            if(this.currentAnimableObject.type==="TextAnimable"){return EntranceModes.text_drawn}
+        }else if(UIentraceModeName==='typed'){
+            return EntranceModes.text_typed;
+        }
+        return UIentraceModeName;
+
     }
 };
-
-
 
 
 
