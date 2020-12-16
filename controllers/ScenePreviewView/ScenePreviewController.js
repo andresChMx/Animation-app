@@ -76,7 +76,9 @@ var ScenePreviewController=fabric.util.createClass({
                     scaleY:animableObjWithEntrance.get("scaleY"),
                     originX: 'center',
                     originY: 'center',
-                    animations:animableObjWithEntrance.animator.dictAnimations});
+                    animations:animableObjWithEntrance.animator.dictAnimations,
+                    entraceModesSettings:animableObjWithEntrance.entraceModesSettings
+                });
                 listDrawableObjects[i]=tmpObject;
                 listAnimableObjectDrawnEntrance[i]=animableObjWithEntrance;
             }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.dragged){
@@ -104,7 +106,9 @@ var ScenePreviewController=fabric.util.createClass({
                     scaleY:animableObjWithEntrance.get("scaleY"),
                     originX: 'center',
                     originY: 'center',
-                    animations:animableObjWithEntrance.animator.dictAnimations});
+                    animations:animableObjWithEntrance.animator.dictAnimations,
+                    entraceModesSettings:animableObjWithEntrance.entraceModesSettings
+                });
                 listDrawableObjects[index]=textDrawable;
                 listAnimableObjectDrawnEntrance[index]=animableObjWithEntrance
             }

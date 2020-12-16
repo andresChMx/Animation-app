@@ -460,6 +460,22 @@ var SectionConfigureObject={
                     this.htmlElem.querySelector("#" + normalizedEntranceModeName).checked=true;
                 },
                 getVal:function(){return this.value;},
+            },
+            drawn_showHand:{
+                htmlElem:document.querySelector(".drawn-mode-widged__show-hand"),
+                initEvent:function(){this.htmlElem.querySelector("#checkbox-show-hand").addEventListener("change",this.OnTriggered.bind(this))},
+                removeEvent:function(){this.htmlElem.querySelector("#checkbox-show-hand").removeEventListener("change",this.OnTriggered.bind(this))},
+                OnTriggered:function(e){},
+                setVal:function(showBool){this.htmlElem.querySelector("#checkbox-show-hand").checked=showBool;},
+                getVal:function(){return this.htmlElem.querySelector("#checkbox-show-hand").checked;}
+            },
+            drawn_finalDrawingAppearance:{
+                htmlElem:document.querySelector(".drawn-mode-widged__final-drawing-appearance"),
+                initEvent:function(){},
+                removeEvent:function(){},
+                OnTriggered:function(e){},
+                setVal:function(appearance){},
+                getVal:function(){return "masked"}
             }
         }
 
@@ -530,10 +546,14 @@ var SectionConfigureObject={
         //INIT WIDGETS
     },
     initEventsWidgetsEntranceModes:function(){
-        this.widgetsEntraceMode.modeSelector.initEvent();
+        for(let i in this.widgetsEntraceMode){
+            this.widgetsEntraceMode[i].initEvent();
+        }
     },
     removeEventsWidgetsEntranceModes:function (){
-        this.widgetsEntraceMode.modeSelector.removeEvent();
+        for(let i in this.widgetsEntraceMode){
+            this.widgetsEntraceMode[i].removeEvent();
+        }
     },
     initEventsWidgetsTextAnimable:function(){
         for(let i in this.widgetsTextAnimableObjectAppareance){
@@ -573,6 +593,15 @@ var SectionConfigureObject={
     fillWidgetsEntranceMode:function(animableObject){
         this.widgetsEntraceMode.modeSelector.setVal(this.normalizeObjectEntraceMode(animableObject.getEntranceMode()));
         //todo fill widgets by entrance mode
+        for(let i=0;i<animableObject.applicableEntrenceModes.length;i++){
+            let unnormalizedMode=animableObject.applicableEntrenceModes[i]
+            let normalizedMode=this.normalizeObjectEntraceMode(animableObject.applicableEntrenceModes[i]);
+            for(let key in animableObject.entraceModesSettings[unnormalizedMode]){
+                let val=animableObject.entraceModesSettings[unnormalizedMode][key];
+                console.log(val);
+                this.widgetsEntraceMode[normalizedMode + "_"+ key].setVal(val);
+            }
+        }
     },
     fillWidgetsObjectAppareanceTextAnimable:function(animableObject){
         this.widgetsTextAnimableObjectAppareance.fontFamily.setVal(animableObject.fontFamily);
@@ -616,7 +645,16 @@ var SectionConfigureObject={
                 }
                 this.currentAnimableObject.setEntranceMode(entranceModeChoosen);
             }
-            console.log(entranceModeChoosen);
+
+            for(let i=0;i<this.currentAnimableObject.applicableEntrenceModes.length;i++){
+                let unnormalizedApplicapleMode=this.currentAnimableObject.applicableEntrenceModes[i]
+                let normalizedApplicableMode=this.normalizeObjectEntraceMode(this.currentAnimableObject.applicableEntrenceModes[i]);
+                for(let key in this.currentAnimableObject.entraceModesSettings[unnormalizedApplicapleMode]){
+                    let val=this.widgetsEntraceMode[normalizedApplicableMode + "_"+ key].getVal();
+                    console.log(val);
+                    this.currentAnimableObject.entraceModesSettings[unnormalizedApplicapleMode][key]=val;
+                }
+            }
             // appareance options
             if(this.currentAnimableObject.type==="ImageAnimable"){
 

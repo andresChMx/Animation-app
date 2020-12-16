@@ -56,7 +56,15 @@ var DrawingCacheManager=fabric.util.createClass({
     //(POSIT NOTA MENTAL) turn your drawing into whiteboard animation
     _executeAnimations:function(animatorTime){
         let finalSegmentPoint=this.pathIllustrator._manualDrawingLoop(animatorTime);
-        if(finalSegmentPoint===null){// no more drawings or the pathillustrator is in a delay time
+        if(finalSegmentPoint===null){// no more drawings or the pathillustrator is in a delay time ||
+            this.drawingHand.updatePosition(-1000,-1000);
+        }else if(this.listDrawableObjects[this.indexDrawableTurn].entraceModesSettings.drawn &&
+            !this.listDrawableObjects[this.indexDrawableTurn].entraceModesSettings.drawn.showHand
+        ){
+            this.drawingHand.updatePosition(-1000,-1000);
+        }else if(this.listDrawableObjects[this.indexDrawableTurn].entraceModesSettings.text_drawn &&
+            !this.listDrawableObjects[this.indexDrawableTurn].entraceModesSettings.text_drawn.showHand
+        ){
             this.drawingHand.updatePosition(-1000,-1000);
         }else {
             if(finalSegmentPoint.x!==null && finalSegmentPoint.y!==null){

@@ -20,10 +20,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/common/DrawingHand.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/ControllerAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ControllerAnimator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
@@ -152,7 +150,7 @@
       <workItem from="1607905673629" duration="21029000" />
       <workItem from="1607953410436" duration="26513000" />
       <workItem from="1608043492781" duration="11650000" />
-      <workItem from="1608091504047" duration="7352000" />
+      <workItem from="1608091504047" duration="17453000" />
     </task>
     <servers />
   </component>

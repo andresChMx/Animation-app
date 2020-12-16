@@ -240,17 +240,31 @@ var AnimatorCamera=fabric.util.createClass(Animator,{
 });
 
 var ImageAnimable=fabric.util.createClass(fabric.Image,{
-    applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI
+    applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
         this.name="";
         this.entranceMode=null;
+        this.entraceModesSettings={};
+        this.setupEntraceModesSettings();
         this.imageDrawingData=this.convertEntityToDTO(options.imageDrawingData);
         this.animator=new Animator(this);
         this.setEntranceMode(EntranceModes.drawn); //debe estar a drawn antes de generar la imagen final mascarada (la siguiente funcion invocada)
         if(this.type==="ImageAnimable"){ // since the subclasse (CameraAnimable) are invoking this constructor ()
             this.generateFinalMaskedImage();
+        }
+    },
+    setupEntraceModesSettings:function(){
+        this.entraceModesSettings[this.applicableEntrenceModes[0]]={
+
+        }
+        this.entraceModesSettings[this.applicableEntrenceModes[1]]={
+            showHand:true,
+            finalDrawingAppearance:'masked'
+        }
+        this.entraceModesSettings[this.applicableEntrenceModes[2]]={
+
         }
     },
     convertEntityToDTO:function(entityDrawingData){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHTML
@@ -359,7 +373,8 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
 })
 
 var TextAnimable=fabric.util.createClass(fabric.IText, {
-    applicableEntrenceModes: [EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged,EntranceModes.text_typed],//FOR UI
+    //drawn y text_draw NO son lo mismo, ya que su logica es diferente
+    applicableEntrenceModes: [EntranceModes.none,EntranceModes.text_drawn,EntranceModes.dragged,EntranceModes.text_typed],//FOR UI
     type:"TextAnimable",
     initialize:function(text,options){
         /*exact copy of animable object*/
@@ -367,12 +382,26 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         this.name="";
         this.fill="#000000";
         this.entranceMode=null;
+        this.entraceModesSettings={};
+        this.setupEntraceModesSettings();
         this.imageDrawingData=this.convertEntityToDTO(options.imageDrawingData);
         this.animator=new Animator(this);
         this.setFontSize(72);
         this.setFontFamily(FontsNames["bauhs 93"]);
         /*---------------------------*/
     },//exitEditing
+    setupEntraceModesSettings:function(){
+        this.entraceModesSettings[this.applicableEntrenceModes[0]]={
+
+        }
+        this.entraceModesSettings[this.applicableEntrenceModes[1]]={
+            showHand:true,
+            finalDrawingAppearance:'masked'
+        }
+        this.entraceModesSettings[this.applicableEntrenceModes[2]]={
+
+        }
+    },
     convertEntityToDTO:function(entityDrawingData){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHTML
         let DTO={
             //id:entityDrawingData.id,
@@ -549,7 +578,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
 
         this.animator=new Animator(this);
         this.animator.dictAnimations=options.animations;
-
+        this.entranceModesSettings=options.entraceModesSettings;
         this.flaglastSnapShotReady=false;
     },
     setTurn:function(is,finalImageMask){
