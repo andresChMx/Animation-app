@@ -4,7 +4,8 @@ var ScenePreviewController=fabric.util.createClass({
         OnAnimatorTick:'OnAnimatorTick'
     },
     initialize:function(){
-        this.drawingCacheManager=new DrawingCacheManager();
+        this.drawingHand=new DrawingHand();
+        this.drawingCacheManager=new DrawingCacheManager(this.drawingHand);
         this.UIPanelPreviewerCanvas=null;
         this.pointsGenerator=new ImageModelDrawingDataGenerator();
         this.animator=null;
@@ -166,7 +167,8 @@ var ScenePreviewController=fabric.util.createClass({
                 listForAnimator.push(listDrawableObjects[i]);
             }
             this.drawingCacheManager.wakeUp(listDrawableObjects,listAnimableWithDrawnEntrance);
-            listForAnimator.push(this.drawingCacheManager.pathIllustrator);
+            this.drawingCacheManager.addDrawingHandToCanvas(this.UIPanelPreviewerCanvas);
+            listForAnimator.push(this.drawingCacheManager);
             this.animator.setListObjectsToAnimate(listForAnimator);
 
             this.animator.setTotalProgress(0);

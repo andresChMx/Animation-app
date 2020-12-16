@@ -20,17 +20,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/common/DrawingHand.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Globals/Variables.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/Variables.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/ControllerAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ControllerAnimator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/util.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -153,7 +150,9 @@
       <workItem from="1607782520815" duration="35027000" />
       <workItem from="1607866700149" duration="18711000" />
       <workItem from="1607905673629" duration="21029000" />
-      <workItem from="1607953410436" duration="21515000" />
+      <workItem from="1607953410436" duration="26513000" />
+      <workItem from="1608043492781" duration="11650000" />
+      <workItem from="1608091504047" duration="7352000" />
     </task>
     <servers />
   </component>

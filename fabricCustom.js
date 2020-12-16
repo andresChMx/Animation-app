@@ -599,7 +599,6 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
        }*/
     },
   });
-
 /*
 * Canvas en el que se toma en cuenta la opacidad, la cual es aplicar a todos los objetos. Usado para el canvas previewer
 * */

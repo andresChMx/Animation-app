@@ -1,7 +1,7 @@
 var PathIllustrator=fabric.util.createClass({
     initialize:function(canvas,ctx,dataAdapter,loopMode){
-        this.listObserversOnDrawingNewObject=[];
-
+        this.observersOnDrawingNewObject=[];
+        this.observerOnLastObjectDrawingFinished=null;
         this.canvas=canvas;
         this.ctx=ctx;
 
@@ -28,10 +28,7 @@ var PathIllustrator=fabric.util.createClass({
         this.prevStrokeTurnIndex=0;
         this.functionDrawingMode=null;
         this.flagFirstTime=false;
-        let self=this;
-        this.animator={
-            executeAnimations:this._executeAnimations.bind(self)
-        }
+
     },
     setupPreviewSceneVars:function(){
         if(this.data.getObjectsToDrawLength()<=0){return;}
@@ -97,32 +94,16 @@ var PathIllustrator=fabric.util.createClass({
         }.bind(this)())
 
     },
-    _executeAnimations:function(nowTime){
-        if(this.endLoop || this.data.getObjectsToDrawLength()<=0){return;}
+    _manualDrawingLoop:function(nowTime){
+        if(this.endLoop || this.data.getObjectsToDrawLength()<=0){return null;}
+        let finalSegmentPoint={x:null,y:null}; //for the animation hand which belongs to a DrawingCacheManager
         if(nowTime>=this.animFinishTime || this.flagFirstTime){ // siguiente imagen o primera vez
             let imageFinalFrame=new Image();
             if(!this.flagFirstTime){
                 //// Completing not drawn lines
                 if(this.data.getEntraceModeOf(this.k)===EntranceModes.drawn){
                     imageFinalFrame=this.data.getFinalMaskedImageOf(this.k);
-                    //this.ctx.drawImage(,0,0,this.canvas.width,this.canvas.height);
-
                 }else if(this.data.getEntraceModeOf(this.k)===EntranceModes.text_drawn){
-                    let animTrueProgress=this.animTotalProgress-this.data.getDelayOf(this.k);
-                    animTrueProgress=Math.max(0,animTrueProgress);
-                    let indexPathTurn=parseInt(animTrueProgress/this.animStrokeDuration);
-                    let cantJumps=(Math.round(this.data.getDurationOf(this.k)/this.animStrokeDuration)-1)-indexPathTurn;
-
-                    this.drawCurveSegment(this.k,this.i,this.j,1);
-                    let oldValI=this.i;
-                    let flagNewPath=false;
-                    for(let p=0;p<cantJumps;p++){
-                        let indexes=this.getNextPath(this.k,this.i,this.j,1);
-                        this.i=indexes[0];
-                        this.j=indexes[1];
-                        this.drawCompletePath(this.k,indexes[0],indexes[1]);
-                    }
-                    this.functionDrawingMode(this.k);
                     imageFinalFrame=this.data.getFinalMaskedImageOf(this.k);
                 }
             }else{
@@ -133,7 +114,8 @@ var PathIllustrator=fabric.util.createClass({
                 if(this.loopMode){
                     this.k=0;
                 }else{
-                    this.finish();return;
+                    this.notifyOnLastObjectDrawingFinished(this.k-1,imageFinalFrame);
+                    this.finish();return null;
                 }
             }
             ///
@@ -181,9 +163,10 @@ var PathIllustrator=fabric.util.createClass({
                 if(!Preprotocol.wantConsume){
                     //return;
                 }else{
-                    Preprotocol.wantDelete=false;
                     let animTrueProgress=this.animTotalProgress-this.data.getDelayOf(this.k);
-                    animTrueProgress=Math.max(0,animTrueProgress);
+                    if(animTrueProgress<0){return null;}
+                    Preprotocol.wantDelete=false;
+                    //animTrueProgress=Math.max(0,animTrueProgress);
                     let indexPathTurn=Math.floor(animTrueProgress/this.animStrokeDuration);
                     let cantJumps=indexPathTurn-this.prevStrokeTurnIndex;
                     let oldValI=this.i;
@@ -217,7 +200,7 @@ var PathIllustrator=fabric.util.createClass({
                             this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
                             this.ctx.lineCap = "round";
                         }else{
-                            this.drawCurveSegment(this.k,this.i,this.j,(animTrueProgress%this.animStrokeDuration)/this.animStrokeDuration);
+                            finalSegmentPoint=this.drawCurveSegment(this.k,this.i,this.j,(animTrueProgress%this.animStrokeDuration)/this.animStrokeDuration);
                             this.functionDrawingMode(this.k);
                         }
                         this.prevStrokeTurnIndex=indexPathTurn;
@@ -229,6 +212,7 @@ var PathIllustrator=fabric.util.createClass({
                 }
             }
         }
+        return finalSegmentPoint;
     },
     _loop:function(){
         this.ctx.lineCap = "round";
@@ -276,7 +260,7 @@ var PathIllustrator=fabric.util.createClass({
                     this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
 
                     this.prevPathSnapshot.src=this.canvas.toDataURL();
-                    this.notifyOnDrawingNewObject(0,0,this.canvas.toDataURL());
+                    //this.notifyOnDrawingNewObject(0,0,this.canvas.toDataURL());
                     if(this.data.getListLinesWidthsLength(k)>0){
                         this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
                     }
@@ -316,8 +300,7 @@ var PathIllustrator=fabric.util.createClass({
                                 }
                             }
                             ///
-                            this.notifyOnDrawingNewObject(k-1,k,this.canvas.toDataURL());
-
+                            //this.notifyOnDrawingNewObject(k-1,k,this.canvas.toDataURL());
                             //calculando momento final de la animacion de la imagen
                             let offsetTime=nowTime-animFinishTime;
 
@@ -526,11 +509,14 @@ var PathIllustrator=fabric.util.createClass({
             this.ctx.moveTo(this.data.getStrokeCoordXAt(k, i, pAIndex), this.data.getStrokeCoordYAt(k, i, pAIndex));
         }
         var len = this.data.getPathLength(k,i); // number of points
-        if(len<2){return;}
+        if(len<2){return null;}
+        let finalSegmentPoint={x:null,y:null}; // for the scene previewer, specifically the hand movement
         if(this.data.getStrokeTypeAt(k,i,pAIndex)==="l"){
             let point=this.getLineCurvePoint(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex),this.data.getStrokeCoordXAt(k,i,pAIndex+1),this.data.getStrokeCoordYAt(k,i,pAIndex+1),
                 temperature);
             this.ctx.lineTo(point.x,point.y);
+            finalSegmentPoint.x=point.x;
+            finalSegmentPoint.y=point.y;
         }else if(this.data.getStrokeTypeAt(k,i,pAIndex)==="c"){
             let points=this._getBezierCtrlPoints(
                 this.data.getStrokeCoordXAt(k,i,pAIndex),
@@ -544,6 +530,8 @@ var PathIllustrator=fabric.util.createClass({
                 temperature
             )
             this.ctx.bezierCurveTo(points[0],points[1],points[2],points[3],points[4],points[5]);
+            finalSegmentPoint.x=points[4];
+            finalSegmentPoint.y=points[5];
         }else if(this.data.getStrokeTypeAt(k,i,pAIndex)==="q"){
             let points=this._getQuadraticCtrlPoints(
                 this.data.getStrokeCoordXAt(k,i,pAIndex),
@@ -554,7 +542,9 @@ var PathIllustrator=fabric.util.createClass({
                 this.data.getStrokeCoordYAt(k,i,pAIndex+1),
                 temperature
             )
-            this.ctx.quadraticCurveTo(points[0],points[1],points[2],points[3])
+            this.ctx.quadraticCurveTo(points[0],points[1],points[2],points[3]);
+            finalSegmentPoint.x=points[2];
+            finalSegmentPoint.y=points[3];
         }else if(this.data.getStrokeTypeAt(k,i,pAIndex)==="q1"){
             let points=this._getQuadraticCtrlPoints(
                 this.data.getStrokeCoordXAt(k,i,pAIndex),
@@ -565,10 +555,15 @@ var PathIllustrator=fabric.util.createClass({
                 this.data.getStrokeCoordYAt(k,i,pAIndex+1),
                 temperature
             )
-            this.ctx.quadraticCurveTo(points[0],points[1],points[2],points[3])
+            this.ctx.quadraticCurveTo(points[0],points[1],points[2],points[3]);
+            finalSegmentPoint.x=points[2];
+            finalSegmentPoint.y=points[3];
         }else if(this.data.getStrokeTypeAt(k,i,pAIndex)==="m"){
-            this.ctx.moveTo(this.data.getStrokeCoordXAt(k,i,pAIndex+1),this.data.getStrokeCoordYAt(k,i,pAIndex+1));
+            finalSegmentPoint.x=this.data.getStrokeCoordXAt(k,i,pAIndex+1);
+            finalSegmentPoint.y=this.data.getStrokeCoordYAt(k,i,pAIndex+1);
+            this.ctx.moveTo(finalSegmentPoint.x,finalSegmentPoint.y);
         }
+        return finalSegmentPoint;
     },
     _getBezierCtrlPoints:function(p1x,p1y,c1x,c1y,c2x,c2y,p2x,p2y,temperature){
         let t=temperature;
@@ -635,12 +630,16 @@ var PathIllustrator=fabric.util.createClass({
         return totalCantPathStrokes;
     },
     notifyOnDrawingNewObject:function(lastObjIndex,newObjIndex,lastDataUrl){//suscritos : su manejador de este en la vista PreviewerView (DrawingCacheManager)
-        for(let i=0;i<this.listObserversOnDrawingNewObject.length;i++){
-            this.listObserversOnDrawingNewObject[i].notificationOnDrawingNewObject(lastObjIndex,newObjIndex,lastDataUrl);
-        }
+        this.observersOnDrawingNewObject.notificationOnDrawingNewObject(lastObjIndex,newObjIndex,lastDataUrl);
+    },
+    notifyOnLastObjectDrawingFinished:function(indexLastObject,finalObjectImage){
+        this.observerOnLastObjectDrawingFinished.notificationOnLastObjectDrawingFinished(indexLastObject,finalObjectImage);
     },
     registerOnDrawingNewObject:function(obj){
-        this.listObserversOnDrawingNewObject.push(obj);
+        this.observersOnDrawingNewObject=obj;
+    },
+    registerOnLastObjectDrawingFinished:function(obj){
+        this.observerOnLastObjectDrawingFinished=obj;
     }
 })
 var IllustratorDataAdapterPreview=fabric.util.createClass({

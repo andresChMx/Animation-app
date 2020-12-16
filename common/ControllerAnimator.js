@@ -72,15 +72,7 @@ var ControllerAnimator=fabric.util.createClass({
     },
     _updateObjectsAccordAnims:function(self){
         for(var i=0;i<this.objectsToAnimate.length;i++){
-            //if(this.objectsToAnimate[i].animator.hasAnimations()){
-
-                this.objectsToAnimate[i].animator.executeAnimations(self.totalProgress);
-                //if (!this.objectsToAnimate[i].isOnScreen()) {
-                //}
-              //console.log(listAnimableObjects[i].listAnimations.length);
-            //}else{
-              //no hacer nada
-            //}
+            this.objectsToAnimate[i].animator.executeAnimations(self.totalProgress);
         }
     }
 })
