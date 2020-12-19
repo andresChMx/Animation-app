@@ -25,8 +25,8 @@ var PreviewManager=fabric.util.createClass({
     },
     wakeUp:function(imageDrawingData){
         this.imageDrawingData=imageDrawingData;
-        let imgWidth=imageDrawingData.imgHTML.naturalWidth;
-        let imgHeight=imageDrawingData.imgHTML.naturalHeight;
+        let imgWidth=imageDrawingData.imgHigh.naturalWidth;
+        let imgHeight=imageDrawingData.imgHigh.naturalHeight;
         let aspect=imgWidth/imgHeight;
         if(imgWidth>imgHeight){
             this.canvas.width=this.parentWidth;
@@ -41,7 +41,7 @@ var PreviewManager=fabric.util.createClass({
         this.scalerFactorX=this.canvas.width/this.canvasDrawingManager.canvasOriginalWidth;
         this.scalerFactorY=this.canvas.height/this.canvasDrawingManager.canvasOriginalHeight;
     
-        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this.scalerFactorX,this.scalerFactorY,this.imageDrawingData.imgHTML);
+        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this.scalerFactorX,this.scalerFactorY,this.imageDrawingData.imgHigh);
         this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,this.illustratorDataAdapter,true);
         this.pathIllustrator.start();
     },

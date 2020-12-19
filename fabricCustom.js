@@ -248,7 +248,8 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.entranceMode=null;
         this.entraceModesSettings={};
         this.setupEntraceModesSettings();
-        this.imageDrawingData=this.convertEntityToDTO(options.imageDrawingData);
+        this.imageAssetModel=options.imageAssetModel;
+        this.imageDrawingData=this.setupImageDrawingDTO(options);
         this.animator=new Animator(this);
         this.setEntranceMode(EntranceModes.drawn); //debe estar a drawn antes de generar la imagen final mascarada (la siguiente funcion invocada)
         if(this.type==="ImageAnimable"){ // since the subclasse (CameraAnimable) are invoking this constructor ()
@@ -267,13 +268,10 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
 
         }
     },
-    convertEntityToDTO:function(entityDrawingData){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHTML
-        let DTO={
-            id:entityDrawingData.id,
-            url:entityDrawingData.url,
-            userid:entityDrawingData.userid,
-
-            imgHTML:entityDrawingData.imgHTML,
+    setupImageDrawingDTO:function(options){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHigh
+        return {
+            imgHigh:options.imgHighDefinition,
+            imgLow:options.imgLowDefinition,
             imgMasked:null,
             points:[],
             linesWidths:[],
@@ -282,7 +280,6 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             ctrlPoints:[],
             type:ImageType.CREATED_NOPATH
         }
-        return DTO;
     },
     generateFinalMaskedImage:function(){
         let dataGenerator=new ImageModelDrawingDataGenerator();
@@ -290,9 +287,9 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         let canvas=document.createElement("canvas");
         let ctx=canvas.getContext("2d");
         if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
-            canvas.width=this.imageDrawingData.imgHTML.naturalWidth;
-            canvas.height=this.imageDrawingData.imgHTML.naturalHeight;
-            ctx.drawImage(this.imageDrawingData.imgHTML,0,0);
+            canvas.width=this.imageDrawingData.imgHigh.naturalWidth;
+            canvas.height=this.imageDrawingData.imgHigh.naturalHeight;
+            ctx.drawImage(this.imageDrawingData.imgHigh,0,0);
             this.imageDrawingData.imgMasked=new Image();
             this.imageDrawingData.imgMasked.src=canvas.toDataURL();
             canvas.remove();
@@ -324,10 +321,10 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     },
 
     getWidthInDrawingCache:function(){
-        return this.imageDrawingData.imgHTML.naturalWidth;
+        return this.imageDrawingData.imgHigh.naturalWidth;
     },
     getHeightInDrawingCache:function(){
-        return this.imageDrawingData.imgHTML.naturalHeight;
+        return this.imageDrawingData.imgHigh.naturalHeight;
     },
     setEntranceMode:function(mode){
         this.entranceMode=mode;
@@ -384,7 +381,9 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         this.entranceMode=null;
         this.entraceModesSettings={};
         this.setupEntraceModesSettings();
-        this.imageDrawingData=this.convertEntityToDTO(options.imageDrawingData);
+        this.imageAssetModel={imgLow:""}
+        this.fontAssetModel={id:"",url_font:"",user_id:""}
+        this.imageDrawingData=this.setupImageDrawingDTO();
         this.animator=new Animator(this);
         this.setFontSize(72);
         this.setFontFamily(FontsNames["bauhs 93"]);
@@ -402,14 +401,9 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
 
         }
     },
-    convertEntityToDTO:function(entityDrawingData){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHTML
-        let DTO={
-            //id:entityDrawingData.id,
-            url:entityDrawingData.url,
-            //userid:entityDrawingData.userid,
-
-            //imgHTML:entityDrawingData.imgHTML,
-            //imgMasked:null,
+    setupImageDrawingDTO:function(){
+        return {
+            imgMasked:null,
             points:[],
             linesWidths:[],
             pathsNames:[],
@@ -417,7 +411,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
             ctrlPoints:[],
             type:ImageType.CREATED_NOPATH
         }
-        return DTO;
+
     },
     setFontFamily:function(fontname){ //Cargando Font Object y guardandolo, solo si aun no esta cargado
         if(!FontsFileName[fontname]){fontname=Object.keys(FontsFileName)[0];} //validando que nombre sea uno valido

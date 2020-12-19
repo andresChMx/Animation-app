@@ -375,7 +375,6 @@
     width:300px;
     z-index: 900;
     background:red;
-    padding:10px;
     display:flex;
     flex-direction: column !important;
 }
@@ -394,14 +393,54 @@
     flex-grow: 1;
     position:relative;
 }
-.panel-assets__sections-container__section-image-assets{
+.panel-assets__sections-container__section-image{
     width:100%;
     height:100%;
     overflow-y:auto;
     overflow-x:hidden;
-    
+
+
 }
-.panel-assets__section-image-assets__item{
+.panel-assets__sections-container__section-image__box-options{
+
+}
+.panel-assets__section-image__box-options__second-row{
+    position: relative;
+    overflow:hidden;
+    height: 100%;
+}
+.panel-assets__section-image__box-options__second-row__menu-categories{
+    width:600px;
+    background: peru;
+    overflow-x: auto;
+    height:100%;
+}
+.panel-assets__section-image__box-options__menu-categories__list-categories{
+    list-style: none;
+    display: inline-block;
+    background: yellow;
+}
+.panel-assets__section-image__box-options__second-row__menu-categories button{
+    position:absolute;
+    padding:2px 10px;
+}
+.panel-assets__section-image__box-options__second-row__menu-categories button:first-child{
+    left:0;
+}
+.panel-assets__section-image__box-options__second-row__menu-categories button:last-child{
+    right:0;
+}
+.panel-assets__section-image__box-options__menu-categories__list-categories li{
+    display: inline-block;
+}
+.panel-assets__section-image__box-options__menu-categories__list-categories li.active{
+    background: red;
+}
+.panel-assets__section-image__box-assets{
+    padding:10px;
+    background:green;
+}
+.panel-assets__section-image__box-assets__asset{
     display:inline-block;
     width:33.33%;
     
@@ -409,7 +448,7 @@
     padding:5px;
     
 }
-.panel-assets__section-image-assets__item__inner-container{
+.panel-assets__section-image__box-assets__asset__inner-container{
     width:100%;
     height:100%;
     cursor:pointer;
@@ -418,12 +457,12 @@
     align-items: center;
     background:salmon;
 }
-.panel-assets__section-image-assets__item__inner-container__image{
+.panel-assets__section-image__box-assets__asset__inner-container__image{
     width:100%;
     display:inline-block;
     max-height: 100%;
 }
-.panel-assets__section-image-assets__item__btn-options{
+.panel-assets__section-image__box-assets__asset__btn-options{
     width:30%;
     height:30%;
     background:green;

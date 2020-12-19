@@ -10,23 +10,95 @@
 
     <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-firestore.js"></script>
-
+    <script src="data.js "></script>
     <script>
         // Your web app's Firebase configuration
-        var firebaseConfig = {
-            apiKey: "AIzaSyCsEgjXD5P01yKgppoubymvMxijwOqIaiA",
-            authDomain: "drawesome-29e1e.firebaseapp.com",
-            databaseURL: "https://drawesome-29e1e.firebaseio.com",
-            projectId: "drawesome-29e1e",
-            storageBucket: "drawesome-29e1e.appspot.com",
-            messagingSenderId: "272805254155",
-            appId: "1:272805254155:web:f13ba700248a82ac57e30e",
-            measurementId: "G-1MJ0XWKJ8K"
+        var firebaseConfigImageAssets_arrows = {
+            apiKey: "AIzaSyAqRRDMM1ESSEkVP8awQCJI2DZFTxau3Hs",
+            authDomain: "arrows-b8e4b.firebaseapp.com",
+            projectId: "arrows-b8e4b",
+            storageBucket: "arrows-b8e4b.appspot.com",
+            messagingSenderId: "320448795288",
+            appId: "1:320448795288:web:4ee35cbabce0e5ba47f6ed",
+            measurementId: "G-HE2WRTM9L8"
+        };
+        var firebaseConfigImageAssets_backgrounds = {
+            apiKey: "AIzaSyBYRJHl9vT6a3rCqNNoMlBz48BwdoBny-E",
+            authDomain: "backgrounds-64eef.firebaseapp.com",
+            projectId: "backgrounds-64eef",
+            storageBucket: "backgrounds-64eef.appspot.com",
+            messagingSenderId: "774510981735",
+            appId: "1:774510981735:web:4f82c4937d9528dc3c5ac2",
+            measurementId: "G-6PLS8R9TPX"
+        };
+        var firebaseConfigImageAssets_bubbles={
+            apiKey: "AIzaSyD1-3wcxeF4u2oWhp5O4PJAe6KlQm3l7pw",
+            authDomain: "bubbles-8ff2c.firebaseapp.com",
+            projectId: "bubbles-8ff2c",
+            storageBucket: "bubbles-8ff2c.appspot.com",
+            messagingSenderId: "217533607503",
+            appId: "1:217533607503:web:6196bc4a3b44d55e59843a",
+            measurementId: "G-E2QPPWXG6L"
+        };
+        var firebaseConfigImageAssets_buildings={
+            apiKey: "AIzaSyCjVxL8g1xVTpbDlQuJX-sOwhxdqiGQ3nk",
+            authDomain: "buildings-6439b.firebaseapp.com",
+            projectId: "buildings-6439b",
+            storageBucket: "buildings-6439b.appspot.com",
+            messagingSenderId: "23067520055",
+            appId: "1:23067520055:web:5d24209a756cbcbfa4a3b2",
+            measurementId: "G-0WZDG6C9WY"
+        };
+        var firebaseConfigImageAssets_characters={
+            apiKey: "AIzaSyCCrTkCTKRmmGmmWDbsNj5QFtAsjhD-MVs",
+            authDomain: "characters-88b33.firebaseapp.com",
+            projectId: "characters-88b33",
+            storageBucket: "characters-88b33.appspot.com",
+            messagingSenderId: "366131669914",
+            appId: "1:366131669914:web:b66756c74ddabb25aca823",
+            measurementId: "G-NYDNXCQQTW"
+        };
+        var firebaseConfigImageAssets_objects = {
+            apiKey: "AIzaSyB0kMmmu972m-Q203yrEti-w3WBYqYs7QA",
+            authDomain: "objects-9f968.firebaseapp.com",
+            projectId: "objects-9f968",
+            storageBucket: "objects-9f968.appspot.com",
+            messagingSenderId: "837145773017",
+            appId: "1:837145773017:web:3f8e9d1332d3f8a0d88fc8",
+            measurementId: "G-WG5NEDFZPQ"
+        };
+        var firebaseConfigImageAssets_people = {
+            apiKey: "AIzaSyDSbeElfnzjaWqPneF7ViUMisPcOrXQanc",
+            authDomain: "people-e71d3.firebaseapp.com",
+            projectId: "people-e71d3",
+            storageBucket: "people-e71d3.appspot.com",
+            messagingSenderId: "255177175940",
+            appId: "1:255177175940:web:27c167ba9f44e432cb63d1",
+            measurementId: "G-X2K6DDGL92"
+        };
+        var firebaseConfigImageAssets_symbols = {
+            apiKey: "AIzaSyB1G0nHZgx4CU8P8se37DuRSNyQRQmwgEc",
+            authDomain: "symbols-4d185.firebaseapp.com",
+            projectId: "symbols-4d185",
+            storageBucket: "symbols-4d185.appspot.com",
+            messagingSenderId: "562774822967",
+            appId: "1:562774822967:web:d27a8b136eee6b560dafb2",
+            measurementId: "G-QED1SZ9VZ3"
         };
         // Initialize Firebase
-        let app= firebase.initializeApp(firebaseConfig);
-        window.db = firebase.firestore(app);
+        let appImageAssets={
+            arrows: firebase.initializeApp(firebaseConfigImageAssets_arrows),
+            backgrounds: firebase.initializeApp(firebaseConfigImageAssets_backgrounds,'backgrounds'),
+            bubbles: firebase.initializeApp(firebaseConfigImageAssets_bubbles,'bubbles'),
+            buildings: firebase.initializeApp(firebaseConfigImageAssets_buildings,'buildings'),
+            characters: firebase.initializeApp(firebaseConfigImageAssets_characters,'characters'),
+            objects: firebase.initializeApp(firebaseConfigImageAssets_objects,'objects'),
+            people: firebase.initializeApp(firebaseConfigImageAssets_people,'people'),
+            symbols: firebase.initializeApp(firebaseConfigImageAssets_symbols,'symbols'),
+        }
+        //window.db = firebase.firestore(appImageAssets_arrows);
         //firebase.analytics();
+
     </script>
 
     <style>
@@ -198,12 +270,40 @@
             <div class="panel-assets__menu-sections__item">gifs</div>
             <div class="panel-assets__menu-sections__item">Sound</div>
         </nav>
+        <div class="panel-assets__buttons-add-resource">
+            <button class="panel-assets__buttons-add-resource__image-asset">Add Image</button>
+            <button class="panel-assets__buttons-add-resource__gifs-asset" style="display:none">Add Gif</button>
+            <button class="panel-assets__buttons-add-resource__sound-asset" style="display:none">Add Sound</button>
+        </div>
         <div class="panel-assets__sections-container">
-            <div class="panel-assets__sections-container__section-image-assets" data-bind="foreach: listAssets">
-                <div class="panel-assets__section-image-assets__item" data-bind="setupEvents: koBindingSetupHTML($element)" >
-                    <div class="panel-assets__section-image-assets__item__inner-container">
-                        <img src="" data-bind="attr:{src:model.url}" crossorigin alt="" class="panel-assets__section-image-assets__item__inner-container__image" >
-                        <button class="panel-assets__section-image-assets__item__btn-options"></button>
+            <div class="panel-assets__sections-container__section-image">
+                <div class="panel-assets__sections-container__section-image__box-options">
+                    <div class="panel-assets__section-image__box-options__first-row">
+                        <button class="panel-assets__section-image__box-options__btn-add-image">Add Local Image</button>
+                    </div>
+                    <div class="panel-assets__section-image__box-options__second-row">
+                        <div class="panel-assets__section-image__box-options__second-row__menu-categories">
+                            <button id="control-left"><</button>
+                            <ul class="panel-assets__section-image__box-options__menu-categories__list-categories">
+                                <li value="characters" >characters</li>
+                                <li value="arrows" >arrows</li>
+                                <li value="people" >people</li>
+                                <li value="backgrounds" >backgrounds</li>
+                                <li value="objects" >objects</li>
+                                <li value="buildings" >buildings</li>
+                                <li value="bubbles" >bubbles</li>
+                                <li value="symbols" >symbols</li>
+                            </ul>
+                            <button id="control-right">></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-assets__section-image__box-assets" data-bind="foreach: listAssets">
+                    <div class="panel-assets__section-image__box-assets__asset" data-bind="setupEvents: koBindingSetupHTML($element)" >
+                        <div class="panel-assets__section-image__box-assets__asset__inner-container">
+                            <img src="" data-bind="attr:{src:model.url_thumbnail}" crossorigin alt="" class="panel-assets__section-image__box-assets__asset__inner-container__image" >
+                            <button class="panel-assets__section-image__box-assets__asset__btn-options"></button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -212,11 +312,7 @@
             </div>
             <div class="sections-container__section-third"></div>
         </div>
-        <div class="panel-assets__buttons-add-resource">
-            <button class="panel-assets__buttons-add-resource__image-asset">Add Image</button>
-            <button class="panel-assets__buttons-add-resource__gifs-asset" style="display:none">Add Gif</button>
-            <button class="panel-assets__buttons-add-resource__sound-asset" style="display:none">Add Sound</button>
-        </div>
+
     </section>
     <div class="panel-assets__modal-upload-image__filter">
         <section class="panel-assets__modal-upload-image">

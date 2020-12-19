@@ -28,9 +28,9 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.canvas.on("mouse:move",this.OnMouseMoved.bind(this))
         this.canvas.on("mouse:up",this.OnMouseUp.bind(this))
 
-        this.canvasOriginalWidth=imageDrawingData.imgHTML.naturalWidth;
-        this.canvasOriginalHeight=imageDrawingData.imgHTML.naturalHeight;
-        let oImg=new fabric.Image(imageDrawingData.imgHTML,{
+        this.canvasOriginalWidth=imageDrawingData.imgHigh.naturalWidth;
+        this.canvasOriginalHeight=imageDrawingData.imgHigh.naturalHeight;
+        let oImg=new fabric.Image(imageDrawingData.imgHigh,{
             "left":0,
             "top":0,
             "selectable":false,

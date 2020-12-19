@@ -73,7 +73,7 @@ var CanvasManager={
             top:0,
             width:1400,
             height:800,
-            imageDrawingData:{'url':'http...',id:"",userid:"",imgHTML:""}
+            imageDrawingData:{url_thumbnail:'http..',id:"",userid:"",imgHigh:""}
         });
 
     },
@@ -166,7 +166,7 @@ var CanvasManager={
 
     },
     createAnimableObject:function(model,type="ImageAnimable"){
-        let self=CanvasManager;
+        let self=this;
 
         /*
                 fabric.loadSVGFromURL('http://localhost:3000/svg.svg', function(objects, options) {
@@ -177,21 +177,41 @@ var CanvasManager={
                     self.canvas.add(obj).renderAll();
                   });
                 */
-
+        
         //console.log(model);
-        let animObj=null;
         if(type==="ImageAnimable"){
-            animObj=new ImageAnimable(model.imgHTML,{
+            let lowImage=new Image();
+            let highImage=new Image();
+            lowImage.crossOrigin="anonymous";
+            highImage.crossOrigin="anonymous";
+            let tmpCount=0;
+            lowImage.onload=function(){tmpCount++;if(tmpCount===2){imgsReady()}}
+            highImage.onload=function(){tmpCount++;if(tmpCount===2){imgsReady()}}
+            function imgsReady(){
+                model.imgHigh=highImage;
+                model.imgLow=lowImage;
+                let animObj=new ImageAnimable(highImage,{
+                    "left":WindowManager.mouse.x-self.canvas._offset.left,
+                    "top":WindowManager.mouse.y-self.canvas._offset.top,
+                    "originX":'center',
+                    "originY":'center',
+                    "imageAssetModel":model,
+                    "imgHighDefinition":highImage,
+                    "imgLowDefinition":lowImage
+                })
+                animObj.setCoords();
+                self.listAnimableObjects.push(animObj);
+                self.listAnimableObjectsWithEntrance.push(animObj);
+                self.canvas.add(animObj);
+                self.notifyOnObjAddedToListObjectsWithEntrance.bind(self)(animObj);
+                self.notifyOnAnimableObjectAdded.bind(self)(animObj);
+            }
+            lowImage.src=model.url_thumbnail;
+            highImage.src=model.url_image;
 
-                "left":WindowManager.mouse.x-this.canvas._offset.left,
-                "top":WindowManager.mouse.y-this.canvas._offset.top,
-                "originX":'center',
-                "originY":'center',
-                "imageDrawingData":model,
-            })
              // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea
         }else{ //(type==="TextAnimable")
-            animObj=new TextAnimable("asdfasdfasdf",{
+            let animObj=new TextAnimable("asdfasdfasdf",{
                 "left":100,
                 "top":100,
                 "originX":"center",
@@ -199,15 +219,14 @@ var CanvasManager={
                 "imageDrawingData":model,
             })
             animObj.setEntranceMode(EntranceModes.text_drawn); //textos tambien tendran entrada siendo dibujados
+
+            animObj.setCoords();
+            self.listAnimableObjects.push(animObj);
+            self.listAnimableObjectsWithEntrance.push(animObj);
+            self.canvas.add(animObj);
+            self.notifyOnObjAddedToListObjectsWithEntrance.bind(this)(animObj);
+            self.notifyOnAnimableObjectAdded.bind(self)(animObj);
         }
-        animObj.setCoords();
-        self.listAnimableObjects.push(animObj);
-        self.listAnimableObjectsWithEntrance.push(animObj);
-        self.canvas.add(animObj);
-
-        self.notifyOnObjAddedToListObjectsWithEntrance.bind(this)(animObj);
-        self.notifyOnAnimableObjectAdded.bind(self)(animObj);
-
     },
     createAnimableText:function(){
 

@@ -92,8 +92,8 @@ var ScenePreviewController=fabric.util.createClass({
                 animableObjWithEntrance.imageDrawingData = result;
                 animableObjWithEntrance.imageDrawingData.url=tmpUrl;
                 animableObjWithEntrance.imageDrawingData.type=TextType.PROVIDED;
-                animableObjWithEntrance.imageDrawingData.imgHTML=self.pointsGenerator.generateTextBaseImage(animableObjWithEntrance);
-                animableObjWithEntrance.imageDrawingData.imgMasked=animableObjWithEntrance.imageDrawingData.imgHTML;
+                animableObjWithEntrance.imageDrawingData.imgHigh=self.pointsGenerator.generateTextBaseImage(animableObjWithEntrance);
+                animableObjWithEntrance.imageDrawingData.imgMasked=animableObjWithEntrance.imageDrawingData.imgHigh;
 
                 let textDrawable=new DrawableImage({
                     cacheCanvas:self.drawingCacheManager.canvas,

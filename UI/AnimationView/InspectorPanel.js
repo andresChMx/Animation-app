@@ -11,8 +11,9 @@ let SectionToolBox={
         this.HTMLElement=document.querySelector(".panel-inspector__toolbox");
         let btnPreview=document.querySelector(".toolbox__item__button-preview");
         btnPreview.addEventListener("click",this.notifyOnBtnPreview.bind(this));
-
         this.HTMLTextTools=document.querySelector(".panel-inspector__toolbox__item-text");
+
+
         this.initEvents();
     },
     initEvents:function(){
@@ -39,6 +40,9 @@ var SectionObjectsEntraceEditor={
 
         this.lastActiveHTMLItem=null;
 
+        this.iconTextAnimable=new Image();
+        this.iconTextAnimable.src="https://res.cloudinary.com/daqft8zr2/image/upload/v1608394852/icons/tyyt12ejtdymwgj28owt.png"
+
     },
 
     activeBoxObjectsHTMLItem:function(index){
@@ -56,9 +60,9 @@ var SectionObjectsEntraceEditor={
     createHTMLItem:function(animObjWithEntrance){
         let newItem=this.HTMLBoxItem.cloneNode(true);
         let icon=newItem.querySelector(".panel-inspector__objects-entrance-editor__box-items__item__icon img");
+        icon.replaceWith(this._getAnimableObjectIcon(animObjWithEntrance));
         let inputDelay=newItem.querySelector(".box-items__item__input-field__input-element-delay");
         let inputDuration=newItem.querySelector(".box-items__item__input-field__input-element-duration");
-        icon.setAttribute("src",animObjWithEntrance.imageDrawingData.url);
         inputDelay.value=animObjWithEntrance.animator.entranceDelay;
         inputDuration.value=animObjWithEntrance.animator.entranceDuration;
         newItem.style.display="block";
@@ -67,6 +71,13 @@ var SectionObjectsEntraceEditor={
         inputDelay.addEventListener("input",this.onInputDelay.bind(this));
         newItem.addEventListener("click",this.onHTMLItemClicked.bind(this))
         this.HTMLElement.appendChild(newItem)
+    },
+    _getAnimableObjectIcon:function(animObjWithEntrance){
+        if(animObjWithEntrance.type==="ImageAnimable"){
+            return animObjWithEntrance.imageDrawingData.imgLow.cloneNode();
+        }else if(animObjWithEntrance.type==="TextAnimable"){
+            return this.iconTextAnimable.cloneNode();
+        }
     },
     deleteHTMLItemAt:function(index){
         this.HTMLElement.children[index+1].remove();// index-1 porque siempre hay un item oculto en el box items

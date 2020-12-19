@@ -41,8 +41,8 @@ var ImageModelDrawingDataGenerator=fabric.util.createClass({
 
 
     generateDefaultDrawingPointsAndLineWidth:function (imageDrawingData,lineWidthWanted){
-        let imageWidth=imageDrawingData.imgHTML.naturalWidth;
-        let imageHeight=imageDrawingData.imgHTML.naturalHeight;
+        let imageWidth=imageDrawingData.imgHigh.naturalWidth;
+        let imageHeight=imageDrawingData.imgHigh.naturalHeight;
 
         let matPoints=[]
         let listLinesWidths=[lineWidthWanted/imageWidth];

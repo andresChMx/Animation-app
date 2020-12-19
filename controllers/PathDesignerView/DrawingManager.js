@@ -203,7 +203,7 @@ var DrawingManager=fabric.util.createClass({
             this.ctrlPointsManager.generateCrtlPointsFromPointsMatrix(this.canvasManager.listPoints)
         }else if(imageDrawingData.type===ImageType.CREATED_PATHLOADED){
             this.loadPathsNames(imageDrawingData);
-            this.ctrlPointsManager.generateCrtlPointsFromLoadedData(imageDrawingData,imageDrawingData.imgHTML.naturalWidth,imageDrawingData.imgHTML.naturalHeight)
+            this.ctrlPointsManager.generateCrtlPointsFromLoadedData(imageDrawingData,imageDrawingData.imgHigh.naturalWidth,imageDrawingData.imgHigh.naturalHeight)
         }
 
         this.canvasManager.updatePathData(this.ctrlPointsManager.list,this.canvasManager.listPoints);

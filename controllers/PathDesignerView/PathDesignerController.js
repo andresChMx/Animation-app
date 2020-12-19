@@ -129,7 +129,7 @@ var PathDesignerController=fabric.util.createClass({
     loadingPathsFromSVG:function(loadingMode){
         let self=this;
         if(this.imageDrawingData!=null){
-            this.svgManager.calcDrawingData(this.imageDrawingData.url,this.imageDrawingData.imgHTML.naturalWidth,this.imageDrawingData.imgHTML.naturalHeight,loadingMode,"url",function( svgLoadedData){
+            this.svgManager.calcDrawingData(this.imageDrawingData.url,this.imageDrawingData.imgHigh.naturalWidth,this.imageDrawingData.imgHigh.naturalHeight,loadingMode,"url",function( svgLoadedData){
 
                 (function Wait(){
                     if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),1);return;}
@@ -139,7 +139,7 @@ var PathDesignerController=fabric.util.createClass({
 
                     svgLoadedData.type=ImageType.CREATED_PATHLOADED;
                     svgLoadedData.url=this.imageDrawingData.url;
-                    svgLoadedData.imgHTML=this.imageDrawingData.imgHTML;
+                    svgLoadedData.imgHigh=this.imageDrawingData.imgHigh;
 
                     this.previewManager.sleep();
                     this.drawingManager.sleep();

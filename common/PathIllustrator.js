@@ -643,7 +643,7 @@ var PathIllustrator=fabric.util.createClass({
     }
 })
 var IllustratorDataAdapterPreview=fabric.util.createClass({
-    initialize:function(drawingManager,canvasDrawingManager,scalerFactorX,scalerFactorY,imgHTML){
+    initialize:function(drawingManager,canvasDrawingManager,scalerFactorX,scalerFactorY,imgHigh){
         this.drawingManager=drawingManager;
         this.canvasDrawingManager=canvasDrawingManager;
 
@@ -651,7 +651,7 @@ var IllustratorDataAdapterPreview=fabric.util.createClass({
         this.scalerFactorY=scalerFactorY;
         this.duration=3000;
         this.delay=0;
-        this.baseImage=imgHTML;
+        this.baseImage=imgHigh;
     },
     getStrokeCoordXAt:function(k,i,j){
         return this.canvasDrawingManager.listPoints[i][j].get("left")*this.scalerFactorX;
@@ -740,7 +740,7 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
         return this.listAnimableObjectsWithDrawnEntrances[k].imageDrawingData.linesWidths.length;
     },
     getBaseImageOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].imageDrawingData.imgHTML;
+        return this.listAnimableObjectsWithDrawnEntrances[k].imageDrawingData.imgHigh;
     },
     getFinalMaskedImageOf:function(k){
         return this.listAnimableObjectsWithDrawnEntrances[k].imageDrawingData.imgMasked;
