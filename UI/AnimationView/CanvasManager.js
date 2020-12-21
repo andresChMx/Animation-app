@@ -193,11 +193,15 @@ var CanvasManager={
                 let animObj=new ImageAnimable(highImage,{
                     "left":WindowManager.mouse.x-self.canvas._offset.left,
                     "top":WindowManager.mouse.y-self.canvas._offset.top,
-                    "originX":'center',
-                    "originY":'center',
+                    "originX":'custom',
+                    "originY":'custom',
                     "imageAssetModel":model,
                     "imgHighDefinition":highImage,
-                    "imgLowDefinition":lowImage
+                    "imgLowDefinition":lowImage,
+
+                    "padding":20,
+                    "transparentCorners": false,
+                    cornerColor:"rgb(0,0,0)"
                 })
                 animObj.setCoords();
                 self.listAnimableObjects.push(animObj);
@@ -214,8 +218,8 @@ var CanvasManager={
             let animObj=new TextAnimable("asdfasdfasdf",{
                 "left":100,
                 "top":100,
-                "originX":"center",
-                "originY":"center",
+                "originX":"custom",
+                "originY":"custom",
                 "imageDrawingData":model,
             })
             animObj.setEntranceMode(EntranceModes.text_drawn); //textos tambien tendran entrada siendo dibujados

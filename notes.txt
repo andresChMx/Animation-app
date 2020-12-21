@@ -1,2 +1,13 @@
 el establecer dimenciones del canvas resetea el valor de lineCap del context
 el problema de que el canvas cache rederizaba pixeleado se suluciono con un ctx.clearRect() antes de renderizar la imagen clippeada en el path
+
+
+fabric.js
+absolute son las coordenadas en el "mundo", es decir las reales, no absoluto seria aplicando las transformaciones del viewport, ya sera escala, o desplazamiento de la "camara"
+
+
+
+para entender las transformaciones del viewport: no pienses en que la "camara" se mueve, sino que cualquier punto a ser dibujado Ejm: ctx.moveTo(100,100);
+se aplicara la transformacion que tenga el canvas, es decir esos valores 100,100, seran alterados y el resultado de esa alteracion es donde se hara en si
+el grafico o lo que usara el API canvas para hacer lo que haga el comando que usaste
+

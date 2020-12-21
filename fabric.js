@@ -10460,7 +10460,6 @@ fabric.PatternBrush = fabric.util.createClass(fabric.PencilBrush, /** @lends fab
       var t = this._currentTransform,
           target = t.target, constraintPosition,
           constraintPosition = target.translateToOriginPoint(target.getCenterPoint(), t.originX, t.originY);
-
       if (target.lockRotation) {
         return false;
       }
