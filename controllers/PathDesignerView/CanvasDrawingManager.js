@@ -33,6 +33,8 @@ var CanvasDrawingManager=fabric.util.createClass({
         let oImg=new fabric.Image(imageDrawingData.imgHigh,{
             "left":0,
             "top":0,
+            "originX":"left",
+            "originY":"top",
             "selectable":false,
             "evented":false,
         })

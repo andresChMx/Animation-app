@@ -74,8 +74,14 @@ var ScenePreviewController=fabric.util.createClass({
                     angle:animableObjWithEntrance.get("angle"),
                     scaleX:animableObjWithEntrance.get("scaleX"),
                     scaleY:animableObjWithEntrance.get("scaleY"),
-                    originX: 'center',
-                    originY: 'center',
+
+                    pivotX:animableObjWithEntrance.get("pivotX"),
+                    pivotY:animableObjWithEntrance.get("pivotY"),
+                    pivotCornerX:animableObjWithEntrance.get("pivotCornerX"),
+                    pivotCornerY:animableObjWithEntrance.get("pivotCornerY"),
+                    originX: 'custom',
+                    originY: 'custom',
+
                     animations:animableObjWithEntrance.animator.dictAnimations,
                     entraceModesSettings:animableObjWithEntrance.entraceModesSettings
                 });
@@ -104,8 +110,14 @@ var ScenePreviewController=fabric.util.createClass({
                     angle:animableObjWithEntrance.get("angle"),
                     scaleX:animableObjWithEntrance.get("scaleX"),
                     scaleY:animableObjWithEntrance.get("scaleY"),
-                    originX: 'center',
-                    originY: 'center',
+                    
+                    pivotX:animableObjWithEntrance.get("pivotX"),
+                    pivotY:animableObjWithEntrance.get("pivotY"),
+                    pivotCornerX:animableObjWithEntrance.get("pivotCornerX"),
+                    pivotCornerY:animableObjWithEntrance.get("pivotCornerY"),
+                    originX: 'custom',
+                    originY: 'custom',
+
                     animations:animableObjWithEntrance.animator.dictAnimations,
                     entraceModesSettings:animableObjWithEntrance.entraceModesSettings
                 });

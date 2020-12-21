@@ -227,7 +227,12 @@ var ImageModelDrawingDataGenerator=fabric.util.createClass({
             lineHeight:animableText.lineHeight,
             fontFamily:animableText.fontFamily,
             fontSize:animableText.fontSize,
-            fill:animableText.fill
+            fill:animableText.fill,
+
+            pivotX:animableText.pivotX,
+            pivotY:animableText.pivotY,
+            pivotCornerX:animableText.pivotCornerX,
+            pivotCornerY:animableText.pivotCornerY,
         });
         this.auxCanvasForTexts.add(tmpText);
         let image=new Image();
