@@ -131,7 +131,6 @@ let Marker = fabric.util.createClass(Component, {
         ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
     },
     onLocalCoordsSettled: function () {
-        this.localState.coords.left = 200;
         this.calcTimelineTimeFromLocation(0);
         this.calcTimelineLocationFromTime(this.timeLineTime);
     },
@@ -175,8 +174,7 @@ let Marker = fabric.util.createClass(Component, {
         this.calcTimelineLocationFromTime(this.timeLineTime);
     },
     notificationOnTimeBarClicked: function (e) {
-        let mouseXInWorldCoords = this.mouseState.x + this.globalState.timingDistances.scrollLeft;
-        this.calcTimelineTimeFromLocation(mouseXInWorldCoords - this.globalState.padding.width);
+        this.calcTimelineTimeFromLocation(this.mouseState.inWorldX - this.globalState.padding.width);
         this.calcTimelineLocationFromTime(this.timeLineTime);
         this.canvas.requestRenderAll();
     },
@@ -270,6 +268,14 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
     _scrollWidthToWidthCoord:function(){
 
     },
+    constraintMovement:function(){
+        if (this.localState.coords.left < this.globalState.coords.left) {
+            this.localState.coords.left = this.globalState.coords.left
+        }
+        if (this.localState.coords.left > this.globalState.coords.width - this.localState.coords.width) {
+            this.localState.coords.left = this.globalState.coords.width - this.localState.coords.width
+        }
+    },
     _mouseInBoundingBox: function () {
         return this.mouseState.x > this.localState.coords.left &&
             this.mouseState.x < this.localState.coords.left + this.localState.coords.width &&
@@ -277,9 +283,9 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
             this.mouseState.y < this.localState.coords.top + this.localState.coords.height;
     },
     calcWidth: function () {
-        let percentInViewport = (this.globalState.coords.width - (this.globalState.padding.width * 2)) / (this.globalState.timingDistances.usableScrollWidth);
-        let barWidth = (this.globalState.coords.width) * percentInViewport;
-        this.localState.coords.width = barWidth;
+        let percentInViewport = (this.globalState.coords.width - (this.globalState.padding.width * 2)) /
+                                (this.globalState.timingDistances.usableScrollWidth);
+        this.localState.coords.width = this.globalState.coords.width * percentInViewport;
     },
     setComponentsCoords: function () {
         let buttonsWidth = 20;
@@ -293,8 +299,6 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
         ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
         ctx.restore();
     },
-
-
     onLocalCoordsSettled: function () {
         this.calcWidth();
         this.setComponentsCoords();
@@ -302,18 +306,10 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
     onMouseDragStarted: function () {
         this.offsetMouseX = this.mouseState.x - this.localState.coords.left;
         this.offsetMouseY = this.mouseState.y - this.localState.coords.top;
-
-
     },
     onMouseDragging: function () {
         this.localState.coords.left = this.mouseState.x - this.offsetMouseX;
-
-        if (this.localState.coords.left < this.globalState.coords.left) {
-            this.localState.coords.left = this.globalState.coords.left
-        }
-        if (this.localState.coords.left > this.globalState.coords.width - this.localState.coords.width) {
-            this.localState.coords.left = this.globalState.coords.width - this.localState.coords.width
-        }
+        this.constraintMovement();
 
         this.setComponentsCoords();
         this.notifyOnScroll(this._leftCoordToScrollLeft());
@@ -341,11 +337,9 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
             if (buttonACoords.left < this.globalState.coords.left) {
                 buttonACoords.left = this.globalState.coords.left
             }
-            ;
             if (buttonACoords.left > buttonBCoords.left + buttonBCoords.width - this.minWidth) {
                 buttonACoords.left = buttonBCoords.left + buttonBCoords.width - this.minWidth
             }
-
 
             let newWidth = (buttonBCoords.left + buttonBCoords.width) - buttonACoords.left;
             this.localState.coords.width = newWidth;
@@ -357,15 +351,15 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
             if (buttonBCoords.left + buttonBCoords.width > this.globalState.coords.width) {
                 buttonBCoords.left = this.globalState.coords.width - buttonBCoords.width
             }
-            if (buttonBCoords.left < buttonACoords.left + this.minWidth - buttonBCoords.width) {
-                buttonBCoords.left = buttonACoords.left + this.minWidth - buttonBCoords.width;
+            if (buttonBCoords.left < buttonACoords.left+buttonACoords.width + this.minWidth) {
+                buttonBCoords.left = buttonACoords.left+buttonACoords.width + this.minWidth;
             }
 
             let newWidth = (this.buttonB.localState.coords.left + this.buttonB.localState.coords.width) - this.buttonA.localState.coords.left;
             this.localState.coords.width = newWidth;
         }
-        this.notifyOnScrollBarResize(this.localState.coords.width)
-        this.notifyOnScroll((this.localState.coords.left / this.globalState.coords.width) * (this.globalState.timingDistances.usableScrollWidth))
+        this.notifyOnScrollBarResize(this.localState.coords.width);
+        this.notifyOnScroll(this._leftCoordToScrollLeft());
         this.canvas.requestRenderAll();
     },
     registerOnScroll: function (obj) {
@@ -413,11 +407,11 @@ let TimeLineProxy=fabric.util.createClass({
         this.timeLineComponent.keysBarComponent.notificationOnDurationChange(durationBefore,durationAfter);
         this.timeLineComponent.renderAll();
     },
-    addKeyFrameOnMarker:function(laneName,values){
-        this.timeLineComponent.keysBarComponent.addKeyFrame(laneName,this.timeLineComponent.markerComponent.timeLineTime,values);
+    addKeyFrameOnMarker:function(laneName,listListValues){
+        this.timeLineComponent.keysBarComponent.addKeyFrame(laneName,this.timeLineComponent.markerComponent.timeLineTime,listListValues);
     },
-    addKeyFrameOn:function(laneName,values,time){
-        this.timeLineComponent.keysBarComponent.addKeyFrame(laneName,time,values);
+    addKeyFramesInBatch:function(listDictsKeyFramesByProperties){
+        this.timeLineComponent.keysBarComponent.addKeyFramesInBatch(listDictsKeyFramesByProperties);
     },
     getLaneKeyFramesLength:function(laneName){
         return this.timeLineComponent.keysBarComponent.dictPropertiesLanes[laneName].counterActiveKeyFrames;
@@ -497,9 +491,9 @@ let TimeLineActions = fabric.util.createClass({
         this.globalState.coords.width = this.HTMLElement.clientWidth;
         this.globalState.coords.height = this.HTMLElement.clientHeight;
     },
-    setupGlobalStateTimingDistances: function (widthArea) {//debe ser el scrollWidth USABLE (sin contar los paddings)
+    setupGlobalStateTimingDistances: function (newUsableScrollWidth) {//debe ser el scrollWidth USABLE (sin contar los paddings)
         let numSegmentsWithBaseSegmentTimeValue = this.globalState.time.duration / this.globalState.time.baseSegmentTimeValue;
-        let segmentLongitude = widthArea / numSegmentsWithBaseSegmentTimeValue;
+        let segmentLongitude = newUsableScrollWidth/ numSegmentsWithBaseSegmentTimeValue;
 
         let newSegmentDistance;
         let newSegmentTimeValue;
@@ -607,8 +601,8 @@ let TimeLineActions = fabric.util.createClass({
         this.globalState.timingDistances.scrollLeft = scrollLeft;
         this.ctx.setTransform(1, 0, 0, 1, -scrollLeft, 0);
     },
-    notificationOnScrollBarResize: function (scrollBarCoordWidth) {
-        let percentViewport = scrollBarCoordWidth / this.globalState.coords.width;
+    notificationOnScrollBarResize: function (scrollBarWidth) {
+        let percentViewport = scrollBarWidth / this.globalState.coords.width;
         let usableScrollWidth = (this.globalState.coords.width - this.globalState.padding.width * 2) / percentViewport;
 
         this.setupGlobalStateTimingDistances(usableScrollWidth);
@@ -745,10 +739,9 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     },
     setupComponentsCoords: function () {
         let laneHeight = 20;
-        let top = 0;
         let i = 0;
         for (let key in this.dictPropertiesLanes) {
-            top = laneHeight * i + this.localState.coords.top;
+            let top = laneHeight * i + this.localState.coords.top;
             this.dictPropertiesLanes[key].setLocalCoords(0, top, this.localState.coords.width, laneHeight);
             i++;
         }
@@ -760,7 +753,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             }
             this.selectedKeyframes = [];
         }
-        this.canvas.requestRenderAll();
+
     },
     findKeyframesInsideBoxSelection: function () {
         for (let i in this.dictPropertiesLanes) {
@@ -807,8 +800,26 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         this.canvas.requestRenderAll();
         this.notifyOnKeyframeSelectionUpdated();
     },
-    addKeyFrame: function (laneName, markerTimeLineTime,values) {
-        this.dictPropertiesLanes[laneName].retrieveKeyFrame(markerTimeLineTime,values);
+    addKeyFrame: function (laneName, markerTimeLineTime, listListValues) {
+        this.deselectCurrentSelection();
+        for(let i=0;i<listListValues.length;i++){
+            this.dictPropertiesLanes[laneName].retrieveKeyFrame(markerTimeLineTime,listListValues[i], i);
+        }
+        this.notifyOnKeyframeSelectionUpdated();
+        this.canvas.requestRenderAll();
+    },
+    addKeyFramesInBatch:function(listDictsKeyFramesByProperties){ //helpful when adding keyframes in batch (generating keyframes from object animations)
+        this.deselectCurrentSelection();
+        for(let p=0;p<listDictsKeyFramesByProperties.length;p++){
+            for(let key in listDictsKeyFramesByProperties[p]){
+                for(let i=0;i<listDictsKeyFramesByProperties[p][key].length;i++){
+                    let data=listDictsKeyFramesByProperties[p][key][i];
+                    this.dictPropertiesLanes[key].retrieveKeyFrame(data.time, data.values, p);
+                }
+            }
+        }
+        this.notifyOnKeyframeSelectionUpdated();
+        this.canvas.requestRenderAll();
     },
     onLocalCoordsSettled: function () {
         this.setupComponentsCoords();
@@ -828,6 +839,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     onMouseFixedClick: function () {
         this.deselectCurrentSelection();
         this.notifyOnKeyframeSelectionUpdated();
+        this.canvas.requestRenderAll();
     },
     onMouseDragEnded: function () {
         this.deselectCurrentSelection();
@@ -865,14 +877,26 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         }
     },
     notifyOnKeyframeSelectionUpdated: function () {
-        let dictPropertiesLanesKeysLengths={};
+        let listIndexes=[];
+        let listDictsPropertiesLanesKeysLengths=[];
         for(let prop in this.dictPropertiesLanes){
-            for(let i=0;i<this.dictPropertiesLanes[prop].counterActiveKeyFrames;i++){
-                this.dictPropertiesLanes[prop].keyFrames[i].indexInParentList=i;
+            listIndexes=[];
+            for(let i=0;i<this.dictPropertiesLanes[prop].counterActiveKeyFrames;i++) {
+                let identifier = this.dictPropertiesLanes[prop].keyFrames[i].identifier;
+                if (listIndexes[identifier] === undefined) {listIndexes[identifier] = 0;}
+                else{listIndexes[identifier]++}
+                this.dictPropertiesLanes[prop].keyFrames[i].indexInParentList = listIndexes[identifier];
+
+                if (listDictsPropertiesLanesKeysLengths[identifier] === undefined) {
+                    listDictsPropertiesLanesKeysLengths[identifier] = {}
+                }
+                if (listDictsPropertiesLanesKeysLengths[identifier][prop] === undefined) {
+                    listDictsPropertiesLanesKeysLengths[identifier][prop] = 0
+                }
+                listDictsPropertiesLanesKeysLengths[identifier][prop]++;
             }
-            dictPropertiesLanesKeysLengths[prop]=this.dictPropertiesLanes[prop].counterActiveKeyFrames;
         }
-        this.observerOnSelectionUpdated.notificationOnKeyBarSelectionUpdated(this.selectedKeyframes,dictPropertiesLanesKeysLengths);
+        this.observerOnSelectionUpdated.notificationOnKeyBarSelectionUpdated(this.selectedKeyframes,listDictsPropertiesLanesKeysLengths);
 
     },
     notifyOnKeyFrameDragging:function(laneName){
@@ -895,8 +919,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         }
     },
     notificationOnKeyframeMouseDown: function (keyframe) {
-        //si no hay seleccion multiple, y si el keyframe trigger es diferente al seleccionado
-        //if (keyframe !== this.keyframeSelected && this.selectedKeyframes.length === 0) {
+        // si el target es parte de la seleccion, no se hace nada en este metodo, solo se renderiza todo.
         if ( (this.selectedKeyframes.length === 1 && this.selectedKeyframes[0]!==keyframe) || this.selectedKeyframes.length===0 ) {
             if (this.selectedKeyframes.length === 1) {
                 this.selectedKeyframes[0].deselect();
@@ -907,13 +930,14 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             keyframe.select();
             this.notifyOnKeyframeSelectionUpdated();
         } else {
-            if (!keyframe.isSelected) {
+            if (!keyframe.isSelected) {// si hay seleccion multiple antra al if
                 this.deselectCurrentSelection();
                 keyframe.select();
                 this.selectedKeyframes.push(keyframe);
                 this.notifyOnKeyframeSelectionUpdated();
             }
         }
+
         this.canvas.requestRenderAll();
 
     },
@@ -949,6 +973,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         }
         dictLaneNames[keyframe.laneName]++;
         this.notifyOnKeyFrameDragEnded(dictLaneNames);
+        this.canvas.requestRenderAll();
     },
     notificationOnKeyframeFixedClick: function (keyframe,laneName) {//click sin dragging, si se hizo dragging no se notifica
         if (this.selectedKeyframes.length > 1) {
@@ -1006,9 +1031,9 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         this.observerOnKeyframeDragEnded = null;
         this.observerOnKeyframeDragStarted = null;
     },
-    retrieveKeyFrame: function (markerTimeLineTime,values) {
+    retrieveKeyFrame: function (markerTimeLineTime,values,keyframeIdentifier) {
         if (this.counterActiveKeyFrames >= this.keyFrames.length) {
-            let newKey = new KeyFrame(this.canvas, this.globalState, this.mouseState,this.name, markerTimeLineTime,values)
+            let newKey = new KeyFrame(this.canvas, this.globalState, this.mouseState,this.name, markerTimeLineTime,values,keyframeIdentifier);
             this.keyFrames.push(newKey);
             newKey.registerOnMouseDown(this);
             newKey.registerOnFixedClick(this);
@@ -1020,10 +1045,9 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
             newKey.setLocalCoords(0, this.localState.coords.top, 20, 20)
 
         } else {
-            this.keyFrames[this.counterActiveKeyFrames].activate(markerTimeLineTime,values);
+            this.keyFrames[this.counterActiveKeyFrames].activate(markerTimeLineTime,values,keyframeIdentifier);
         }
         this.counterActiveKeyFrames++;
-        this.canvas.requestRenderAll();
     },
     discartKeyFrame: function (keyframe) {
         let index = this.keyFrames.indexOf(keyframe);
@@ -1045,7 +1069,31 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         insertionSort(this.keyFrames,this.counterActiveKeyFrames);
     },
     getActiveKeyFrames:function(){
-        return this.keyFrames.slice(0,this.counterActiveKeyFrames);
+        let listListKeyframesByIdentifier=[];
+        for(let i=0;i<this.counterActiveKeyFrames;i++){
+            let identifier=this.keyFrames[i].identifier;
+            if(listListKeyframesByIdentifier[identifier]===undefined){
+                listListKeyframesByIdentifier[identifier]=[];
+            }
+            listListKeyframesByIdentifier[identifier].push(this.keyFrames[i]);
+        }
+        return listListKeyframesByIdentifier;
+    },
+    _renderAnimationsBoxes:function(ctx){
+        for (let i = 0; i < this.counterActiveKeyFrames-1; i++) {
+            let firstKeyCoords=this.keyFrames[i].localState.coords,
+                secondKeyCoords=this.keyFrames[i+1].localState.coords;
+            if(this.keyFrames[i].isSelected){
+                ctx.fillStyle="white";
+            }else{
+                ctx.fillStyle="purple";
+            }
+            ctx.fillRect(firstKeyCoords.left
+                ,firstKeyCoords.top
+                ,secondKeyCoords.left-firstKeyCoords.left
+                ,firstKeyCoords.height
+            );
+        }
     },
     render: function (ctx) {
 
@@ -1053,7 +1101,9 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         ctx.strokeStyle = this.localState.colors.stroke
         ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
 
-        for (let i = 0; i < this.keyFrames.length; i++) {
+        this._renderAnimationsBoxes(ctx);
+
+        for (let i = 0; i < this.counterActiveKeyFrames; i++) {
             this.keyFrames[i].render(ctx);
         }
     },
@@ -1064,7 +1114,6 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
             this.keyFrames[i].notificationOnScrollBarResize();
         }
     },
-
     notificationOnKeyframeFixedClick: function (keyframe) {
         this.observerOnKeyframeFixedClick.notificationOnKeyframeFixedClick(keyframe);
     },
@@ -1125,7 +1174,7 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
     }
 })
 var KeyFrame = fabric.util.createClass(Component, {
-    initialize: function (canvas, globalState, mouseState,laneName, time,values) {
+    initialize: function (canvas, globalState, mouseState,laneName, time,values,identifier) {
         this.callSuper("initialize", globalState, mouseState);
         this.values=values;
         this.localState = {colors: {idle: "red", selected: "pink"}}
@@ -1145,9 +1194,12 @@ var KeyFrame = fabric.util.createClass(Component, {
 
         this.wasDragged = false;
 
+        this.identifier=identifier;        //identifica al animable object que le corresponde, solo se actualiza cuando cambia la seleccion de ojectos del canvas
+
         this.indexInParentList=-1; //solo se actualiza cuando se actualizo la seleccion en el KeyBar component
     },
-    activate: function (timeLineTime,values) {
+    activate: function (timeLineTime,values,identifier) {
+        this.identifier=identifier;
         this.isActive = true;
         this.timeLineTime = timeLineTime;
         this.values=values;
@@ -1201,7 +1253,6 @@ var KeyFrame = fabric.util.createClass(Component, {
                 yInside = true
             }
         }
-        ;
         return xInside && yInside;
     },
     hasBeenSelected: function () {
@@ -1229,15 +1280,12 @@ var KeyFrame = fabric.util.createClass(Component, {
     },
     onMouseDragStarted: function () {
         this.offsetMouseX = this.mouseState.inWorldX - this.localState.coords.left;
-        //this.offsetMouseY=this.mouseState.inWorldY-this.localState.coords.top;
         this.notifyOnDragStarted();
     },
     onMouseDragging: function () {
-        let newLeftCoord = this.mouseState.inWorldX - this.offsetMouseX;
-        let prevLeftCoord = this.localState.coords.left;
-        this.localState.coords.left = newLeftCoord;
-        this.notifyOnDragging();
+        this.localState.coords.left = this.mouseState.inWorldX - this.offsetMouseX;
         this.movementConstraints();
+        this.notifyOnDragging();
         this.canvas.requestRenderAll();
 
     },

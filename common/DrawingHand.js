@@ -3,6 +3,8 @@ var DrawingHand=fabric.util.createClass({
         this.image=null;
         fabric.Image.fromURLImageOutOfCamera('https://res.cloudinary.com/dkhbeokkp/image/upload/v1608049692/drawing_hand_fldb5f.png', function(oImg) {
             this.image=oImg;
+            this.image.originX="left";
+            this.image.originY="top";
         }.bind(this));
     },
     getHandImage:function(){

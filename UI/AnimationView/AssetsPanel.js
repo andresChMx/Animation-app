@@ -28,6 +28,11 @@ let ModalUploadImage={
         let collectionNewDocs=[];
         NetworkManager.UploadImageFile(this.HTMLFormFileInput.files)
             .then(function(data){
+                // let jsonData=data.map(function(value,index){
+                //     return JSON.parse(value).url;
+                // })
+                // console.log(jsonData);
+                // return;
                 for(let i=0;i<data.length;i++){
                     if(data[i]!==undefined){
                         let jsonData=JSON.parse(data[i]);
@@ -78,13 +83,15 @@ let ModalUploadImage={
             })
 
     },
-     */
+    */
+
+
     OnFormUploaderSubmit:function(e){
         e.preventDefault();
         let promises=[];
-        for(let i=0;i<characters.length;i++){
+        for(let i=0;i<parts.length;i++){
             promises.push(
-                NetworkManager.insertToFirestoreImageAsset(characters[i])
+                NetworkManager.insertToFirestoreImageAsset(parts[i])
                     .then(function(docRef) {
                         return docRef.id;
                     })

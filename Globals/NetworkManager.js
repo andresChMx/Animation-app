@@ -69,14 +69,14 @@ var NetworkManager={
         })
     },
     insertToFirestoreImageAsset:function(doc){
-        let db=firebase.firestore(appImageAssets.characters);
+        let db=firebase.firestore(appImageAssets.symbols);
         return db.collection("assets_images").add(doc);
     },
     getCollectionImagesAssetsWithLimit:function(image_category){
         let db=firebase.firestore(appImageAssets[image_category]);
         var query = db.collection("assets_images")
             .orderBy("name")
-            .limit(50);
+            .limit(2000);
         return query.get().then(function(documents){
             return documents.docs;
         });

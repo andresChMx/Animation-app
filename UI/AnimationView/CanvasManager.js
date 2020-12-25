@@ -156,13 +156,15 @@ var CanvasManager={
     },
     /*FIN-METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTSO DE ENTRADA (DRAWN Y DRAGGED)*/
     getSelectedAnimableObj:function(){
-        let activeObj=this.canvas.getActiveObject()
-        if(activeObj && (activeObj.type==="ImageAnimable" || activeObj.type==="CameraAnimable" || activeObj.type==="TextAnimable")){
-            return activeObj
-        }else{
-            return null;
+        let activeObj=this.canvas.getActiveObject();
+        if(activeObj){
+            return activeObj;
         }
-        //switch(case obj.)
+        // if(activeObj && (activeObj.type==="ImageAnimable" || activeObj.type==="CameraAnimable" || activeObj.type==="TextAnimable")){
+        //     return activeObj
+        // }else{
+        //     return null;
+        // }
 
     },
     createAnimableObject:function(model,type="ImageAnimable"){

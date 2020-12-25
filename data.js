@@ -385,9 +385,18 @@ let symbols=[
 ];
 
 
-
-
-
+var parts=[
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/ckqjtfbyycszhedwjrnw.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/ckqjtfbyycszhedwjrnw.png",user_id:"",categoriy:"symbol",name:"algo"},
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/tosv5hedqfmgc5hbxmr8.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/tosv5hedqfmgc5hbxmr8.png",user_id:"",categoriy:"symbol",name:"algo"},
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/vihz5uz7ovcxnuzrhx5o.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/vihz5uz7ovcxnuzrhx5o.png",user_id:"",categoriy:"symbol",name:"algo"},
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/zm0xctpr4xrqaqs4h6in.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/zm0xctpr4xrqaqs4h6in.png",user_id:"",categoriy:"symbol",name:"algo"},
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/ga1plrxheljrrhh00y8x.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/ga1plrxheljrrhh00y8x.png",user_id:"",categoriy:"symbol",name:"algo"},
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/hcezc3adwoafoyaexkd1.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/hcezc3adwoafoyaexkd1.png",user_id:"",categoriy:"symbol",name:"algo"},
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/a5agudhv5jcdmjx8odql.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833328/HIGH/a5agudhv5jcdmjx8odql.png",user_id:"",categoriy:"symbol",name:"algo"},
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833329/HIGH/ik1zcokkynf2bgwbyebh.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833329/HIGH/ik1zcokkynf2bgwbyebh.png",user_id:"",categoriy:"symbol",name:"algo"},
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833329/HIGH/wt1tieaymdnw3yhacc42.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833329/HIGH/wt1tieaymdnw3yhacc42.png",user_id:"",categoriy:"symbol",name:"algo"},
+{id:"",url_thumbnail:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833329/HIGH/ym3fj64aqrqkdnvywv0c.png",url_image:"http://res.cloudinary.com/dhc21c3yy/image/upload/v1608833329/HIGH/ym3fj64aqrqkdnvywv0c.png",user_id:"",categoriy:"symbol",name:"algo"}
+]
 
 
 

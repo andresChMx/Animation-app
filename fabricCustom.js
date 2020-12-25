@@ -1,3 +1,55 @@
+fabric.Object.prototype.setBatch=function(dictNewProperties){// sets properties in batch where the given properties are in world coordinates
+    if(this.group){// is its in a group, the values will be transformed to the group's coordinates system
+        if(dictNewProperties["left"]===undefined){//meaning if it has no properties
+            return;
+        }
+        let absoluteMatrix=this.calcTransformMatrix(); // absolute values (world coordinates, never changes)
+        let options=fabric.util.qrDecompose(absoluteMatrix);
+
+        for(let key in dictNewProperties){
+            if(key==="left"){
+                options.translateX=dictNewProperties[key];
+            }else if(key==="top"){
+                options.translateY=dictNewProperties[key];
+            }else{
+                options[key]=dictNewProperties[key];
+            }
+        }
+        let newMat=fabric.util.composeMatrix(options);
+        let groupInverseMatrix=fabric.util.invertTransform(this.group.calcTransformMatrix());// matrix to convert world coordinates to group coordinates
+        let finalMatrix=fabric.util.multiplyTransformMatrices(groupInverseMatrix,newMat); //converting object new world coordinates to group coordinates
+        let optionsFinal=fabric.util.qrDecompose(finalMatrix);
+        //setting new values
+        this.set(optionsFinal);
+        this.left=optionsFinal.translateX;
+        this.top=optionsFinal.translateY;
+    }else{
+        for(let key in dictNewProperties){
+            this[key]=dictNewProperties[key];
+        }
+    }
+};
+fabric.Object.prototype.getCustom=function(property){ // gets properties in world coordinates whether it is in a group or not
+    if(this.group){
+        let optionsInGroup=fabric.util.qrDecompose(this.calcOwnMatrix());
+        let optionsInWorld = fabric.util.qrDecompose(this.calcTransformMatrix());
+
+        this.set(optionsInWorld);
+        this.setPositionByOrigin({x:optionsInWorld.translateX,y:optionsInWorld.translateY},"center","center");
+        let worldPositionAtOrigin={x:this.left,y:this.top};
+
+        this.set(optionsInGroup);
+        this.setPositionByOrigin({x:optionsInGroup.translateX,y:optionsInGroup.translateY},"center","center");
+
+        switch (property){
+            case "left":return worldPositionAtOrigin.x;case "top":return worldPositionAtOrigin.y;
+            case "angle":return optionsInWorld.angle;case "scaleX":return optionsInWorld.scaleX;
+            case "scaleY":return optionsInWorld.scaleY;default:return this.get(property);
+        }
+    }else{
+        return this.get(property);
+    }
+}
 var ImageAnimable=fabric.util.createClass(fabric.Image,{
     applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
     type:'ImageAnimable',
@@ -126,8 +178,6 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.clipTo && ctx.restore();
         ctx.restore();
     },
-    //TODO: update animation handler
-    // FOR MIDDLE FUCKING POINT
 })
 var TextAnimable=fabric.util.createClass(fabric.IText, {
     //drawn y text_draw NO son lo mismo, ya que su logica es diferente

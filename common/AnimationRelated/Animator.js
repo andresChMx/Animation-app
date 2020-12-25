@@ -17,7 +17,7 @@ var Animator=fabric.util.createClass({
         this.animableObject=obj;
     },
     executeAnimations:function(currentTime){
-
+        let dictNewPropertysValues={}
         for(const prop in this.dictAnimations){
             let anims=this.dictAnimations[prop]
             for(var i=0;i<anims.length;i++){
@@ -26,24 +26,26 @@ var Animator=fabric.util.createClass({
                     let value=anim.tick(currentTime)
                     if(value==="tiempoMenor"){
                         if(this.isFirstIndex(i)){
-                            this.animableObject.set(anim.property,anim.startValue);
+                            dictNewPropertysValues[anim.property]=anim.startValue;
                             break;
                         }
                     }else if (value==="tiempoMayor"){
                         if(this.isLastIndex(i,anims.length)){
-                            this.animableObject.set(anim.property,anim.endValue);
+                            dictNewPropertysValues[anim.property]=anim.endValue;
                             break;
                         }
                     }
                     else{
-                        this.animableObject.set(anim.property,value);
+                        dictNewPropertysValues[anim.property]=value;
+
                         break;
                     }
                 }else{
-                    this.animableObject.set(anim.property,anim.startValue);
+                    dictNewPropertysValues[anim.property]=anim.startValue;
                 }
             }
         }
+        this.animableObject.setBatch(dictNewPropertysValues);
     },
 
     isLastIndex:function(index,listLength){
