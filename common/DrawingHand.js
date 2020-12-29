@@ -1,7 +1,7 @@
 var DrawingHand=fabric.util.createClass({
     initialize:function(options){
         this.image=null;
-        fabric.Image.fromURLImageOutOfCamera('https://res.cloudinary.com/dkhbeokkp/image/upload/v1608049692/drawing_hand_fldb5f.png', function(oImg) {
+        fabric.Image.fromURLImageOutOfCamera('https://res.cloudinary.com/dkhbeokkp/image/upload/v1609085047/sohbzhlyfcj6mjpqdxgy.png', function(oImg) {
             this.image=oImg;
             this.image.originX="left";
             this.image.originY="top";

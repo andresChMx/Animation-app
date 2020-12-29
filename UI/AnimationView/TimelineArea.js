@@ -125,6 +125,14 @@ let Marker = fabric.util.createClass(Component, {
         if (this.localState.coords.left > this.globalState.timingDistances.scrollWidth - this.globalState.padding.width - this.localState.coords.width / 2) {
             this.localState.coords.left = this.globalState.timingDistances.scrollWidth - this.globalState.padding.width - this.localState.coords.width / 2
         }
+        //SNAPPING WITH MARKS
+        //haciendo que haya el cuadruple de markers que segmenttimesvalues en 1 segundo (BORROWED from TimeBarComponent)
+        let timeBarMarksDistance=this.globalState.timingDistances.segmentDistance/4,
+            leftInUsableArea=this.localState.coords.left-this.globalState.padding.width + this.localState.coords.width/2,
+            timeBarMarksSnappingRange=3;
+        if(leftInUsableArea%timeBarMarksDistance>timeBarMarksDistance-timeBarMarksSnappingRange || leftInUsableArea%timeBarMarksDistance<timeBarMarksSnappingRange){
+            this.localState.coords.left=Math.round(leftInUsableArea/timeBarMarksDistance)*timeBarMarksDistance + this.globalState.padding.width - this.localState.coords.width/2;
+        }
     },
     render: function (ctx) {
         ctx.fillStyle = this.localState.colors.idle;
@@ -425,9 +433,18 @@ let TimeLineProxy=fabric.util.createClass({
     sortLaneKeyFramesByTime:function(laneName){
         this.timeLineComponent.keysBarComponent.dictPropertiesLanes[laneName].sortKeyFramesByTime();
     },
-    getLaneActiveKeyFrames:function(laneName){
-        let tmp =this.timeLineComponent.keysBarComponent.dictPropertiesLanes[laneName].getActiveKeyFrames();
+    getLaneActiveKeyFramesByIds:function(laneName){
+        let tmp =this.timeLineComponent.keysBarComponent.dictPropertiesLanes[laneName].getActiveKeyFramesByIds();
         return tmp;
+    },
+    /*
+    Updates keyframes by lane, and by object, given that in uno lane there could be keyframes for more than one object
+     */
+    updateKeyFramesIndexByObject:function(){
+      this.timeLineComponent.keysBarComponent.updateKeyFramesIndexByObject();
+    },
+    getSelectedKeyFrames:function(){
+        return this.timeLineComponent.keysBarComponent.getSelectedKeyFrames();
     }
 })
 let TimeLineActions = fabric.util.createClass({
@@ -447,7 +464,7 @@ let TimeLineActions = fabric.util.createClass({
             top: 0, // coor y desde la esquina superior izquierda desde el origen del canvas a partir de donde empieza todo
             width: null, // alto del viewport,
             height: null,}, // ancho del viewport
-        time: {segmentTimeValue: 100, baseSegmentTimeValue: 100, duration: 60000},
+        time: {segmentTimeValue: 250, baseSegmentTimeValue: 250, duration: 60000},
         timingDistances: {
             minSegmentDistance: 100,    // longitud en px minima, a partir de la cual el segmentDistance y segmentTimeValue se  doblegan en tamaño
             maxSegmentDistance: 200,   // longitud en px maxima a partir de la cual el segmentDistance y segmentTimeValue se dividen / 2 en tamaño
@@ -623,6 +640,7 @@ let TimeLineActions = fabric.util.createClass({
     },
     _clearCanvas: function () {
         this.ctx.clearRect(0, 0, this.globalState.timingDistances.scrollWidth, this.globalState.coords.height);
+        this.ctx.beginPath();
     },
 });
 
@@ -661,12 +679,33 @@ let TimeLineTimeBar = fabric.util.createClass(Component, {
         ctx.fillStyle = this.localState.colors.text;
         ctx.font = "10px Arial";
         ctx.textBaseline = "middle";
+        //marks are all the little lines
         let cantLabels=Math.ceil(this.globalState.timingDistances.cantSegments);
+        let timesTimeValueIn1Second=(1000/(this.globalState.time.segmentTimeValue)); //simbre data un valor entero, ya que segmentTimeValue esta en base a 250 (125,250,500,...)
+        let timeBarMarksDistance=this.globalState.timingDistances.segmentDistance / 4; // 4 para cuadruplicar los marks por segundo
+        //haciendo que haya el cuadruple de markers que segmenttimesvalues en 1 segundo
+        timesTimeValueIn1Second=timesTimeValueIn1Second<1?1/timesTimeValueIn1Second*4:timesTimeValueIn1Second*4;
+
         for (let i = 0; i <=cantLabels ; i++) {
-            let txt = this.globalState.time.segmentTimeValue * i;
-            let txtWidth = ctx.measureText(txt).width;
-            ctx.fillText(txt, this.globalState.timingDistances.segmentDistance * i + this.globalState.padding.width - txtWidth / 2, this.localState.coords.height / 2);
+            let timeMS = this.globalState.time.segmentTimeValue * i;
+            if(timeMS%1000===0){
+                let text=(timeMS/1000) + "s";
+                let txtWidth = ctx.measureText(text).width;
+                let labelLeftPos=this.globalState.timingDistances.segmentDistance * i + this.globalState.padding.width;
+                for(let j=0;j<timesTimeValueIn1Second;j++){
+                    ctx.moveTo(labelLeftPos+(timeBarMarksDistance*j),this.localState.coords.top);
+                    if(j%(timesTimeValueIn1Second/4)===0){
+                        ctx.lineTo(labelLeftPos + (timeBarMarksDistance * j), this.localState.coords.top + 12);
+                    }else {
+                        ctx.lineTo(labelLeftPos + (timeBarMarksDistance * j), this.localState.coords.top + 7);
+                    }
+                }
+                ctx.fillText(text,labelLeftPos - (txtWidth/2) , this.localState.coords.height / 2);
+            }
         }
+        ctx.stroke();
+
+
     },
     updateLogic: function () {
     },
@@ -713,6 +752,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         this.selectionHeight = 0;
         this.selecting = false;
 
+        this.dictKeyFramesBySeconds={};
         this.dictPropertiesLanes = {};
         this.listLanesName = listLanesName;
 
@@ -765,18 +805,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             }
         }
     },
-    discartSelectedKeyFrames: function () {
-        let tmpDictCantLanesKeyFrames=this._countSelectedKeyFramesByLane();
-        if (this.selectedKeyframes.length > 0) {
-            for (let i = 0; i < this.selectedKeyframes.length; i++) {
-                this.dictPropertiesLanes[this.selectedKeyframes[i].laneName].discartKeyFrame(this.selectedKeyframes[i]);
-            }
-            this.selectedKeyframes = [];
-        }
-        this.notifyOnKeyframeSelectionUpdated();
-        this.canvas.requestRenderAll();
-        return tmpDictCantLanesKeyFrames;
-    },
+
     _countSelectedKeyFramesByLane:function(){
         let tmpDictLanesNames={};
         if (this.selectedKeyframes.length > 0) {
@@ -787,39 +816,84 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         }
         return tmpDictLanesNames;
     },
+    discartSelectedKeyFrames: function () {
+        let tmpDictCantLanesKeyFrames=this._countSelectedKeyFramesByLane();
+        if (this.selectedKeyframes.length > 0) {
+            for (let i = 0; i < this.selectedKeyframes.length; i++) {
+                let keyframe=this.dictPropertiesLanes[this.selectedKeyframes[i].laneName].discartKeyFrame(this.selectedKeyframes[i]);
+                this._removeKeyFrameFromDictBySeconds(keyframe);
+            }
+            this.selectedKeyframes = [];
+        }
+        this.canvas.requestRenderAll();
+        this.notifyOnKeyframeSelectionUpdated();
+        return tmpDictCantLanesKeyFrames;
+    },
     discartLaneKeyFrames:function(laneName){
-        this.dictPropertiesLanes[laneName].discartAllKeyFrames();
+        this.dictPropertiesLanes[laneName].discartAllKeyFrames(function(keyframe){
+            this._removeKeyFrameFromDictBySeconds(keyframe);
+        }.bind(this));
         this.canvas.requestRenderAll();
     },
     discartAllKeyFrames:function(){
         this.deselectCurrentSelection();
         for(let i in this.dictPropertiesLanes){
-            this.dictPropertiesLanes[i].discartAllKeyFrames();
+            this.dictPropertiesLanes[i].discartAllKeyFrames(function(keyframe){
+                this._removeKeyFrameFromDictBySeconds(keyframe);
+            }.bind(this));
         }
 
         this.canvas.requestRenderAll();
         this.notifyOnKeyframeSelectionUpdated();
     },
+    /*
+    Updates keyframes by lane, and by object, given that in uno lane there could be keyframes for more than one object
+     */
+    updateKeyFramesIndexByObject:function(){
+        for(let prop in this.dictPropertiesLanes){
+            this.dictPropertiesLanes[prop].updateKeyFramesIndexByObject();
+        }
+    },
     addKeyFrame: function (laneName, markerTimeLineTime, listListValues) {
         this.deselectCurrentSelection();
         for(let i=0;i<listListValues.length;i++){
-            this.dictPropertiesLanes[laneName].retrieveKeyFrame(markerTimeLineTime,listListValues[i], i);
+            let keyframe=this.dictPropertiesLanes[laneName].retrieveKeyFrame(markerTimeLineTime,listListValues[i], i);
+            this._addkeyframeToDictBySeconds(keyframe);
         }
         this.notifyOnKeyframeSelectionUpdated();
         this.canvas.requestRenderAll();
     },
+    /*
+    @param listDictsKeyFramesByProperties lista de diccionarios con propiedades: time:float, values:array
+     */
     addKeyFramesInBatch:function(listDictsKeyFramesByProperties){ //helpful when adding keyframes in batch (generating keyframes from object animations)
         this.deselectCurrentSelection();
+
         for(let p=0;p<listDictsKeyFramesByProperties.length;p++){
             for(let key in listDictsKeyFramesByProperties[p]){
                 for(let i=0;i<listDictsKeyFramesByProperties[p][key].length;i++){
                     let data=listDictsKeyFramesByProperties[p][key][i];
-                    this.dictPropertiesLanes[key].retrieveKeyFrame(data.time, data.values, p);
+                    let keyframe=this.dictPropertiesLanes[key].retrieveKeyFrame(data.time, data.values, p);
+
+                    this._addkeyframeToDictBySeconds(keyframe);
                 }
             }
         }
         this.notifyOnKeyframeSelectionUpdated();
         this.canvas.requestRenderAll();
+    },
+    _addkeyframeToDictBySeconds:function(keyframe){
+        let second=Math.ceil(keyframe.timeLineTime/1000)
+        if(!this.dictKeyFramesBySeconds[second]) {
+            this.dictKeyFramesBySeconds[second] = [];
+        }
+        this.dictKeyFramesBySeconds[second].push(keyframe);
+    },
+    _removeKeyFrameFromDictBySeconds:function(keyframe){
+            let second=Math.ceil(keyframe.timeLineTime/1000);
+            let index=this.dictKeyFramesBySeconds[second].indexOf(keyframe);
+            if(index!==-1){this.dictKeyFramesBySeconds[second].splice(index,1);}
+            else{alert("ERRORRR: UN KEYFRAME DESCARTADO NO ESTABA EN EL DICCOINARIO DE SEGUNDOS");}
     },
     onLocalCoordsSettled: function () {
         this.setupComponentsCoords();
@@ -849,9 +923,15 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         this.canvas.requestRenderAll();
     },
     _drawContainer: function (ctx) {
+        ctx.strokeStyle="white";
         ctx.fillStyle = this.localState.colors.idle;
         ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
-
+        for(let i=0;i<this.globalState.timingDistances.cantSegments;i++){
+            let leftPos=i*this.globalState.timingDistances.segmentDistance + this.globalState.padding.width;
+            ctx.moveTo(leftPos,this.localState.coords.top);
+            ctx.lineTo(leftPos,this.localState.coords.top+this.localState.coords.height);
+        }
+        ctx.stroke();
     },
     _drawSelection: function (ctx) {
         if (this.selecting) {
@@ -871,33 +951,11 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     drawSnapshot: function (ctx) {
         ctx.putImageData(this.snapshotLastState, 0, 0);
     },
-    notificationOnDurationChange:function(durationBefore,durationAfter){
-        for(let key in this.dictPropertiesLanes){
-            this.dictPropertiesLanes[key].notificationOnDurationChange(durationBefore,durationAfter);
-        }
+    getSelectedKeyFrames:function(){
+      return this.selectedKeyframes;
     },
     notifyOnKeyframeSelectionUpdated: function () {
-        let listIndexes=[];
-        let listDictsPropertiesLanesKeysLengths=[];
-        for(let prop in this.dictPropertiesLanes){
-            listIndexes=[];
-            for(let i=0;i<this.dictPropertiesLanes[prop].counterActiveKeyFrames;i++) {
-                let identifier = this.dictPropertiesLanes[prop].keyFrames[i].identifier;
-                if (listIndexes[identifier] === undefined) {listIndexes[identifier] = 0;}
-                else{listIndexes[identifier]++}
-                this.dictPropertiesLanes[prop].keyFrames[i].indexInParentList = listIndexes[identifier];
-
-                if (listDictsPropertiesLanesKeysLengths[identifier] === undefined) {
-                    listDictsPropertiesLanesKeysLengths[identifier] = {}
-                }
-                if (listDictsPropertiesLanesKeysLengths[identifier][prop] === undefined) {
-                    listDictsPropertiesLanesKeysLengths[identifier][prop] = 0
-                }
-                listDictsPropertiesLanesKeysLengths[identifier][prop]++;
-            }
-        }
-        this.observerOnSelectionUpdated.notificationOnKeyBarSelectionUpdated(this.selectedKeyframes,listDictsPropertiesLanesKeysLengths);
-
+        this.observerOnSelectionUpdated.notificationOnKeyBarSelectionUpdated();
     },
     notifyOnKeyFrameDragging:function(laneName){
       for(let i=0;i<this.listObserversOnKeyFrameDragging.length;i++){
@@ -907,6 +965,14 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     notifyOnKeyFrameDragEnded:function(laneName){
         for(let i=0;i<this.listObserversOnKeyFrameDragEnded.length;i++){
             this.listObserversOnKeyFrameDragEnded[i].notificationOnKeyFrameDragEnded(laneName);
+        }
+    },
+    notificationOnDurationChange:function(durationBefore,durationAfter){
+        for(let key in this.dictPropertiesLanes){
+            this.dictPropertiesLanes[key].notificationOnDurationChange(durationBefore,durationAfter,function(keyFrame){
+                this._removeKeyFrameFromDictBySeconds(keyFrame);
+                this._addkeyframeToDictBySeconds(keyFrame);
+            }.bind(this));
         }
     },
     notificationOnGlobalStateChange: function (args) {
@@ -942,19 +1008,23 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
 
     },
     notificationOnKeyframeDragStarted: function (keyframe) {
+        keyframe.setDictKeyFramesBySecondsForSnapping(this.dictKeyFramesBySeconds);
         if (keyframe.isSelected && this.selectedKeyframes.length > 1) {
             for (let i = 0; i < this.selectedKeyframes.length; i++) {
                 if (this.selectedKeyframes[i] !== keyframe) {
-                    this.selectedKeyframes[i].simulateDragStarted();
+                    this.selectedKeyframes[i].simulateDragStarted(keyframe.localState.coords.left);
+
+                    this._removeKeyFrameFromDictBySeconds(this.selectedKeyframes[i]);
                 }
             }
         }
+        this._removeKeyFrameFromDictBySeconds(keyframe);
     },
     notificationOnKeyframeDragging: function (keyframe) {
         if (keyframe.isSelected && this.selectedKeyframes.length > 1) {
             for (let i = 0; i < this.selectedKeyframes.length; i++) {
                 if (this.selectedKeyframes[i] !== keyframe) {
-                    this.selectedKeyframes[i].simulateDragging()
+                    this.selectedKeyframes[i].simulateDragging(keyframe.localState.coords.left)
                 }
             }
         }
@@ -968,9 +1038,13 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
                 if (this.selectedKeyframes[i] !== keyframe) {
                     this.selectedKeyframes[i].simulateDragEnded();
                     dictLaneNames[this.selectedKeyframes[i].laneName]++;
+
+                    this._addkeyframeToDictBySeconds(this.selectedKeyframes[i]);
                 }
             }
         }
+        this._addkeyframeToDictBySeconds(keyframe);
+
         dictLaneNames[keyframe.laneName]++;
         this.notifyOnKeyFrameDragEnded(dictLaneNames);
         this.canvas.requestRenderAll();
@@ -1022,90 +1096,129 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         this.localState = {colors: {idle: "orange", stroke: "yellow"}}
         this.name = name;
         this.canvas = canvas;
+
+        // Estas variables tienen que ver con el manejo de keyframes activos en escena. Los primeros dos, son para el el pooling, y el ultmo clasifica los keyframes por identifier
         this.keyFrames = [];
         this.counterActiveKeyFrames = 0;
+        this.listListActiveKeyFramesById=[];
 
         this.observerOnKeyframeFixedClick = null;
         this.observerOnKeyframeMouseDown = null;
         this.observerOnKeyframeDragging = null;
         this.observerOnKeyframeDragEnded = null;
         this.observerOnKeyframeDragStarted = null;
+
     },
     retrieveKeyFrame: function (markerTimeLineTime,values,keyframeIdentifier) {
+        let retrievedKey=null;
         if (this.counterActiveKeyFrames >= this.keyFrames.length) {
-            let newKey = new KeyFrame(this.canvas, this.globalState, this.mouseState,this.name, markerTimeLineTime,values,keyframeIdentifier);
-            this.keyFrames.push(newKey);
-            newKey.registerOnMouseDown(this);
-            newKey.registerOnFixedClick(this);
-            newKey.registerOnDragStarted(this);
-            newKey.registerOnDragging(this);
-            newKey.registerOnDragEnded(this);
+            retrievedKey = new KeyFrame(this.canvas, this.globalState, this.mouseState,this.name, markerTimeLineTime,values,keyframeIdentifier);
+            this.keyFrames.push(retrievedKey);
+            retrievedKey.registerOnMouseDown(this);
+            retrievedKey.registerOnFixedClick(this);
+            retrievedKey.registerOnDragStarted(this);
+            retrievedKey.registerOnDragging(this);
+            retrievedKey.registerOnDragEnded(this);
 
 
-            newKey.setLocalCoords(0, this.localState.coords.top, 20, 20)
+            retrievedKey.setLocalCoords(0, this.localState.coords.top, 20, 20)
 
         } else {
-            this.keyFrames[this.counterActiveKeyFrames].activate(markerTimeLineTime,values,keyframeIdentifier);
+            retrievedKey=this.keyFrames[this.counterActiveKeyFrames];
+            retrievedKey.activate(markerTimeLineTime,values,keyframeIdentifier)
         }
+
+        if(this.listListActiveKeyFramesById[retrievedKey.identifier]===undefined)
+        {this.listListActiveKeyFramesById[retrievedKey.identifier]=[]}
+        this.listListActiveKeyFramesById[retrievedKey.identifier].push(retrievedKey);
+
         this.counterActiveKeyFrames++;
+        return retrievedKey;
     },
     discartKeyFrame: function (keyframe) {
         let index = this.keyFrames.indexOf(keyframe);
+        let tmp;
         if (index !== -1) {
-            let tmp = this.keyFrames[index];
+            tmp = this.keyFrames[index];
             tmp.deactivate();
             this.keyFrames.splice(index, 1);
             this.keyFrames.push(tmp);
             this.counterActiveKeyFrames--;
         }
+
+        let indexInListById=this.listListActiveKeyFramesById[keyframe.identifier].indexOf(keyframe);
+        if(indexInListById!== -1){
+            this.listListActiveKeyFramesById[keyframe.identifier].splice(indexInListById,1);
+        }else{
+            alert("NOOO ERRORRR: NO SE CONTRO EL KEYFRAME, PERO SE SUPONDE QUE DEBE ESTAR siempre");
+        }
+
+        return tmp;
     },
-    discartAllKeyFrames: function () {
+    discartAllKeyFrames: function (callback) {
         for (let i = 0; i < this.counterActiveKeyFrames; i++) {
+            callback(this.keyFrames[i]);
             this.keyFrames[i].deactivate();
         }
+
+        this.listListActiveKeyFramesById=[];
+
         this.counterActiveKeyFrames=0;
     },
     sortKeyFramesByTime:function(){
         insertionSort(this.keyFrames,this.counterActiveKeyFrames);
-    },
-    getActiveKeyFrames:function(){
-        let listListKeyframesByIdentifier=[];
-        for(let i=0;i<this.counterActiveKeyFrames;i++){
-            let identifier=this.keyFrames[i].identifier;
-            if(listListKeyframesByIdentifier[identifier]===undefined){
-                listListKeyframesByIdentifier[identifier]=[];
-            }
-            listListKeyframesByIdentifier[identifier].push(this.keyFrames[i]);
+        for(let i=0;i<this.listListActiveKeyFramesById.length;i++){
+            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
+            insertionSort(this.listListActiveKeyFramesById[i],this.listListActiveKeyFramesById[i].length);
         }
-        return listListKeyframesByIdentifier;
+    },
+    updateKeyFramesIndexByObject:function(){
+        for(let i=0;i<this.listListActiveKeyFramesById.length;i++){
+            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
+            for(let j=0;j<this.listListActiveKeyFramesById[i].length;j++){
+                this.listListActiveKeyFramesById[i][j].indexInParentList=j;
+            }
+        }
+    },
+    getActiveKeyFramesByIds:function(){
+        return this.listListActiveKeyFramesById;
     },
     _renderAnimationsBoxes:function(ctx){
-        for (let i = 0; i < this.counterActiveKeyFrames-1; i++) {
-            let firstKeyCoords=this.keyFrames[i].localState.coords,
-                secondKeyCoords=this.keyFrames[i+1].localState.coords;
-            if(this.keyFrames[i].isSelected){
-                ctx.fillStyle="white";
-            }else{
-                ctx.fillStyle="purple";
+        for(let i=0;i<this.listListActiveKeyFramesById.length;i++){
+            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
+            let identifier=i;
+            for(let j=0;j<this.listListActiveKeyFramesById[i].length-1;j++){
+
+                let firstKeyCoords=this.listListActiveKeyFramesById[identifier][j].localState.coords;
+                let secondKeyCoords=this.listListActiveKeyFramesById[identifier][j+1].localState.coords;
+                if(this.listListActiveKeyFramesById[identifier][j].isSelected){
+                    ctx.fillStyle="white";
+                }else{
+                    ctx.fillStyle="rgb(" + ((identifier+1)*100)%200+"," + ((identifier+1)*150)%200+ ","+ ((identifier+1)*190)%200+")";
+                }
+                ctx.fillRect(firstKeyCoords.left + firstKeyCoords.width
+                    ,firstKeyCoords.top
+                    ,secondKeyCoords.left-firstKeyCoords.left
+                    ,firstKeyCoords.height
+                );
+                this.listListActiveKeyFramesById[identifier][j+1].render(ctx);
             }
-            ctx.fillRect(firstKeyCoords.left
-                ,firstKeyCoords.top
-                ,secondKeyCoords.left-firstKeyCoords.left
-                ,firstKeyCoords.height
-            );
+            if(this.listListActiveKeyFramesById[identifier].length>0){
+                this.listListActiveKeyFramesById[identifier][0].render(ctx);
+            }
         }
     },
     render: function (ctx) {
 
-        ctx.fillStyle = this.localState.colors.idle;
-        ctx.strokeStyle = this.localState.colors.stroke
-        ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
+        //ctx.fillStyle = this.localState.colors.idle;
+        //ctx.strokeStyle = this.localState.colors.stroke
+        //ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
 
         this._renderAnimationsBoxes(ctx);
 
-        for (let i = 0; i < this.counterActiveKeyFrames; i++) {
-            this.keyFrames[i].render(ctx);
-        }
+        // for (let i = 0; i < this.counterActiveKeyFrames; i++) {
+        //     this.keyFrames[i].render(ctx);
+        // }
     },
 
     notificationOnScrollBarResize: function () {
@@ -1131,30 +1244,44 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         this.observerOnKeyframeDragStarted.notificationOnKeyframeDragStarted(keyframe);
     },
     notificationOnMouseMove: function (e) {
-        for (let i = this.keyFrames.length - 1; i >= 0; i--) {
-            this.keyFrames[i].notificationOnMouseMove(e);
+        for(let i =this.listListActiveKeyFramesById.length-1;i>=0;i--){
+            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
+            for(let j=this.listListActiveKeyFramesById[i].length-1;j>=0;j--){
+                this.listListActiveKeyFramesById[i][j].notificationOnMouseMove(e);
+            }
         }
         this.callSuper("notificationOnMouseMove", e);
     },
     notificationOnMouseDown: function (e) {
-        for (let i = this.keyFrames.length - 1; i >= 0; i--) {
-            let pressed = this.keyFrames[i].notificationOnMouseDown(e);
-            if (pressed) {
-                return true;
+        for(let i =this.listListActiveKeyFramesById.length-1;i>=0;i--){
+            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
+            for(let j=this.listListActiveKeyFramesById[i].length-1;j>=0;j--){
+
+                let pressed=this.listListActiveKeyFramesById[i][j].notificationOnMouseDown(e);
+                if (pressed) {
+                    return true;
+                }
             }
         }
         this.callSuper("notificationOnMouseDown", e);
         return false;
     },
     notificationOnMouseUp: function (e) {
-        for (let i = this.keyFrames.length - 1; i >= 0; i--) {
-            this.keyFrames[i].notificationOnMouseUp(e);
+        for(let i =this.listListActiveKeyFramesById.length-1;i>=0;i--){
+            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
+            for(let j=this.listListActiveKeyFramesById[i].length-1;j>=0;j--){
+                let pressed=this.listListActiveKeyFramesById[i][j].notificationOnMouseUp(e);
+                if (pressed) {
+                    return true;
+                }
+            }
         }
         this.callSuper("notificationOnMouseUp", e);
     },
-    notificationOnDurationChange:function(durationBefore,durationAfter){
+    notificationOnDurationChange:function(durationBefore,durationAfter,callback){
         for (let i =0;i<this.counterActiveKeyFrames;i++){
             this.keyFrames[i].notificationOnDurationChange(durationBefore,durationAfter);
+            callback(this.keyFrames[i]);
         }
     },
     registerOnKeyframeMouseDown: function (obj) {
@@ -1177,7 +1304,7 @@ var KeyFrame = fabric.util.createClass(Component, {
     initialize: function (canvas, globalState, mouseState,laneName, time,values,identifier) {
         this.callSuper("initialize", globalState, mouseState);
         this.values=values;
-        this.localState = {colors: {idle: "red", selected: "pink"}}
+        this.localState = {colors: {idle: "brown", selected: "pink"}}
         this.laneName=laneName;
         this.canvas = canvas;
         this.isActive = true;
@@ -1193,10 +1320,11 @@ var KeyFrame = fabric.util.createClass(Component, {
         this.isSelected = false;
 
         this.wasDragged = false;
+        this.dictKeyFramesBySecondsForSnapping=null; //setted when drag started by the KeybarComponent.Used for snapping with other keyframes
 
         this.identifier=identifier;        //identifica al animable object que le corresponde, solo se actualiza cuando cambia la seleccion de ojectos del canvas
 
-        this.indexInParentList=-1; //solo se actualiza cuando se actualizo la seleccion en el KeyBar component
+        this.indexInParentList=-1; //solo se actualiza cuando se actualizo la seleccion en el KeyBar component, se actualiza al index que ocupa en la lista del PropertyLane al que pertenece, teniendo en cuenta el objeto al que pertenece. Esto con el fin de hacer match con la animacion a la que corresponde modificar.
     },
     activate: function (timeLineTime,values,identifier) {
         this.identifier=identifier;
@@ -1219,12 +1347,36 @@ var KeyFrame = fabric.util.createClass(Component, {
         let percentInUsableArea = locationInUsableArea / this.globalState.timingDistances.usableScrollWidth;
         this.timeLineTime = this.globalState.time.duration * percentInUsableArea;
     },
-    movementConstraints: function () {
+    movementConstraints: function (applySnappingContraints) {
         if (this.localState.coords.left < this.globalState.padding.width - (this.localState.coords.width / 2)) {
             this.localState.coords.left = this.globalState.padding.width - (this.localState.coords.width / 2)
         }
         if (this.localState.coords.left > this.globalState.timingDistances.scrollWidth - this.globalState.padding.width - this.localState.coords.width / 2) {
             this.localState.coords.left = this.globalState.timingDistances.scrollWidth - this.globalState.padding.width - this.localState.coords.width / 2
+        }
+        //----------SNAP WITH MARKS
+        if(applySnappingContraints){
+            //haciendo que haya el cuadruple de markers que segmenttimesvalues en 1 segundo (BORROWED from Maker component)
+            let timeBarMarksDistance = this.globalState.timingDistances.segmentDistance / 4,
+                leftInUsableArea = this.localState.coords.left - this.globalState.padding.width + this.localState.coords.width / 2,
+                timeBarMarksSnappingRange = 3;
+            if(leftInUsableArea%timeBarMarksDistance>timeBarMarksDistance-timeBarMarksSnappingRange || leftInUsableArea%timeBarMarksDistance<timeBarMarksSnappingRange){
+                this.localState.coords.left=Math.round(leftInUsableArea/timeBarMarksDistance)*timeBarMarksDistance + this.globalState.padding.width - this.localState.coords.width/2;
+            }
+        }
+
+        //---------SNAP WITH OTHER KEYFRAMES
+        if(applySnappingContraints && this.dictKeyFramesBySecondsForSnapping!==null){
+            let range=5;
+            let myTimeInSeconds=Math.ceil(this.timeLineTime/1000);
+            if(this.dictKeyFramesBySecondsForSnapping[myTimeInSeconds]!==undefined){
+                for(let i=0;i<this.dictKeyFramesBySecondsForSnapping[myTimeInSeconds].length;i++){
+                    let otherKeyFramePos=this.dictKeyFramesBySecondsForSnapping[myTimeInSeconds][i].localState.coords.left;
+                    if(this.localState.coords.left>otherKeyFramePos-range && this.localState.coords.left<otherKeyFramePos+range){
+                        this.localState.coords.left=otherKeyFramePos;
+                    }
+                }
+            }
         }
     },
     isInsideSelection: function (startX, startY, width, height) {
@@ -1284,8 +1436,12 @@ var KeyFrame = fabric.util.createClass(Component, {
     },
     onMouseDragging: function () {
         this.localState.coords.left = this.mouseState.inWorldX - this.offsetMouseX;
-        this.movementConstraints();
+        this.movementConstraints(true);
+
+        this.calcTimelineTimeFromLocation(this.localState.coords.left - this.globalState.padding.width + this.localState.coords.width / 2);
+
         this.notifyOnDragging();
+
         this.canvas.requestRenderAll();
 
     },
@@ -1300,17 +1456,20 @@ var KeyFrame = fabric.util.createClass(Component, {
         this.notifyOnMouseFixedClick();
     },
     /*Funciones para cuando un miembro de la seleccion de la que este objeto es parte, es arrastrado, se llamara estos metodos en cada miembro de la seleccion*/
-    simulateDragStarted: function () {
-        this.offsetMouseX = this.mouseState.inWorldX - this.localState.coords.left;
+    simulateDragStarted: function (masterKeyFramePos) {
+        this.offsetMouseX = masterKeyFramePos - this.localState.coords.left;
     },
-    simulateDragging: function () {
-        this.localState.coords.left = this.mouseState.inWorldX - this.offsetMouseX;
-        this.movementConstraints();
+    simulateDragging: function (masterKeyFramePos) {
+        this.localState.coords.left = masterKeyFramePos - this.offsetMouseX;
+        this.movementConstraints(false);
     },
     simulateDragEnded: function () {
         this.calcTimelineTimeFromLocation(this.localState.coords.left - this.globalState.padding.width + this.localState.coords.width / 2);
         },
     /**/
+    setDictKeyFramesBySecondsForSnapping:function(dict){
+        this.dictKeyFramesBySecondsForSnapping=dict;
+    },
     notifyOnMouseFixedClick: function () {
         this.observerOnFixedClick.notificationOnKeyframeFixedClick(this);
     },

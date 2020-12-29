@@ -63,7 +63,7 @@ var CanvasManager={
         WindowManager.registerOnKeyDeletePressed(this);
         },
     initCamera:function(){
-        fabric.Image.fromURLCustom("https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599380/icons/camera_kykhid.svg",function(animCamera){
+        fabric.Image.fromURLCustom("https://res.cloudinary.com/dkhbeokkp/image/upload/v1609085185/fco0mtxh19dzino8qded.jpg",function(animCamera){
             this.camera=animCamera;
             this.listAnimableObjects.push(animCamera);
             this.canvas.add(animCamera);

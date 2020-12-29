@@ -1,26 +1,42 @@
-fabric.Object.prototype.setBatch=function(dictNewProperties){// sets properties in batch where the given properties are in world coordinates
+// sets properties in batch where the given properties are in world coordinates
+// Esta funcion existe para lograr manejar la seleccion multiple de objectos, es como un proxy entre coordenadas grupales y las absolutas. Consiste en que cuando el objecto se encuentra en un grupo,
+// primero obtenemos sus propiedades en coordenadas absolutas con calcTransformMatrix() para poder alterar esos valores con otros que estan en coordenadas aboslutas, de forma que
+// siembre estaremos trabajando con coordenadas aboslutas, el problema de hallar una matriz de transformaciones
+// en fabric es que las propeidades translateX y translateY las halla respecto al centro del object, no coincide a left y top, este problema biene de calcOwnMatrix(). Entonces se hace un paso en el que se
+// esos valores se modifiquen hacia las coordenadas del origen, de forma que si el animator no pasa ni left y top, los valores pasados al objecto
+// sean los correctos y no los del centro del objecto.
+fabric.Object.prototype.setBatch=function(dictNewProperties){
     if(this.group){// is its in a group, the values will be transformed to the group's coordinates system
-        if(dictNewProperties["left"]===undefined){//meaning if it has no properties
+        if(Object.keys(dictNewProperties).length===0){//meaning if it has no properties, just for purposes of performance
             return;
         }
         let absoluteMatrix=this.calcTransformMatrix(); // absolute values (world coordinates, never changes)
-        let options=fabric.util.qrDecompose(absoluteMatrix);
+        let optionsInWorld=fabric.util.qrDecompose(absoluteMatrix);
+
+        // El siguiente bloque se debe a que EN CASO EL ANIMATOR NO ESTABLESCA LAS PROPIEDADES de left y top, no lo sobrescriba al objecto con las propiedaes del centro sino de su origen
+        this.set(optionsInWorld);//porque la sigueinte funcion accedera a cosas como escala y angulo.
+        this.setPositionByOrigin({x:optionsInWorld.translateX,y:optionsInWorld.translateY},"center","center");
+        optionsInWorld.translateX=this.left;
+        optionsInWorld.translateY=this.top;
 
         for(let key in dictNewProperties){
             if(key==="left"){
-                options.translateX=dictNewProperties[key];
-            }else if(key==="top"){
-                options.translateY=dictNewProperties[key];
+                optionsInWorld.translateX=dictNewProperties[key];
+            }else if(key==="top") {
+                optionsInWorld.translateY = dictNewProperties[key];
             }else{
-                options[key]=dictNewProperties[key];
+                optionsInWorld[key]=dictNewProperties[key];
             }
         }
-        let newMat=fabric.util.composeMatrix(options);
+
+        let newMat=fabric.util.composeMatrix(optionsInWorld);
         let groupInverseMatrix=fabric.util.invertTransform(this.group.calcTransformMatrix());// matrix to convert world coordinates to group coordinates
         let finalMatrix=fabric.util.multiplyTransformMatrices(groupInverseMatrix,newMat); //converting object new world coordinates to group coordinates
         let optionsFinal=fabric.util.qrDecompose(finalMatrix);
         //setting new values
         this.set(optionsFinal);
+        this.opacity=dictNewProperties.opacity===undefined?this.opacity:dictNewProperties.opacity;
+        //left y top se pasan directamente, sin considerar el origin, ya que los valores pasados por el animator de left y top ya estan en relacion al origin (ger getCustom)
         this.left=optionsFinal.translateX;
         this.top=optionsFinal.translateY;
     }else{
@@ -29,18 +45,27 @@ fabric.Object.prototype.setBatch=function(dictNewProperties){// sets properties 
         }
     }
 };
+/*
+* Permite trabajar con seleccion multiple, sirve como un proxy entre coornadas de de la seleccion y las absolutas. De forma que para el resto de
+* la aplicacion se retornan las coordenadas absolutas del objecto. Funciona a la par de la funcion setBatch, que de maneja las coordenadas absolutas
+* en caso el objecto esté en una seleccion
+* */
 fabric.Object.prototype.getCustom=function(property){ // gets properties in world coordinates whether it is in a group or not
     if(this.group){
+        //getting object transformation in group coordinates system. Note that the location is acoording the center of the object, not its origin
         let optionsInGroup=fabric.util.qrDecompose(this.calcOwnMatrix());
         let optionsInWorld = fabric.util.qrDecompose(this.calcTransformMatrix());
 
-        this.set(optionsInWorld);
+        this.set(optionsInWorld); // we do this because in order to find the location according the object's origin, the next function makes use of the angle and scale of the object, but those values before this line were according the group.
+        // finding the object's location its origin
         this.setPositionByOrigin({x:optionsInWorld.translateX,y:optionsInWorld.translateY},"center","center");
         let worldPositionAtOrigin={x:this.left,y:this.top};
 
+        //bringing back coordintates according its group
         this.set(optionsInGroup);
         this.setPositionByOrigin({x:optionsInGroup.translateX,y:optionsInGroup.translateY},"center","center");
 
+        //getting the required value;
         switch (property){
             case "left":return worldPositionAtOrigin.x;case "top":return worldPositionAtOrigin.y;
             case "angle":return optionsInWorld.angle;case "scaleX":return optionsInWorld.scaleX;
@@ -410,6 +435,9 @@ var CustomStaticCanvas = fabric.util.createClass(fabric.StaticCanvas, {
     initialize:function(id,options){
         this.callSuper('initialize', id,options);
         this.opacity=1;
+    },
+    getZoom:function(){
+        return Math.sqrt(this.viewportTransform[0]*this.viewportTransform[0] + this.viewportTransform[1]*this.viewportTransform[1]);
     },
     renderCanvas:function(ctx, objects){
         var v = this.viewportTransform, path = this.clipPath;

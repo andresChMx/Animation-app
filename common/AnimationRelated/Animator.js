@@ -125,9 +125,10 @@ var AnimatorCamera=fabric.util.createClass(Animator,{
     updateCanvastWithOwnState:function(){
         let matrix=this.animableObject.calcOwnMatrix();
         let newReferenceMatrix=matrix.slice(0);
-        this.canvasCamera.viewportTransform=this.invertTransform(newReferenceMatrix);
-        this.canvasCamera.viewportTransform[4]+=this.animableObject.width/2;
-        this.canvasCamera.viewportTransform[5]+=this.animableObject.height/2;
+        newReferenceMatrix=this.invertTransform(newReferenceMatrix);
+        newReferenceMatrix[4]+=this.animableObject.width/2;
+        newReferenceMatrix[5]+=this.animableObject.height/2;
+        this.canvasCamera.setViewportTransform(newReferenceMatrix);
     },
     invertTransform: function(t) {
         var a = 1 / (t[0] * t[3] - t[1] * t[2]),

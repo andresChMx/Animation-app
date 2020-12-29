@@ -189,6 +189,38 @@ var SectionActionEditorMenu={
             this.selectedOptionInTweenTypesMenu=null;
         }
     },
+    updateUIFromAnimations:function(listAnimations){
+        this.listSelectedKeyFramesAnimations=listAnimations;
+        console.log(listAnimations);
+        if(this.listSelectedKeyFramesAnimations.length>0){
+            let firstAnimationFunction=this.listSelectedKeyFramesAnimations[0].easeFunctionType;
+            let firstAnimationTween=this.listSelectedKeyFramesAnimations[0].tweenType;
+            let flagMoreThanOneType=false;
+            let flagMoreThanOneTween=false;
+            for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
+                if(this.listSelectedKeyFramesAnimations[i].easeFunctionType!==firstAnimationFunction){
+                    flagMoreThanOneType=true;
+                }
+                if(this.listSelectedKeyFramesAnimations[i].tweenType!==firstAnimationTween){
+                    flagMoreThanOneTween=true;
+                }
+            }
+            if(flagMoreThanOneType){
+                this.activateMenuFunctionsOption('')
+
+            }else{
+                this.activateMenuFunctionsOption(firstAnimationFunction);
+            }
+            if(flagMoreThanOneTween){
+                this.activateMenuTweenTypesOption('');
+            }else{
+                this.activateMenuTweenTypesOption(firstAnimationTween);
+            }
+        }else{
+            this.activateMenuFunctionsOption('');
+            this.activateMenuTweenTypesOption('');
+        }
+    },
     notifyOnDurationInput:function(intInputValue){
         this.parentClass.childNotificationOnDurationInput(intInputValue);
     },
@@ -203,36 +235,10 @@ var SectionActionEditorMenu={
         }
     },
     notificationOnKeyBarSelectionUpdated:function (listAnimations){
-        this.listSelectedKeyFramesAnimations=listAnimations;
-        console.log(listAnimations);
-        if(this.listSelectedKeyFramesAnimations.length>0){
-            let firstType=this.listSelectedKeyFramesAnimations[0].easeFunctionType;
-            let firstTween=this.listSelectedKeyFramesAnimations[0].tweenType;
-            let flagMoreThanOneType=false;
-            let flagMoreThanOneTween=false;
-            for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
-                if(this.listSelectedKeyFramesAnimations[i].easeFunctionType!==firstType){
-                    flagMoreThanOneType=true;
-                }
-                if(this.listSelectedKeyFramesAnimations[i].tweenType!==firstTween){
-                    flagMoreThanOneTween=true;
-                }
-            }
-            if(flagMoreThanOneType){
-                this.activateMenuFunctionsOption('')
-
-            }else{
-                this.activateMenuFunctionsOption(firstType);
-            }
-            if(flagMoreThanOneTween){
-                this.activateMenuTweenTypesOption('');
-            }else{
-                this.activateMenuTweenTypesOption(firstTween);
-            }
-        }else{
-            this.activateMenuFunctionsOption('');
-            this.activateMenuTweenTypesOption('');
-        }
+        this.updateUIFromAnimations(listAnimations);
+    },
+    notificationOnKeyframeDragEnded:function(listAnimations){
+        this.updateUIFromAnimations(listAnimations);
     }
 }
 let SectionTimeLine={
@@ -307,38 +313,38 @@ let SectionTimeLine={
                 this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[this.MODELLanesProperties[laneName][i]]=[];
             }
         }
-        let listListlaneActiveKeyFrames=this.timeLineComponent.getLaneActiveKeyFrames(laneName);
+        let listListlaneActiveKeyFrames=this.timeLineComponent.getLaneActiveKeyFramesByIds(laneName);
         for(let objectIndex=0;objectIndex<listListlaneActiveKeyFrames.length;objectIndex++){
-            if(listListlaneActiveKeyFrames[objectIndex]!==undefined){
-                if(listListlaneActiveKeyFrames[objectIndex].length===1){
-                    for(let i in lanePropeties){
-                        this.currentSelectedAnimableObjects[objectIndex].animator.addAnimation(lanePropeties[i],listListlaneActiveKeyFrames[objectIndex][0].values[i],-1,listListlaneActiveKeyFrames[objectIndex][0].timeLineTime,-1);
-                    }
-                }else{
-                    for(let i=0;i<listListlaneActiveKeyFrames[objectIndex].length-1;i++){
-                        let keys=listListlaneActiveKeyFrames[objectIndex];
-                        this.currentSelectedAnimableObjects[objectIndex].animator.addAnimations(lanePropeties,keys[i].values,keys[i+1].values,keys[i].timeLineTime,keys[i+1].timeLineTime);
-                    }
+            if(listListlaneActiveKeyFrames[objectIndex]===undefined){continue;}
+            if(listListlaneActiveKeyFrames[objectIndex].length===1){
+                for(let i in lanePropeties){
+                    this.currentSelectedAnimableObjects[objectIndex].animator.addAnimation(lanePropeties[i],listListlaneActiveKeyFrames[objectIndex][0].values[i],-1,listListlaneActiveKeyFrames[objectIndex][0].timeLineTime,-1);
+                }
+            }else{
+                for(let i=0;i<listListlaneActiveKeyFrames[objectIndex].length-1;i++){
+                    let keys=listListlaneActiveKeyFrames[objectIndex];
+                    this.currentSelectedAnimableObjects[objectIndex].animator.addAnimations(lanePropeties,keys[i].values,keys[i+1].values,keys[i].timeLineTime,keys[i+1].timeLineTime);
                 }
             }
+
         }
     },
     updateObjectPropertiesAnimationsFromKeyFrames:function(laneName){//antes asegurarse que el numero de keyframes y las animaciones del object son compatibles
         let lanePropeties=this.MODELLanesProperties[laneName];
-        let laneActiveKeyFramesById=this.timeLineComponent.getLaneActiveKeyFrames(laneName);
+        let laneActiveKeyFramesById=this.timeLineComponent.getLaneActiveKeyFramesByIds(laneName);
         for(let objectIndex=0;objectIndex<laneActiveKeyFramesById.length;objectIndex++){
-            if(laneActiveKeyFramesById[objectIndex]!==undefined){
-                if(laneActiveKeyFramesById[objectIndex].length===1){
-                    for(let j in lanePropeties){
-                        this.currentSelectedAnimableObjects[objectIndex].animator.updateAnimation(0,lanePropeties[j],laneActiveKeyFramesById[objectIndex][0].values[j],-1,laneActiveKeyFramesById[objectIndex][0].timeLineTime,-1)
-                    }
-                }else{
-                    for(let j=0;j<laneActiveKeyFramesById[objectIndex].length-1;j++){
-                        let keyframes=laneActiveKeyFramesById[objectIndex];
-                        this.currentSelectedAnimableObjects[objectIndex].animator.updateAnimations(j,lanePropeties,keyframes[j].values,keyframes[j+1].values,keyframes[j].timeLineTime,keyframes[j+1].timeLineTime)
-                    }
+            if(laneActiveKeyFramesById[objectIndex]===undefined){continue;}
+            if(laneActiveKeyFramesById[objectIndex].length===1){
+                for(let j in lanePropeties){
+                    this.currentSelectedAnimableObjects[objectIndex].animator.updateAnimation(0,lanePropeties[j],laneActiveKeyFramesById[objectIndex][0].values[j],-1,laneActiveKeyFramesById[objectIndex][0].timeLineTime,-1)
+                }
+            }else{
+                for(let j=0;j<laneActiveKeyFramesById[objectIndex].length-1;j++){
+                    let keyframes=laneActiveKeyFramesById[objectIndex];
+                    this.currentSelectedAnimableObjects[objectIndex].animator.updateAnimations(j,lanePropeties,keyframes[j].values,keyframes[j+1].values,keyframes[j].timeLineTime,keyframes[j+1].timeLineTime)
                 }
             }
+
         }
 
     },
@@ -349,18 +355,20 @@ let SectionTimeLine={
         }
     },
 
-    extractAnimationsFromSelectedKeyFrames:function(listSelectedKeyFrames,listDictsPropertiesLanesKeysLengths){
+    extractAnimationsFromSelectedKeyFrames:function(listSelectedKeyFrames){
         let listAnimations=[];
         for(let i=0;i<listSelectedKeyFrames.length;i++){
             let indexInParentList=listSelectedKeyFrames[i].indexInParentList;
             let objectIdentifier=listSelectedKeyFrames[i].identifier;
             let laneName=listSelectedKeyFrames[i].laneName;
             let propertiesForLaneName=this.MODELLanesProperties[laneName];
+            if(this.currentSelectedAnimableObjects[objectIdentifier].animator.dictAnimations[propertiesForLaneName[0]][indexInParentList]===undefined){
+                //the current keyframe is the last one, so it has no animation related to it
+                continue;
+            }
             for(let k=0;k<propertiesForLaneName.length;k++){
-                if(indexInParentList < (listDictsPropertiesLanesKeysLengths[objectIdentifier][laneName]-1)){
                 let anim=this.currentSelectedAnimableObjects[objectIdentifier].animator.dictAnimations[propertiesForLaneName[k]][indexInParentList];
                 listAnimations.push(anim);
-                }
             }
         }
         return listAnimations;
@@ -435,13 +443,22 @@ let SectionTimeLine={
             if(dictLanesNames[key]>0){
                 //sorting by time the keyframes of the lane affected considering the new keyframe
                 this.timeLineComponent.sortLaneKeyFramesByTime(key);
+
                 this.updateObjectPropertiesAnimationsFromKeyFrames(key);
             }
         }
+        //from this point similar pipeline than when keyframes selection updated, because of the menu, then a keyframe is drawgged it points to a different animation
+        this.timeLineComponent.updateKeyFramesIndexByObject();
+        let listSelectedKeyFrames=this.timeLineComponent.getSelectedKeyFrames();
+        let listAnimations = this.extractAnimationsFromSelectedKeyFrames(listSelectedKeyFrames);
+        this.parentClass.childNotificationOnKeyframeDragEnded(listAnimations);
+
     },
-    notificationOnKeyBarSelectionUpdated:function(listSelectedKeyFrames,listDictsPropertiesLanesKeysLengths) {
-        let listAnimations = this.extractAnimationsFromSelectedKeyFrames(listSelectedKeyFrames, listDictsPropertiesLanesKeysLengths);
-        this.parentClass.childNotificationOnKeyBarSelectionUpdated(listSelectedKeyFrames,listAnimations);
+    notificationOnKeyBarSelectionUpdated:function() {
+        this.timeLineComponent.updateKeyFramesIndexByObject();
+        let listSelectedKeyFrames=this.timeLineComponent.getSelectedKeyFrames();
+        let listAnimations = this.extractAnimationsFromSelectedKeyFrames(listSelectedKeyFrames);
+        this.parentClass.childNotificationOnKeyBarSelectionUpdated(listAnimations);
     },
     notificationOnMarkerDragEnded:function(time){
         this.parentClass.childNotificationOnMarkerDragEnded(time);
@@ -537,8 +554,11 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     childNotificationOnFieldPropertyInput:function(propName,propNewValue){
         MainMediator.notify(this.name,this.events.OnFieldPropertyInput,[propName,propNewValue]);
     },
-    childNotificationOnKeyBarSelectionUpdated:function(listKeyFrames,listAnimations){
+    childNotificationOnKeyBarSelectionUpdated:function(listAnimations){
         this.SectionActionEditorMenu.notificationOnKeyBarSelectionUpdated(listAnimations);
+    },
+    childNotificationOnKeyframeDragEnded:function(listAnimations){
+        this.SectionActionEditorMenu.notificationOnKeyframeDragEnded(listAnimations);
     },
     notificationCanvasManagerOnSelectionUpdated:function(){
         this.SectionProperties.notificationOnSelectionUpdated();

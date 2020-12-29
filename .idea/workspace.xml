@@ -21,16 +21,12 @@
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Globals/NetworkManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/NetworkManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/DrawingHand.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/DrawingHand.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data.js" beforeDir="false" afterPath="$PROJECT_DIR$/data.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/debug.log" beforeDir="false" afterPath="$PROJECT_DIR$/debug.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/fabricRelated/PivotHandling.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/fabricRelated/PivotHandling.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -169,7 +165,17 @@
       <workItem from="1608727935773" duration="19583000" />
       <workItem from="1608796349215" duration="285000" />
       <workItem from="1608826600947" duration="6332000" />
-      <workItem from="1608850530673" duration="13758000" />
+      <workItem from="1608850530673" duration="14357000" />
+      <workItem from="1608916219758" duration="3883000" />
+      <workItem from="1608949933342" duration="6036000" />
+      <workItem from="1608988955007" duration="8341000" />
+      <workItem from="1608999679779" duration="15590000" />
+      <workItem from="1609081939504" duration="33217000" />
+      <workItem from="1609165831127" duration="601000" />
+      <workItem from="1609171674022" duration="687000" />
+      <workItem from="1609173950132" duration="29819000" />
+      <workItem from="1609234771086" duration="37000" />
+      <workItem from="1609255797758" duration="1699000" />
     </task>
     <servers />
   </component>
@@ -225,21 +231,21 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="dock-window-2/0.0.1920.1050@0.0.1920.1050" timestamp="1602996543928" />
-    <state x="500" y="100" width="878" height="801" key="find.popup" timestamp="1608610289041">
+    <state x="500" y="100" width="878" height="801" key="find.popup" timestamp="1609224579249">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="500" y="100" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1608610289041" />
+    <state x="500" y="100" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1609224579249" />
     <state width="600" height="428" key="javadoc.popup" timestamp="1603662965310">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="600" height="428" key="javadoc.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603662965310" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1608769083878">
+    <state x="616" y="237" key="run.anything.popup" timestamp="1609221331503">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1608769083878" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1608623142541">
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1609221331503" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1608927973274">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1608623142541" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1608927973274" />
   </component>
 </project>

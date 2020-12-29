@@ -1,6 +1,7 @@
 fabric.Object.prototype.originX="custom";
 fabric.Object.prototype.originY="custom";
 fabric.Object.prototype.centeredRotation=false;
+fabric.Object.prototype.centeredScaling=false;
 fabric.Object.prototype.pivotX=0;
 fabric.Object.prototype.pivotY=0;
 fabric.Object.prototype.pivotCornerX=0;//visual corner pos X
