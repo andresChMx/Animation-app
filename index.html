@@ -329,7 +329,7 @@
     <section class="panel-inspector">
         <div class="panel-inspector__toolbox">
             <div class="panel-inspector__toolbox__item">
-                <p class="toolbox__tool-item__title">Actions:</p>
+<!--                <p class="toolbox__tool-item__title">Actions:</p>-->
                 <button class="toolbox__item__button-save">Save</button>
                 <button class="toolbox__item__button-preview">Preview</button>
                 <button class="toolbox__item__button-export">Export</button>
@@ -347,38 +347,83 @@
 
             </div>
         </div>
-        <div class="panel-inspector__objects-entrance-editor">
-                <p class="panel-inspector__objects-entrance-editor__title">Objects with Effects</p>
-                <div class="panel-inspector__objects-entrance-editor__box-items ">
-                    <div class="panel-inspector__objects-entrance-editor__box-items__item clearfix" style="display:none;">
-                        <div class="panel-inspector__objects-entrance-editor__box-items__item__icon">
-                            <img src="" alt="" class="">
-                        </div>
-                        <div class="panel-inspector__objects-entrance-editor__box-items__item__input-field">
-                            <label for="">Delay</label>
-                            <input type="text" class="box-items__item__input-field__input-element-delay"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
-                        </div>
-                        <div class="panel-inspector__objects-entrance-editor__box-items__item__input-field">
-                            <label for="">Duration</label>
-                            <input type="text" class="box-items__item__input-field__input-element-duration"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+        <div class="panel-inspector__manu-areas">
+            <ul>
+                <li class="active">Scene Objects</li>
+                <li>Object Properties</li>
+            </ul>
+        </div>
+        <div class="panel-inspector__container-areas">
+            <div class="panel-inspector__area-scene-objects area">
+                <div class="panel-inspector__area-scene-objects__listing-objects-entrance">
+                    <p class="area-scene-objects__listing-objects-entrance__title">Objects with Effects</p>
+                    <div class="area-scene-objects__listing-objects-entrance__box-items ">
+                        <div class="area-scene-objects__listing-objects-entrance__box-items__item clearfix" style="display:none;">
+                            <div class="icon">
+                                <img src="" alt="" class="">
+                            </div>
+                            <div class="input-field-box">
+                                <label for="">Delay</label>
+                                <input type="text" class="input-field-box__delay"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                            </div>
+                            <div class="input-field-box">
+                                <label for="">Duration</label>
+                                <input type="text" class="input-field-box__duration"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                            </div>
                         </div>
                     </div>
                 </div>
-        </div>
-        <div class="panel-inspector__animable-objects-editor">
-            <p class="panel-inspector__animable-objects-editor__title">Objects with</p>
-            <ul class="panel-inspector__animable-objects-editor__box-items ">
-                <li class="panel-inspector__animable-objects-editor__box-items__item clearfix" style="display:none;">
-                    <img src="" alt="" class="panel-inspector__animable-objects-editor__box-items__item__icon">
-                    <div class="panel-inspector__animable-objects-editor__box-items__item__label-group">
-                        <p>Object 1</p>
-                        <input type="text" style="display: none;">
+                <div class="panel-inspector__area-scene-objects__listing-objects-all">
+                    <p class="area-scene-objects__listing-objects-all__title">Objects with</p>
+                    <ul class="area-scene-objects__listing-objects-all__box-items ">
+                        <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" style="display:none;">
+                            <img src="" alt="" class="icon">
+                            <div class="group-object-name">
+                                <p class="group-object-name__text-name">Object 1</p>
+                                <input type="text" style="display: none;" class="group-object-name__input">
+                            </div>
+                            <div class="group-box-actions">
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel-inspector__area-object-properties area">
+                <div class="box-related-widgets clearfix">
+                    <div class="widget-property-left widget">
+                        <label>Left</label>
+                        <div class="property-input"><button class="btn-decrease">-</button><input type="text" property="left" class="field-value"/><button class="btn-increase">+</button></div>
                     </div>
-                    <div class="panel-inspector__animable-objects-editor__box-items__item__btn-action-box">
+                </div>
+                <div class="box-related-widgets clearfix">
+                    <div class="widget-property-top widget">
+                        <label>Top</label><div class="property-input"><button class="btn-decrease">-</button><input type="text" property="top" class="field-value"/><button class="btn-increase">+</button></div>
                     </div>
-                </li>
-            </ul>
+                </div>
+                <div class="box-related-widgets clearfix">
+                    <div class="widget-property-scaleX widget">
+                        <label>scale X</label><div class="property-input"><button class="btn-decrease">-</button><input type="text" property="scaleX"class="field-value"/><button class="btn-increase">+</button></div>
+                    </div>
+                </div>
+                <div class="box-related-widgets clearfix">
+                    <div class="widget-property-scaleY widget">
+                        <label>scale Y</label><div class="property-input"><button class="btn-decrease">-</button><input type="text" property="scaleY" class="field-value"/><button class="btn-increase">+</button></div>
+                    </div>
+                </div>
+                <div class="box-related-widgets clearfix">
+                    <div class="widget-property-angle widget">
+                        <label>Angle</label><div class="property-input"><button class="btn-decrease">-</button><input type="text" property="angle" class="field-value"/><button class="btn-increase">+</button></div>
+                    </div>
+                </div>
+                <div class="box-related-widgets clearfix">
+                    <div class="widget-property-opacity widget">
+                        <label>Opacity</label><div class="property-input"><input step="10"  type="range" property="opacity" class="range-value"/><input type="text" property="opacity" class="field-value"/></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
+
 
     </section>
 
@@ -425,37 +470,8 @@
         <div class="panel-animation__editors-container">
                 <section class="action-editor">
                     <div class="action-editor__properties-area">
-                        <div class="action-editor__properties-area__list">
-                            <div class="action-editor__properties-area__list__item" property="position">
-                                <span class="action-editor__properties-area__list__item__btn-add">+</span>
-                                <p class="action-editor__properties-area__list__item__label">Position</p>
-                                <div class="action-editor__properties-area__list__item__box-inputs">
-                                    <label>x:</label><input type="text" property="left">
-                                    <label>y:</label><input type="text" property="top">
-                                </div>
-                            </div>
-                            <div class="action-editor__properties-area__list__item" property="scale">
-                                <span class="action-editor__properties-area__list__item__btn-add">+</span>
-                                <p class="action-editor__properties-area__list__item__label">Scale</p>
-                                <div class="action-editor__properties-area__list__item__box-inputs">
-                                    <label>x:</label><input type="text" property="scaleX">
-                                    <label>y:</label><input type="text" property="scaleY">
-                                </div>
-                            </div>
-                            <div class="action-editor__properties-area__list__item" property="rotation">
-                                <span class="action-editor__properties-area__list__item__btn-add">+</span>
-                                <p class="action-editor__properties-area__list__item__label">Angle</p>
-                                <div class="action-editor__properties-area__list__item__box-inputs">
-                                    <input type="text" property="angle">
-                                </div>
-                            </div>
-                            <div class="action-editor__properties-area__list__item" property="opacity">
-                                <span class="action-editor__properties-area__list__item__btn-add">+</span>
-                                <p class="action-editor__properties-area__list__item__label">Opacity</p>
-                                <div class="action-editor__properties-area__list__item__box-inputs">
-                                    <input type="text" property="opacity">
-                                </div>
-                            </div>
+                        <div class="action-editor__properties-area__list"> <!--Los lanes se estan añadiendo a este elemento en runtime-->
+
                         </div>
                     </div>
                     <div class="action-editor__timeline-area">

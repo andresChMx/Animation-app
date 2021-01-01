@@ -51,6 +51,9 @@
     bottom:0;
     margin:auto;
 }
+/*================================*/
+/*PANEL-ANIMATION*/
+/*================================*/
 .panel-animation{
     background:#727376;
     width:100%;
@@ -221,8 +224,12 @@
 .action-editor__properties-area__list__item{
     background:#606062;
     outline:1px #4B4B4D solid;
+    opacity:1;
 }
-.action-editor__properties-area__list__item__btn-add{
+.action-editor__properties-area__list__item.desabled{
+    opacity:0.5;
+ }
+.action-editor__properties-area__list__item .btn-add-keyframe{
     display: inline-block;
     padding:0 2px 0 2px;
     border:1px solid white;
@@ -248,121 +255,156 @@
 ==== inspector panel
 ====================*/
 .panel-inspector{
-    background:gray;
+    background: #585858;
     position:absolute;
     right:0;
     top:0;
     height:calc(100vh - var(--panel-animation-height));
     width:300px;
-    padding:10px;
+    overflow-x: hidden;
+}
+/*menu areas*/
+.panel-inspector__manu-areas ul{
+    margin:10px 0;
+    padding:10px 0;
+    list-style: none;
+    border-top:1px solid #bababa;
+    border-bottom:1px solid #bababa;
+}
+.panel-inspector__manu-areas ul li{
+    display:inline;
+    font-size:.8em;
+    color: #dedede;
+    cursor:pointer;
+}
+.panel-inspector__manu-areas ul li:hover{
+    color: #0ec3ef;
+}
+.panel-inspector__manu-areas ul li.active{
+    color:dodgerblue;
+}
+/*areas*/
+.panel-inspector__container-areas{
+    width:200%;
+    position:relative;
+    left:0;
+    transition: .3s all;
 }
 
-/*--------------objects-entrance-editor-----------*/
-.panel-inspector__objects-entrance-editor__box-items
+.panel-inspector__container-areas .area{
+    float:left;
+    width:50%;
+    padding:10px;
+}
+/*--------------panel-inspector__area-scene-objects__listing-objects-entrance-----------*/
+.area-scene-objects__listing-objects-entrance__box-items
 {
     background:white;
     height:300px;
     overflow: auto;
 }
 
-.panel-inspector__objects-entrance-editor__box-items__item{
+.area-scene-objects__listing-objects-entrance__box-items__item{
     background:peru;
 }
-.panel-inspector__objects-entrance-editor__box-items__item__icon{
+.area-scene-objects__listing-objects-entrance__box-items__item .icon{
     float:left;
     width:30%;
     padding:10px;
     box-sizing: border-box;
 }
-.panel-inspector__objects-entrance-editor__box-items__item__icon img{
+.area-scene-objects__listing-objects-entrance__box-items__item .icon img{
     width:100%;
 }
-.panel-inspector__objects-entrance-editor__box-items__item__input-field{
+.area-scene-objects__listing-objects-entrance__box-items__item.input-field-box{
     float:left;
     width:70%;
 }
-.panel-inspector__objects-entrance-editor__box-items #active-item{
+.area-scene-objects__listing-objects-entrance__box-items #active-item{
     background:red;
 }
-/*--------------animable objects editor----------------*/
-.panel-inspector__animable-objects-editor__box-items{
+/*--------------panel-inspector__area-scene-objects__listing-objects-all----------------*/
+.area-scene-objects__listing-objects-all__box-items{
     background:white;
     height:300px;
     overflow: auto;
 }
-.panel-inspector__animable-objects-editor__box-items__item{
+.area-scene-objects__listing-objects-all__box-items #active-item{
+    background:red !important;
+}
+.area-scene-objects__listing-objects-all__box-items__item{
     list-style: none;
     border-bottom: 2px solid black;
 
 }
-.panel-inspector__animable-objects-editor__box-items #active-item{
-    background:red !important;
+/*------------------------panel-inspector__area-object-properties----------------------*/
+.panel-inspector__area-object-properties{
+}
+.panel-inspector__area-object-properties__title{
+    margin-bottom:15px;
+}
+.panel-inspector__area-object-properties .box-related-widgets{
+    height:25px;
+    margin-bottom:10px;
+}
+.panel-inspector__area-object-properties .widget{
+    height:100%;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    position:relative;
+}
+.panel-inspector__area-object-properties .widget.disable:after{
+    content:"";
+    display:block;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.2);
+    position:absolute;
+    left:0;top:0;
+
+}
+.panel-inspector__area-object-properties .widget label{
+    width:34%;
+    line-height: 100%;
+}
+.panel-inspector__area-object-properties .widget .property-input{
+    display:inline-flex;
+    width:50%;
+    height:100%;
+    justify-content: space-between;
+}
+.panel-inspector__area-object-properties .widget .property-input .field-value{
+    display: inline-block;
+    width:40%;
+    height:100%;
+    border:none;
+    line-height: 100%;
+    font-size: 1.1em;
+    text-align: center;
+    padding:2px;
+}
+.panel-inspector__area-object-properties .widget .property-input button{
+    display: inline-block;
+    width:30%;
+    height:100%;
+    border:1px solid #4a4a4a;
+}
+
+.panel-inspector__area-object-properties .widget-property-opacity .property-input .range-value{
+    width:70%;
+    display:inline-block;
+    vertical-align: middle;
+}
+.panel-inspector__area-object-properties .widget-property-opacity .property-input .field-value{
+    display: inline-block;
+    margin:0;
+    padding:0;
+    width:25%
 }
 /*-------------toolbox--------------*/
 .panel-inspector__toolbox__tool-item{
 
-}
-/*----------Menu-add-keyframe---------*/
-.panel-inspector__menu-add-keyframe{
-
-}
-
-.menu-add-keyframe__inner-container{
-    color:white;
-    background:green;
-    width:80%;
-    margin:auto;
-    text-align: center;
-    padding:10px;
-    position:relative;
-}
-.menu-add-keyframe__inner-container:hover > .menu-add-keyframe__options-list{
-    display:block;
-
-}
-.menu-add-keyframe__options-list{
-    display:none;
-    position:absolute;
-    list-style: none;
-    background:rgb(0, 163, 0);
-    left:0;
-    top:90%;
-    width:100%;
-    z-index: 2000;
-    
-}
-.menu-add-keyframe__options-list__option{
-    padding:6px;
-    cursor:pointer;
-}
-.menu-add-keyframe__options-list__option:hover{
-    background:rgb(2, 177, 2);
-}
-.menu-add-keyframe__label{
-    background:green;
-}
-/*--------panel-inspector__properties-editor*/
-.panel-inspector__properties-editor{
-    margin: 0 0 60px 0;
-}
-.properties-editor__properties-container{
-    text-align:center;
-    margin-top:30px;
-    color:white;
-}
-
-.properties-container__title{
-    margin-bottom:10px;
-}
-.properties-container__field-group{
-    display:inline-block;
-    width:48%;
-}
-.properties-container__field-group label{
-    
-}
-.properties-container__field-group input{
-    width:50%;
 }
 /*=======================
 ==== PANEL ASSETS   =====

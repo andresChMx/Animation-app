@@ -1,3 +1,57 @@
+/*
+* The next block makes the active group (multiple selection) readjust its bounds after the marker has been dragged
+* */
+fabric.ActiveSelection.prototype.update=function(){
+    this._restoreObjectsState();
+    this.angle=0;
+    this.scaleX=1;
+    this.scaleY=1;
+    this._calcBounds();
+    this._updateObjectsCoords();
+    this.setCoords();
+    this.dirty=true;
+    this.canvas.renderAll();
+}
+fabric.ActiveSelection.prototype.initialize=function(objects,options){
+    options = options || {};
+    this._objects = objects || [];
+    for (var i = this._objects.length; i--; ) {
+        this._objects[i].group = this;
+    }
+
+    if (options.originX) {
+        this.originX = options.originX;
+    }
+    if (options.originY) {
+        this.originY = options.originY;
+    }
+    this._calcBounds();
+    this._updateObjectsCoords();
+    fabric.Object.prototype.initialize.call(this, options);
+    this.setCoords();
+
+    //Before here same as the original
+    //NO OVIDAR UNREGISTRAR CUALQUIER OBSERVER QUE SE REGISTRE, YA UQE ESTE OBJETO SE ELIMNA, Y SI NO TE DESREGISTRAR SEGIRA MOVIENDO A LOS OBJETOS SIN TU CONSENTIMINETO
+    MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this);
+    MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnObjectPropertyWidgedChanged,this);
+
+}
+fabric.ActiveSelection.prototype.notificationPanelActionEditorOnMarkerDragEnded=function(){
+    this.update();
+}
+fabric.ActiveSelection.prototype.notificationPanelInspectorOnObjectPropertyWidgedChanged=function(){
+    this.update();
+}
+fabric.ActiveSelection.prototype.onDeselect=function(){
+    MainMediator.unregisterObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this);
+    MainMediator.unregisterObserver(PanelInspector.name,PanelInspector.events.OnObjectPropertyWidgedChanged,this);
+    //From here Same as the original
+    this.destroy();
+    return false;
+}
+
+
+
 // sets properties in batch where the given properties are in world coordinates
 // Esta funcion existe para lograr manejar la seleccion multiple de objectos, es como un proxy entre coordenadas grupales y las absolutas. Consiste en que cuando el objecto se encuentra en un grupo,
 // primero obtenemos sus propiedades en coordenadas absolutas con calcTransformMatrix() para poder alterar esos valores con otros que estan en coordenadas aboslutas, de forma que

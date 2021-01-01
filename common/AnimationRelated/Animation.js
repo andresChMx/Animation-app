@@ -17,6 +17,7 @@ fabric.util.ease.Linear=function(t,b,c,d){
     return (t/d)*c + b;
 }
 var Animation=fabric.util.createClass({
+    type:"Animation",
     startValue:-1,
     endValue:-1,
     byValue:-1,
@@ -47,6 +48,9 @@ var Animation=fabric.util.createClass({
         this.startMoment=startMoment;
         this.endMoment=endMoment;
         this.localDuration=this.endMoment-this.startMoment;
+    },
+    set:function(property,value){
+
     },
     setEaseFunctionType:function(functionTypeName){
         let name=EnumAnimationFunctionTypes[functionTypeName];
@@ -84,5 +88,36 @@ var Animation=fabric.util.createClass({
     },
     hasTwoKeys:function(){
         return this.endMoment!=-1 && this.endValue!=-1;
+    }
+});
+var AnimationRotation=fabric.util.createClass(Animation,{
+    type:"AnimationRotation",
+    initialize:function(property,startValue,endValue,startMoment,endMoment){
+        this.callSuper("initialize",property,startValue,endValue,startMoment,endMoment);
+        this.directionChanged=false;
+    },
+    toggleDirection:function(){
+        this.directionChanged=!this.directionChanged;
+        this.startValue=startValue;
+        this.endValue=endValue;
+        this.endValue=-(360-Math.abs(this.endValue))*(this.endValue/this.endValue);
+        this.byValue=endValue-startValue;
+    },
+    set:function(property,value){
+        this.callSuper("set",property.value);
+        if(property==="rotationDirection"){
+            this.toggleDirection();
+        }
+    }
+});
+
+var FactoryAnimation=fabric.util.createClass({
+    createAnimation:function(property,startValue,endValue,startMoment,endMoment){
+        switch (property){
+            case "angle":
+                return new AnimationRotation(property,startValue,endValue,startMoment,endMoment);
+            default:
+                return new Animation(property,startValue,endValue,startMoment,endMoment);
+        }
     }
 });

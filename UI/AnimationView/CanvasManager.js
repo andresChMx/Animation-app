@@ -53,7 +53,7 @@ var CanvasManager={
         //this.canvas.on('object:removed',this.notifyOnObjDeleted)
         this.canvas.on('object:modified',this.notifyOnObjModified.bind(this));
 
-        //PanelInspector.SectionPropertiesEditor.registerOnFieldInput(this);
+        //PanelInspector.SectionLanesEditor.registerOnFieldInput(this);
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnDurationInput,this);
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this)
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnFieldPropertyInput,this);

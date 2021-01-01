@@ -20,6 +20,14 @@ var MainMediator={
     registerObserver:function(className,event,obj){
         this.members[className][event].push(obj);
     },
+    unregisterObserver:function(className,event,obj){
+        let index=this.members[className][event].indexOf(obj);
+        if(index!==-1){
+        this.members[className][event].splice(index,1);
+        }else{
+            alert("ERROR: MainMediator>unregisterObjeserver: se intento unregister un objecto que no estaba");
+        }
+    },
     notify:function(className,event,args){
         let observerMethod="notification" + className + event;
         for(let i in this.members[className][event]){

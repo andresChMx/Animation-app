@@ -35,7 +35,7 @@ let SectionToolBox={
 var SectionObjectsEntraceEditor={
     HTMLElement:null,
     init:function(){
-        this.HTMLElement=document.querySelector(".panel-inspector__objects-entrance-editor__box-items");
+        this.HTMLElement=document.querySelector(".area-scene-objects__listing-objects-entrance__box-items");
         this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
 
         this.lastActiveHTMLItem=null;
@@ -59,10 +59,10 @@ var SectionObjectsEntraceEditor={
     },
     createHTMLItem:function(animObjWithEntrance){
         let newItem=this.HTMLBoxItem.cloneNode(true);
-        let icon=newItem.querySelector(".panel-inspector__objects-entrance-editor__box-items__item__icon img");
+        let icon=newItem.querySelector(".icon img");
         icon.replaceWith(this._getAnimableObjectIcon(animObjWithEntrance));
-        let inputDelay=newItem.querySelector(".box-items__item__input-field__input-element-delay");
-        let inputDuration=newItem.querySelector(".box-items__item__input-field__input-element-duration");
+        let inputDelay=newItem.querySelector(".input-field-box__delay");
+        let inputDuration=newItem.querySelector(".input-field-box__duration");
         inputDelay.value=animObjWithEntrance.animator.entranceDelay;
         inputDuration.value=animObjWithEntrance.animator.entranceDuration;
         newItem.style.display="block";
@@ -95,7 +95,7 @@ var SectionObjectsEntraceEditor={
     },
     onHTMLItemClicked:function(e){
         let HTMLElem=e.target;
-        while(HTMLElem.className!=="panel-inspector__objects-entrance-editor__box-items__item clearfix"){
+        while(HTMLElem.className!=="area-scene-objects__listing-objects-entrance__box-items__item clearfix"){
             HTMLElem=HTMLElem.parentNode;
         }
         let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
@@ -130,7 +130,7 @@ var SectionObjectsEntraceEditor={
 var SectionAnimableObjectsEditor={
     HTMLElement:null,
     init:function(){
-        this.HTMLElement=document.querySelector(".panel-inspector__animable-objects-editor__box-items");
+        this.HTMLElement=document.querySelector(".area-scene-objects__listing-objects-all__box-items");
         this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
 
         this.lastActiveHTMLItem=null;
@@ -140,7 +140,7 @@ var SectionAnimableObjectsEditor={
     createItem:function(animObject){
       let newItem=this.HTMLBoxItem.cloneNode(this);
       newItem.style.display="block";
-      let label=newItem.querySelector(".panel-inspector__animable-objects-editor__box-items__item__label-group p");
+      let label=newItem.querySelector(".group-object-name__text-name");
       label.innerHTML=animObject.name!==""?animObject.name:"Object" + CanvasManager.listAnimableObjects.length;
       newItem.addEventListener("click",this.OnItemClicked.bind(this))
       this.HTMLElement.appendChild(newItem);
@@ -163,7 +163,7 @@ var SectionAnimableObjectsEditor={
     },
     OnItemClicked:function(e){
         let HTMLElem=e.target;
-        while(HTMLElem.className!=="panel-inspector__animable-objects-editor__box-items__item clearfix"){
+        while(HTMLElem.className!=="area-scene-objects__listing-objects-all__box-items__item clearfix"){
             HTMLElem=HTMLElem.parentNode;
         }
         let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
@@ -189,25 +189,304 @@ var SectionAnimableObjectsEditor={
     }
 
 }
+var SectionMenuAreas={
+    HTMLElement:null,
+    parentClass:null,
+    HTMLContainerAreas:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
+        this.HTMLElement=document.querySelector(".panel-inspector__manu-areas");
+        this.HTMLLinks=this.HTMLElement.querySelectorAll("li");
+
+        this.HTMLContainerAreas=document.querySelector(".panel-inspector__container-areas");
+        this.initEvents();
+    },
+    initEvents:function(){
+        for(let i=0;i<this.HTMLLinks.length;i++){
+            this.HTMLLinks[i].addEventListener("click",this.OnOptionClicked.bind(this))
+        }
+    },
+    OnOptionClicked:function(e){
+        let indexOption=-1;
+        for(let i=0;i<this.HTMLLinks.length;i++){
+            this.HTMLLinks[i].classList.remove("active");
+            if(this.HTMLLinks[i]===e.target){
+                indexOption=i;
+            }
+        }
+        e.target.classList.add("active");
+        this.HTMLContainerAreas.style.left=-(this.HTMLContainerAreas.clientWidth/this.HTMLLinks.length)*indexOption + "px";
+    }
+
+}
+var AreaSceneObjects={
+    HTMLElement:null,
+    init:function(){
+        this.HTMLElement=document.querySelector(".panel-inspector__area-scene-objects");
+    }
+}
+/*El manejo de el envio de la informacion de los inputs, al hacer enter, lo hace el Objecto mayor (AreaObjectPropperties), en caso de focusout lo hace cada widged en widgetsObjectProperties*/
+var AreaObjectProperties={
+    HTMLElement:null,
+    parentClass:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
+        this.currentSelectedAnimableObjects=null;
+        this.HTMLElement=document.querySelector(".panel-inspector__area-object-properties")
+        let me=this;
+        this.widgetsObjectProperties={
+            left:{
+                htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-left .property-input"),
+                val:0,
+                initEvents:function(){
+                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                },
+                OnButtonClicked:function(e){
+                    if(e.target.className==="btn-decrease"){this.val-=5.0;
+                    }else if(e.target.className==="btn-increase"){this.val+=5.0;}
+                    this.setVal(this.val);
+                    me.OnWidgetChanged(this.val,"left");
+                },
+                OnFieldInput:function(e){
+                    if(e.target.value===""){e.target.value=0;}
+                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
+                    this.setVal(e.target.value);
+                    me.OnWidgetChanged(this.val,"left");
+                },
+                getInputFieldElem:function(){return this.htmlElem.children[1];},
+                setVal:function(val){this.val=val;this.htmlElem.children[1].value=val;},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+
+            },
+            top:{
+                htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-top .property-input"),
+                val:0,
+                initEvents:function(){
+                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                },
+                OnButtonClicked:function(e){
+                    if(e.target.className==="btn-decrease"){this.val-=5.0;
+                    }else if(e.target.className==="btn-increase"){this.val+=5.0;}
+                    this.setVal(this.val);
+                    me.OnWidgetChanged(this.val,"top");
+                },
+                OnFieldInput:function(e){
+                    if(e.target.value===""){e.target.value=0;}
+                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
+                    this.setVal(e.target.value);
+                    me.OnWidgetChanged(this.val,"top");
+                },
+                getInputFieldElem:function(){return this.htmlElem.children[1];},
+                setVal:function(val){this.val=val;this.htmlElem.children[1].value=val;},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+
+            },
+            scaleX:{
+                htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-scaleX .property-input"),
+                val:0,
+                initEvents:function(){
+                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                },
+                OnButtonClicked:function(e){
+                    if(e.target.className==="btn-decrease"){this.val-=0.1;
+                    }else if(e.target.className==="btn-increase"){this.val+=0.1;}
+                    this.setVal(this.val);
+                    me.OnWidgetChanged(this.val,"scaleX");
+                },
+                OnFieldInput:function(e){
+                    if(e.target.value===""){e.target.value=0;}
+                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
+                    this.setVal(e.target.value);
+                    me.OnWidgetChanged(this.val,"scaleX");
+                },
+                getInputFieldElem:function(){return this.htmlElem.children[1];},
+                setVal:function(val){this.val=val; this.htmlElem.children[1].value=val;},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+
+            },
+            scaleY:{
+                htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-scaleY .property-input"),
+                val:0,
+                initEvents:function(){
+                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                },
+                OnButtonClicked:function(e){
+                    if(e.target.className==="btn-decrease"){this.val-=0.1;}
+                    else if(e.target.className==="btn-increase"){this.val+=0.1;}
+                    this.setVal(this.val);
+                    me.OnWidgetChanged(this.val,"scaleY");
+                },
+                OnFieldInput:function(e){
+                    if(e.target.value===""){e.target.value=0;}
+                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
+                    this.setVal(e.target.value);
+                    me.OnWidgetChanged(this.val,"scaleY");
+                },
+                getInputFieldElem:function(){return this.htmlElem.children[1];},
+                setVal:function(val){this.val=val;this.htmlElem.children[1].value=val;},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+
+            },
+            angle:{
+                htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-angle .property-input"),
+                val:0,
+                initEvents:function(){
+                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
+                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                },
+                OnButtonClicked:function(e){
+                    if(e.target.className==="btn-decrease"){this.val-=5.0;
+                    }else if(e.target.className==="btn-increase"){this.val+=5.0;}
+                    this.setVal(this.val)
+                    me.OnWidgetChanged(this.val,"angle");
+                },
+                OnFieldInput:function(e){
+                    if(e.target.value===""){e.target.value=0;}
+                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
+                    this.setVal(e.target.value);
+                    me.OnWidgetChanged(this.val,"angle");
+                },
+                getInputFieldElem:function(){return this.htmlElem.children[1];},
+                setVal:function(val){this.val=parseFloat(val);this.htmlElem.children[1].value=this.val;},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+
+            },
+            opacity:{
+                htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-opacity .property-input"),
+                val:0,
+                initEvents:function(){
+                    this.htmlElem.children[0].addEventListener("change",this.OnRangeChanged.bind(this));
+                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                },
+                OnRangeChanged:function(e){
+                    this.setVal(parseInt(e.target.value)/100.0);
+                    me.OnWidgetChanged(this.val/100.0,"opacity");
+                },
+                OnFieldInput:function(e){
+                    if(e.target.value===""){e.target.value=0;}
+                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
+                    this.setVal(parseInt(e.target.value)/100.0);
+                    me.OnWidgetChanged(this.val/100.0,"opacity");
+                },
+                getInputFieldElem:function(){return this.htmlElem.children[1];},
+                setVal:function(val){this.val=parseFloat(val)*100.0;this.htmlElem.children[0].value=this.val;this.htmlElem.children[1].value=this.val;},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+            }
+        }
+        this.initEvents();
+    },
+    initEvents:function(){
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnSelectionUpdated,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjModified,this);
+        MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this);
+        for(let i in this.widgetsObjectProperties){
+            this.widgetsObjectProperties[i].initEvents();
+        }
+        WindowManager.registerOnKeyEnterPressed(this);
+    },
+    OnWidgetChanged:function(val,property){
+        console.log("ON WIDGED CHANEEd");
+        if(this.currentSelectedAnimableObjects!==null){
+            let tmpDict={};tmpDict[property]=val;
+            for(let i in this.currentSelectedAnimableObjects){
+                this.currentSelectedAnimableObjects[i].setBatch(tmpDict);
+                this.currentSelectedAnimableObjects[i].setCoords();
+            }
+            CanvasManager.canvas.renderAll();
+            this.parentClass.childNotificationOnObjectPropertyWidgetChanged();
+        }
+    },
+    populateWidgetsWithObjectProperties:function(){
+
+        for(let key in this.widgetsObjectProperties){
+            this.widgetsObjectProperties[key].setVal(this.currentSelectedAnimableObjects[0].getCustom(key));
+        }
+    },
+    disableWidgets:function(){
+        for(let key in this.widgetsObjectProperties){
+            this.widgetsObjectProperties[key].disable();
+        }
+    },
+    enableWidgets:function(){
+        for(let key in this.widgetsObjectProperties){
+            this.widgetsObjectProperties[key].enable();
+        }
+    },
+    notificationCanvasManagerOnSelectionUpdated:function(){
+        if(this.currentSelectedAnimableObjects){this.notificationOnKeyEnterUp();} // HACK FOR WHEN THE SELECITION IS UPDATED WHITE ONE FIELD IS BEEN EDITED
+        let currentAnimableObject=CanvasManager.getSelectedAnimableObj();
+        console.log(currentAnimableObject);
+        if(currentAnimableObject!==undefined){
+            if(currentAnimableObject.type==="activeSelection"){
+                this.currentSelectedAnimableObjects=currentAnimableObject.getObjects();
+            }else{
+                this.currentSelectedAnimableObjects=[currentAnimableObject];
+            }
+            this.enableWidgets();
+            this.populateWidgetsWithObjectProperties();
+        }else{
+            this.disableWidgets();
+        }
+    },
+    notificationCanvasManagerOnObjModified:function(){
+        this.populateWidgetsWithObjectProperties();
+    },
+    notificationPanelActionEditorOnMarkerDragEnded:function(){
+        if(this.currentSelectedAnimableObjects!==null && this.currentSelectedAnimableObjects!==undefined){
+            this.populateWidgetsWithObjectProperties();
+        }
+    },
+    notificationOnKeyEnterUp:function(){
+        let documentActiveElement=document.activeElement;
+        for(let i in this.widgetsObjectProperties){
+            if(documentActiveElement===this.widgetsObjectProperties[i].getInputFieldElem()){
+                documentActiveElement.blur();
+                this.widgetsObjectProperties[i].OnFieldInput({target:documentActiveElement})
+            }
+        }
+    },
+}
+
 var PanelInspector={
     name:'PanelInspector',
     events:{
         OnBtnPreviewClicked:'OnBtnPreviewClicked',
-        OnTextOptionClicked:'OnTextOptionClicked'
+        OnTextOptionClicked:'OnTextOptionClicked',
+        OnObjectPropertyWidgedChanged:'OnObjectPropertyWidgedChanged'
     },
     HTMLElement:null,
     htmlElementNormalHeight:0,
 
-    SectionObjectsEntraceEditor:SectionObjectsEntraceEditor,
     SectionToolBox:SectionToolBox,
+    SectionMenuAreas:SectionMenuAreas,
+
+    AreaSceneObjects:AreaSceneObjects,
+    SectionObjectsEntraceEditor:SectionObjectsEntraceEditor,
     SectionAnimableObjectsEditor:SectionAnimableObjectsEditor,
+
+    AreaObjectProperties:AreaObjectProperties,
+
     init:function(){
         this.HTMLElement=document.querySelector(".panel-inspector");
         this.htmlElementNormalHeight=this.HTMLElement.offsetHeight;
 
+
         this.SectionToolBox.init(this);
+        this.SectionMenuAreas.init(this);
         this.SectionObjectsEntraceEditor.init();
         this.SectionAnimableObjectsEditor.init();
+
+        this.AreaObjectProperties.init(this);
+
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
 
@@ -249,6 +528,8 @@ var PanelInspector={
     },
     childNotificationOnBtnPreviewClicked:function(){
         MainMediator.notify(this.name,this.events.OnBtnPreviewClicked,[]);
-    }
-
+    },
+    childNotificationOnObjectPropertyWidgetChanged:function(){
+        MainMediator.notify(this.name,this.events.OnObjectPropertyWidgedChanged,[]);
+    },
 }

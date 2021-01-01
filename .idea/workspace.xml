@@ -23,11 +23,14 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/DrawingHand.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/DrawingHand.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/fabricRelated/PivotHandling.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/fabricRelated/PivotHandling.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/WindowManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/AnimationRelated/Animation.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/AnimationRelated/Animation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/Mediators/MainMediator.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/Mediators/MainMediator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -175,7 +178,12 @@
       <workItem from="1609171674022" duration="687000" />
       <workItem from="1609173950132" duration="29819000" />
       <workItem from="1609234771086" duration="37000" />
-      <workItem from="1609255797758" duration="1699000" />
+      <workItem from="1609255797758" duration="12543000" />
+      <workItem from="1609331379397" duration="27180000" />
+      <workItem from="1609374872561" duration="21969000" />
+      <workItem from="1609427847754" duration="37733000" />
+      <workItem from="1609520289603" duration="597000" />
+      <workItem from="1609526971605" duration="8465000" />
     </task>
     <servers />
   </component>
@@ -231,21 +239,21 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="dock-window-2/0.0.1920.1050@0.0.1920.1050" timestamp="1602996543928" />
-    <state x="500" y="100" width="878" height="801" key="find.popup" timestamp="1609224579249">
+    <state x="500" y="100" width="878" height="801" key="find.popup" timestamp="1609481089165">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="500" y="100" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1609224579249" />
+    <state x="500" y="100" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1609481089165" />
     <state width="600" height="428" key="javadoc.popup" timestamp="1603662965310">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="600" height="428" key="javadoc.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603662965310" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1609221331503">
+    <state x="616" y="237" key="run.anything.popup" timestamp="1609436143579">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1609221331503" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1608927973274">
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1609436143579" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1609457437608">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1608927973274" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1609457437608" />
   </component>
 </project>

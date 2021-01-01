@@ -860,6 +860,8 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             let keyframe=this.dictPropertiesLanes[laneName].retrieveKeyFrame(markerTimeLineTime,listListValues[i], i);
             this._addkeyframeToDictBySeconds(keyframe);
         }
+        this.dictPropertiesLanes[laneName].sortKeyFramesByTime();
+
         this.notifyOnKeyframeSelectionUpdated();
         this.canvas.requestRenderAll();
     },

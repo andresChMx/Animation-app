@@ -139,7 +139,7 @@ var WindowManager={
         PanelAnimation.PanelActionEditor.init();
 
         PanelInspector.init();
-        //PanelInspector.SectionPropertiesEditor.init();
+        //PanelInspector.SectionLanesEditor.init();
         //PanelInspector.SectionMenuAddKey.init();
 
         PanelAssets.init();

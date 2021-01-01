@@ -1,74 +1,84 @@
-var SectionProperties={
+var Lane=function(parentClass,name){
+    this.name=name;
+    this.element=null;
+    this.btnAddKey=null;
+    this.label=null;
+    this.parentClass=parentClass;
+    //this.btnDelete=this.element.querySelector("btn-delete");
+
+    this.init=function(){
+        this.element=document.createElement("div");
+        this.label=document.createElement("p");
+        this.btnAddKey=document.createElement("span");
+        this.element.appendChild(this.label);
+        this.element.appendChild(this.btnAddKey);
+        this.parentClass.HTMLElement.children[0].appendChild(this.element);
+
+        this.element.classList.add("action-editor__properties-area__list__item");
+        this.label.classList.add("action-editor__properties-area__list__item__label");
+        this.btnAddKey.classList.add("btn-add-keyframe");
+
+        this.label.textContent=name;
+        this.btnAddKey.textContent="+";
+
+        this.btnAddKey.addEventListener("click",this.OnBtnAddKeyClicked.bind(this))
+    }
+    this.enable=function(){
+        this.element.style.display="block";
+    };
+    this.disable=function(){
+        this.element.style.display="none";
+    };
+    this.OnBtnAddKeyClicked=function(e){
+        this.parentClass.OnBtnAddKeyClicked(this.name);
+    }
+    this.init();
+}
+var SectionLanes={
     HTMLElement:null,
     listObserversOnBtnAddKey:[],
     listObserversOnFieldInput:[],
+    MODELLanesNames:["position","scale","rotation","opacity"],
     init:function(parentClass){
         this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".action-editor__properties-area");
-        this.HTMLListProperties=document.querySelectorAll(".action-editor__properties-area__list__item");
-        this.HTMLInputsPropertyEditors=document.querySelectorAll(".action-editor__properties-area__list__item__box-inputs input");
-        this.initEvents();
-    },
-    initEvents:function(){
-        for(let i=0;i<this.HTMLListProperties.length;i++){
-            let btnAddKey=this.HTMLListProperties[i].querySelector(".action-editor__properties-area__list__item__btn-add");
-            btnAddKey.addEventListener("click",this.OnBtnAddKeyClicked.bind(this));
-        }
-        for(let i=0;i<this.HTMLInputsPropertyEditors.length;i++){
-            this.HTMLInputsPropertyEditors[i].addEventListener("input",this.OnFieldInput.bind(this));
 
-        }
+        this.lanes=[];
 
+        this.initLanes();
     },
-    _desableFields:function(){
-        for(let i=0;i<this.HTMLInputsPropertyEditors.length;i++){
-            this.HTMLInputsPropertyEditors[i].value="a";
-            this.HTMLInputsPropertyEditors[i].setAttribute("disabled","")
+    initLanes:function(){
+        for(let i in this.MODELLanesNames){
+            this.lanes.push(new Lane(this,this.MODELLanesNames[i]));
         }
     },
-    _enableFields:function(){
-        for(let i=0;i<this.HTMLInputsPropertyEditors.length;i++){
-            this.HTMLInputsPropertyEditors[i].removeAttribute("disabled")
+    desableLanes:function(){
+        for(let i in this.lanes){
+            this.lanes[i].disable();
         }
     },
-    _populateFields:function(selectedAnimObj){
-        for(let i=0;i<this.HTMLInputsPropertyEditors.length;i++){
-            let fieldHTML=this.HTMLInputsPropertyEditors[i];
-            fieldHTML.value=selectedAnimObj.getCustom(fieldHTML.getAttribute("property"));
+    enableFields:function(){
+        for(let i in this.lanes){
+            this.lanes[i].enable();
         }
     },
-    OnBtnAddKeyClicked:function(e){
-        let attrPropName=e.target.parentNode.getAttribute("property");
-        this.notifyOnBtnAddKey(attrPropName);
-    },
-    OnFieldInput:function(e){
-        let attrPropName=e.target.getAttribute("property");
-        let propertyNewValue=e.target.value;
-        this.notifyOnFieldPropertyInput(attrPropName,propertyNewValue);
+    OnBtnAddKeyClicked:function(propertyName){
+        this.notifyOnBtnAddKey(propertyName);
     },
     notificationOnSelectionUpdated:function(){
         let selectedAnimObj=CanvasManager.getSelectedAnimableObj();
-        if(!selectedAnimObj){
-            this._desableFields();
+        if(selectedAnimObj){
+            for(let i in this.lanes){
+                this.lanes[i].enable();
+            }
         }else{
-            this._enableFields();
-            this._populateFields(selectedAnimObj);
-        }
-    },
-    notificationOnObjModified:function(){
-        let selectedAnimObj=CanvasManager.getSelectedAnimableObj();
-        if(!selectedAnimObj){
-            this._desableFields();
-        }else{
-            this._enableFields();
-            this._populateFields(selectedAnimObj);
+            for(let i in this.lanes){
+                this.lanes[i].disable();
+            }
         }
     },
     notifyOnBtnAddKey:function(propName){
         this.parentClass.childNotificationOnBtnKeyAddKey(propName);
-    },
-    notifyOnFieldPropertyInput:function(propName,propNewValue){
-        this.parentClass.childNotificationOnFieldPropertyInput(propName,propNewValue);
     },
 }
 var SectionActionEditorMenu={
@@ -386,7 +396,6 @@ let SectionTimeLine={
                 }
 
             }
-            console.log(listListpropertiesValues);
             //adding animations and keyframes
             for(let objectIndex=0;objectIndex<this.currentSelectedAnimableObjects.length;objectIndex++) {
                 let masterProperty = this.MODELLanesProperties[laneName][0];
@@ -396,10 +405,10 @@ let SectionTimeLine={
                     this._addObjectAnimationsByLane(laneName,animableObject);
                 }
             }
+            //Adding keyframes (not in batch) entails sorting of keyframes of the lane in cuestion
             this.timeLineComponent.addKeyFrameOnMarker(laneName,listListpropertiesValues);
-            //sorting by time the keyframes of the lane affected considering the new keyframe
-            this.timeLineComponent.sortLaneKeyFramesByTime(laneName);
-            //updateing animations based on the keyframes
+
+            //updating animations based on the keyframes
             this.updateObjectPropertiesAnimationsFromKeyFrames(laneName)
         }
 
@@ -485,7 +494,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     HTMLdurationForm:null,
     marker:null,
 
-    SectionProperties:SectionProperties,
+    SectionLanes:SectionLanes,
     SectionTimeLine:SectionTimeLine,
     SectionActionEditorMenu:SectionActionEditorMenu,
 
@@ -500,7 +509,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
 
     init:function(){
 
-        this.SectionProperties.init(this);
+        this.SectionLanes.init(this);
         this.SectionTimeLine.init(this);
         this.SectionActionEditorMenu.init(this);
         this.HTMLdurationFormInput=document.querySelector(".editors-options__action-editor-options__form-duration__input");
@@ -512,7 +521,6 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
 
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnSelectionUpdated,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjModified,this);
-
         //this._setupFormDuration();
         WindowManager.registerObserverOnResize(this);
     },
@@ -559,14 +567,15 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     },
     childNotificationOnKeyframeDragEnded:function(listAnimations){
         this.SectionActionEditorMenu.notificationOnKeyframeDragEnded(listAnimations);
-    },
+        },
     notificationCanvasManagerOnSelectionUpdated:function(){
-        this.SectionProperties.notificationOnSelectionUpdated();
+        this.SectionLanes.notificationOnSelectionUpdated();
         this.SectionTimeLine.notificationOnSelectionUpdated();
     },
     notificationCanvasManagerOnObjModified:function(){
-        this.SectionProperties.notificationOnObjModified();
-    }
+
+    },
+
 }
 
 var PanelAnimation={//LA VENTANA COMPLETA
