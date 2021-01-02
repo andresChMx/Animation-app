@@ -31,7 +31,15 @@ fabric.ActiveSelection.prototype.initialize=function(objects,options){
     this.setCoords();
 
     //Before here same as the original
-    //NO OVIDAR UNREGISTRAR CUALQUIER OBSERVER QUE SE REGISTRE, YA UQE ESTE OBJETO SE ELIMNA, Y SI NO TE DESREGISTRAR SEGIRA MOVIENDO A LOS OBJETOS SIN TU CONSENTIMINETO
+    this.on("modified",function(e){
+        if(e.transform.action==="rotate"){
+            for (var i = this._objects.length; i--; ){
+                this._objects[i].angleInWorld=null;
+            }
+        }
+    })
+
+    //NO OVIDAR UNREGISTRAR CUALQUIER OBSERVER QUE SE REGISTRE EN ESTE OBJECTO, YA UQE ESTE OBJETO SE ELIMNA, Y SI NO TE DESREGISTRAR SEGIRA MOVIENDO A LOS OBJETOS SIN TU CONSENTIMINETO
     MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this);
     MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnObjectPropertyWidgedChanged,this);
 
@@ -45,11 +53,12 @@ fabric.ActiveSelection.prototype.notificationPanelInspectorOnObjectPropertyWidge
 fabric.ActiveSelection.prototype.onDeselect=function(){
     MainMediator.unregisterObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this);
     MainMediator.unregisterObserver(PanelInspector.name,PanelInspector.events.OnObjectPropertyWidgedChanged,this);
+    this.__eventListeners["modified"]=[] // este mismo objeto estaba suscrito a este evento ver initialize
+
     //From here Same as the original
     this.destroy();
     return false;
 }
-
 
 
 // sets properties in batch where the given properties are in world coordinates
@@ -89,6 +98,11 @@ fabric.Object.prototype.setBatch=function(dictNewProperties){
         let optionsFinal=fabric.util.qrDecompose(finalMatrix);
         //setting new values
         this.set(optionsFinal);
+        //this conditional  
+        if(dictNewProperties.angle !==undefined){
+            this.angleInWorld=dictNewProperties.angle;
+        }
+
         this.opacity=dictNewProperties.opacity===undefined?this.opacity:dictNewProperties.opacity;
         //left y top se pasan directamente, sin considerar el origin, ya que los valores pasados por el animator de left y top ya estan en relacion al origin (ger getCustom)
         this.left=optionsFinal.translateX;
@@ -122,7 +136,8 @@ fabric.Object.prototype.getCustom=function(property){ // gets properties in worl
         //getting the required value;
         switch (property){
             case "left":return worldPositionAtOrigin.x;case "top":return worldPositionAtOrigin.y;
-            case "angle":return optionsInWorld.angle;case "scaleX":return optionsInWorld.scaleX;
+            case "angle":if(this.angleInWorld){return this.angleInWorld}else{return optionsInWorld.angle}
+            case "scaleX":return optionsInWorld.scaleX;
             case "scaleY":return optionsInWorld.scaleY;default:return this.get(property);
         }
     }else{
