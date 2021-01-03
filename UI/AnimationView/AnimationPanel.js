@@ -85,54 +85,56 @@ var SectionActionEditorMenu={
     HTMLBtnDeleteKeyFrame:null,
     HTMLSelectFunctions:null,
 
-    MODELFunctionsMenu:Object.keys(EnumAnimationFunctionTypes),
     MODELMenuTweenTypes:Object.keys(EnumAnimationTweenType),
-    selectedOptionInFunctionsMenu:null,
-    selectedOptionInTweenTypesMenu:null,
+    MODELMenuEasingTypes:Object.keys(EnumAnimationEasingType),
+    selectedOptionInTweenTypeMenu:null,
+    selectedOptionInEasingTypeMenu:null,
 
     listSelectedKeyFramesAnimations:[],
+    listSelectedKeyFrames:[],
+
     parentClass:null,
     init:function(parentClass){
         this.parentClass=parentClass;
         this.HTMLBtnDeleteKeyFrame= document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__delete");
-        this.HTMLFunctionsMenu=     document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__list-functions");
-        this.HTMLTweensMenu=        document.querySelector('.action-editor-menu__keyframes-options .keyframes-options__tween-type-menu')
+        this.HTMLTweensMenu=     document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__list-functions");
+        this.HTMLEasingsMenu=        document.querySelector('.action-editor-menu__keyframes-options .keyframes-options__tween-type-menu')
 
         this.HTMLBtnZoomInTimeline= document.querySelector(".action-editor-menu__timeline-options__zoom-in");
         this.HTMLBtnZoomOutTimeline=document.querySelector(".action-editor-menu__timeline-options__zoom-out");
 
         this.HTMLdurationFormInput=document.querySelector(".editors-options__action-editor-options__form-duration__input");
-        this.initHTMLFunctionsMenu();
-        this.initHTMLMenuTweenTypes();
+        this.initHTMLTweenMenu();
+        this.initHTMLEasingsMenu();
         this.initEvents();
     },
     initEvents:function(){
         this.HTMLBtnDeleteKeyFrame.addEventListener("click",this.onBtnDeleteKeyFrame.bind(this));
-        this.HTMLFunctionsMenu.querySelector('ul').addEventListener("mouseup",this.onListFunctionsClicked.bind(this));
-        this.HTMLTweensMenu.addEventListener("click",this.OnTweensMenuClicked.bind(this))
+        this.HTMLTweensMenu.querySelector('ul').addEventListener("mouseup",this.OnListTweenItemClicked.bind(this));
+        this.HTMLEasingsMenu.addEventListener("click",this.OnEasingMenuItemClicked.bind(this))
         this.HTMLBtnZoomInTimeline.addEventListener("click",function (){});
         this.HTMLBtnZoomOutTimeline.addEventListener("click",function(){})
         this.HTMLdurationFormInput.addEventListener("focusout",this.onDurationInput.bind(this))
         WindowManager.registerOnKeyEnterPressed(this);
     },
-    initHTMLFunctionsMenu:function(){
-        let list=this.HTMLFunctionsMenu.querySelector('ul');
-        for(let i=0;i<this.MODELFunctionsMenu.length;i++){
+    initHTMLTweenMenu:function(){
+        let list=this.HTMLTweensMenu.querySelector('ul');
+        for(let i=0;i<this.MODELMenuTweenTypes.length;i++){
             let li=document.createElement('li');
-            li.textContent=this.MODELFunctionsMenu[i];
-            li.setAttribute('name',this.MODELFunctionsMenu[i]);
+            li.textContent=this.MODELMenuTweenTypes[i];
+            li.setAttribute('name',this.MODELMenuTweenTypes[i]);
             li.setAttribute('index',i);
             li.className='list-functions__option'
             list.appendChild(li);
         }
     },
-    initHTMLMenuTweenTypes:function(){
-        for(let i=0;i<this.MODELMenuTweenTypes.length;i++){
+    initHTMLEasingsMenu:function(){
+        for(let i=0;i<this.MODELMenuEasingTypes.length;i++){
             let button=document.createElement('button');
-            button.textContent=this.MODELMenuTweenTypes[i];
-            button.setAttribute("name",this.MODELMenuTweenTypes[i]);
+            button.textContent=this.MODELMenuEasingTypes[i];
+            button.setAttribute("name",this.MODELMenuEasingTypes[i]);
             button.className='tween-type-menu__option';
-            this.HTMLTweensMenu.appendChild(button);
+            this.HTMLEasingsMenu.appendChild(button);
         }
     },
     onBtnDeleteKeyFrame:function(){
@@ -146,89 +148,88 @@ var SectionActionEditorMenu={
             e.target.value=this.parentClass.getTimeLineDuration();
         }
     },
-    onListFunctionsClicked:function(e){
+    OnListTweenItemClicked:function(e){
         if(this.listSelectedKeyFramesAnimations.length===0){return;}
         if(e.target.className==="list-functions__option"){
             let newFunctionName=e.target.getAttribute("name");
             for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
-                this.listSelectedKeyFramesAnimations[i].setEaseFunctionType(newFunctionName);
+                this.listSelectedKeyFramesAnimations[i].setTweenType(newFunctionName);
             }
-            this.activateMenuFunctionsOption(newFunctionName);
+            for(let i=0;i<this.listSelectedKeyFrames.length;i++){
+                this.listSelectedKeyFrames[i].data.tweenType=newFunctionName;
+            }
+            this.activateMenuTweensOption(newFunctionName);
         }
     },
-    OnTweensMenuClicked:function(e){
+    OnEasingMenuItemClicked:function(e){
         if(this.listSelectedKeyFramesAnimations.length===0){return;}
         if(e.target.className==='tween-type-menu__option'){
-            let tweenTypeName=e.target.getAttribute('name');
+            let easingTypeName=e.target.getAttribute('name');
             for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
-                this.listSelectedKeyFramesAnimations[i].setTweenType(tweenTypeName);
+                this.listSelectedKeyFramesAnimations[i].setEasingType(easingTypeName);
             }
-            this.activateMenuTweenTypesOption(tweenTypeName);
+            for(let i=0;i<this.listSelectedKeyFrames.length;i++){
+                this.listSelectedKeyFrames[i].data.easingType=easingTypeName;
+            }
+            this.activateMenuEasingOption(easingTypeName);
         }
     },
-    activateMenuFunctionsOption:function(functionName){
-        if(this.selectedOptionInFunctionsMenu){
-            this.selectedOptionInFunctionsMenu.classList.remove('active');
+    activateMenuTweensOption:function(TweenType){
+        if(this.selectedOptionInTweenTypeMenu){
+            this.selectedOptionInTweenTypeMenu.classList.remove('active');
         }
-        if(functionName !== ''){
-            let liIndex=-1;
-            for(let i in this.MODELFunctionsMenu){
-                if(this.MODELFunctionsMenu[i]===functionName){liIndex=i;break}
-            }
-            this.selectedOptionInFunctionsMenu=this.HTMLFunctionsMenu.querySelector('ul').children[liIndex];
-            this.selectedOptionInFunctionsMenu.classList.add('active');
-            this.HTMLFunctionsMenu.querySelector(".current-selection").textContent=functionName;
+        if(TweenType !== ''){
+            let liIndex=this.MODELMenuTweenTypes.indexOf(TweenType);
+            console.log(liIndex);
+            this.selectedOptionInTweenTypeMenu=this.HTMLTweensMenu.querySelector('ul').children[liIndex];
+            this.selectedOptionInTweenTypeMenu.classList.add('active');
+            this.HTMLTweensMenu.querySelector(".current-selection").textContent=TweenType;
         }else{
-            this.selectedOptionInFunctionsMenu=null;
-            this.HTMLFunctionsMenu.querySelector(".current-selection").textContent='----------';
+            this.selectedOptionInTweenTypeMenu=null;
+            this.HTMLTweensMenu.querySelector(".current-selection").textContent='----------';
 
         }
     },
-    activateMenuTweenTypesOption:function(tweenTypeName){
-        if(this.selectedOptionInTweenTypesMenu){
-            this.selectedOptionInTweenTypesMenu.classList.remove('active');
+    activateMenuEasingOption:function(easingTypeName){
+        if(this.selectedOptionInEasingTypeMenu){
+            this.selectedOptionInEasingTypeMenu.classList.remove('active');
         }
-        if(tweenTypeName!==''){
-            let optIndex=-1;
-            for(let i in this.MODELMenuTweenTypes){
-                if(this.MODELMenuTweenTypes[i]===tweenTypeName){optIndex=i;break}
-            }
-            this.selectedOptionInTweenTypesMenu=this.HTMLTweensMenu.children[optIndex];
-            this.selectedOptionInTweenTypesMenu.classList.add('active');
+        if(easingTypeName!==''){
+            let optIndex=this.MODELMenuEasingTypes.indexOf(easingTypeName);
+            this.selectedOptionInEasingTypeMenu=this.HTMLEasingsMenu.children[optIndex];
+            this.selectedOptionInEasingTypeMenu.classList.add('active');
         }else{
-            this.selectedOptionInTweenTypesMenu=null;
+            this.selectedOptionInEasingTypeMenu=null;
         }
     },
-    updateUIFromAnimations:function(listAnimations){
-        this.listSelectedKeyFramesAnimations=listAnimations;
-        console.log(listAnimations);
+    updateUIFromAnimations:function(){
         if(this.listSelectedKeyFramesAnimations.length>0){
-            let firstAnimationFunction=this.listSelectedKeyFramesAnimations[0].easeFunctionType;
-            let firstAnimationTween=this.listSelectedKeyFramesAnimations[0].tweenType;
+            let firstAnimationFunction=this.listSelectedKeyFramesAnimations[0].tweenType;
+            let firstAnimationTween=this.listSelectedKeyFramesAnimations[0].easingType;
             let flagMoreThanOneType=false;
             let flagMoreThanOneTween=false;
             for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
-                if(this.listSelectedKeyFramesAnimations[i].easeFunctionType!==firstAnimationFunction){
+                if(this.listSelectedKeyFramesAnimations[i].tweenType!==firstAnimationFunction){
                     flagMoreThanOneType=true;
                 }
-                if(this.listSelectedKeyFramesAnimations[i].tweenType!==firstAnimationTween){
+                if(this.listSelectedKeyFramesAnimations[i].easingType!==firstAnimationTween){
                     flagMoreThanOneTween=true;
                 }
             }
             if(flagMoreThanOneType){
-                this.activateMenuFunctionsOption('')
+                this.activateMenuTweensOption('')
 
             }else{
-                this.activateMenuFunctionsOption(firstAnimationFunction);
+                this.activateMenuTweensOption(firstAnimationFunction);
             }
             if(flagMoreThanOneTween){
-                this.activateMenuTweenTypesOption('');
+                this.activateMenuEasingOption('');
             }else{
-                this.activateMenuTweenTypesOption(firstAnimationTween);
+                this.activateMenuEasingOption(firstAnimationTween);
             }
         }else{
-            this.activateMenuFunctionsOption('');
-            this.activateMenuTweenTypesOption('');
+            this.activateMenuTweensOption('');
+            this.activateMenuEasingOption('');
         }
     },
     notifyOnDurationInput:function(intInputValue){
@@ -244,10 +245,14 @@ var SectionActionEditorMenu={
             this.onDurationInput({target:documentActiveElement});
         }
     },
-    notificationOnKeyBarSelectionUpdated:function (listAnimations){
+    notificationOnKeyBarSelectionUpdated:function (listAnimations,listSelectedKeyFrames){
+        this.listSelectedKeyFramesAnimations=listAnimations;
+        this.listSelectedKeyFrames=listSelectedKeyFrames;
         this.updateUIFromAnimations(listAnimations);
     },
-    notificationOnKeyframeDragEnded:function(listAnimations){
+    notificationOnKeyframeDragEnded:function(listAnimations,listSelectedKeyFrames){
+        this.listSelectedKeyFramesAnimations=listAnimations;
+        this.listSelectedKeyFrames=listSelectedKeyFrames;
         this.updateUIFromAnimations(listAnimations);
     }
 }
@@ -282,8 +287,8 @@ let SectionTimeLine={
                         for(let k in properties){
                             values.push(this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[properties[k]][0].startValue);
                         }
-
-                        tmplistDictsPropertyLanes[objectIndex][keyModel].push({values:values,time:this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[masterProperty][0].startMoment});
+                        let masterAnimation=this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[masterProperty][0];
+                        tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:values,easingType:masterAnimation.easingType,tweenType:masterAnimation.tweenType},time:masterAnimation.startMoment});
                     }else{
                         for(let i=0;i<this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[masterProperty].length;i+=2){
                             let firstPropertyAnim=this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[masterProperty][i];
@@ -293,8 +298,15 @@ let SectionTimeLine={
                                 startValues.push(this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[properties[k]][i].startValue);
                                 endValues.push(this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[properties[k]][i].endValue);
                             }
-                            tmplistDictsPropertyLanes[objectIndex][keyModel].push({values:startValues,time:firstPropertyAnim.startMoment});
-                            tmplistDictsPropertyLanes[objectIndex][keyModel].push({values:endValues,time:firstPropertyAnim.endMoment});
+                            let animation=this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[masterProperty][i];
+                            let nextAnimation=this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[masterProperty][i+1];
+
+                            tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:startValues,easingType:animation.easingType,tweenType:animation.tweenType},time:firstPropertyAnim.startMoment});
+                            if(nextAnimation !== undefined){
+                                tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:endValues,easingType:nextAnimation.easingType,tweenType:nextAnimation.tweenType},time:firstPropertyAnim.endMoment});
+                            }else{
+                                tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:endValues,easingType:EnumAnimationEasingType.In,tweenType:EnumAnimationTweenType.Sine},time:firstPropertyAnim.endMoment});
+                            }
                         }
 
                         let animationsLength=this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[masterProperty].length;
@@ -304,9 +316,7 @@ let SectionTimeLine={
                                 values.push(this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[properties[k]][animationsLength-1].endValue);
                             }
                             let firstPropertyAnim=this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[masterProperty][animationsLength-1];
-
-                            tmplistDictsPropertyLanes[objectIndex][keyModel].push({values:values,time:firstPropertyAnim.endMoment});
-
+                            tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:values,easingType:EnumAnimationEasingType.In,tweenType:EnumAnimationTweenType.Sine},time:firstPropertyAnim.endMoment});
                         }
                     }
                 }
@@ -328,12 +338,12 @@ let SectionTimeLine={
             if(listListlaneActiveKeyFrames[objectIndex]===undefined){continue;}
             if(listListlaneActiveKeyFrames[objectIndex].length===1){
                 for(let i in lanePropeties){
-                    this.currentSelectedAnimableObjects[objectIndex].animator.addAnimation(lanePropeties[i],listListlaneActiveKeyFrames[objectIndex][0].values[i],-1,listListlaneActiveKeyFrames[objectIndex][0].timeLineTime,-1);
+                    this.currentSelectedAnimableObjects[objectIndex].animator.addAnimation(lanePropeties[i],listListlaneActiveKeyFrames[objectIndex][0].data.values[i],-1,listListlaneActiveKeyFrames[objectIndex][0].timeLineTime,-1,listListlaneActiveKeyFrames[objectIndex][0].data.easingType,listListlaneActiveKeyFrames[objectIndex][0].tweenType);
                 }
             }else{
                 for(let i=0;i<listListlaneActiveKeyFrames[objectIndex].length-1;i++){
                     let keys=listListlaneActiveKeyFrames[objectIndex];
-                    this.currentSelectedAnimableObjects[objectIndex].animator.addAnimations(lanePropeties,keys[i].values,keys[i+1].values,keys[i].timeLineTime,keys[i+1].timeLineTime);
+                    this.currentSelectedAnimableObjects[objectIndex].animator.addAnimations(lanePropeties,keys[i].data.values,keys[i+1].data.values,keys[i].timeLineTime,keys[i+1].timeLineTime,keys[i].data.easingType,keys[i].data.tweenType);
                 }
             }
 
@@ -346,12 +356,12 @@ let SectionTimeLine={
             if(laneActiveKeyFramesById[objectIndex]===undefined){continue;}
             if(laneActiveKeyFramesById[objectIndex].length===1){
                 for(let j in lanePropeties){
-                    this.currentSelectedAnimableObjects[objectIndex].animator.updateAnimation(0,lanePropeties[j],laneActiveKeyFramesById[objectIndex][0].values[j],-1,laneActiveKeyFramesById[objectIndex][0].timeLineTime,-1)
+                    this.currentSelectedAnimableObjects[objectIndex].animator.updateAnimation(0,lanePropeties[j],laneActiveKeyFramesById[objectIndex][0].data.values[j],-1,laneActiveKeyFramesById[objectIndex][0].timeLineTime,-1,laneActiveKeyFramesById[objectIndex][0].data.easingType,laneActiveKeyFramesById[objectIndex][0].data.tweenType);
                 }
             }else{
                 for(let j=0;j<laneActiveKeyFramesById[objectIndex].length-1;j++){
                     let keyframes=laneActiveKeyFramesById[objectIndex];
-                    this.currentSelectedAnimableObjects[objectIndex].animator.updateAnimations(j,lanePropeties,keyframes[j].values,keyframes[j+1].values,keyframes[j].timeLineTime,keyframes[j+1].timeLineTime)
+                    this.currentSelectedAnimableObjects[objectIndex].animator.updateAnimations(j,lanePropeties,keyframes[j].data.values,keyframes[j+1].data.values,keyframes[j].timeLineTime,keyframes[j+1].timeLineTime,keyframes[j].data.easingType,keyframes[j].data.tweenType);
                 }
             }
 
@@ -361,7 +371,7 @@ let SectionTimeLine={
     _addObjectAnimationsByLane:function(laneName,animableObject){
         let lanePropeties=this.MODELLanesProperties[laneName];
         for(let i in lanePropeties){
-            animableObject.animator.addAnimation(lanePropeties[i],0,0,0,0);
+            animableObject.animator.addAnimation(lanePropeties[i],0,0,0,0,EnumAnimationEasingType.In,EnumAnimationTweenType.Sine);
         }
     },
 
@@ -388,11 +398,11 @@ let SectionTimeLine={
             let listListpropertiesValues=[];
             //collecting values
             for(let objectIndex=0;objectIndex<this.currentSelectedAnimableObjects.length;objectIndex++){
-                listListpropertiesValues.push([]);
+                listListpropertiesValues.push({values:[],easingType:EnumAnimationEasingType.In,tweenType:EnumAnimationTweenType.Sine});
 
                 for(let i in this.MODELLanesProperties[laneName]){
                     let propertyValue=this.currentSelectedAnimableObjects[objectIndex].getCustom(this.MODELLanesProperties[laneName][i]);
-                    listListpropertiesValues[objectIndex].push(propertyValue);
+                    listListpropertiesValues[objectIndex].values.push(propertyValue);
                 }
 
             }
@@ -405,7 +415,7 @@ let SectionTimeLine={
                     this._addObjectAnimationsByLane(laneName,animableObject);
                 }
             }
-            //Adding keyframes (not in batch) entails sorting of keyframes of the lane in cuestion
+            //Adding keyframes (not in batch) entails sorting of keyframes of the lane in question
             this.timeLineComponent.addKeyFrameOnMarker(laneName,listListpropertiesValues);
 
             //updating animations based on the keyframes
@@ -418,7 +428,6 @@ let SectionTimeLine={
     },
     notificationOnSelectionUpdated:function(obj){
         let newSelectedObject=CanvasManager.getSelectedAnimableObj();
-        console.log(newSelectedObject);
         if(newSelectedObject!=null){
             if(newSelectedObject.type==="activeSelection"){
                 this.currentSelectedAnimableObjects=newSelectedObject.getObjects();
@@ -460,14 +469,14 @@ let SectionTimeLine={
         this.timeLineComponent.updateKeyFramesIndexByObject();
         let listSelectedKeyFrames=this.timeLineComponent.getSelectedKeyFrames();
         let listAnimations = this.extractAnimationsFromSelectedKeyFrames(listSelectedKeyFrames);
-        this.parentClass.childNotificationOnKeyframeDragEnded(listAnimations);
+        this.parentClass.childNotificationOnKeyframeDragEnded(listAnimations,listSelectedKeyFrames);
 
     },
     notificationOnKeyBarSelectionUpdated:function() {
         this.timeLineComponent.updateKeyFramesIndexByObject();
         let listSelectedKeyFrames=this.timeLineComponent.getSelectedKeyFrames();
         let listAnimations = this.extractAnimationsFromSelectedKeyFrames(listSelectedKeyFrames);
-        this.parentClass.childNotificationOnKeyBarSelectionUpdated(listAnimations);
+        this.parentClass.childNotificationOnKeyBarSelectionUpdated(listAnimations,listSelectedKeyFrames);
     },
     notificationOnMarkerDragEnded:function(time){
         this.parentClass.childNotificationOnMarkerDragEnded(time);
@@ -562,11 +571,11 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     childNotificationOnFieldPropertyInput:function(propName,propNewValue){
         MainMediator.notify(this.name,this.events.OnFieldPropertyInput,[propName,propNewValue]);
     },
-    childNotificationOnKeyBarSelectionUpdated:function(listAnimations){
-        this.SectionActionEditorMenu.notificationOnKeyBarSelectionUpdated(listAnimations);
+    childNotificationOnKeyBarSelectionUpdated:function(listAnimations,listSelectedKeyFrames){
+        this.SectionActionEditorMenu.notificationOnKeyBarSelectionUpdated(listAnimations,listSelectedKeyFrames);
     },
-    childNotificationOnKeyframeDragEnded:function(listAnimations){
-        this.SectionActionEditorMenu.notificationOnKeyframeDragEnded(listAnimations);
+    childNotificationOnKeyframeDragEnded:function(listAnimations,listSelectedKeyFrames){
+        this.SectionActionEditorMenu.notificationOnKeyframeDragEnded(listAnimations,listSelectedKeyFrames);
         },
     notificationCanvasManagerOnSelectionUpdated:function(){
         this.SectionLanes.notificationOnSelectionUpdated();

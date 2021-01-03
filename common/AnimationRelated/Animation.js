@@ -1,4 +1,4 @@
-var EnumAnimationFunctionTypes={
+var EnumAnimationTweenType={
     Sine:'Sine',
     Cubic:'Cubic',
     Quint:'Quint',
@@ -7,7 +7,7 @@ var EnumAnimationFunctionTypes={
     Elastic:'Elastic',
     Bounce:'Bounce',
 }
-var EnumAnimationTweenType={
+var EnumAnimationEasingType={
     In:'In',
     Out:'Out',
     InOut:'InOut',
@@ -27,14 +27,14 @@ var Animation=fabric.util.createClass({
 
 
     property:"",
-    functionName:'easeInSine',
-    easeFunctionType:'Sine', // sine,quart, etc...
-    tweenType:'In',  // In | Out | InOut | linear
-    initialize:function(property,startValue,endValue,startMoment,endMoment){
+    functionName:'easeInSine', // found from the next two variables
+    tweenType:'Sine', // sine,quart, etc...
+    easingType:'In',  // In | Out | InOut | linear
+    initialize:function(property,startValue,endValue,startMoment,endMoment,easingType=EnumAnimationEasingType.In,tweenType=EnumAnimationTweenType.Sine){
         this.property=property;
-        this.initParameters(startValue,endValue,startMoment,endMoment)
+        this.initParameters(startValue,endValue,startMoment,endMoment,easingType,tweenType)
     },
-    initParameters:function(startValue,endValue,startMoment,endMoment){
+    initParameters:function(startValue,endValue,startMoment,endMoment,easingType,tweenType){
         this.startValue=startValue;
         this.endValue=endValue;
 
@@ -43,6 +43,11 @@ var Animation=fabric.util.createClass({
 
         this.localDuration=endMoment-startMoment;
         this.byValue=endValue-startValue;
+
+
+        this.easingType=easingType;
+        this.tweenType=tweenType;
+        this.assembleFunctionName();
     },
     updateMoments:function(startMoment,endMoment){
         this.startMoment=startMoment;
@@ -52,27 +57,27 @@ var Animation=fabric.util.createClass({
     set:function(property,value){
 
     },
-    setEaseFunctionType:function(functionTypeName){
-        let name=EnumAnimationFunctionTypes[functionTypeName];
+    setTweenType:function(tweenType){
+        let name=EnumAnimationTweenType[tweenType];
         if(name===undefined){
-            name=EnumAnimationFunctionTypes.Sine;
+            name=EnumAnimationTweenType.Sine;
         }
-        this.easeFunctionType=name;
+        this.tweenType=name;
         this.assembleFunctionName();
     },
-    setTweenType:function(tweenType){
-        let type=EnumAnimationTweenType[tweenType];
+    setEasingType:function(easingType){
+        let type=EnumAnimationEasingType[easingType];
         if(type===undefined){
-            type=EnumAnimationTweenType.In;
+            type=EnumAnimationEasingType.In;
         }
-        this.tweenType=type;
+        this.easingType=type;
         this.assembleFunctionName();
     },
     assembleFunctionName:function(){
-        if(this.tweenType===EnumAnimationTweenType.Linear){
+        if(this.easingType===EnumAnimationEasingType.Linear){
             this.functionName='Linear';
         }else{
-            this.functionName='ease' + this.tweenType + this.easeFunctionType;
+            this.functionName='ease' + this.easingType + this.tweenType;
         }
     },
     tick:function(currentTime){

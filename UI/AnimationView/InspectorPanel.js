@@ -394,7 +394,6 @@ var AreaObjectProperties={
         WindowManager.registerOnKeyEnterPressed(this);
     },
     OnWidgetChanged:function(val,property){
-        console.log("ON WIDGED CHANEEd");
         if(this.currentSelectedAnimableObjects!==null){
             let tmpDict={};tmpDict[property]=val;
             for(let i in this.currentSelectedAnimableObjects){

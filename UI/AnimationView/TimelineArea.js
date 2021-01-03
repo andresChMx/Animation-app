@@ -875,7 +875,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             for(let key in listDictsKeyFramesByProperties[p]){
                 for(let i=0;i<listDictsKeyFramesByProperties[p][key].length;i++){
                     let data=listDictsKeyFramesByProperties[p][key][i];
-                    let keyframe=this.dictPropertiesLanes[key].retrieveKeyFrame(data.time, data.values, p);
+                    let keyframe=this.dictPropertiesLanes[key].retrieveKeyFrame(data.time, data.data, p);
 
                     this._addkeyframeToDictBySeconds(keyframe);
                 }
@@ -1102,7 +1102,7 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         // Estas variables tienen que ver con el manejo de keyframes activos en escena. Los primeros dos, son para el el pooling, y el ultmo clasifica los keyframes por identifier
         this.keyFrames = [];
         this.counterActiveKeyFrames = 0;
-        this.listListActiveKeyFramesById=[];
+        this.listListActiveKeyFramesByIds=[];
 
         this.observerOnKeyframeFixedClick = null;
         this.observerOnKeyframeMouseDown = null;
@@ -1111,10 +1111,10 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         this.observerOnKeyframeDragStarted = null;
 
     },
-    retrieveKeyFrame: function (markerTimeLineTime,values,keyframeIdentifier) {
+    retrieveKeyFrame: function (markerTimeLineTime,data,keyframeIdentifier) {
         let retrievedKey=null;
         if (this.counterActiveKeyFrames >= this.keyFrames.length) {
-            retrievedKey = new KeyFrame(this.canvas, this.globalState, this.mouseState,this.name, markerTimeLineTime,values,keyframeIdentifier);
+            retrievedKey = new KeyFrame(this.canvas, this.globalState, this.mouseState,this.name, markerTimeLineTime,data,keyframeIdentifier);
             this.keyFrames.push(retrievedKey);
             retrievedKey.registerOnMouseDown(this);
             retrievedKey.registerOnFixedClick(this);
@@ -1127,12 +1127,12 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
 
         } else {
             retrievedKey=this.keyFrames[this.counterActiveKeyFrames];
-            retrievedKey.activate(markerTimeLineTime,values,keyframeIdentifier)
+            retrievedKey.activate(markerTimeLineTime,data,keyframeIdentifier)
         }
 
-        if(this.listListActiveKeyFramesById[retrievedKey.identifier]===undefined)
-        {this.listListActiveKeyFramesById[retrievedKey.identifier]=[]}
-        this.listListActiveKeyFramesById[retrievedKey.identifier].push(retrievedKey);
+        if(this.listListActiveKeyFramesByIds[retrievedKey.identifier]===undefined)
+        {this.listListActiveKeyFramesByIds[retrievedKey.identifier]=[]}
+        this.listListActiveKeyFramesByIds[retrievedKey.identifier].push(retrievedKey);
 
         this.counterActiveKeyFrames++;
         return retrievedKey;
@@ -1148,9 +1148,9 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
             this.counterActiveKeyFrames--;
         }
 
-        let indexInListById=this.listListActiveKeyFramesById[keyframe.identifier].indexOf(keyframe);
+        let indexInListById=this.listListActiveKeyFramesByIds[keyframe.identifier].indexOf(keyframe);
         if(indexInListById!== -1){
-            this.listListActiveKeyFramesById[keyframe.identifier].splice(indexInListById,1);
+            this.listListActiveKeyFramesByIds[keyframe.identifier].splice(indexInListById,1);
         }else{
             alert("NOOO ERRORRR: NO SE CONTRO EL KEYFRAME, PERO SE SUPONDE QUE DEBE ESTAR siempre");
         }
@@ -1163,37 +1163,37 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
             this.keyFrames[i].deactivate();
         }
 
-        this.listListActiveKeyFramesById=[];
+        this.listListActiveKeyFramesByIds=[];
 
         this.counterActiveKeyFrames=0;
     },
     sortKeyFramesByTime:function(){
         insertionSort(this.keyFrames,this.counterActiveKeyFrames);
-        for(let i=0;i<this.listListActiveKeyFramesById.length;i++){
-            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
-            insertionSort(this.listListActiveKeyFramesById[i],this.listListActiveKeyFramesById[i].length);
+        for(let i=0;i<this.listListActiveKeyFramesByIds.length;i++){
+            if(this.listListActiveKeyFramesByIds[i]===undefined){continue;}
+            insertionSort(this.listListActiveKeyFramesByIds[i],this.listListActiveKeyFramesByIds[i].length);
         }
     },
     updateKeyFramesIndexByObject:function(){
-        for(let i=0;i<this.listListActiveKeyFramesById.length;i++){
-            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
-            for(let j=0;j<this.listListActiveKeyFramesById[i].length;j++){
-                this.listListActiveKeyFramesById[i][j].indexInParentList=j;
+        for(let i=0;i<this.listListActiveKeyFramesByIds.length;i++){
+            if(this.listListActiveKeyFramesByIds[i]===undefined){continue;}
+            for(let j=0;j<this.listListActiveKeyFramesByIds[i].length;j++){
+                this.listListActiveKeyFramesByIds[i][j].indexInParentList=j;
             }
         }
     },
     getActiveKeyFramesByIds:function(){
-        return this.listListActiveKeyFramesById;
+        return this.listListActiveKeyFramesByIds;
     },
     _renderAnimationsBoxes:function(ctx){
-        for(let i=0;i<this.listListActiveKeyFramesById.length;i++){
-            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
+        for(let i=0;i<this.listListActiveKeyFramesByIds.length;i++){
+            if(this.listListActiveKeyFramesByIds[i]===undefined){continue;}
             let identifier=i;
-            for(let j=0;j<this.listListActiveKeyFramesById[i].length-1;j++){
+            for(let j=0;j<this.listListActiveKeyFramesByIds[i].length-1;j++){
 
-                let firstKeyCoords=this.listListActiveKeyFramesById[identifier][j].localState.coords;
-                let secondKeyCoords=this.listListActiveKeyFramesById[identifier][j+1].localState.coords;
-                if(this.listListActiveKeyFramesById[identifier][j].isSelected){
+                let firstKeyCoords=this.listListActiveKeyFramesByIds[identifier][j].localState.coords;
+                let secondKeyCoords=this.listListActiveKeyFramesByIds[identifier][j+1].localState.coords;
+                if(this.listListActiveKeyFramesByIds[identifier][j].isSelected){
                     ctx.fillStyle="white";
                 }else{
                     ctx.fillStyle="rgb(" + ((identifier+1)*100)%200+"," + ((identifier+1)*150)%200+ ","+ ((identifier+1)*190)%200+")";
@@ -1203,10 +1203,10 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
                     ,secondKeyCoords.left-firstKeyCoords.left
                     ,firstKeyCoords.height
                 );
-                this.listListActiveKeyFramesById[identifier][j+1].render(ctx);
+                this.listListActiveKeyFramesByIds[identifier][j+1].render(ctx);
             }
-            if(this.listListActiveKeyFramesById[identifier].length>0){
-                this.listListActiveKeyFramesById[identifier][0].render(ctx);
+            if(this.listListActiveKeyFramesByIds[identifier].length>0){
+                this.listListActiveKeyFramesByIds[identifier][0].render(ctx);
             }
         }
     },
@@ -1246,20 +1246,20 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         this.observerOnKeyframeDragStarted.notificationOnKeyframeDragStarted(keyframe);
     },
     notificationOnMouseMove: function (e) {
-        for(let i =this.listListActiveKeyFramesById.length-1;i>=0;i--){
-            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
-            for(let j=this.listListActiveKeyFramesById[i].length-1;j>=0;j--){
-                this.listListActiveKeyFramesById[i][j].notificationOnMouseMove(e);
+        for(let i =this.listListActiveKeyFramesByIds.length-1;i>=0;i--){
+            if(this.listListActiveKeyFramesByIds[i]===undefined){continue;}
+            for(let j=this.listListActiveKeyFramesByIds[i].length-1;j>=0;j--){
+                this.listListActiveKeyFramesByIds[i][j].notificationOnMouseMove(e);
             }
         }
         this.callSuper("notificationOnMouseMove", e);
     },
     notificationOnMouseDown: function (e) {
-        for(let i =this.listListActiveKeyFramesById.length-1;i>=0;i--){
-            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
-            for(let j=this.listListActiveKeyFramesById[i].length-1;j>=0;j--){
+        for(let i =this.listListActiveKeyFramesByIds.length-1;i>=0;i--){
+            if(this.listListActiveKeyFramesByIds[i]===undefined){continue;}
+            for(let j=this.listListActiveKeyFramesByIds[i].length-1;j>=0;j--){
 
-                let pressed=this.listListActiveKeyFramesById[i][j].notificationOnMouseDown(e);
+                let pressed=this.listListActiveKeyFramesByIds[i][j].notificationOnMouseDown(e);
                 if (pressed) {
                     return true;
                 }
@@ -1269,10 +1269,10 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         return false;
     },
     notificationOnMouseUp: function (e) {
-        for(let i =this.listListActiveKeyFramesById.length-1;i>=0;i--){
-            if(this.listListActiveKeyFramesById[i]===undefined){continue;}
-            for(let j=this.listListActiveKeyFramesById[i].length-1;j>=0;j--){
-                let pressed=this.listListActiveKeyFramesById[i][j].notificationOnMouseUp(e);
+        for(let i =this.listListActiveKeyFramesByIds.length-1;i>=0;i--){
+            if(this.listListActiveKeyFramesByIds[i]===undefined){continue;}
+            for(let j=this.listListActiveKeyFramesByIds[i].length-1;j>=0;j--){
+                let pressed=this.listListActiveKeyFramesByIds[i][j].notificationOnMouseUp(e);
                 if (pressed) {
                     return true;
                 }
@@ -1303,9 +1303,9 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
     }
 })
 var KeyFrame = fabric.util.createClass(Component, {
-    initialize: function (canvas, globalState, mouseState,laneName, time,values,identifier) {
+    initialize: function (canvas, globalState, mouseState,laneName, time,data,identifier) {
         this.callSuper("initialize", globalState, mouseState);
-        this.values=values;
+        this.data=data; //{values:[100,100],easingType:"In",TweenType:"Sine"}
         this.localState = {colors: {idle: "brown", selected: "pink"}}
         this.laneName=laneName;
         this.canvas = canvas;
@@ -1328,11 +1328,11 @@ var KeyFrame = fabric.util.createClass(Component, {
 
         this.indexInParentList=-1; //solo se actualiza cuando se actualizo la seleccion en el KeyBar component, se actualiza al index que ocupa en la lista del PropertyLane al que pertenece, teniendo en cuenta el objeto al que pertenece. Esto con el fin de hacer match con la animacion a la que corresponde modificar.
     },
-    activate: function (timeLineTime,values,identifier) {
+    activate: function (timeLineTime,data,identifier) {
         this.identifier=identifier;
         this.isActive = true;
         this.timeLineTime = timeLineTime;
-        this.values=values;
+        this.data=data;
         this.calcTimelineLocationFromTime(this.timeLineTime);
     },
     deactivate: function () {
@@ -1358,7 +1358,7 @@ var KeyFrame = fabric.util.createClass(Component, {
         }
         //----------SNAP WITH MARKS
         if(applySnappingContraints){
-            //haciendo que haya el cuadruple de markers que segmenttimesvalues en 1 segundo (BORROWED from Maker component)
+            //haciendo que haya el cuadruple de markers que segmenttimesdata en 1 segundo (BORROWED from Maker component)
             let timeBarMarksDistance = this.globalState.timingDistances.segmentDistance / 4,
                 leftInUsableArea = this.localState.coords.left - this.globalState.padding.width + this.localState.coords.width / 2,
                 timeBarMarksSnappingRange = 3;

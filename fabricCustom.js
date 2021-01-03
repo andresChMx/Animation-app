@@ -31,6 +31,8 @@ fabric.ActiveSelection.prototype.initialize=function(objects,options){
     this.setCoords();
 
     //Before here same as the original
+
+    //When the acitveselection starts been rotated the getCustom function will return the true angle of the objects with are in group coordinates and "normalized"
     this.on("modified",function(e){
         if(e.transform.action==="rotate"){
             for (var i = this._objects.length; i--; ){
@@ -98,7 +100,8 @@ fabric.Object.prototype.setBatch=function(dictNewProperties){
         let optionsFinal=fabric.util.qrDecompose(finalMatrix);
         //setting new values
         this.set(optionsFinal);
-        //this conditional  
+        //this conditional enables de use of the variable angleInWorld by the getCustom function. This way the animator can get the angle value setted
+        // by the inspector, which is in world coordinates and is not "normalized" by fabricjs. And will return the true angle value as soon as the Active selection is rotated
         if(dictNewProperties.angle !==undefined){
             this.angleInWorld=dictNewProperties.angle;
         }

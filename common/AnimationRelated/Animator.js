@@ -62,21 +62,22 @@ var Animator=fabric.util.createClass({
         }
         return false;
     },
-    addAnimation:function(property,startValue,endValue,startMoment,endMoment){//string,number,number
-        this.dictAnimations[property].push(new Animation(property,startValue,endValue,startMoment,endMoment));
+    addAnimation:function(property,startValue,endValue,startMoment,endMoment,easingType,tweenType){//string,number,number
+        this.dictAnimations[property].push(new Animation(property,startValue,endValue,startMoment,endMoment,easingType,tweenType));
         console.log("TOTAL CANT ANIMACIONES EN PROPEIDAD : " + property + this.dictAnimations[property].length);
     },
-    addAnimations:function(properties,startValues,endValues,startMoment,endMoment){
+    addAnimations:function(properties,startValues,endValues,startMoment,endMoment,easingType,tweenType){
         for(let i in properties){
-            this.addAnimation(properties[i],startValues[i],endValues[i],startMoment,endMoment)
+            this.addAnimation(properties[i],startValues[i],endValues[i],startMoment,endMoment,easingType,tweenType)
         }
     },
-    updateAnimation:function(animIndex,property,startValue,endValue,startMoment,endMoment){
-        this.dictAnimations[property][animIndex].initParameters(startValue,endValue,startMoment,endMoment);
+    updateAnimation:function(animIndex,property,startValue,endValue,startMoment,endMoment,easingType,tweenType){
+        this.dictAnimations[property][animIndex].initParameters(startValue,endValue,startMoment,endMoment,easingType,tweenType);
     },
-    updateAnimations:function(animIndex,properties,startValues,endValues,startMoment,endMoment){
+    // a veces al keyframe de un lane le correcponden mas de una animacion en diferentes lanes (keyframe en position -> animation en left y top)
+    updateAnimations:function(animIndex,properties,startValues,endValues,startMoment,endMoment,easingType,tweenType){
         for (let i in properties){
-            this.updateAnimation(animIndex,properties[i],startValues[i],endValues[i],startMoment,endMoment);
+            this.updateAnimation(animIndex,properties[i],startValues[i],endValues[i],startMoment,endMoment,easingType,tweenType);
         }
     },
     /*
