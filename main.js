@@ -1,4 +1,4 @@
-  MainMediator.registerSubjects([WindowManager,PanelActionEditor,PanelAssets,CanvasManager,PanelInspector,PanelDesignerOptions,PanelPreviewer]);
+  MainMediator.registerSubjects([WindowManager,PanelActionEditor,PanelAssets,CanvasManager,PanelInspector,PanelDesignerOptions,  PanelPreviewer]);
 
 
   var fontsLoader=new FontsLoader();
@@ -17,7 +17,10 @@
   PanelPreviewer.setController(scenePreviewController);
 
   //registering controllers as subjects
+  //for their UI view
   MainMediator.registerSubject(scenePreviewController.name,scenePreviewController.events);
+  MainMediator.registerSubject(animationController.name,animationController.events);
+
   /*---------------------------------------------------*/
   WindowManager.init();
   CanvasManager.init();

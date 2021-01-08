@@ -100,7 +100,7 @@
         //firebase.analytics();
 
     </script>
-
+    <script src="https://kit.fontawesome.com/8abefba5b4.js" crossorigin="anonymous"></script>
     <style>
         *{
             margin:0;
@@ -110,6 +110,8 @@
         background:rgb(59, 59, 59);
     }
     </style>
+
+ <link rel="stylesheet" href="styles/font-icons.css">
  <link rel="stylesheet" href="styles.css">
  <link rel="stylesheet" href="stylesPathsDesigner.css">
 </head>
@@ -164,98 +166,104 @@
         <div class="canvas-animator__object__menu-options" style="display: none;"></div>
         <canvas id="c" class="canvas-animator"></canvas>
     </div>
-    <div class="canvas-animator__object-configuration__filter" style="display:none;">
-        <div class="canvas-animator__object-configuration">
-            <div class="canvas-animator__object-configuration__btn-close"></div>
-            <div class="canvas-animator__object-configuration__entrance-settings">
-                <p class="canvas-animator__object-configuration__entrance-settings__title">Entrace Modes</p>
-                <div class="canvas-animator__object-configuration__entrance-settings__box-radio-buttons">
-                    <div class="form-group"><!--el radio box debe ser segundo hijo-->
-                        <label id="label_none" for="none">None</label>
-                        <input type="radio" name="entrace_mode" value="none" id="none" class="entrance-settings__box-radio-buttons__radio-button ">
-                    </div>
-                    <div class="form-group">
-                        <label id="label_drawn" for="drawn">Drawn</label>
-                        <input type="radio" name="entrace_mode" value="drawn" id="drawn" class="entrance-settings__box-radio-buttons__radio-button ">
-                    </div>
-                    <div class="form-group">
-                        <label id="label_dragged" for="dragged">Dragged</label>
-                        <input type="radio" name="entrace_mode" value="dragged" id="dragged" class="entrance-settings__box-radio-buttons__radio-button ">
-                    </div>
-                    <div class="form-group">
-                        <label id="label_typed" for="typed">Typed</label>
-                        <input type="radio" name="entrace_mode" value="typed" id="typed" class="entrance-settings__box-radio-buttons__radio-button ">
-                    </div>
-                </div>
-                <div class="canvas-animator__object-configuration__entrance-settings__box-options">
-                    <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options none">
-                        opciones de el modo none
-                    </div>
-                    <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options drawn">
-                        opciones de el modo drawn
-                        <div class="form-group drawn-mode-widged__show-hand">
-                            <label for="checkbox-show-hand">Show Hand:</label>
-                            <input id="checkbox-show-hand" type="checkbox">
+    <div class="canvas-animator__object-configuration__filter modal__filter" style="display:none;">
+        <div class="canvas-animator__object-configuration modal">
+            <div class="canvas-animator__object-configuration__header modal__header">
+                <p class="modal-header__title">Object Configuration</p>
+                <div class="canvas-animator__object-configuration__btn-close btn-close-modal icon-cross modal-header__btn-close"></div>
+            </div>
+            <div class="canvas-animator__object-configuration__body modal__body">
+                <div class="canvas-animator__object-configuration__entrance-settings">
+                    <p class="canvas-animator__object-configuration__entrance-settings__title title">Entrace Modes</p>
+                    <div class="canvas-animator__object-configuration__entrance-settings__box-buttons">
+                        <div class="form-group entrance-button button-custom" id="none"><!--el radio box debe ser segundo hijo-->
+                            <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
+                            <p class="entrance-button__label" >None</p>
                         </div>
-                        <div class="form-group drawn-mode-widged__final-drawing-appearance" >
-                            <label for="">Drawing Final Appearance:</label>
-                            <div class="draw-final-appearance-options">
-                                <div><img src="" alt=""><span class="toolkit">Original Image</span></div>
-                                <div><img src="" alt=""><span class="toolkit">Resulting Image</span></div>
+                        <div class="form-group entrance-button button-custom" id="drawn">
+                            <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
+                            <p class="entrance-button__label" >Drawn</p>
+                        </div>
+                        <div class="form-group entrance-button button-custom" id="dragged">
+                            <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
+                            <p class="entrance-button__label" >Dragged</p>
+                        </div>
+                        <div class="form-group entrance-button button-custom" id="typed">
+                            <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
+                            <p class="entrance-button__label" >Typed</p>
+                        </div>
+                    </div>
+                    <div class="canvas-animator__object-configuration__entrance-settings__box-mode-settings">
+                        <div class="none-mode-settings mode-settings">
+                            opciones de el modo none
+                        </div>
+                        <div class="drawn-mode-settings mode-settings">
+                            <div class="form-group drawn-mode-widget__resulting-drawing drawn-mode-widged">
+                                <label for="checkbox-show-hand" class="widget-label">Show Hand </label>
+                                <input id="checkbox-show-hand" type="checkbox">
+                            </div>
+                            <div class="form-group drawn-mode-widget__resulting-drawing drawn-mode-widged" >
+                                <p class="widget-label">Resulting Drawing </p>
+                                <div class="box-resulting-drawing-buttons">
+                                    <div class="resulting-drawing-button button-custom" id="original"><img src="" alt=""><span class="tooltip">Original Image</span></div>
+                                    <div class="resulting-drawing-button button-custom" id="masked"><img src="" alt=""><span class="tooltip">Resulting Image</span></div>
+                                </div>
                             </div>
                         </div>
+                        <div class="dragged-mode-settings mode-settings">
+                            opciones del modo dragged
+                        </div>
+                        <div class="typed-mode-settings mode-settings">
+                            opciones del modo typed
+                        </div>
                     </div>
-                    <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options dragged">
-                        opciones del modo dragged
-                    </div>
-                    <div class="canvas-animator__object-configuration__entrance-settings__box-options__mode-options typed">
-                        opciones del modo typed
+                </div>
+                <div class="canvas-animator__object-configuration__appearance-settings">
+                    <p class="canvas-animator__object-configuration__apearance-settings__title title">Appareance</p>
+                    <div class="canvas-animator__object-configuration__appearance-settings__box-options">
+                        <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options ImageAnimable">
+                            opciones de objetos de tipo ImageAnimable
+                        </div>
+                        <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options TextAnimable">
+                            <div class="form-group ImageAnimable-widged__font-family text-animable-object-widget">
+                                <label for="font-family">Font Family </label>
+                                <select id="font-family" class="">
+                                    <option value="bauhs 93">Bauhs 93</option>
+                                    <option value="arial">Arial</option>
+                                    <option value="Verdana">Verdana</option>
+                                </select>
+                            </div>
+                            <div class="form-group ImageAnimable-widged__font-size text-animable-object-widget">
+                                <label for="text-size">Text Size </label>
+                                <div class="property-input"><button class="btn-decrease"></button><input id="text-size" type="text" value="16" class="field-value"><button class="btn-increase"></button></div>
+
+                            </div>
+                            <div class="form-group ImageAnimable-widged__line-height text-animable-object-widget">
+                                <label for="line-height">Line Height </label>
+                                <div class="property-input"><button class="btn-decrease"></button><input id="line-height" type="text" value="1.16" class="field-value"><button class="btn-increase"></button></div>
+                            </div>
+                            <div class="form-group ImageAnimable-widged__text-alignment text-animable-object-widget">
+                                <label for="">Text Alignment </label>
+                                <div class="text-alignment__options">
+                                    <span id="left" class="icon-paragraph-left"></span>
+                                    <span id="center" class="icon-paragraph-center"></span>
+                                    <span id="right" class="icon-paragraph-right"></span>
+                                </div>
+                            </div>
+                            <div class="form-group ImageAnimable-widged__fill-color text-animable-object-widget">
+                                <label for="fill-color">Color </label>
+                                <input id="fill-color" type="color">
+                            </div>
+                        </div>
+                        <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options CameraAnimable">
+                            opciones de objetos de tipo CameraAnimable
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="canvas-animator__object-configuration__appearance-settings">
-                <p class="canvas-animator__object-configuration__apearance-settings__title">Appareance</p>
-                <div class="canvas-animator__object-configuration__appearance-settings__box-options">
-                    <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options ImageAnimable">
-                        opciones de objetos de tipo ImageAnimable
-                    </div>
-                    <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options TextAnimable">
-                        <div class="form-group ImageAnimable-widged__font-family">
-                            <label for="font-family">Font Family:</label>
-                            <select id="font-family" class="">
-                                <option value="bauhs 93">Bauhs 93</option>
-                                <option value="arial">Arial</option>
-                                <option value="Verdana">Verdana</option>
-                            </select>
-                        </div>
-                        <div class="form-group ImageAnimable-widged__text-alignment">
-                            <label for="">Text Alignment:</label>
-                            <div class="text-alignment__options">
-                                <span id="left">L</span>
-                                <span id="center">C</span>
-                                <span id="right">R</span>
-                            </div>
-                        </div>
-                        <div class="form-group ImageAnimable-widged__font-size">
-                            <label for="text-size">Text Size:</label>
-                            <input id="text-size" type="number" value="16">
-                        </div>
-                        <div class="form-group ImageAnimable-widged__line-height">
-                            <label for="line-height">Line Height:</label>
-                            <input id="line-height" type="number" value="1.16">
-                        </div>
-                        <div class="form-group ImageAnimable-widged__fill-color">
-                            <label for="fill-color">Color:</label>
-                            <input id="fill-color" type="color">
-                        </div>
-                    </div>
-                    <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options CameraAnimable">
-                        opciones de objetos de tipo CameraAnimable
-                    </div>
-                </div>
-            </div>
-            <div class="canvas-animator__object-configuration__box-buttons">
-                <button class="btn-accept">Accept</button>
+            <div class="canvas-animator__object-configuration__footer modal__footer">
+                <button class="btn-accept modal__footer__btn-action">Accept</button>
+                <button class="btn-cancel modal__footer__btn-action">Cancel</button>
 
             </div>
         </div>
@@ -392,27 +400,27 @@
                 <div class="box-related-widgets clearfix">
                     <div class="widget-property-left widget">
                         <label>Left</label>
-                        <div class="property-input"><button class="btn-decrease">-</button><input type="text" property="left" class="field-value"/><button class="btn-increase">+</button></div>
+                        <div class="property-input"><button class="btn-decrease"></button><input type="text" property="left" class="field-value"/><button class="btn-increase"></button></div>
                     </div>
                 </div>
                 <div class="box-related-widgets clearfix">
                     <div class="widget-property-top widget">
-                        <label>Top</label><div class="property-input"><button class="btn-decrease">-</button><input type="text" property="top" class="field-value"/><button class="btn-increase">+</button></div>
+                        <label>Top</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="top" class="field-value"/><button class="btn-increase"></button></div>
                     </div>
                 </div>
                 <div class="box-related-widgets clearfix">
                     <div class="widget-property-scaleX widget">
-                        <label>scale X</label><div class="property-input"><button class="btn-decrease">-</button><input type="text" property="scaleX"class="field-value"/><button class="btn-increase">+</button></div>
+                        <label>scale X</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
                     </div>
                 </div>
                 <div class="box-related-widgets clearfix">
                     <div class="widget-property-scaleY widget">
-                        <label>scale Y</label><div class="property-input"><button class="btn-decrease">-</button><input type="text" property="scaleY" class="field-value"/><button class="btn-increase">+</button></div>
+                        <label>scale Y</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleY" class="field-value"/><button class="btn-increase"></button></div>
                     </div>
                 </div>
                 <div class="box-related-widgets clearfix">
                     <div class="widget-property-angle widget">
-                        <label>Angle</label><div class="property-input"><button class="btn-decrease">-</button><input type="text" property="angle" class="field-value"/><button class="btn-increase">+</button></div>
+                        <label>Angle</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="angle" class="field-value"/><button class="btn-increase"></button></div>
                     </div>
                 </div>
                 <div class="box-related-widgets clearfix">
@@ -437,32 +445,13 @@
                  <li class="panel-animation__top-bar__top-menu__item">Scenes</li>
                  <li class="panel-animation__top-bar__top-menu__item">Curves</li>
             </ul>
-            <div class="panel-animation__top-bar__editors-menus">
-                <div class="action-editor-menu">
-                    <div class="action-editor-menu__keyframes-options">
-                        <button class="keyframes-options__delete">[]</button>
-                        <nav name="keyframe-type" id="" class="keyframes-options__list-functions">
-                            <p class="current-selection">-----</p>
-                            <ul>
-                            </ul>
-                        </nav>
-                        <div class="keyframes-options__tween-type-menu">
-                            <!--
-                            <button class="tween-type-menu__option" name="Linear">|</button>
-                            <button class="tween-type-menu__option" name="In">In</button>
-                            <button class="tween-type-menu__option" name="Out">Out</button>
-                            <button class="tween-type-menu__option" name="InOut">InOut</button>
-                            -->
-                        </div>
-                    </div>
-                    <div class="action-editor-menu__timeline-options">
-                        <button class="action-editor-menu__timeline-options__zoom-in">+</button>
-                        <button class="action-editor-menu__timeline-options__zoom-out">-</button>
-                        <div class="action-editor-options__form-duration">
-                            <label class="editors-options__action-editor-options__form-duration__label">Duration: </label>
-                            <!--el input debe ser segundo hijo OnDurationInput panel action editor-->
-                            <input type="text" class="editors-options__action-editor-options__form-duration__input">
-                        </div>
+
+            <div class="panel-animation__top-bar__area-editors-menus">
+                <div class="panel-animation__top-bar__area-editors-menus__action-editor-menu action-editor-menu">
+                    <div class="display-timeline-progress tool">00:00:00</div>
+                    <div class="duration-form tool" title="scene duration">
+                        <label for="">Duration  </label>
+                        <div class="property-input"><button class="btn-decrease"></button><input id="" type="text" value="1.16" class="field-value"><button class="btn-increase"></button></div>
                     </div>
                 </div>
             </div>
@@ -470,6 +459,21 @@
         <div class="panel-animation__editors-container">
                 <section class="action-editor">
                     <div class="action-editor__properties-area">
+                        <div class="action-editor__properties-area__toolbar">
+                            <div class="btn-reset-timeline tool"><span class="icon-restart"></span></div>
+                            <div class="btn-play-timeline tool"></div>
+                            <div class="btn-delete-keyframe tool"> <span class="icon-bin"></span></div>
+                            <nav class="menu-functions tool">
+                                <div class="menu-functions__trigger"></div>
+                                <div class="menu-functions__dropdown dropdown">
+                                    <div class="menu-functions__dropdown__easing-list">
+                                    </div>
+                                    <div class="menu-functions__dropdown__tween-list"><!--list tweens-->
+                                    </div>
+                                </div>
+                            </nav>
+                        </div>
+
                         <div class="action-editor__properties-area__list"> <!--Los lanes se estan añadiendo a este elemento en runtime-->
 
                         </div>

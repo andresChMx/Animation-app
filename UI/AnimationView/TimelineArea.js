@@ -96,7 +96,7 @@ let Marker = fabric.util.createClass(Component, {
     type: "marker_component",
     HTMLElement: null,
     globalState: {},
-    localState: {colors: {idle: "yellow"}},
+    localState: {colors: {idle: "#0D263D"}},
     isPressed: false,
     mouseState: {},
     initialize: function (canvas, globalState, mouseState) {
@@ -106,6 +106,7 @@ let Marker = fabric.util.createClass(Component, {
 
         this.listObserversOnDragging=[];
         this.listObserversOnDragEnded=[];
+        this.listObserversOnDragStarted=[];
         this.canvas.addComponent(this);
     },
     calcTimelineLocationFromTime: function (time) {
@@ -135,8 +136,18 @@ let Marker = fabric.util.createClass(Component, {
         }
     },
     render: function (ctx) {
+        ctx.beginPath();
+        ctx.lineWidth=1;
+        ctx.strokeStyle=this.localState.colors.idle;
         ctx.fillStyle = this.localState.colors.idle;
-        ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
+        ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height/2);
+        ctx.moveTo(this.localState.coords.left,this.localState.coords.top + this.localState.coords.height/2);
+        ctx.lineTo(this.localState.coords.left+this.localState.coords.width,this.localState.coords.top + this.localState.coords.height/2);
+        ctx.lineTo(this.localState.coords.left+this.localState.coords.width/2, this.localState.coords.top+this.localState.coords.height);
+        ctx.lineTo(this.localState.coords.left+this.localState.coords.width/2,this.localState.coords.top+this.localState.coords.height+this.canvas.keysBarComponent.localState.coords.height);
+        ctx.lineTo(this.localState.coords.left+this.localState.coords.width/2, this.localState.coords.top+this.localState.coords.height);
+        ctx.stroke();
+        ctx.fill();
     },
     onLocalCoordsSettled: function () {
         this.calcTimelineTimeFromLocation(0);
@@ -145,6 +156,7 @@ let Marker = fabric.util.createClass(Component, {
     onMouseDragStarted: function () {
         this.offsetMouseX = this.mouseState.inWorldX - this.localState.coords.left;
         this.offsetMouseY = this.mouseState.inWorldY - this.localState.coords.top;
+        this.notifyOnDragStarted();
     },
     onMouseDragging: function () {
         this.localState.coords.left = this.mouseState.inWorldX - this.offsetMouseX;
@@ -160,6 +172,19 @@ let Marker = fabric.util.createClass(Component, {
     },
     onMouseDragEnded: function () {
         this.notifyOnDragEnded();
+    },
+    /*
+    * Establece un numero tiempo, y actualiza la ubicacion en timeline, Usado para cuando se da play
+    * */
+    setTime:function(newTime){
+        this.timeLineTime=newTime;
+        this.calcTimelineLocationFromTime(this.timeLineTime);
+        this.canvas.requestRenderAll();
+    },
+    notifyOnDragStarted:function(){
+        for (let i = 0; i < this.listObserversOnDragStarted.length; i++) {
+            this.listObserversOnDragStarted[i].notificationOnMarkerDragStarted(this.timeLineTime);
+        }
     },
     notifyOnDragging:function(){
         for(let i=0;i<this.listObserversOnDragging.length;i++){
@@ -185,19 +210,25 @@ let Marker = fabric.util.createClass(Component, {
         this.calcTimelineTimeFromLocation(this.mouseState.inWorldX - this.globalState.padding.width);
         this.calcTimelineLocationFromTime(this.timeLineTime);
         this.canvas.requestRenderAll();
+
+        this.notifyOnDragging(); // De forma que el animator actualize los eleentos del canvas al haer lick en el timebar, (sin esto, no pasara nada, solo se actualizara el timeline)
+    },
+    registerOnDragStarted:function(obj){
+        this.listObserversOnDragStarted.push(obj);
     },
     registerOnDragging:function(obj){
         this.listObserversOnDragging.push(obj);
     },
     registerOnDragEnded:function (obj){
         this.listObserversOnDragEnded.push(obj);
-    }
+    },
+
 });
 let ScrollBarButton = fabric.util.createClass(Component, {
 
     initialize: function (canvas, globalState, mouseState) {
         this.callSuper("initialize", globalState, mouseState)
-        this.localState = {colors: {idle: "peru"}};
+        this.localState = {colors: {idle: "#A1ACB1",innerCircle:"#6B7276"}};
         this.observerOnDragged = null;
         this.offsetMouseX = 0;
         this.offsetMouseY = 0;
@@ -214,9 +245,17 @@ let ScrollBarButton = fabric.util.createClass(Component, {
     },
     render: function (ctx) {
         ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(this.localState.coords.left+this.localState.coords.width/2, this.localState.coords.top + this.localState.coords.height/2);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.fillStyle = this.localState.colors.idle;
-        ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
+        ctx.arc(this.localState.coords.left+this.localState.coords.width/2, this.localState.coords.top + this.localState.coords.height/2,this.localState.coords.width/2,0,Math.PI*2,false);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.fillStyle =this.localState.colors.innerCircle;
+        ctx.arc(this.localState.coords.left+this.localState.coords.width/2, this.localState.coords.top + this.localState.coords.height/2,this.localState.coords.width/3,0,Math.PI*2,false);
+        ctx.fill();
+
         ctx.restore();
     },
     onLocalCoordsSettled: function () {
@@ -250,7 +289,7 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
         this.canvas = canvas;
         this.canvas.addComponent(this);
 
-        this.localState = {colors: {idle: "green"}};
+        this.localState = {colors: {idle: "#A1ACB1"}};
 
         this.offsetMouseX = 0;
         this.offsetMouseY = 0;
@@ -296,7 +335,7 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
         this.localState.coords.width = this.globalState.coords.width * percentInViewport;
     },
     setComponentsCoords: function () {
-        let buttonsWidth = 20;
+        let buttonsWidth = this.localState.coords.height;
         this.buttonA.setLocalCoords(this.localState.coords.left, this.localState.coords.top, buttonsWidth, this.localState.coords.height);
         this.buttonB.setLocalCoords(this.localState.coords.left + this.localState.coords.width - buttonsWidth, this.localState.coords.top, buttonsWidth, this.localState.coords.height);
     },
@@ -304,7 +343,7 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.fillStyle = this.localState.colors.idle;
-        ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
+        ctx.fillRect(this.localState.coords.left +(this.buttonA.localState.coords.width/2), this.localState.coords.top, this.localState.coords.width - (this.buttonB.localState.coords.width), this.localState.coords.height);
         ctx.restore();
     },
     onLocalCoordsSettled: function () {
@@ -382,7 +421,7 @@ let Padding = fabric.util.createClass(Component, {
 
     initialize: function (canvas, globalState, mouseState, name) {
         this.callSuper("initialize", globalState, mouseState);
-        this.localState = {"colors": {"idle": "rgba(0,0,0,0.6)"}}
+        this.localState = {"colors": {"idle": "rgba(0,0,0,.1)"}}
         this.name = name;
         this.canvas = canvas;
 
@@ -404,6 +443,7 @@ let TimeLineProxy=fabric.util.createClass({
 
         this.timeLineComponent.keysBarComponent.registerOnKeyFrameDragEnded(classParent);
         this.timeLineComponent.keysBarComponent.registerOnKeyFrameDragging(classParent);
+        this.timeLineComponent.markerComponent.registerOnDragStarted(classParent);
         this.timeLineComponent.markerComponent.registerOnDragging(classParent);
         this.timeLineComponent.markerComponent.registerOnDragEnded(classParent);
         this.timeLineComponent.keysBarComponent.registerOnSelectionUpdated(classParent);
@@ -445,7 +485,12 @@ let TimeLineProxy=fabric.util.createClass({
     },
     getSelectedKeyFrames:function(){
         return this.timeLineComponent.keysBarComponent.getSelectedKeyFrames();
+    },
+    /*setters*/
+    setMarkerTime:function(time){
+        this.timeLineComponent.markerComponent.setTime(time);
     }
+
 })
 let TimeLineActions = fabric.util.createClass({
     HTMLElement: null,
@@ -474,7 +519,7 @@ let TimeLineActions = fabric.util.createClass({
             cantSegments:0, // cantidad de segmentos
             scrollLeft: 0  // tamaño de porcion oculta de la izquierda por scroll ( 0 es que 0px estan ocultos)
         },
-        padding: {width: 50}
+        padding: {width: 25}
     },
     mouseState: {x: 0, y: 0, click: false, inWorldX: 0, inWorldY: 0},
     globalStateUpdated: true,
@@ -550,15 +595,15 @@ let TimeLineActions = fabric.util.createClass({
     setupComponentsCoords: function () {
         let timeBarLeft = 0;
         let timeBarTop = 0;
-        let timeBarHeight = 20;
-        let scrollBarHeight = 20;
+        let timeBarHeight = 23;
+        let scrollBarHeight = 18;
         this.timeBarComponent.setLocalCoords(timeBarLeft, timeBarTop, this.globalState.coords.width, timeBarHeight);
         this.keysBarComponent.setLocalCoords(timeBarLeft, timeBarHeight, this.globalState.coords.width, this.globalState.coords.height - timeBarHeight);
-        this.markerComponent.setLocalCoords(timeBarLeft, timeBarTop, 30, timeBarHeight);
+        this.markerComponent.setLocalCoords(timeBarLeft, timeBarTop, 20, timeBarHeight);
         this.scrollBarComponent.setLocalCoords(0, this.globalState.coords.height - scrollBarHeight, 100, scrollBarHeight);
 
-        this.paddingLeft.setLocalCoords(0, 0, this.globalState.padding.width, this.globalState.coords.height);
-        this.paddingRight.setLocalCoords(this.globalState.timingDistances.scrollWidth - this.globalState.padding.width, 0, this.globalState.padding.width, this.globalState.coords.height);
+        this.paddingLeft.setLocalCoords(0, timeBarHeight, this.globalState.padding.width, this.globalState.coords.height);
+        this.paddingRight.setLocalCoords(this.globalState.timingDistances.scrollWidth - this.globalState.padding.width, timeBarHeight, this.globalState.padding.width, this.globalState.coords.height);
     },
     initEvents:function(){
         this.scrollBarComponent.registerOnScroll(this);
@@ -650,7 +695,7 @@ let TimeLineTimeBar = fabric.util.createClass(Component, {
     globalState: {},
     localState: {
         coords: {left: 0, top: 0, width: 0, height: 0},
-        colors: {idle: "gray", onMouseOver: "yellow", onMouseClick: "green", text: "white"}
+        colors: {idle: "#F2F5F7", onMouseOver: "yellow", onMouseClick: "green", text: "#808080"}
     },
     mouseState: {},
     snapshotLastState: null,
@@ -672,13 +717,19 @@ let TimeLineTimeBar = fabric.util.createClass(Component, {
 
     },
     _drawContainer: function (ctx) {
+
         ctx.fillStyle = this.localState.colors.idle;
         ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
-    },
+        ctx.moveTo(this.localState.coords.left,this.localState.coords.top+this.localState.coords.height);
+        ctx.lineTo(this.localState.coords.left+ this.localState.coords.width,this.localState.coords.top+this.localState.coords.height);
+        ctx.stroke();
+        },
     _drawLabels: function (ctx) {
+        let fontSize=11;
+        ctx.beginPath();
+        ctx.font = fontSize + "px Arial";
+        ctx.textBaseline = "top";
         ctx.fillStyle = this.localState.colors.text;
-        ctx.font = "10px Arial";
-        ctx.textBaseline = "middle";
         //marks are all the little lines
         let cantLabels=Math.ceil(this.globalState.timingDistances.cantSegments);
         let timesTimeValueIn1Second=(1000/(this.globalState.time.segmentTimeValue)); //simbre data un valor entero, ya que segmentTimeValue esta en base a 250 (125,250,500,...)
@@ -690,32 +741,36 @@ let TimeLineTimeBar = fabric.util.createClass(Component, {
             let timeMS = this.globalState.time.segmentTimeValue * i;
             if(timeMS%1000===0){
                 let text=(timeMS/1000) + "s";
-                let txtWidth = ctx.measureText(text).width;
+                let textMeassures = ctx.measureText(text);
                 let labelLeftPos=this.globalState.timingDistances.segmentDistance * i + this.globalState.padding.width;
                 for(let j=0;j<timesTimeValueIn1Second;j++){
-                    ctx.moveTo(labelLeftPos+(timeBarMarksDistance*j),this.localState.coords.top);
                     if(j%(timesTimeValueIn1Second/4)===0){
-                        ctx.lineTo(labelLeftPos + (timeBarMarksDistance * j), this.localState.coords.top + 12);
+                        ctx.moveTo(labelLeftPos + (timeBarMarksDistance * j), this.localState.coords.top+this.localState.coords.height -10);
                     }else {
-                        ctx.lineTo(labelLeftPos + (timeBarMarksDistance * j), this.localState.coords.top + 7);
+                        ctx.moveTo(labelLeftPos + (timeBarMarksDistance * j), this.localState.coords.top+this.localState.coords.height - 6);
                     }
+                    ctx.lineTo(labelLeftPos + (timeBarMarksDistance * j),this.localState.coords.top+this.localState.coords.height);
                 }
-                ctx.fillText(text,labelLeftPos - (txtWidth/2) , this.localState.coords.height / 2);
+                ctx.fillText(text,labelLeftPos - (textMeassures.width/2) , this.localState.coords.top+2 );
             }
         }
+
         ctx.stroke();
 
-
+        ctx.closePath();
     },
     updateLogic: function () {
     },
     render: function (ctx) {
+        ctx.lineWidth=1;
+        ctx.strokeStyle=this.localState.colors.text;
         this._drawContainer(ctx);
         this._drawLabels(ctx);
-        this.snapshotLastState = ctx.getImageData(this.localState.coords.left,
-            this.localState.coords.top,
-            this.localState.coords.width,
-            this.localState.coords.height)
+        ctx.beginPath();
+        // this.snapshotLastState = ctx.getImageData(this.localState.coords.left,
+        //     this.localState.coords.top, 
+        //     this.localState.coords.width,
+        //     this.localState.coords.height)
     },
     drawSnapshot: function (ctx) {
         ctx.putImageData(this.snapshotLastState, 0, 0)
@@ -740,7 +795,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     type: "keys-bar_component",
     localState: {
         coords: {left: 0, top: 0, width: 0, height: 0},
-        colors: {idle: "red", selection: "yellow", onMouseClick: "green", text: "white"}
+        colors: {idle: "#ffffff", selection: "yellow", onMouseClick: "green", text: "white",guidelines:"rgb(230,230,230)"}
     },
     initialize: function (canvas, globalState, mouseState, listLanesName) {
         this.callSuper('initialize', globalState, mouseState);
@@ -778,7 +833,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         }
     },
     setupComponentsCoords: function () {
-        let laneHeight = 20;
+        let laneHeight = 24;
         let i = 0;
         for (let key in this.dictPropertiesLanes) {
             let top = laneHeight * i + this.localState.coords.top;
@@ -925,7 +980,8 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         this.canvas.requestRenderAll();
     },
     _drawContainer: function (ctx) {
-        ctx.strokeStyle="white";
+        ctx.beginPath();
+        ctx.strokeStyle=this.localState.colors.guidelines;
         ctx.fillStyle = this.localState.colors.idle;
         ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
         for(let i=0;i<this.globalState.timingDistances.cantSegments;i++){
@@ -937,17 +993,23 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     },
     _drawSelection: function (ctx) {
         if (this.selecting) {
+            ctx.beginPath();
+            ctx.strokeStyle="black";
+            ctx.setLineDash([5,5]);
             ctx.fillStyle = this.localState.colors.selection;
-            ctx.fillRect(this.mousePosXOnDragStated, this.mousePosYOnDragStated, this.selectionWidth, this.selectionHeight);
+            ctx.rect(this.mousePosXOnDragStated, this.mousePosYOnDragStated, this.selectionWidth, this.selectionHeight);
+            ctx.stroke();
+            ctx.setLineDash([]);
         }
     },
     render: function (ctx) {
+
         this._drawContainer(ctx);
         for (let key in this.dictPropertiesLanes) {
             this.dictPropertiesLanes[key].render(ctx);
         }
         this._drawSelection(ctx);
-        this.snapshotLastState = ctx.getImageData(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height)
+        //this.snapshotLastState = ctx.getImageData(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height)
 
     },
     drawSnapshot: function (ctx) {
@@ -1095,7 +1157,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
 var KeyBarPropertyLane = fabric.util.createClass(Component, {
     initialize: function (canvas, globalState, mouseState, name) {
         this.callSuper("initialize", globalState, mouseState);
-        this.localState = {colors: {idle: "orange", stroke: "yellow"}}
+        this.localState = {colors: {idle: "orange", stroke: "yellow", guidelines:"rgb(230,230,230)"}}
         this.name = name;
         this.canvas = canvas;
 
@@ -1122,8 +1184,7 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
             retrievedKey.registerOnDragging(this);
             retrievedKey.registerOnDragEnded(this);
 
-
-            retrievedKey.setLocalCoords(0, this.localState.coords.top, 20, 20)
+            retrievedKey.setLocalCoords(0, this.localState.coords.top,this.localState.coords.height , this.localState.coords.height)
 
         } else {
             retrievedKey=this.keyFrames[this.counterActiveKeyFrames];
@@ -1189,33 +1250,46 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         for(let i=0;i<this.listListActiveKeyFramesByIds.length;i++){
             if(this.listListActiveKeyFramesByIds[i]===undefined){continue;}
             let identifier=i;
+            let r=100+(((identifier+1)*10)%100);
+            let g=100+(((identifier+1)*160)%100);
+            let b=100+(((identifier+1)*170)%100);
             for(let j=0;j<this.listListActiveKeyFramesByIds[i].length-1;j++){
 
                 let firstKeyCoords=this.listListActiveKeyFramesByIds[identifier][j].localState.coords;
                 let secondKeyCoords=this.listListActiveKeyFramesByIds[identifier][j+1].localState.coords;
+                let diff=0;
                 if(this.listListActiveKeyFramesByIds[identifier][j].isSelected){
-                    ctx.fillStyle="white";
+                    let mayor;
+                    if(g>r && g>b){mayor=g}else if(r>g &&  r>b){mayor=r}
+                    else {mayor=b;}
+
+                    diff=255-mayor;
+                    ctx.fillStyle =  "rgb(" + (r+diff)+"," +(g+diff) + ","+ (b+diff) +")";
                 }else{
-                    ctx.fillStyle="rgb(" + ((identifier+1)*100)%200+"," + ((identifier+1)*150)%200+ ","+ ((identifier+1)*190)%200+")";
+                    ctx.fillStyle="rgb(" + r+"," +g + ","+ b+")";
                 }
-                ctx.fillRect(firstKeyCoords.left + firstKeyCoords.width
+                ctx.fillRect(firstKeyCoords.left + firstKeyCoords.width/2
                     ,firstKeyCoords.top
                     ,secondKeyCoords.left-firstKeyCoords.left
                     ,firstKeyCoords.height
                 );
-                this.listListActiveKeyFramesByIds[identifier][j+1].render(ctx);
+                this.listListActiveKeyFramesByIds[identifier][j].render(ctx,r+diff,g+diff,b+diff);
             }
             if(this.listListActiveKeyFramesByIds[identifier].length>0){
-                this.listListActiveKeyFramesByIds[identifier][0].render(ctx);
+                this.listListActiveKeyFramesByIds[identifier][this.listListActiveKeyFramesByIds[identifier].length-1].render(ctx,r,g,b);
             }
         }
     },
     render: function (ctx) {
-
+        ctx.beginPath();
+        ctx.lineWidth=1;
+        ctx.strokeStyle=this.localState.colors.guidelines;
         //ctx.fillStyle = this.localState.colors.idle;
         //ctx.strokeStyle = this.localState.colors.stroke
         //ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
-
+        ctx.moveTo(this.localState.coords.left,this.localState.coords.top+this.localState.coords.height);
+        ctx.lineTo(this.localState.coords.left+this.localState.coords.width,this.localState.coords.top+this.localState.coords.height);
+        ctx.stroke();
         this._renderAnimationsBoxes(ctx);
 
         // for (let i = 0; i < this.counterActiveKeyFrames; i++) {
@@ -1306,7 +1380,7 @@ var KeyFrame = fabric.util.createClass(Component, {
     initialize: function (canvas, globalState, mouseState,laneName, time,data,identifier) {
         this.callSuper("initialize", globalState, mouseState);
         this.data=data; //{values:[100,100],easingType:"In",TweenType:"Sine"}
-        this.localState = {colors: {idle: "brown", selected: "pink"}}
+        this.localState = {colors: {idle: "#0D263D", selected: "#AEB6BE"}}
         this.laneName=laneName;
         this.canvas = canvas;
         this.isActive = true;
@@ -1417,17 +1491,30 @@ var KeyFrame = fabric.util.createClass(Component, {
     deselect: function () {
         this.isSelected = false;
     },
-    render: function (ctx) {
+    render: function (ctx,r,g,b) {
+        ctx.beginPath();
+        ctx.lineWidth=3;
+        let radio=6;
         if (!this.isActive) {
             return false;
         }
         if (this.isSelected) {
-            ctx.fillStyle = this.localState.colors.selected;
+            ctx.fillStyle =  "rgb(" + r+"," +g + ","+ b +")";
+            ctx.strokeStyle=this.localState.colors.selected;
         } else {
-            ctx.fillStyle = this.localState.colors.idle;
+            ctx.fillStyle = "rgb(" + r+"," +g + ","+ b+")";
+            ctx.strokeStyle=this.localState.colors.idle;
         }
-        ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
-        },
+        let center={x:this.localState.coords.left+this.localState.coords.width/2,y:this.localState.coords.top+ this.localState.coords.height/2}
+        ctx.moveTo(center.x,center.y-radio);
+        ctx.lineTo(center.x+radio, center.y);
+        ctx.lineTo(center.x,center.y+radio);
+        ctx.lineTo(center.x-radio,center.y);
+        ctx.lineTo(center.x,center.y-radio);
+        // ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
+        ctx.stroke();
+        ctx.fill();
+    },
     onLocalCoordsSettled: function () {
 
         this.calcTimelineLocationFromTime(this.timeLineTime);

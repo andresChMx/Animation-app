@@ -171,7 +171,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         }
         this.entraceModesSettings[this.applicableEntrenceModes[1]]={
             showHand:true,
-            finalDrawingAppearance:'masked'
+            finalDrawingAppearance:'masked'  // masked || original
         }
         this.entraceModesSettings[this.applicableEntrenceModes[2]]={
 

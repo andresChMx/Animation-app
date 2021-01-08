@@ -11,7 +11,6 @@ var EnumAnimationEasingType={
     In:'In',
     Out:'Out',
     InOut:'InOut',
-    Linear:'Linear',
 }
 fabric.util.ease.Linear=function(t,b,c,d){
     return (t/d)*c + b;

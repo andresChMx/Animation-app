@@ -28,7 +28,7 @@ var PanelPreviewer={
         this.canvas=new CustomStaticCanvas('panel-previewer__canvas');
         this.scenePreviewerController.setPreviewerCanvas(this.canvas);
     },
-    setController:function(controller){
+    setController:function(controller){//controllers are setted before initialization (init())
         this.scenePreviewerController=controller;
     },
     initEvents:function(){
@@ -38,14 +38,16 @@ var PanelPreviewer={
     },
     notificationPanelInspectorOnBtnPreviewClicked:function(){
         this.setupDimentions(1400,800,15,30,10);
-        this.HTMLControls_playBtn.classList.remove("pause");
+        this.HTMLControls_playBtn.classList.add("pause");
         this.HTMLParent.style.display="block";
     },
     notificationScenePreviewControllerOnAnimatorTick:function(args){
-        let normalizedProgress=args[0];
+        let progress=args[0];
+        let totalDuration=this.scenePreviewerController.animator.totalDuration;
+        let normalizedProgress=progress/totalDuration;
         this.HTMLControls_progressBar.style.width=this.progressBarCompleteWidth*normalizedProgress + "px";
-        if(normalizedProgress===1){ //termino la animacion
-            this.HTMLControls_playBtn.classList.add("pause");
+        if(progress===totalDuration){ //termino la animacion
+            this.HTMLControls_playBtn.classList.remove("pause");
         }
     },
     setupDimentions:function(resolutionWidth,resolutionHeight,padding,controlsContentHeight,controlsPadding){
@@ -84,10 +86,10 @@ var PanelPreviewer={
     OnBtnPlayClicked:function(e){
         if(e.target.classList.contains('pause')){
             this.HTMLControls_playBtn.classList.remove("pause");
-            this.notifyBtnPlayClicked(1);
+            this.notifyBtnPlayClicked(0);
         }else{
             this.HTMLControls_playBtn.classList.add("pause");
-            this.notifyBtnPlayClicked(0);
+            this.notifyBtnPlayClicked(1);
         }
     },
     notifyBtnPlayClicked:function(action){

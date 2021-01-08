@@ -459,36 +459,36 @@ var SectionConfigureObject={
     init:function(){
         this.HTMLElement=document.querySelector(".canvas-animator__object-configuration__filter");
         this.HTMLAreaEntranceSettings=document.querySelector(".canvas-animator__object-configuration__entrance-settings")
-        this.HTMLCollectionRadioButtons=document.querySelectorAll(".entrance-settings__box-radio-buttons__radio-button")
-        this.HTMLCollectionModesAreas=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-options__mode-options")
+        this.HTMLCollectionEntranceButtons=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-buttons .entrance-button")
+        this.HTMLCollectionModesAreas=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-mode-settings__mode-options")
 
         this.HTMLCollectionObjectAppearanceAreas=document.querySelectorAll(".canvas-animator__object-configuration__appearance-settings__box-options__object-type-options");
         this.widgetsEntraceMode={
             modeSelector:{
                 value:"",
-                htmlElem:document.querySelector(".canvas-animator__object-configuration__entrance-settings__box-radio-buttons"),
+                htmlElem:document.querySelector(".canvas-animator__object-configuration__entrance-settings__box-buttons"),
                 initEvent:function(){
-                    console.log(this.htmlElem);
-                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].children[1].addEventListener("change",this.OnTriggered.bind(this));}
+                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].addEventListener("click",this.OnTriggered.bind(this));}
                 },
                 removeEvent:function(){
-                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].children[1].removeEventListener("change",this.OnTriggered.bind(this));}
+                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].removeEventListener("click",this.OnTriggered.bind(this));}
                 },
-                OnTriggered:function(e){this.setVal(e.target.value);},
+                OnTriggered:function(e){console.log(e.target);this.setVal(e.target.id);},
                 setVal:function(normalizedEntranceModeName){
-                    let HTMLCollectionEntraceModesAreas=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-options__mode-options");
+                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].classList.remove("active");}
+                    let HTMLCollectionEntraceModesAreas=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-mode-settings .mode-settings");
                     for(let i=0;i<this.htmlElem.children.length;i++){
-                        if(this.htmlElem.children[i].children[1].value===normalizedEntranceModeName){
+                        if(this.htmlElem.children[i].id===normalizedEntranceModeName){
                             HTMLCollectionEntraceModesAreas[i].style.display="block";
                             this.value=normalizedEntranceModeName;
                         }else{HTMLCollectionEntraceModesAreas[i].style.display="none";}
                     }
-                    this.htmlElem.querySelector("#" + normalizedEntranceModeName).checked=true;
+                    this.htmlElem.querySelector("#" + normalizedEntranceModeName).classList.add("active");
                 },
                 getVal:function(){return this.value;},
             },
             drawn_showHand:{
-                htmlElem:document.querySelector(".drawn-mode-widged__show-hand"),
+                htmlElem:document.querySelector(".drawn-mode-widget__resulting-drawing"),
                 initEvent:function(){this.htmlElem.querySelector("#checkbox-show-hand").addEventListener("change",this.OnTriggered.bind(this))},
                 removeEvent:function(){this.htmlElem.querySelector("#checkbox-show-hand").removeEventListener("change",this.OnTriggered.bind(this))},
                 OnTriggered:function(e){},
@@ -496,12 +496,29 @@ var SectionConfigureObject={
                 getVal:function(){return this.htmlElem.querySelector("#checkbox-show-hand").checked;}
             },
             drawn_finalDrawingAppearance:{
-                htmlElem:document.querySelector(".drawn-mode-widged__final-drawing-appearance"),
-                initEvent:function(){},
-                removeEvent:function(){},
-                OnTriggered:function(e){},
-                setVal:function(appearance){},
-                getVal:function(){return "masked"}
+                value:"",
+                htmlElem:document.querySelector(".drawn-mode-widget__resulting-drawing .box-resulting-drawing-buttons"),
+                initEvent:function(){
+                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].addEventListener("click",this.OnTriggered.bind(this));}
+                },
+                removeEvent:function(){
+                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].removeEventListener("click",this.OnTriggered.bind(this));}
+                },
+                OnTriggered:function(e){
+                    if(e.target.className==="tooltip"){return;}
+                    this.setVal(e.target.id);
+                },
+                setVal:function(appearance){
+                    this.value=appearance;
+                    for(let i=0;i<this.htmlElem.children.length;i++){
+                        if(this.htmlElem.children[i].id===appearance){
+                            this.htmlElem.children[i].classList.add("active");
+                        }else{
+                            this.htmlElem.children[i].classList.remove("active");
+                        }
+                    }
+                },
+                getVal:function(){return this.value;}
             }
         }
 
@@ -534,20 +551,56 @@ var SectionConfigureObject={
                 getVal:function(){return this.value},
                 },
             fontSize:{
-                htmlElem:document.querySelector(".ImageAnimable-widged__font-size input"),
-                initEvent:function(){this.htmlElem.addEventListener("input",this.OnTriggered.bind(this))},
-                removeEvent:function(){this.htmlElem.removeEventListener("input",this.OnTriggered.bind(this))},
-                OnTriggered:function(e){},
-                setVal:function(val){this.htmlElem.value=val},
-                getVal:function(){return this.htmlElem.value},
+                htmlElem:document.querySelector(".ImageAnimable-widged__font-size .property-input"),
+                val:0,
+                initEvent:function(){
+                    this.htmlElem.children[0].addEventListener("click",this.OnTriggered.bind(this))
+                    this.htmlElem.children[1].addEventListener("input",this.OnTriggered.bind(this))
+                    this.htmlElem.children[2].addEventListener("click",this.OnTriggered.bind(this))
+                },
+                removeEvent:function(){
+                    this.htmlElem.children[0].removeEventListener("click",this.OnTriggered.bind(this))
+                    this.htmlElem.children[1].removeEventListener("input",this.OnTriggered.bind(this))
+                    this.htmlElem.children[2].removeEventListener("click",this.OnTriggered.bind(this))
+                },
+                OnTriggered:function(e){
+                    if(e.target.className==="btn-decrease"){this.setVal(this.val-5)}
+                    else if(e.target.className==="btn-increase"){this.setVal(this.val+5)}
+                    else{
+                        if(isNaN(parseInt(e.target.value))){this.setVal(this.val);}
+                        else{this.setVal(e.target.value)}
+                    }
+                },
+                setVal:function(val){
+                    val=val<0?0:val;
+                    val=parseInt(val);this.val=val;this.htmlElem.children[1].value=val},
+                getVal:function(){return this.val},
                 },
             lineHeight:{
-                htmlElem:document.querySelector(".ImageAnimable-widged__line-height input"),
-                initEvent:function(){this.htmlElem.addEventListener("input",this.OnTriggered.bind(this))},
-                removeEvent:function(){this.htmlElem.removeEventListener("input",this.OnTriggered.bind(this))},
-                OnTriggered:function(e){},
-                setVal:function(val){this.htmlElem.value=val},
-                getVal:function(){return this.htmlElem.value},
+                htmlElem:document.querySelector(".ImageAnimable-widged__line-height .property-input"),
+                initEvent:function(){
+                    this.htmlElem.children[0].addEventListener("click",this.OnTriggered.bind(this))
+                    this.htmlElem.children[1].addEventListener("input",this.OnTriggered.bind(this))
+                    this.htmlElem.children[2].addEventListener("click",this.OnTriggered.bind(this))
+                },
+                removeEvent:function(){
+                    this.htmlElem.children[0].removeEventListener("click",this.OnTriggered.bind(this))
+                    this.htmlElem.children[1].removeEventListener("input",this.OnTriggered.bind(this))
+                    this.htmlElem.children[2].removeEventListener("click",this.OnTriggered.bind(this))
+                },
+                OnTriggered:function(e){
+                    if(e.target.className==="btn-decrease"){this.setVal(this.val-0.05)}
+                    else if(e.target.className==="btn-increase"){this.setVal(this.val+0.05)}
+                    else{
+                        if(isNaN(parseFloat(e.target.value))){this.setVal(this.val);}
+                        else{this.setVal(e.target.value)}
+                    }
+                },
+                setVal:function(val){val=parseFloat(val);
+                val=val<0?0:val;
+                val=Math.round(val * 100) / 100;
+                this.val=val;this.htmlElem.children[1].value=val},
+                getVal:function(){return this.val;},
             },
             fillColor:{htmlElem:document.querySelector(".ImageAnimable-widged__fill-color input"),
                 initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
@@ -559,9 +612,11 @@ var SectionConfigureObject={
         }
 
         this.HTMLcloseBtn=document.querySelector(".canvas-animator__object-configuration__btn-close");
-        this.HTMLAcceptBtn=document.querySelector(".canvas-animator__object-configuration__box-buttons .btn-accept")
+        this.HTMLAcceptBtn=document.querySelector(".canvas-animator__object-configuration__footer .btn-accept")
+
         this.currentAnimableObject=null;
         this.currentSelectedOptions={};
+
         this.initEvents();
     },
     initEvents:function(){
@@ -624,7 +679,6 @@ var SectionConfigureObject={
             let normalizedMode=this.normalizeObjectEntraceMode(animableObject.applicableEntrenceModes[i]);
             for(let key in animableObject.entraceModesSettings[unnormalizedMode]){
                 let val=animableObject.entraceModesSettings[unnormalizedMode][key];
-                console.log(val);
                 this.widgetsEntraceMode[normalizedMode + "_"+ key].setVal(val);
             }
         }
@@ -637,12 +691,12 @@ var SectionConfigureObject={
         this.widgetsTextAnimableObjectAppareance.fillColor.setVal(animableObject.fill);
     },
     activateEntraceModeRadios:function(animableObject){
-        for(let i=0;i<this.HTMLCollectionRadioButtons.length;i++) {
-            this.HTMLCollectionRadioButtons[i].parentNode.style.display="none";
+        for(let i=0;i<this.HTMLCollectionEntranceButtons.length;i++) {
+            this.HTMLCollectionEntranceButtons[i].style.display="none";
         }
         for(let i=0;i<animableObject.applicableEntrenceModes.length;i++){
             let applicableEntraceMode=this.normalizeObjectEntraceMode(animableObject.applicableEntrenceModes[i]);
-            this.HTMLAreaEntranceSettings.querySelector("#" + applicableEntraceMode).parentNode.style.display="inline";
+            this.HTMLAreaEntranceSettings.querySelector("#" + applicableEntraceMode ).style.display="inline";
         }
     },
     activateObjectAppareanceArea:function(animableObjectType){

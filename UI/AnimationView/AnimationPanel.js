@@ -12,7 +12,7 @@ var Lane=function(parentClass,name){
         this.btnAddKey=document.createElement("span");
         this.element.appendChild(this.label);
         this.element.appendChild(this.btnAddKey);
-        this.parentClass.HTMLElement.children[0].appendChild(this.element);
+        this.parentClass.HTMLElement.children[1].appendChild(this.element);
 
         this.element.classList.add("action-editor__properties-area__list__item");
         this.label.classList.add("action-editor__properties-area__list__item__label");
@@ -87,174 +87,296 @@ var SectionActionEditorMenu={
 
     MODELMenuTweenTypes:Object.keys(EnumAnimationTweenType),
     MODELMenuEasingTypes:Object.keys(EnumAnimationEasingType),
-    selectedOptionInTweenTypeMenu:null,
-    selectedOptionInEasingTypeMenu:null,
-
-    listSelectedKeyFramesAnimations:[],
-    listSelectedKeyFrames:[],
 
     parentClass:null,
     init:function(parentClass){
         this.parentClass=parentClass;
-        this.HTMLBtnDeleteKeyFrame= document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__delete");
-        this.HTMLTweensMenu=     document.querySelector(".action-editor-menu__keyframes-options .keyframes-options__list-functions");
-        this.HTMLEasingsMenu=        document.querySelector('.action-editor-menu__keyframes-options .keyframes-options__tween-type-menu')
 
-        this.HTMLBtnZoomInTimeline= document.querySelector(".action-editor-menu__timeline-options__zoom-in");
-        this.HTMLBtnZoomOutTimeline=document.querySelector(".action-editor-menu__timeline-options__zoom-out");
+        let me=this;
+        this.widgetsKeyframeTools={
+            deleteKeyframe:{
+                htmlElem:document.querySelector(".action-editor__properties-area__toolbar .btn-delete-keyframe"),
+                enable:function(){this.htmlElem.classList.remove("disabled");},
+                desable:function(){this.htmlElem.classList.add("disabled")},
+                initEvents:function (){this.htmlElem.addEventListener("click",this.OnTrigger.bind(this))},
+                OnTrigger:function(){me.OnWidgetChanged("delete-keyframe");}
+            },
+            menuFunctions:{
+                htmlElem:document.querySelector(".action-editor__properties-area__toolbar .menu-functions"),
+                val:{listKeyframes:[],listAnimations:[]},
+                htmlEasingItemSelected:null,
+                htmlTweenItemSelected:null,
+                auxBtnOpenMouseDown:false,
+                auxMouseOverMenu:false,
+                enable:function(){this.htmlElem.classList.remove("disabled");},
+                desable:function(){this.htmlElem.classList.add("disabled")},
+                initEvents:function(){
+                    this.htmlElem.addEventListener("mouseover",function(){this.auxMouseOverMenu=true;}.bind(this))
+                    this.htmlElem.addEventListener("mouseout",function(){this.auxMouseOverMenu=false;}.bind(this))
 
-        this.HTMLdurationFormInput=document.querySelector(".editors-options__action-editor-options__form-duration__input");
+                    this.htmlElem.children[0].addEventListener("click",this.OnTrigger.bind(this));
+                    this.htmlElem.children[0].addEventListener("mousedown",function(){this.auxBtnOpenMouseDown=true;}.bind(this));
+
+                    let easingList=this.htmlElem.querySelector(".menu-functions__dropdown__easing-list");
+                    let tweenList=this.htmlElem.querySelector(".menu-functions__dropdown__tween-list");
+                    for(let i=0;i<easingList.children.length;i++){
+                        easingList.children[i].addEventListener("click",this.OnTrigger.bind(this));
+                    }
+                    for(let i=0;i<tweenList.children.length;i++){
+                        tweenList.children[i].addEventListener("click",this.OnTrigger.bind(this));
+                    }
+
+                },
+                OnTrigger:function(e){
+                    if(this.val.listAnimations.length===0){return;}
+                    if(e.target.className==="menu-functions__trigger"){
+                        this.htmlElem.children[1].classList.toggle("active");
+                        this.auxBtnOpenMouseDown=false;
+                    }else if(e.target.className==="item-tween-list"){
+                        let newEasingName=e.target.getAttribute("name");
+                        for(let i=0;i<this.val.listAnimations.length;i++){this.val.listAnimations[i].setTweenType(newEasingName);}
+                        for(let i=0;i<this.val.listKeyframes.length;i++){this.val.listKeyframes[i].data.tweenType=newEasingName;}
+                        this.activateMenuTweensOption(newEasingName);
+                    }else if(e.target.className==="item-easing-list"){
+                        let easingTypeName=e.target.getAttribute('name');
+                        for(let i=0;i<this.val.listAnimations.length;i++){this.val.listAnimations[i].setEasingType(easingTypeName);}
+                        for(let i=0;i<this.val.listKeyframes.length;i++){this.val.listKeyframes[i].data.easingType=easingTypeName;}
+                        this.activateMenuEasingOption(easingTypeName);
+                    }
+                },
+                activateMenuTweensOption:function(TweenType){
+                    if(this.htmlTweenItemSelected){this.htmlTweenItemSelected.classList.remove('active');}
+
+                    let tweenList=this.htmlElem.querySelector(".menu-functions__dropdown__tween-list");
+                    if(TweenType !== ''){
+                        let liIndex=me.MODELMenuTweenTypes.indexOf(TweenType);
+                        this.htmlTweenItemSelected=tweenList.children[liIndex];
+                        this.htmlTweenItemSelected.classList.add('active');
+                    }else{this.htmlTweenItemSelected=null;}
+                },
+                activateMenuEasingOption:function(easingTypeName){
+                    if(this.htmlEasingItemSelected){this.htmlEasingItemSelected.classList.remove('active');}
+
+                    let easingList=this.htmlElem.querySelector(".menu-functions__dropdown__easing-list");
+                    if(easingTypeName!==''){
+                        let optIndex=me.MODELMenuEasingTypes.indexOf(easingTypeName);
+                        this.htmlEasingItemSelected=easingList.children[optIndex];
+                        this.htmlEasingItemSelected.classList.add('active');
+                    }else{this.htmlEasingItemSelected=null;}
+                },
+
+                notificationOnWindowMouseDown:function(){
+                    setTimeout(function(){
+                        if(this.auxBtnOpenMouseDown || this.auxMouseOverMenu){return;}
+                        this.htmlElem.children[1].classList.remove("active");
+                        }.bind(this),10);
+                    },
+                setVal:function(listAnimations,listKeyframes){
+                    this.val.listKeyframes=listKeyframes;
+                    this.val.listAnimations=listAnimations;
+
+                    if(this.val.listAnimations.length>0){
+                        let firstAnimationFunction=this.val.listAnimations[0].tweenType;
+                        let firstAnimationTween=this.val.listAnimations[0].easingType;
+                        let flagMoreThanOneType=false;
+                        let flagMoreThanOneTween=false;
+                        for(let i=0;i<this.val.listAnimations.length;i++){
+                            if(this.val.listAnimations[i].tweenType!==firstAnimationFunction){flagMoreThanOneType=true;}
+                            if(this.val.listAnimations[i].easingType!==firstAnimationTween){flagMoreThanOneTween=true;}
+                        }
+                        if(flagMoreThanOneType){this.activateMenuTweensOption('')}
+                        else{this.activateMenuTweensOption(firstAnimationFunction);}
+                        if(flagMoreThanOneTween){this.activateMenuEasingOption('');}
+                        else{this.activateMenuEasingOption(firstAnimationTween);}
+                    }else{
+                        this.activateMenuTweensOption('');
+                        this.activateMenuEasingOption('');
+                    }
+                }
+            }
+        }
+        this.widgetsTimelineTools={ //always actives
+            btnReset:{
+                htmlElem:document.querySelector(".action-editor__properties-area__toolbar .btn-reset-timeline"),
+                initEvents:function(){
+                    this.htmlElem.addEventListener("click",this.OnTrigger.bind(this))
+                },
+                OnTrigger:function(){
+                    me.OnWidgetChanged("reset-timeline");
+                }
+            },
+            btnPlay:{
+                val:ControllerAnimatorState.paused, //possible values equal to ControllerAnimatorStates
+                htmlElem:document.querySelector('.action-editor__properties-area__toolbar .btn-play-timeline'),
+                initEvents:function(){
+                    this.htmlElem.addEventListener("click",this.OnTrigger.bind(this))
+                },
+                OnTrigger:function(e){
+                    if(this.val===ControllerAnimatorState.paused){
+                        me.OnWidgetChanged("play-timeline");
+                    }
+                    else{
+                        me.OnWidgetChanged("pause-timeline");
+                    }
+                },
+                notificationControllerOnAnimatorStateChanged:function(newState){
+                    this.setVal(newState);
+                },
+                setVal:function(val){
+                    this.val=val;
+                    let classList=this.htmlElem.classList;
+                    if(this.val===ControllerAnimatorState.playing){
+                        classList.remove("icon-play");classList.add("icon-pause");
+                    }else if(this.val===ControllerAnimatorState.paused){
+                        classList.remove("icon-pause");classList.add("icon-play");
+                    }
+
+                }
+            },
+            displayProgress:{
+                htmlElem:document.querySelector(".panel-animation__top-bar__area-editors-menus__action-editor-menu .display-timeline-progress"),
+                initEvents:function(){
+                },
+                notificationControllerOnAnimatorNewProgress:function(progress){
+                    this.htmlElem.textContent=this._calcTimeString(progress);
+                },
+                notificationControllerOnAnimatorTick:function(progress){
+                    this.htmlElem.textContent=this._calcTimeString(progress);
+                },
+                _calcTimeString:function(timeInMiliSeconds){
+                    let minutes=Math.floor(timeInMiliSeconds/60000);
+                    timeInMiliSeconds=timeInMiliSeconds%60000;
+                    let seconds=Math.floor(timeInMiliSeconds/1000);
+                    timeInMiliSeconds=timeInMiliSeconds%1000;
+                    let miliseconds=Math.floor(timeInMiliSeconds/10);
+
+                    let strMinutes=minutes<=9?"0"+minutes: minutes;
+                    let strSeconds=seconds<=9?"0"+seconds: seconds;
+                    let strMiliseconds=miliseconds<=9?"0"+miliseconds:miliseconds;
+                    return strMinutes + ":" + strSeconds + ":" + strMiliseconds;
+                }
+            },
+            durationField:{
+                htmlElem:document.querySelector(".panel-animation__top-bar__area-editors-menus__action-editor-menu .duration-form .property-input"),
+                val:3000,
+                initEvents:function(){
+                    this.htmlElem.children[0].addEventListener("click",this.OnTrigger.bind(this));
+                    this.htmlElem.children[1].addEventListener("focusout",this.OnTrigger.bind(this));
+                    this.htmlElem.children[2].addEventListener("click",this.OnTrigger.bind(this));
+                },
+                OnTrigger:function(e){
+                    let durationBefore=this.val;
+                    if(e.target.className==="btn-decrease"){this.setVal(this.val-5)}
+                    else if(e.target.className==="btn-increase"){this.setVal(this.val+5)}
+                    else{
+                        if(isNaN(parseInt(e.target.value))){this.setVal(this.val);}
+                        else{this.setVal(e.target.value)}
+                    }
+                    me.OnWidgetChanged("update-duration", {before:durationBefore,after:this.val});
+                },
+                setVal:function(val){
+                    val=val<0?0:val;val=parseInt(val);this.htmlElem.children[1].value=val;this.val=val;
+                },
+                getVal:function(){return this.val;},
+                notificationOnKeyEnterUp:function(){
+                    let documentActiveElement=document.activeElement;
+                    if(documentActiveElement===this.htmlElem.children[1]) {
+                        documentActiveElement.blur();
+                        this.OnTrigger({target: documentActiveElement});
+                    }
+                }
+            }
+        }
         this.initHTMLTweenMenu();
         this.initHTMLEasingsMenu();
         this.initEvents();
-    },
-    initEvents:function(){
-        this.HTMLBtnDeleteKeyFrame.addEventListener("click",this.onBtnDeleteKeyFrame.bind(this));
-        this.HTMLTweensMenu.querySelector('ul').addEventListener("mouseup",this.OnListTweenItemClicked.bind(this));
-        this.HTMLEasingsMenu.addEventListener("click",this.OnEasingMenuItemClicked.bind(this))
-        this.HTMLBtnZoomInTimeline.addEventListener("click",function (){});
-        this.HTMLBtnZoomOutTimeline.addEventListener("click",function(){})
-        this.HTMLdurationFormInput.addEventListener("focusout",this.onDurationInput.bind(this))
-        WindowManager.registerOnKeyEnterPressed(this);
-    },
+
+        this.widgetsTimelineTools.btnPlay.setVal(this.widgetsTimelineTools.btnPlay.val);
+        this.widgetsTimelineTools.durationField.setVal(this.widgetsTimelineTools.durationField.val);
+
+        this.notifyOnDurationInput(this.widgetsTimelineTools.durationField.getVal(),this.widgetsTimelineTools.durationField.getVal());
+        },
     initHTMLTweenMenu:function(){
-        let list=this.HTMLTweensMenu.querySelector('ul');
+        let list=this.widgetsKeyframeTools.menuFunctions.htmlElem.querySelector('.dropdown').children[1];
         for(let i=0;i<this.MODELMenuTweenTypes.length;i++){
-            let li=document.createElement('li');
-            li.textContent=this.MODELMenuTweenTypes[i];
-            li.setAttribute('name',this.MODELMenuTweenTypes[i]);
-            li.setAttribute('index',i);
-            li.className='list-functions__option'
-            list.appendChild(li);
+            let item=document.createElement('p');
+            item.textContent=this.MODELMenuTweenTypes[i];
+            item.setAttribute('name',this.MODELMenuTweenTypes[i]);
+            item.setAttribute('index',i);
+            item.className='item-tween-list'
+            list.appendChild(item);
         }
     },
     initHTMLEasingsMenu:function(){
+        let list=this.widgetsKeyframeTools.menuFunctions.htmlElem.querySelector('.dropdown').children[0];
         for(let i=0;i<this.MODELMenuEasingTypes.length;i++){
-            let button=document.createElement('button');
-            button.textContent=this.MODELMenuEasingTypes[i];
-            button.setAttribute("name",this.MODELMenuEasingTypes[i]);
-            button.className='tween-type-menu__option';
-            this.HTMLEasingsMenu.appendChild(button);
+            let item=document.createElement('p');
+            item.textContent=this.MODELMenuEasingTypes[i];
+            item.setAttribute("name",this.MODELMenuEasingTypes[i]);
+            item.className='item-easing-list';
+            list.appendChild(item);
         }
     },
-    onBtnDeleteKeyFrame:function(){
-        this.notifyOnBtnDeleteKeyFrame();
+    initEvents:function(){
+        for(let i in this.widgetsKeyframeTools){this.widgetsKeyframeTools[i].initEvents();}
+        for(let i in this.widgetsTimelineTools){this.widgetsTimelineTools[i].initEvents();}
+        WindowManager.registerOnKeyEnterPressed(this);
     },
-    onDurationInput:function(e){
-        let intInputValue=parseInt(e.target.value);
-        if(!isNaN(intInputValue)){
-            this.notifyOnDurationInput(intInputValue);
-        }else{
-            e.target.value=this.parentClass.getTimeLineDuration();
-        }
-    },
-    OnListTweenItemClicked:function(e){
-        if(this.listSelectedKeyFramesAnimations.length===0){return;}
-        if(e.target.className==="list-functions__option"){
-            let newFunctionName=e.target.getAttribute("name");
-            for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
-                this.listSelectedKeyFramesAnimations[i].setTweenType(newFunctionName);
-            }
-            for(let i=0;i<this.listSelectedKeyFrames.length;i++){
-                this.listSelectedKeyFrames[i].data.tweenType=newFunctionName;
-            }
-            this.activateMenuTweensOption(newFunctionName);
-        }
-    },
-    OnEasingMenuItemClicked:function(e){
-        if(this.listSelectedKeyFramesAnimations.length===0){return;}
-        if(e.target.className==='tween-type-menu__option'){
-            let easingTypeName=e.target.getAttribute('name');
-            for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
-                this.listSelectedKeyFramesAnimations[i].setEasingType(easingTypeName);
-            }
-            for(let i=0;i<this.listSelectedKeyFrames.length;i++){
-                this.listSelectedKeyFrames[i].data.easingType=easingTypeName;
-            }
-            this.activateMenuEasingOption(easingTypeName);
+    OnWidgetChanged:function(action,value){
+        switch(action){
+            case "delete-keyframe":
+                this.notifyOnBtnDeleteKeyFrame();
+                break;
+            case "update-duration":
+                this.notifyOnDurationInput(value.before,value.after);
+                break;
+            case "reset-timeline":
+                this.notifyOnBtnResetTimeline();
+                break;
+            case "play-timeline":
+                this.notifyOnBtnPlayTimeline();
+                break;
+            case "pause-timeline":
+                this.notifyOnBtnPauseTimeline();
+                break;
         }
     },
-    activateMenuTweensOption:function(TweenType){
-        if(this.selectedOptionInTweenTypeMenu){
-            this.selectedOptionInTweenTypeMenu.classList.remove('active');
-        }
-        if(TweenType !== ''){
-            let liIndex=this.MODELMenuTweenTypes.indexOf(TweenType);
-            console.log(liIndex);
-            this.selectedOptionInTweenTypeMenu=this.HTMLTweensMenu.querySelector('ul').children[liIndex];
-            this.selectedOptionInTweenTypeMenu.classList.add('active');
-            this.HTMLTweensMenu.querySelector(".current-selection").textContent=TweenType;
-        }else{
-            this.selectedOptionInTweenTypeMenu=null;
-            this.HTMLTweensMenu.querySelector(".current-selection").textContent='----------';
-
-        }
-    },
-    activateMenuEasingOption:function(easingTypeName){
-        if(this.selectedOptionInEasingTypeMenu){
-            this.selectedOptionInEasingTypeMenu.classList.remove('active');
-        }
-        if(easingTypeName!==''){
-            let optIndex=this.MODELMenuEasingTypes.indexOf(easingTypeName);
-            this.selectedOptionInEasingTypeMenu=this.HTMLEasingsMenu.children[optIndex];
-            this.selectedOptionInEasingTypeMenu.classList.add('active');
-        }else{
-            this.selectedOptionInEasingTypeMenu=null;
-        }
-    },
-    updateUIFromAnimations:function(){
-        if(this.listSelectedKeyFramesAnimations.length>0){
-            let firstAnimationFunction=this.listSelectedKeyFramesAnimations[0].tweenType;
-            let firstAnimationTween=this.listSelectedKeyFramesAnimations[0].easingType;
-            let flagMoreThanOneType=false;
-            let flagMoreThanOneTween=false;
-            for(let i=0;i<this.listSelectedKeyFramesAnimations.length;i++){
-                if(this.listSelectedKeyFramesAnimations[i].tweenType!==firstAnimationFunction){
-                    flagMoreThanOneType=true;
-                }
-                if(this.listSelectedKeyFramesAnimations[i].easingType!==firstAnimationTween){
-                    flagMoreThanOneTween=true;
-                }
-            }
-            if(flagMoreThanOneType){
-                this.activateMenuTweensOption('')
-
-            }else{
-                this.activateMenuTweensOption(firstAnimationFunction);
-            }
-            if(flagMoreThanOneTween){
-                this.activateMenuEasingOption('');
-            }else{
-                this.activateMenuEasingOption(firstAnimationTween);
-            }
-        }else{
-            this.activateMenuTweensOption('');
-            this.activateMenuEasingOption('');
-        }
-    },
-    notifyOnDurationInput:function(intInputValue){
-        this.parentClass.childNotificationOnDurationInput(intInputValue);
+    notifyOnDurationInput:function(durationBefore,newDuration){
+        this.parentClass.childNotificationOnDurationInput(durationBefore,newDuration);
     },
     notifyOnBtnDeleteKeyFrame:function(){
         this.parentClass.childNotificationOnBtnDeleteKeyFrame();
     },
+    notifyOnBtnResetTimeline:function(){
+        this.parentClass.childNotificationOnBtnResetTimeline();
+    },
+    notifyOnBtnPlayTimeline:function(){
+        this.parentClass.childNotificationOnBtnPlayTimeline();
+    },
+    notifyOnBtnPauseTimeline:function(){
+        this.parentClass.childNotificationOnBtnPauseTimeline();
+    },
     notificationOnKeyEnterUp:function(){
-        let documentActiveElement=document.activeElement;
-        if(documentActiveElement===this.HTMLdurationFormInput){
-            documentActiveElement.blur();
-            this.onDurationInput({target:documentActiveElement});
-        }
+        this.widgetsTimelineTools.durationField.notificationOnKeyEnterUp();
     },
     notificationOnKeyBarSelectionUpdated:function (listAnimations,listSelectedKeyFrames){
-        this.listSelectedKeyFramesAnimations=listAnimations;
-        this.listSelectedKeyFrames=listSelectedKeyFrames;
-        this.updateUIFromAnimations(listAnimations);
+        this.widgetsKeyframeTools.menuFunctions.setVal(listAnimations,listSelectedKeyFrames);
     },
     notificationOnKeyframeDragEnded:function(listAnimations,listSelectedKeyFrames){
-        this.listSelectedKeyFramesAnimations=listAnimations;
-        this.listSelectedKeyFrames=listSelectedKeyFrames;
-        this.updateUIFromAnimations(listAnimations);
-    }
+        this.widgetsKeyframeTools.menuFunctions.setVal(listAnimations,listSelectedKeyFrames);
+    },
+    notificationOnWindowMouseDown:function(){
+        this.widgetsKeyframeTools.menuFunctions.notificationOnWindowMouseDown();
+    },
+    notificationControllerOnAnimatorStateChanged:function(state){
+        this.widgetsTimelineTools.btnPlay.notificationControllerOnAnimatorStateChanged(state);
+    },
+    notificationControllerOnAnimatorTick:function(progress){
+        this.widgetsTimelineTools.displayProgress.notificationControllerOnAnimatorTick(progress);
+    },
+    notificationControllerOnAnimatorNewProgress:function(progress){
+        this.widgetsTimelineTools.displayProgress.notificationControllerOnAnimatorNewProgress(progress);
+    },
 }
 let SectionTimeLine={
     HTMLElement:null,
@@ -452,6 +574,13 @@ let SectionTimeLine={
             }
         }
     },
+    notificationControllerOnAnimatorTick:function(progress){
+        this.timeLineComponent.setMarkerTime(progress);
+
+    },
+    notificationOnBtnResetTimeline:function(){
+        this.timeLineComponent.setMarkerTime(0);
+    },
     /*notificaciones de componentes HIJOS*/
     notificationOnKeyFrameDragging:function(laneName){
 
@@ -478,6 +607,8 @@ let SectionTimeLine={
         let listAnimations = this.extractAnimationsFromSelectedKeyFrames(listSelectedKeyFrames);
         this.parentClass.childNotificationOnKeyBarSelectionUpdated(listAnimations,listSelectedKeyFrames);
     },
+    notificationOnMarkerDragStarted:function(time){
+    },
     notificationOnMarkerDragEnded:function(time){
         this.parentClass.childNotificationOnMarkerDragEnded(time);
     },
@@ -486,11 +617,12 @@ let SectionTimeLine={
     },
 
 }
-let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
+let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. // esta clase es tan grande que se considera como el master, en cuando a susbripcion a emisores de eventos. Por eso el nombre (Panel)
     name:'PanelActionEditor',
     events:{
         OnDurationInput:'OnDurationInput',
         OnFieldPropertyInput:'OnFieldPropertyInput',
+        OnMarkerDragStarted:'OnMarkerDragStarted',
         OnMarkerDragged:'OnMarkerDragged',
         OnMarkerDragEnded:'OnMarkerDragEnded'
     },
@@ -508,7 +640,6 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     SectionActionEditorMenu:SectionActionEditorMenu,
 
     timelineController:null,
-    timeLineDuration:3000,
     totalProgress:0,
 
     timeBar_numSegments:0,
@@ -526,23 +657,18 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         this.HTMLElement=document.querySelector(".action-editor");//todo el panel
         this.HTMLtimeline=document.querySelector(".action-editor__timeline-area");
 
-        this.setDuration(3000,3000);
+        MainMediator.registerObserver(this.timelineController.name,this.timelineController.events.OnAnimatorTick,this);
+        MainMediator.registerObserver(this.timelineController.name,this.timelineController.events.OnAnimatorStateChanged,this);
+        MainMediator.registerObserver(this.timelineController.name,this.timelineController.events.OnAnimatorNewProgress,this);
+
 
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnSelectionUpdated,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjModified,this);
-        //this._setupFormDuration();
         WindowManager.registerObserverOnResize(this);
+        WindowManager.registerOnMouseDown(this);
     },
     setController:function(obj){
         this.timelineController=obj;
-    },
-    setDuration:function(durationBefore,durationAfter){
-        this.timelineController.animator.setTotalDuration(durationAfter);
-        this.SectionTimeLine.notificationOnDurationChange(durationBefore,durationAfter);
-        this.timeLineDuration=durationAfter;
-    },
-    getTimeLineDuration:function(){
-        return this.timeLineDuration;
     },
     childNotificationOnMarkerDragging:function(time){
         MainMediator.notify(this.name,this.events.OnMarkerDragged,[time]);
@@ -558,25 +684,50 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
         //use the correct dictionary (according to selectoed object)
         this.dictPropertyLanes[property].generateKeyFrame(this.timelineController.animator.totalProgress);
     },*/
+    childNotificationOnBtnResetTimeline:function(){
+        this.timelineController.animator.setTotalProgress(0);
+        if(this.timelineController.animator.state===ControllerAnimatorState.playing){
+            this.timelineController.animator._calcTimingValuesForLoop();
+        }
+        this.SectionTimeLine.notificationOnBtnResetTimeline();
+    },
+    childNotificationOnBtnPlayTimeline:function(){
+        this.timelineController.animator.playAnimation();
+    },
+    childNotificationOnBtnPauseTimeline:function(){
+        this.timelineController.animator.stopAnimation();
+    },
     childNotificationOnBtnKeyAddKey:function(btnNameAttr){
         this.SectionTimeLine.notificationOnBtnKeyAddKey(btnNameAttr)
     },
-    childNotificationOnDurationInput:function(newDuration){
-        this.setDuration(this.timeLineDuration,newDuration);
-        MainMediator.notify(this.name,this.events.OnDurationInput,[this.timeLineDuration,newDuration]);
+    childNotificationOnDurationInput:function(durationBefore,newDuration){
+        this.SectionTimeLine.notificationOnDurationChange(durationBefore,newDuration);
+        this.timelineController.animator.setTotalDuration(newDuration); // se notifica directamente a este elemento porque es su controller, los componentes se pueden comunicar con libertar directamente con sus controllers
+        MainMediator.notify(this.name,this.events.OnDurationInput,[durationBefore,newDuration]);
     },
     childNotificationOnBtnDeleteKeyFrame:function(){
         this.SectionTimeLine.notificationOnBtnDeleteKeyFrame();
-    },
-    childNotificationOnFieldPropertyInput:function(propName,propNewValue){
-        MainMediator.notify(this.name,this.events.OnFieldPropertyInput,[propName,propNewValue]);
     },
     childNotificationOnKeyBarSelectionUpdated:function(listAnimations,listSelectedKeyFrames){
         this.SectionActionEditorMenu.notificationOnKeyBarSelectionUpdated(listAnimations,listSelectedKeyFrames);
     },
     childNotificationOnKeyframeDragEnded:function(listAnimations,listSelectedKeyFrames){
         this.SectionActionEditorMenu.notificationOnKeyframeDragEnded(listAnimations,listSelectedKeyFrames);
+
         },
+    notificationAnimationControllerOnAnimatorTick:function(args){
+        let progress=args[0];
+        this.SectionTimeLine.notificationControllerOnAnimatorTick(progress);
+        this.SectionActionEditorMenu.notificationControllerOnAnimatorTick(progress);
+    },
+    notificationAnimationControllerOnAnimatorNewProgress:function(args){
+        let progress=args[0];
+        this.SectionActionEditorMenu.notificationControllerOnAnimatorNewProgress(progress);
+    },
+    notificationAnimationControllerOnAnimatorStateChanged:function(args){
+        let state=args[0];
+        this.SectionActionEditorMenu.notificationControllerOnAnimatorStateChanged(state);
+    },
     notificationCanvasManagerOnSelectionUpdated:function(){
         this.SectionLanes.notificationOnSelectionUpdated();
         this.SectionTimeLine.notificationOnSelectionUpdated();
@@ -584,6 +735,9 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES
     notificationCanvasManagerOnObjModified:function(){
 
     },
+    notificationOnMouseDown:function(){
+        this.SectionActionEditorMenu.notificationOnWindowMouseDown();
+    }
 
 }
 

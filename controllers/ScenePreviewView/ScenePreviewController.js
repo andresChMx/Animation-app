@@ -8,7 +8,8 @@ var ScenePreviewController=fabric.util.createClass({
         this.drawingCacheManager=new DrawingCacheManager(this.drawingHand);
         this.UIPanelPreviewerCanvas=null;
         this.pointsGenerator=new ImageModelDrawingDataGenerator();
-        this.animator=null;
+        this.animator=new ControllerAnimator(null); // el UIPanelPreviewerCanvas en este punto aun vale null, cuando carga el UI de este controller se popula con la refernecia al canvas (setPreviewerCanvas)
+        this.animator.onTick(this.callBackOnAnimatorTick.bind(this));
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnDurationInput,this)
 
         MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnPreviewClicked,this);
@@ -20,10 +21,12 @@ var ScenePreviewController=fabric.util.createClass({
         this.indexDrawableTexts=0;
         this.listDelayedObjects=[];
     },
-
+    callBackOnAnimatorTick:function(progress){
+        MainMediator.notify(this.name,this.events.OnAnimatorTick,[progress])
+    },
     setPreviewerCanvas:function(previewerCanvas){
         this.UIPanelPreviewerCanvas=previewerCanvas;
-        this.animator=new ControllerAnimator(this.UIPanelPreviewerCanvas,this);
+        this.animator.canvasToDisplay=this.UIPanelPreviewerCanvas;
     },
     loadObjectsForAnimation:function(listForAnimator,listDrawableObjects,listAnimableObjectDrawnEntrance){
         /*
@@ -50,84 +53,69 @@ var ScenePreviewController=fabric.util.createClass({
         /*
         * recorremos todos los objetos del canvas, porque queremos el orden el que estan
         * */
-        listForAnimator.push(CanvasManager.camera);                  //Primero agregamos la camara
-        let allCanvasObjects=CanvasManager.canvas.getObjects();
-        for(let i=0;i<allCanvasObjects.length;i++){
-            let canvasObject=allCanvasObjects[i];
-            if(canvasObject.getEntranceMode()===EntranceModes.none && canvasObject.type!=="CameraAnimable"){
-                this.UIPanelPreviewerCanvas.add(canvasObject);      //Agremos al canvas de previsualizacion tdos los objetos animables (no el restangulo camara [AnimableCamara])
-                listForAnimator.push(canvasObject);                  // Agregamos todos los abjetos (incluido al AnimableCamara)
-            }
-        }
-        /*Se recorren los objetos en estos dos bucles por separado ya que nos interesa el orden en elque estan en estos arreglos*/
         for(let i=0;i<CanvasManager.listAnimableObjectsWithEntrance.length;i++){
             let animableObjWithEntrance=CanvasManager.listAnimableObjectsWithEntrance[i];
-            let tmpObject=null;
-            if(animableObjWithEntrance.getEntranceMode()===EntranceModes.drawn){
-                this.generateDrawingDataOnDrawableObject(animableObjWithEntrance);
-                tmpObject=new DrawableImage({
-                    cacheCanvas:this.drawingCacheManager.canvas,
-                    left:animableObjWithEntrance.get("left"),
-                    top:animableObjWithEntrance.get("top"),
-                    width:animableObjWithEntrance.get("width"),
-                    height:animableObjWithEntrance.get("height"),
-                    angle:animableObjWithEntrance.get("angle"),
-                    scaleX:animableObjWithEntrance.get("scaleX"),
-                    scaleY:animableObjWithEntrance.get("scaleY"),
-
-                    pivotX:animableObjWithEntrance.get("pivotX"),
-                    pivotY:animableObjWithEntrance.get("pivotY"),
-                    pivotCornerX:animableObjWithEntrance.get("pivotCornerX"),
-                    pivotCornerY:animableObjWithEntrance.get("pivotCornerY"),
-                    originX: 'custom',
-                    originY: 'custom',
-
-                    animations:animableObjWithEntrance.animator.dictAnimations,
-                    entraceModesSettings:animableObjWithEntrance.entraceModesSettings
-                });
-                listDrawableObjects[i]=tmpObject;
-                listAnimableObjectDrawnEntrance[i]=animableObjWithEntrance;
-            }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.dragged){
-                //TODO Manager para objetos que entran arrastrados
-            }else if(animableObjWithEntrance.getEntranceMode()===EntranceModes.text_drawn){
-                /*Loading drawing data of text*/
-                let self=this;
-                let index=i;
-                let result=this.pointsGenerator.generateTextDrawingData(animableObjWithEntrance,animableObjWithEntrance.getWidthInDrawingCache(),animableObjWithEntrance.getHeightInDrawingCache());
-                let tmpUrl=animableObjWithEntrance.imageDrawingData.url;
-                animableObjWithEntrance.imageDrawingData = result;
-                animableObjWithEntrance.imageDrawingData.url=tmpUrl;
-                animableObjWithEntrance.imageDrawingData.type=TextType.PROVIDED;
-                animableObjWithEntrance.imageDrawingData.imgHigh=self.pointsGenerator.generateTextBaseImage(animableObjWithEntrance);
-                animableObjWithEntrance.imageDrawingData.imgMasked=animableObjWithEntrance.imageDrawingData.imgHigh;
-
-                let textDrawable=new DrawableImage({
-                    cacheCanvas:self.drawingCacheManager.canvas,
-                    left:animableObjWithEntrance.get("left"),
-                    top:animableObjWithEntrance.get("top"),
-                    width:animableObjWithEntrance.get("width"),
-                    height:animableObjWithEntrance.get("height"),
-                    angle:animableObjWithEntrance.get("angle"),
-                    scaleX:animableObjWithEntrance.get("scaleX"),
-                    scaleY:animableObjWithEntrance.get("scaleY"),
-                    
-                    pivotX:animableObjWithEntrance.get("pivotX"),
-                    pivotY:animableObjWithEntrance.get("pivotY"),
-                    pivotCornerX:animableObjWithEntrance.get("pivotCornerX"),
-                    pivotCornerY:animableObjWithEntrance.get("pivotCornerY"),
-                    originX: 'custom',
-                    originY: 'custom',
-
-                    animations:animableObjWithEntrance.animator.dictAnimations,
-                    entraceModesSettings:animableObjWithEntrance.entraceModesSettings
-                });
-                listDrawableObjects[index]=textDrawable;
-                listAnimableObjectDrawnEntrance[index]=animableObjWithEntrance
-            }
-
+            animableObjWithEntrance.tmpIndexStartOrder=i;
         }
+        let canvasObjects=CanvasManager.canvas.getObjects();
+        for(let i=0;i<canvasObjects.length;i++){
+            let object=canvasObjects[i];
+            let objectToBeAnimated=null;
+            if(object.getEntranceMode()===EntranceModes.drawn){
+                this.generateDrawingDataOnDrawableObject(object);
+                objectToBeAnimated=new DrawableImage({
+                    cacheCanvas:this.drawingCacheManager.canvas,
+                    left:object.get("left"), top:object.get("top"),
+                    width:object.get("width"), height:object.get("height"), angle:object.get("angle"),
+                    scaleX:object.get("scaleX"), scaleY:object.get("scaleY"),
 
+                    pivotX:object.get("pivotX"), pivotY:object.get("pivotY"),
+                    pivotCornerX:object.get("pivotCornerX"), pivotCornerY:object.get("pivotCornerY"),
+                    originX: 'custom', originY: 'custom',
 
+                    animations:object.animator.dictAnimations,
+                    entraceModesSettings:object.entraceModesSettings
+                });
+                listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
+                listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
+            }else if(object.getEntranceMode()===EntranceModes.dragged){
+                objectToBeAnimated=object;
+            }else if(object.getEntranceMode()===EntranceModes.text_drawn){
+                let result=this.pointsGenerator.generateTextDrawingData(object,object.getWidthInDrawingCache(),object.getHeightInDrawingCache());
+                let tmpUrl=object.imageDrawingData.url;
+                object.imageDrawingData = result;
+                object.imageDrawingData.url=tmpUrl;
+                object.imageDrawingData.type=TextType.PROVIDED;
+                object.imageDrawingData.imgHigh=this.pointsGenerator.generateTextBaseImage(object);
+                object.imageDrawingData.imgMasked=object.imageDrawingData.imgHigh;
+
+                objectToBeAnimated=new DrawableImage({
+                    cacheCanvas:this.drawingCacheManager.canvas,
+                    left:object.get("left"), top:object.get("top"),
+                    width:object.get("width"), height:object.get("height"), angle:object.get("angle"),
+                    scaleX:object.get("scaleX"), scaleY:object.get("scaleY"),
+
+                    pivotX:object.get("pivotX"), pivotY:object.get("pivotY"),
+                    pivotCornerX:object.get("pivotCornerX"), pivotCornerY:object.get("pivotCornerY"),
+                    originX: 'custom', originY: 'custom',
+
+                    animations:object.animator.dictAnimations,
+                    entraceModesSettings:object.entraceModesSettings
+                });
+                listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
+                listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
+            }else if(object.getEntranceMode()===EntranceModes.text_typed){
+                objectToBeAnimated=object;
+            }else if(object.getEntranceMode()===EntranceModes.none){
+                objectToBeAnimated=object;
+            }else{
+                alert("hay objectos que tienen entrance mode diferentes a los contemplados scenePreviewController.js");
+            }
+            if(object.type!=="CameraAnimable"){
+                this.UIPanelPreviewerCanvas.add(objectToBeAnimated);
+            }
+            listForAnimator.push(objectToBeAnimated);
+        }
     },
     generateDrawingDataOnDrawableObject:function(animableObj){
         if(animableObj.imageDrawingData.type===ImageType.CREATED_NOPATH){
@@ -161,9 +149,7 @@ var ScenePreviewController=fabric.util.createClass({
             }
         }
     },
-    childNotificationOnAnimatorTick:function(normalizedProgress){
-      MainMediator.notify(this.name,this.events.OnAnimatorTick,[normalizedProgress])
-    },
+
     notificationPanelInspectorOnBtnPreviewClicked:function(){
         let listForAnimator=[];//list that contains objects with no entrace (none) and objects in listDrawableObjects list. List for the animator
         //listas para el DrawingCacheManager (dibujador)
@@ -175,23 +161,14 @@ var ScenePreviewController=fabric.util.createClass({
         * */
         CanvasManager.camera.animator.start(this.UIPanelPreviewerCanvas);
         this.loadObjectsForAnimation(listForAnimator,listDrawableObjects,listAnimableWithDrawnEntrance);
-        (function Wait(){
-            if(this.counterCallBacksDrawableTexts!==0){setTimeout(Wait.bind(this),5);return;}
-            //TODO: ORDERlistDelayerObjects
-            for(let i=0;i<listDrawableObjects.length;i++){
-                this.UIPanelPreviewerCanvas.add(listDrawableObjects[i]);
-                listForAnimator.push(listDrawableObjects[i]);
-            }
-            this.drawingCacheManager.wakeUp(listDrawableObjects,listAnimableWithDrawnEntrance);
-            this.drawingCacheManager.addDrawingHandToCanvas(this.UIPanelPreviewerCanvas);
-            listForAnimator.push(this.drawingCacheManager);
-            this.animator.setListObjectsToAnimate(listForAnimator);
 
-            this.animator.setTotalProgress(0);
-            this.animator.playAnimation();
+        this.drawingCacheManager.wakeUp(listDrawableObjects,listAnimableWithDrawnEntrance);
+        this.drawingCacheManager.addDrawingHandToCanvas(this.UIPanelPreviewerCanvas);
+        listForAnimator.push(this.drawingCacheManager);
+        this.animator.setListObjectsToAnimate(listForAnimator);
 
-        }.bind(this)())
-
+        this.animator.setTotalProgress(0);
+        this.animator.playAnimation();
     },
     notificationPanelPreviewerOnBtnClose:function(){
         this.listDelayedObjects=[];
@@ -204,7 +181,7 @@ var ScenePreviewController=fabric.util.createClass({
     },
     notificationPanelPreviewerOnBtnPlay:function(args){
         let playOrPause=args[0]
-        if(this.animator.calcNormalizedTotalProgress()===1){
+        if(this.animator.totalProgress===this.animator.totalDuration){
             this.drawingCacheManager.OnReplayPreview();
             this.animator.setTotalProgress(0);
             this.animator.playAnimation();
