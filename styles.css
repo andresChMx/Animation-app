@@ -155,7 +155,26 @@
 .property-input .btn-increase:before{
     content: "\ea0a";
 }
+/*editable lable*/
+.box-text{
+    height:100%;
+}
+.box-text input{
+    outline:none;
+    border:none;
+    background:transparent;
+    margin:0;
+    padding:0;
+    font-size:1em;
+    line-height: 100%;
+    vertical-align: middle;
+}
+.box-text p{
+    line-height: 100%;
+    vertical-align: middle;
+    font-size:1em;
 
+}
 /*================================*/
 /*AUTHENTICATION*/
 /*================================*/
@@ -464,16 +483,25 @@
 /*--------------panel-inspector__area-scene-objects__listing-objects-all----------------*/
 .area-scene-objects__listing-objects-all__box-items{
     background:white;
-    height:300px;
     overflow: auto;
-}
-.area-scene-objects__listing-objects-all__box-items #active-item{
-    background:red !important;
+    height: 300px;
+    border:1px solid black;
 }
 .area-scene-objects__listing-objects-all__box-items__item{
-    list-style: none;
-    border-bottom: 2px solid black;
+    height:30px;
+    display: flex;
+    align-items: center;
 
+    list-style: none;
+    font-size: .8em;
+    padding-left:8px;
+
+}
+.area-scene-objects__listing-objects-all__box-items__item .group-object-name{
+}
+
+.area-scene-objects__listing-objects-all__box-items #active-item{
+    background:red !important;
 }
 /*------------------------panel-inspector__area-object-properties----------------------*/
 .panel-inspector__area-object-properties{
@@ -522,8 +550,42 @@
     width:25%
 }
 /*-------------toolbox--------------*/
+.panel-inspector__toolbox{
+    display:flex;
+    justify-content: center;
+}
 .panel-inspector__toolbox__tool-item{
-
+    margin:4px;
+    height:50px;
+    width:55px;
+    position:relative;
+    cursor:pointer;
+}
+.panel-inspector__toolbox__tool-item:hover{
+    background: rgba(0,0,0,.1);
+}
+.panel-inspector__toolbox__tool-item span{
+    font-size:.75em;
+    display: block;
+    width:100%;
+}
+.panel-inspector__toolbox__tool-item .icon{
+    height:55%;
+}
+.panel-inspector__toolbox__tool-item .label{
+    height: 45%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.panel-inspector__toolbox__tool-item:after{
+    content:"";
+    display:block;
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
 }
 /*=======================
 ==== PANEL ASSETS   =====

@@ -89,6 +89,10 @@ var WindowManager={
     registerOnKeyEnterPressed:function(obj,obsType=ObserverType.main){
         this.listObservers[obsType].onKeyEnterUp.push(obj);
     },
+    unregisterOnKeyEnterPressed:function(obj,obsType=ObserverType.main){
+        let index=this.listObservers[obsType].onKeyEnterUp.indexOf(obj);
+        if(index!==-1){this.listObservers[obsType].onKeyEnterUp.splice(index,1);}
+    },
     onWindowResize:function(){
         let self=WindowManager;
         for(var i=0;i<self.listObservers[self.activeObserverType].onResize.length;i++){

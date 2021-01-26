@@ -336,24 +336,11 @@
     ===============================-->
     <section class="panel-inspector">
         <div class="panel-inspector__toolbox">
-            <div class="panel-inspector__toolbox__item">
-<!--                <p class="toolbox__tool-item__title">Actions:</p>-->
-                <button class="toolbox__item__button-save">Save</button>
-                <button class="toolbox__item__button-preview">Preview</button>
-                <button class="toolbox__item__button-export">Export</button>
-            </div>
-            <!--
-            <div class="panel-inspector__toolbox__item">
-                <p class="toolbox__tool-item__title">Zoom:</p>
-                <button class="toolbox__tool-item__button">+</button>
-                <button class="toolbox__tool-item__button">-</button>
-            </div>
-            -->
-            <div class="panel-inspector__toolbox__item-text">
-                <p class="toolbox__item-text__title">Text:</p>
-                <button class="toolbox__item-text__button-add-text" action="add-text">Add Text</button>
+<!--            <div class="panel-inspector__toolbox__item-text">-->
+<!--                <p class="toolbox__item-text__title">Text:</p>-->
+<!--                <button class="toolbox__item-text__button-add-text" action="add-text">Add Text</button>-->
 
-            </div>
+<!--            </div>-->
         </div>
         <div class="panel-inspector__manu-areas">
             <ul>
@@ -370,13 +357,15 @@
                             <div class="icon">
                                 <img src="" alt="" class="">
                             </div>
-                            <div class="input-field-box">
+                            <div class="input-field-box delay">
                                 <label for="">Delay</label>
-                                <input type="text" class="input-field-box__delay"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                                <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                                <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
                             </div>
-                            <div class="input-field-box">
+                            <div class="input-field-box duration">
                                 <label for="">Duration</label>
-                                <input type="text" class="input-field-box__duration"><!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                                <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                                <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
                             </div>
                         </div>
                     </div>
@@ -387,8 +376,6 @@
                         <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" style="display:none;">
                             <img src="" alt="" class="icon">
                             <div class="group-object-name">
-                                <p class="group-object-name__text-name">Object 1</p>
-                                <input type="text" style="display: none;" class="group-object-name__input">
                             </div>
                             <div class="group-box-actions">
                             </div>

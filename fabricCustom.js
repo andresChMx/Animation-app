@@ -147,13 +147,21 @@ fabric.Object.prototype.getCustom=function(property){ // gets properties in worl
         return this.get(property);
     }
 }
+
+fabric.Object.prototype.getGlobalPosition=function(){// POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
+    let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
+    newPoint.x+=this.canvas._offset.left;
+    newPoint.y+=this.canvas._offset.top;
+    return newPoint;
+}
+fabric.Object.prototype.name="ObjectC";
 var ImageAnimable=fabric.util.createClass(fabric.Image,{
     applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
         this.centeredRotation=false;
-        this.name="";
+        this.name=options.name;
         this.entranceMode=null;
         this.entraceModesSettings={};
         this.setupEntraceModesSettings();
@@ -284,7 +292,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         /*exact copy of animable object*/
         this.callSuper('initialize', text,options);
         this.centeredRotation=false;
-        this.name="";
+        this.name=options.name;
         this.fill="#000000";
         this.entranceMode=null;
         this.entraceModesSettings={};

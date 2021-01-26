@@ -203,7 +203,9 @@ var CanvasManager={
 
                     "padding":20,
                     "transparentCorners": false,
-                    cornerColor:"rgb(0,0,0)"
+
+                    cornerColor:"rgb(0,0,0)",
+                    "name":"Object X"
                 })
                 animObj.setCoords();
                 self.listAnimableObjects.push(animObj);
@@ -223,6 +225,8 @@ var CanvasManager={
                 "originX":"custom",
                 "originY":"custom",
                 "imageDrawingData":model,
+
+                "name":"Object X",
             })
             animObj.setEntranceMode(EntranceModes.text_drawn); //textos tambien tendran entrada siendo dibujados
 
@@ -240,17 +244,26 @@ var CanvasManager={
     removeActiveAnimableObject:function(){
         let activeAnimableObject=this.getSelectedAnimableObj();
         if(activeAnimableObject){
-            let indexInMainList=this.listAnimableObjects.indexOf(activeAnimableObject);
-            let indexInObjsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(activeAnimableObject);
-            if(indexInMainList!=-1){
-                this.listAnimableObjects.splice(indexInMainList,1);
+            let listObjects;
+            if(activeAnimableObject.type==="activeSelection"){listObjects=activeAnimableObject.getObjects();}
+            else{listObjects=[activeAnimableObject]}
+            this.canvas.discardActiveObject();
+            for(let i=0;i<listObjects.length;i++){
+                let object=listObjects[i];
+
+                let indexInMainList=this.listAnimableObjects.indexOf(object);
+                let indexInObjsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(object);
+                if(indexInMainList!==-1){
+                    this.listAnimableObjects.splice(indexInMainList,1);
+                }
+                if(indexInObjsWithEntrance!==-1){
+                    this.listAnimableObjectsWithEntrance.splice(indexInObjsWithEntrance,1);
+                    this.notifyOnObjDeletedFromListWithEntrance(indexInObjsWithEntrance);
+                }
+                this.canvas.remove(object);
+                this.notifyOnAnimableObjectDeleted(indexInMainList);
             }
-            if(indexInObjsWithEntrance!=-1){
-                this.listAnimableObjectsWithEntrance.splice(indexInObjsWithEntrance,1);
-                this.notifyOnObjDeletedFromListWithEntrance(indexInObjsWithEntrance);
-            }
-            this.canvas.remove(this.canvas.getActiveObject());
-            this.notifyOnAnimableObjectDeleted(indexInMainList);
+
         }
     },
     setCanvasOnAnimableObjects:function(){
@@ -424,7 +437,13 @@ var SectionFloatingMenu={
     notificationCanvasManagerOnSelectionUpdated:function(){// and on canvas active Object deleted
         let activeAnimableObject=CanvasManager.getSelectedAnimableObj();
         if(!activeAnimableObject){this.hiddeMenu();return;}
-        if(activeAnimableObject.type==='ImageAnimable'){
+        if(activeAnimableObject.type==="activeSelection"){
+            this.lastAnimableObjectActive=activeAnimableObject;
+            let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
+            this.desableOptions([1,1,1,0,0]);
+            this.showMenu(positionInViewportCoords.x, positionInViewportCoords.y);
+        }
+        else if(activeAnimableObject.type==='ImageAnimable'){
             this.lastAnimableObjectActive=activeAnimableObject;
             let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
             this.desableOptions([1,1,1,1,1]);
