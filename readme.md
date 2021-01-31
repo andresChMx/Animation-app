@@ -1,20 +1,20 @@
-# Drawnimate
+# Overview
 
-Una aplicacion web para crear videos animados a partir de imagenes, videos, texto y musica. Pensado para ser usado desde cualquier sitio sin necesidad de instalar algo, y permitir crear animaciones completamente personalizadas de manera facil.
+A web application to create animated videos from images, videos, text and music.
 
-### Caracteristicas
+### Features
 
-* Permite el uso de recursos propios
-* Línea de tiempo que proporcionan flexibilidad para crear animaciones
-* Eficiente uso de recursos computacionales
-* Effectos avanzados de animacion
+* Fully featured timeline
+* Advanced animation effects
+* Embeded media assets gallery 
+* Usage of your own assets
+* SVG Images Parsing
 
 ### In action
 
-Esta aplicación permite la creacion de dos estilos de videos animados:
+It can be used to create two video styles :
 
-##### Whiteboard animations: 
+* Whiteboard animation videos ([see result](see result))
+* Promotional videos ([see result]()])
 
-
-
-##### Videos promocionales:
+#### [Demo](https://andreschmx.github.io/Animation-app/index.html)

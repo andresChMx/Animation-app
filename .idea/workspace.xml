@@ -20,26 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Globals/NetworkManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/NetworkManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Globals/OpenTypeFontManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/OpenTypeFontManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Globals/Variables.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/Variables.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fonts/icomoon.eot" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/icomoon.eot" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fonts/icomoon.svg" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/icomoon.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fonts/icomoon.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/icomoon.ttf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fonts/icomoon.woff" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/icomoon.woff" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles/font-icons.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles/font-icons.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -213,7 +194,7 @@
       <workItem from="1611855281548" duration="1826000" />
       <workItem from="1611934152638" duration="29953000" />
       <workItem from="1612042223367" duration="7463000" />
-      <workItem from="1612060933027" duration="8491000" />
+      <workItem from="1612060933027" duration="9091000" />
     </task>
     <servers />
   </component>
