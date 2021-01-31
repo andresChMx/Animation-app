@@ -126,6 +126,47 @@ let ModalUploadImage={
     }
 }
 }
+var ModalLoadURLImage={
+    HTMLElement:null,
+  HTMLBtnClose:null,
+  HTMLBtnAccept:null,
+  HTMLBtnCancel:null,
+  HTMLInputURL:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
+        this.HTMLElement=document.querySelector(".panel-assets__modal-load-url-image__filter");
+        this.HTMLBtnClose=this.HTMLElement.querySelector(".modal__header__btn-close-modal");
+        this.HTMLBtnAccept=this.HTMLElement.querySelector(".btn-accept");
+        this.HTMLBtnCancel=this.HTMLElement.querySelector(".btn-cancel");
+
+        this.HTMLInputURL=this.HTMLElement.querySelector(".panel-assets__modal-load-url-image__body input")
+        this.initEvents();
+    },
+    initEvents:function(){
+        this.HTMLBtnClose.addEventListener("click",this.OnBtnClose.bind(this));
+        this.HTMLBtnAccept.addEventListener("click",this.OnBtnAccept.bind(this));
+        this.HTMLBtnCancel.addEventListener("click",this.OnBtnCancel.bind(this));
+        },
+    OnBtnClose:function(){
+        this.HTMLElement.style.display="none";
+    },
+    OnBtnAccept:function(){
+        let fieldValue=this.HTMLInputURL.value;
+        let urls=fieldValue.split(",");
+        for(let i=0;i<urls.length;i++){
+            console.log(urls[i]);
+            this.parentClass.childNotificationOnImageURLLoaded(urls[i]);
+        }
+        this.HTMLElement.style.display="none";
+    },
+    OnBtnCancel:function(){
+        this.HTMLElement.style.display="none";
+
+    },
+    showModal:function(){
+        this.HTMLElement.style.display="block";
+    }
+};
 let SectionImageAssets={
 
     HTMLElement:null,
@@ -153,23 +194,35 @@ let SectionImageAssets={
         }
     ],
     listAssets:ko.observableArray([]),
+    listAssetsPerPageCant:20,
+    listAssetsPageNumber:1,
+    lastSearch:"",
+    lastCategory:"",
+    lastProvider:"unsplash", //unsplash, pixabay
+
     parentClass:null,
 
     ModalUploadImage:ModalUploadImage,
+    ModalLoadURLImage:ModalLoadURLImage,
     init:function(parentClass){
 
         this.parentClass=parentClass;
-        this.HTMLElement=document.querySelector(".panel-assets__sections-container__section-image");
-        this.HTMLDummyAssetDrag=document.querySelector(".section-image-assets__dummy-drag-asset");
-        this.HTMLItemMenu=document.querySelector(".section-image-assets__item__menu-options");
-        this.HTMLBtnUploadImageAsset=document.querySelector(".panel-assets__section-image__box-options__btn-add-image");
+        this.HTMLElement=document.querySelector(".panel-assets__sections-container .section-assets.image");
 
-        this.HTMLMenuCategories=document.querySelector(".panel-assets__section-image__box-options__second-row__menu-categories");
+        this.HTMLDummyAssetDrag=document.querySelector(".section-image-assets__dummy-drag-asset");
+        this.HTMLDummyAssetDrag.style.width=200 + "px";
+        this.HTMLDummyAssetDrag.style.height=200 + "px";
+
+        this.HTMLItemMenu=document.querySelector(".section-image-assets__item__menu-options");
+        this.HTMLBtnUploadImageAsset=document.querySelector(".section-assets.images .section-assets__box-options__first-row .btn-add-image");
+        this.HTMLFieldSearch=document.querySelector(".section-assets.images .section-assets__box-options__first-row .search-field-box");
+
+        this.HTMLMenuCategories=document.querySelector(".section-assets.images .section-assets__box-options__second-row__menu-categories");
         this.HTMLMenuCategoriesControlButtons=this.HTMLMenuCategories.querySelectorAll("button");
         this.HTMLMenuCategoriesListCategories=this.HTMLMenuCategories.querySelectorAll("li");
         this.HTMLMenuCategoriesSelectedOption=null;
-        this.selectMenuCategoriesOption(this.HTMLMenuCategoriesListCategories[0]);
 
+        this.HTMLBtnLoadMore=document.querySelector(".section-assets.images .section-assets__btn-load-more");
         this.generateImageAssets(this.MODELItemAssets);
         this.generateHTMLMenuOptionsCollection(this.MODELItemMenuOptions);
         this.initEvents();
@@ -177,17 +230,28 @@ let SectionImageAssets={
         /*setting up DOM elemes*/
         this.HTMLMenuCategories.style.paddingLeft=this.HTMLMenuCategoriesControlButtons[0].offsetWidth +"px";
 
-        this.HTMLDummyAssetDrag.style.width=this.HTMLElement.children[0].offsetWidth + "px";
-        this.HTMLDummyAssetDrag.style.height=this.HTMLElement.children[0].offsetWidth + "px";
 
         WindowManager.registerOnMouseUp(this);
         WindowManager.registerOnMouseDown(this);
         WindowManager.registerOnMouseMove(this);
 
-        this.ModalUploadImage.init(this);
+        //this.ModalUploadImage.init(this);
+        this.ModalLoadURLImage.init(this);
+
+        // simulating clicking in first category (all)
+        this.selectMenuCategoriesOption(this.HTMLMenuCategoriesListCategories[0]);
+        this.lastProvider="unsplash";
+        this.lastSearch="";
+        this.lastCategory="";
+        NetworkManager.getUnsplashImagesBySearch(this.lastProvider,this.lastSearch,this.lastCategory,this.listAssetsPageNumber).then(function(data){
+            this.MODELItemAssets=data;
+            this.listAssets([]);
+            this.generateImageAssets(this.MODELItemAssets);
+        }.bind(this));
     },
     initEvents:function(){
         this.HTMLBtnUploadImageAsset.addEventListener("click",this.OnButtonAddImageClicked.bind(this))
+        this.HTMLFieldSearch.querySelector("button").addEventListener("click",this.OnSearchFieldBtnClicked.bind(this))
         /*menu categories*/
         this.HTMLMenuCategoriesControlButtons[0].addEventListener("click",this.OnMenuCategoriesControlButtonsPressed.bind(this));
         this.HTMLMenuCategoriesControlButtons[1].addEventListener("click",this.OnMenuCategoriesControlButtonsPressed.bind(this));
@@ -195,7 +259,8 @@ let SectionImageAssets={
         for(let i=0;i<this.HTMLMenuCategoriesListCategories.length;i++){
             this.HTMLMenuCategoriesListCategories[i].addEventListener("click",this.OnMenuCategoriesOptionClicked.bind(this));
         }
-        },
+        this.HTMLBtnLoadMore.addEventListener("click",this.OnBtnLoadMore.bind(this))
+    },
     generateHTMLMenuOptionsCollection:function(MODEL){
         for(var i=0;i<MODEL.length;i++){
             let btnOpt=document.createElement("div");
@@ -247,13 +312,34 @@ let SectionImageAssets={
         self.hiddeHTMLItemMenu();
     },
     OnButtonAddImageClicked:function(){
-        this.ModalUploadImage.showModal();
+        this.ModalLoadURLImage.showModal();
+        // this.ModalUploadImage.showModal();
+    },
+    OnSearchFieldBtnClicked:function(e){
+        let htmlTarget=this.HTMLFieldSearch.querySelector("input");
+        this.lastSearch=htmlTarget.value;
+        this.listAssetsPageNumber=1;
+        NetworkManager.getUnsplashImagesBySearch(this.lastProvider,this.lastSearch,this.lastCategory,this.listAssetsPageNumber).then(function(data){
+            this.MODELItemAssets=data;
+            this.listAssets([]);
+            this.generateImageAssets(this.MODELItemAssets);
+
+            if(this.listAssets().length>=this.listAssetsPerPageCant){//The button "Looad More" will only be shown if there are more than the mininum quantity of images loaded
+                this.HTMLBtnLoadMore.style.display="block";
+            }else{
+                this.HTMLBtnLoadMore.style.display="none";
+            }
+        }.bind(this));
+
+        htmlTarget.value="";
+
+
     },
     OnMenuCategoriesControlButtonsPressed:function(e){
         if(e.target.id==="control-left"){
-            this.HTMLMenuCategories.parentNode.scrollLeft-=50;
+            this.HTMLMenuCategories.parentNode.scrollLeft-=70;
         }else if(e.target.id==="control-right"){
-            this.HTMLMenuCategories.parentNode.scrollLeft+=50;
+            this.HTMLMenuCategories.parentNode.scrollLeft+=70;
         }
         if(this.HTMLMenuCategories.parentNode.scrollLeft>this.HTMLMenuCategories.parentNode.scrollWidth){
             this.HTMLMenuCategories.parentNode.scrollLeft=this.HTMLMenuCategories.parentNode.scrollWidth;
@@ -263,14 +349,43 @@ let SectionImageAssets={
         },
     OnMenuCategoriesOptionClicked:function(e){
         this.selectMenuCategoriesOption(e.target);
-        NetworkManager.getCollectionImagesAssetsWithLimit(e.target.getAttribute("value")).then(function(docs){
-           let mappedDocs=docs.map(function(value,index){
-               return value.data();
-           })
-           console.log(mappedDocs);
-           this.MODELItemAssets=mappedDocs;
-           this.listAssets([]);
-           this.generateImageAssets(this.MODELItemAssets);
+        this.listAssetsPageNumber=1;
+        this.lastSearch="";
+        let category=e.target.getAttribute("value");
+        this.lastCategory=category;
+        if(category==="vector"){
+            this.lastProvider="pixabay"
+        }else{
+            this.lastProvider="unsplash"
+        }
+        NetworkManager.getUnsplashImagesBySearch(this.lastProvider,this.lastSearch,this.lastCategory,this.listAssetsPageNumber).then(function(data){
+            this.MODELItemAssets=data;
+            this.listAssets([]);
+            this.generateImageAssets(this.MODELItemAssets);
+
+            if(this.listAssets().length>=this.listAssetsPerPageCant){//The button "Looad More" will only be shown if there are more than the mininum quantity of images loaded
+                this.HTMLBtnLoadMore.style.display="block";
+            }else{
+                this.HTMLBtnLoadMore.style.display="none";
+            }
+        }.bind(this));
+
+
+        // NetworkManager.getCollectionImagesAssetsWithLimit(e.target.getAttribute("value")).then(function(docs){
+        //    let mappedDocs=docs.map(function(value,index){
+        //        return value.data();
+        //    })
+        //    console.log(mappedDocs);
+        //    this.MODELItemAssets=mappedDocs;
+        //    this.listAssets([]);
+        //    this.generateImageAssets(this.MODELItemAssets);
+        // }.bind(this));
+    },
+    OnBtnLoadMore:function(e){
+
+        this.listAssetsPageNumber++;
+        NetworkManager.getUnsplashImagesBySearch(this.lastProvider,this.lastSearch,this.lastCategory,this.listAssetsPageNumber).then(function(data){
+            this.generateImageAssets(data);
         }.bind(this));
     },
     notificationOnMouseUp:function(){
@@ -325,31 +440,133 @@ let SectionImageAssets={
             this.generateImageAssets(mappedDocs);
         }
     },
+    childNotificationOnImageURLLoaded:function(url){
+        this.parentClass.childNotificationOnImageURLLoaded(url);
+    },
     notifyOnDummyDraggingEnded:function(){
         this.parentClass.childNotificationOnImageAssetDummyDraggingEnded(this.lastModelOnItemDragged);
     },
 
 }
+var SectionTextAssets={
+    HTMLElement:null,
+    HTMLDraggableElement:null,
+    parentClass:null,
+    listAssets:[],
+    assetDragStarted:false,
+    HTMLAssetBeenDragged:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
+        this.HTMLElement=document.querySelector(".panel-assets__sections-container .section-assets.text");
+        this.HTMLDraggableElement=document.querySelector(".section-text-assets__dummy-drag-asset")
+        this.HTMLAssetPrefab=this.HTMLElement.querySelector(".text-asset");
+        this.initListAssets();
+        // registering as observer
+        WindowManager.registerOnMouseMove(this);
+        WindowManager.registerOnMouseUp(this);
+
+    },
+    initListAssets:function(){
+        let htmlBoxAssets=this.HTMLElement.querySelector(".section-assets__box-assets");
+        for(let i in FontsNames){
+            let newAsset=this.HTMLAssetPrefab.cloneNode(true);
+            newAsset.style.fontFamily=FontsNames[i];
+            newAsset.addEventListener("mousedown",this.OnAssetDragStarted.bind(this));
+            htmlBoxAssets.appendChild(newAsset);
+        }
+        this.HTMLAssetPrefab.style.display="none";
+    },
+    _moveDraggableTo(x,y){
+        this.HTMLDraggableElement.style.left=x-this.HTMLDraggableElement.clientWidth/2 + "px";
+        this.HTMLDraggableElement.style.top=y-this.HTMLDraggableElement.clientHeight/2 + "px";
+    },
+    OnAssetDragStarted:function(e){
+        this.assetDragStarted=true;
+        this.HTMLAssetBeenDragged=e.target;
+    },
+
+    notificationOnMouseMove:function(){
+        if(this.assetDragStarted){
+            this._moveDraggableTo(WindowManager.mouse.x,WindowManager.mouse.y)
+        }
+    },
+    notificationOnMouseUp:function(){
+        if(this.assetDragStarted){
+            let fontFamily=getComputedStyle(this.HTMLAssetBeenDragged).getPropertyValue("font-family");
+            console.log(fontFamily);
+            this.parentClass.childNotificationOnTextAssetDraggableDropped(fontFamily);
+            this.assetDragStarted=false;
+        }
+    }
+};
 var PanelAssets={
     name:'PanelAssets',
     events:{
+        OnImageURLLoaded:'OnImageURLLoaded',
         OnImageAssetDummyDraggingEnded:'OnImageAssetDummyDraggingEnded',
+        OnTextAssetDraggableDropped:'OnTextAssetDraggableDropped'
     },
     HTMLElement:null,
+    HTMLCollMenuOptions:null,
+    HTMLCollSectionsAssets:null,
+
+    HTMLMenuOptionActive:null,
+    HTMLSectionAssetActive:null,
     htmlElementNormalHeight:0,
     SectionImageAssets:SectionImageAssets,
+    SectionTextAssets:SectionTextAssets,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-assets");
+        this.HTMLCollMenuOptions=document.querySelector(".panel-assets__menu-sections").children;
+        this.HTMLCollSectionsAssets=document.querySelector(".panel-assets__sections-container").children;
         this.htmlElementNormalHeight=this.HTMLElement.offsetHeight;
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
 
         this.SectionImageAssets.init(this);
+        this.SectionTextAssets.init(this);
+        this.initEvents();
+
+        /*Simulating click in first menu option*/
+        this.OnMenuOptionClicked({target:this.HTMLCollMenuOptions[0]});
+    },
+    initEvents:function(){
+        for (let i = 0; i <this.HTMLCollMenuOptions.length; i++) {
+            this.HTMLCollMenuOptions[i].addEventListener("click",this.OnMenuOptionClicked.bind(this));
+        }
+    },
+    OnMenuOptionClicked:function(e){
+        let index=[].slice.call(this.HTMLCollMenuOptions).indexOf(e.target);
+        if(index!==-1){
+            if(this.HTMLMenuOptionActive!==null){
+                this.HTMLMenuOptionActive.classList.remove("active");
+            }
+
+            this.HTMLMenuOptionActive=e.target;
+            this.HTMLMenuOptionActive.classList.add("active");
+
+            this._activeSectionAssets(index);
+        }
+    },
+    _activeSectionAssets:function(index){
+        if(this.HTMLSectionAssetActive!==null){
+            this.HTMLSectionAssetActive.classList.remove("active");
+        }
+        this.HTMLSectionAssetActive=this.HTMLCollSectionsAssets[index];
+        this.HTMLSectionAssetActive.classList.add("active");
     },
     notificationPanelDesignerOptionsOnSettingActionClicked:function(){
         this.HTMLElement.style.height=this.htmlElementNormalHeight;
     },
+
     childNotificationOnImageAssetDummyDraggingEnded:function(lastModelOnItemDragged){
         MainMediator.notify(this.name,this.events.OnImageAssetDummyDraggingEnded,[lastModelOnItemDragged]);
+    },
+    childNotificationOnTextAssetDraggableDropped:function(fontFamily){
+        MainMediator.notify(this.name,this.events.OnTextAssetDraggableDropped,[fontFamily]);
+    },
+
+    childNotificationOnImageURLLoaded:function(url){
+        MainMediator.notify(this.name,this.events.OnImageURLLoaded,[url]);
     }
 }
 

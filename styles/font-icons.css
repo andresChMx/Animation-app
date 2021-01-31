@@ -24,42 +24,50 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-
-.icon-right-angle:before {
-    content: "\e901";
+.icon-publish:before {
+    content: "\e90a";
 }
-.icon-left-angle:before {
-    content: "\e902";
+.icon-preview:before {
+    content: "\e90b";
 }
-.icon-text:before {
+.icon-back:before {
     content: "\e900";
 }
-.icon-easing-icon:before {
+.icon-cursor:before {
+    content: "\e901";
+}
+.icon-double-right:before {
+    content: "\e902";
+}
+.icon-double-left:before {
     content: "\e903";
 }
-.icon-eraser:before {
+.icon-edit:before {
     content: "\e904";
 }
-.icon-pencil:before {
+.icon-front:before {
     content: "\e905";
 }
-.icon-undo:before {
-    content: "\e965";
+.icon-function:before {
+    content: "\e907";
 }
-.icon-redo:before {
-    content: "\e966";
+.icon-settings:before {
+    content: "\e908";
 }
-.icon-zoom-in:before {
-    content: "\e987";
+.icon-text:before {
+    content: "\e909";
 }
-.icon-zoom-out:before {
-    content: "\e988";
+.icon-pencil:before {
+    content: "\e906";
+}
+.icon-floppy-disk:before {
+    content: "\e962";
+}
+.icon-search:before {
+    content: "\e986";
 }
 .icon-bin:before {
-    content: "\e9ac";
-}
-.icon-earth:before {
-    content: "\e9ca";
+    content: "\e9ad";
 }
 .icon-plus:before {
     content: "\ea0a";
@@ -79,8 +87,14 @@
 .icon-pause:before {
     content: "\ea1d";
 }
-.icon-restart:before {
+.icon-stop:before {
+    content: "\ea1e";
+}
+.icon-previous:before {
     content: "\ea23";
+}
+.icon-next:before {
+    content: "\ea24";
 }
 .icon-paragraph-left:before {
     content: "\ea77";

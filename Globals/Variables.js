@@ -2,11 +2,36 @@ var IMAGE_UPLOAD_APIS_URLS=["https://api.cloudinary.com/v1_1/dhc21c3yy/image/upl
 var CLOUDINARY_PRESET_NAME="nkq5azoh";
 var USER_ID="5RUawVPijiUA7yHmwJFnWhkQDhH3";
 //FontsName
-var FontsNames={
-    "bauhs 93":"bauhs 93"
+var FontsNames={ //serves as the truth source of the names of fonts
+    "AlegreyaSans":"AlegreyaSans",
+    "Alice":"Alice",
+    "Amita":"Amita",
+    "BadScript":"BadScript",
+    "BalooDa2":"BalooDa2",
+    "Caveat":"Caveat",
+    "Changa":"Changa",
+    "CormorantInfant":"CormorantInfant",
+    "GothicA1":"GothicA1",
+    "HindSiliguri":"HindSiliguri",
+    "Kalam":"Kalam",
+    "Lobster":"Lobster",
+    "Pacifico":"Pacifico"
 }
-var FontsFileName={
-    "bauhs 93":'BAUHS93.ttf'
+var FontsFileName={ // allows as to get the name file of the font in the server from the font name
+    "AlegreyaSans":'AlegreyaSans-Regular.ttf',
+    "Alice":"Alice-Regular.ttf",
+    "Amita":"Amita-Regular.ttf",
+    "BadScript":"BadScript-Regular.ttf",
+    "BalooDa2":"BalooDa2-Regular.ttf",
+    "Caveat":"Caveat-Regular.ttf",
+    "Changa":"Changa-Regular.ttf",
+    "CormorantInfant":"CormorantInfant-Medium.ttf",
+    "GothicA1":"GothicA1-Medium.ttf",
+    "HindSiliguri":"HindSiliguri-Medium.ttf",
+    "Kalam":"Kalam-Regular.ttf",
+    "Lobster":"Lobster-Regular.ttf",
+    "Pacifico":"Pacifico-Regular.ttf",
+
 }
 
 const EntranceModes={/*Entrance modes are only applicable to Escene objects (ImageAnimable, TextAnimable, CameraAnimable)*/

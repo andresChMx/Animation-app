@@ -81,12 +81,11 @@ var ScenePreviewController=fabric.util.createClass({
             }else if(object.getEntranceMode()===EntranceModes.dragged){
                 objectToBeAnimated=object;
             }else if(object.getEntranceMode()===EntranceModes.text_drawn){
-                let result=this.pointsGenerator.generateTextDrawingData(object,object.getWidthInDrawingCache(),object.getHeightInDrawingCache());
-                let tmpUrl=object.imageDrawingData.url;
+                let pathOpenTypeObjects=[] //for each line we need the path to generate the image
+                let result=this.pointsGenerator.generateTextDrawingData(object,object.getWidthInDrawingCache(),object.getHeightInDrawingCache(),pathOpenTypeObjects);
                 object.imageDrawingData = result;
-                object.imageDrawingData.url=tmpUrl;
                 object.imageDrawingData.type=TextType.PROVIDED;
-                object.imageDrawingData.imgHigh=this.pointsGenerator.generateTextBaseImage(object);
+                object.imageDrawingData.imgHigh=this.pointsGenerator.generateTextBaseImage(object,pathOpenTypeObjects);
                 object.imageDrawingData.imgMasked=object.imageDrawingData.imgHigh;
 
                 objectToBeAnimated=new DrawableImage({

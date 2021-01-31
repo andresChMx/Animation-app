@@ -9,106 +9,16 @@
     <script  src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-firestore.js"></script>
-    <script src="data.js "></script>
-    <script>
-        // Your web app's Firebase configuration
-        var firebaseConfigImageAssets_arrows = {
-            apiKey: "AIzaSyAqRRDMM1ESSEkVP8awQCJI2DZFTxau3Hs",
-            authDomain: "arrows-b8e4b.firebaseapp.com",
-            projectId: "arrows-b8e4b",
-            storageBucket: "arrows-b8e4b.appspot.com",
-            messagingSenderId: "320448795288",
-            appId: "1:320448795288:web:4ee35cbabce0e5ba47f6ed",
-            measurementId: "G-HE2WRTM9L8"
-        };
-        var firebaseConfigImageAssets_backgrounds = {
-            apiKey: "AIzaSyBYRJHl9vT6a3rCqNNoMlBz48BwdoBny-E",
-            authDomain: "backgrounds-64eef.firebaseapp.com",
-            projectId: "backgrounds-64eef",
-            storageBucket: "backgrounds-64eef.appspot.com",
-            messagingSenderId: "774510981735",
-            appId: "1:774510981735:web:4f82c4937d9528dc3c5ac2",
-            measurementId: "G-6PLS8R9TPX"
-        };
-        var firebaseConfigImageAssets_bubbles={
-            apiKey: "AIzaSyD1-3wcxeF4u2oWhp5O4PJAe6KlQm3l7pw",
-            authDomain: "bubbles-8ff2c.firebaseapp.com",
-            projectId: "bubbles-8ff2c",
-            storageBucket: "bubbles-8ff2c.appspot.com",
-            messagingSenderId: "217533607503",
-            appId: "1:217533607503:web:6196bc4a3b44d55e59843a",
-            measurementId: "G-E2QPPWXG6L"
-        };
-        var firebaseConfigImageAssets_buildings={
-            apiKey: "AIzaSyCjVxL8g1xVTpbDlQuJX-sOwhxdqiGQ3nk",
-            authDomain: "buildings-6439b.firebaseapp.com",
-            projectId: "buildings-6439b",
-            storageBucket: "buildings-6439b.appspot.com",
-            messagingSenderId: "23067520055",
-            appId: "1:23067520055:web:5d24209a756cbcbfa4a3b2",
-            measurementId: "G-0WZDG6C9WY"
-        };
-        var firebaseConfigImageAssets_characters={
-            apiKey: "AIzaSyCCrTkCTKRmmGmmWDbsNj5QFtAsjhD-MVs",
-            authDomain: "characters-88b33.firebaseapp.com",
-            projectId: "characters-88b33",
-            storageBucket: "characters-88b33.appspot.com",
-            messagingSenderId: "366131669914",
-            appId: "1:366131669914:web:b66756c74ddabb25aca823",
-            measurementId: "G-NYDNXCQQTW"
-        };
-        var firebaseConfigImageAssets_objects = {
-            apiKey: "AIzaSyB0kMmmu972m-Q203yrEti-w3WBYqYs7QA",
-            authDomain: "objects-9f968.firebaseapp.com",
-            projectId: "objects-9f968",
-            storageBucket: "objects-9f968.appspot.com",
-            messagingSenderId: "837145773017",
-            appId: "1:837145773017:web:3f8e9d1332d3f8a0d88fc8",
-            measurementId: "G-WG5NEDFZPQ"
-        };
-        var firebaseConfigImageAssets_people = {
-            apiKey: "AIzaSyDSbeElfnzjaWqPneF7ViUMisPcOrXQanc",
-            authDomain: "people-e71d3.firebaseapp.com",
-            projectId: "people-e71d3",
-            storageBucket: "people-e71d3.appspot.com",
-            messagingSenderId: "255177175940",
-            appId: "1:255177175940:web:27c167ba9f44e432cb63d1",
-            measurementId: "G-X2K6DDGL92"
-        };
-        var firebaseConfigImageAssets_symbols = {
-            apiKey: "AIzaSyB1G0nHZgx4CU8P8se37DuRSNyQRQmwgEc",
-            authDomain: "symbols-4d185.firebaseapp.com",
-            projectId: "symbols-4d185",
-            storageBucket: "symbols-4d185.appspot.com",
-            messagingSenderId: "562774822967",
-            appId: "1:562774822967:web:d27a8b136eee6b560dafb2",
-            measurementId: "G-QED1SZ9VZ3"
-        };
-        // Initialize Firebase
-        let appImageAssets={
-            arrows: firebase.initializeApp(firebaseConfigImageAssets_arrows),
-            backgrounds: firebase.initializeApp(firebaseConfigImageAssets_backgrounds,'backgrounds'),
-            bubbles: firebase.initializeApp(firebaseConfigImageAssets_bubbles,'bubbles'),
-            buildings: firebase.initializeApp(firebaseConfigImageAssets_buildings,'buildings'),
-            characters: firebase.initializeApp(firebaseConfigImageAssets_characters,'characters'),
-            objects: firebase.initializeApp(firebaseConfigImageAssets_objects,'objects'),
-            people: firebase.initializeApp(firebaseConfigImageAssets_people,'people'),
-            symbols: firebase.initializeApp(firebaseConfigImageAssets_symbols,'symbols'),
-        }
-        //window.db = firebase.firestore(appImageAssets_arrows);
-        //firebase.analytics();
 
-    </script>
-    <script src="https://kit.fontawesome.com/8abefba5b4.js" crossorigin="anonymous"></script>
+<!--    <script src="https://kit.fontawesome.com/8abefba5b4.js" crossorigin="anonymous"></script>-->
     <style>
         *{
             margin:0;
             padding:0;
         }
-    body{
-        background:rgb(59, 59, 59);
-    }
+        body{
+            background:rgb(59, 59, 59);
+        }
     </style>
 
  <link rel="stylesheet" href="styles/font-icons.css">
@@ -169,8 +79,8 @@
     <div class="canvas-animator__object-configuration__filter modal__filter" style="display:none;">
         <div class="canvas-animator__object-configuration modal">
             <div class="canvas-animator__object-configuration__header modal__header">
-                <p class="modal-header__title">Object Configuration</p>
-                <div class="canvas-animator__object-configuration__btn-close btn-close-modal icon-cross modal-header__btn-close"></div>
+                <p class="modal__header__title">Object Configuration</p>
+                <div class="canvas-animator__object-configuration__btn-close icon-cross modal__header__btn-close-modal"></div>
             </div>
             <div class="canvas-animator__object-configuration__body modal__body">
                 <div class="canvas-animator__object-configuration__entrance-settings">
@@ -275,60 +185,97 @@
     <section class="panel-assets">
         <nav class="panel-assets__menu-sections">
             <div class="panel-assets__menu-sections__item">Images</div>
-            <div class="panel-assets__menu-sections__item">gifs</div>
-            <div class="panel-assets__menu-sections__item">Sound</div>
+            <div class="panel-assets__menu-sections__item">Videos</div>
+            <div class="panel-assets__menu-sections__item">Fonts</div>
+            <div class="panel-assets__menu-sections__item">Music</div>
         </nav>
-        <div class="panel-assets__buttons-add-resource">
-            <button class="panel-assets__buttons-add-resource__image-asset">Add Image</button>
-            <button class="panel-assets__buttons-add-resource__gifs-asset" style="display:none">Add Gif</button>
-            <button class="panel-assets__buttons-add-resource__sound-asset" style="display:none">Add Sound</button>
-        </div>
         <div class="panel-assets__sections-container">
-            <div class="panel-assets__sections-container__section-image">
-                <div class="panel-assets__sections-container__section-image__box-options">
-                    <div class="panel-assets__section-image__box-options__first-row">
-                        <button class="panel-assets__section-image__box-options__btn-add-image">Add Local Image</button>
+            <div class="section-assets images">
+                <div class="section-assets__box-options">
+                    <div class="section-assets__box-options__first-row">
+                        <button class="btn-add-image">Add Local Image</button>
+                        <div class="search-field-box">
+                            <input type="text">
+                            <button><i class="icon-search"></i></button>
+                        </div>
                     </div>
-                    <div class="panel-assets__section-image__box-options__second-row">
-                        <div class="panel-assets__section-image__box-options__second-row__menu-categories">
-                            <button id="control-left"><</button>
-                            <ul class="panel-assets__section-image__box-options__menu-categories__list-categories">
-                                <li value="characters" >characters</li>
-                                <li value="arrows" >arrows</li>
+                    <div class="section-assets__box-options__second-row">
+                        <div class="section-assets__box-options__second-row__menu-categories">
+                            <button id="control-left" class="icon-double-left"></button>
+                            <ul class="section-assets__box-options__menu-categories__list-categories">
+                                <li value="" >All</li>
+                                <li value="business" >Business</li>
                                 <li value="people" >people</li>
-                                <li value="backgrounds" >backgrounds</li>
-                                <li value="objects" >objects</li>
-                                <li value="buildings" >buildings</li>
-                                <li value="bubbles" >bubbles</li>
-                                <li value="symbols" >symbols</li>
+                                <li value="background" >Backgrounds</li>
+                                <li value="technology" >Technology</li>
+                                <li value="nature" >Nature</li>
+                                <li value="health" >Health</li>
+                                <li value="animal" >Animals</li>
+                                <li value="vector" >Vectors</li>
                             </ul>
-                            <button id="control-right">></button>
+                            <button id="control-right" class="icon-double-right"></button>
                         </div>
                     </div>
                 </div>
-                <div class="panel-assets__section-image__box-assets" data-bind="foreach: listAssets">
-                    <div class="panel-assets__section-image__box-assets__asset" data-bind="setupEvents: koBindingSetupHTML($element)" >
-                        <div class="panel-assets__section-image__box-assets__asset__inner-container">
-                            <img src="" data-bind="attr:{src:model.url_thumbnail}" crossorigin alt="" class="panel-assets__section-image__box-assets__asset__inner-container__image" >
-                            <button class="panel-assets__section-image__box-assets__asset__btn-options"></button>
+                <div class="section-assets__box-assets" data-bind="foreach: listAssets">
+                    <div class="image-asset" data-bind="setupEvents: koBindingSetupHTML($element)" >
+                        <div class="image-asset__inner-container">
+                            <img src="" data-bind="attr:{src:model.url_thumbnail}" crossorigin alt="" class="image-asset__inner-container__image" >
+                            <button class="image-asset__btn-options"></button>
                         </div>
                     </div>
+                </div>
+                <div class="section-assets__btn-load-more">
+                    Load More...
                 </div>
             </div>
 
-            <div class="panel-assets__sections-container__section-font-assets">
+            <div class="section-assets video">
+                assets video
             </div>
-            <div class="sections-container__section-third"></div>
+            <div class="section-assets text">
+                <div class="section-assets__box-options">
+                    <div class="section-assets__box-options__first-row">
+                        <button class="btn-add-image">Add Local Image</button>
+                    </div>
+                </div>
+                <div class="section-assets__box-assets">
+                    <div class="text-asset">
+                        <p>Sample text</p>
+                    </div>
+                </div>
+            </div>
+            <div class="section-assets music">
+                assets music
+            </div>
         </div>
 
     </section>
-    <div class="panel-assets__modal-upload-image__filter">
-        <section class="panel-assets__modal-upload-image">
-            <div class="panel-assets__modal-upload-image__btn-close"></div>
-            <form class="panel-assets__modal-upload-image__form-uploader">
-                <input type="file" class="form-uploader__input-file" multiple>
-                <input type="submit" value="Upload" class="form-uploader__input-submit">
-            </form>
+
+<!--    <div class="panel-assets__modal-upload-image__filter">-->
+<!--        <section class="panel-assets__modal-upload-image">-->
+<!--            <div class="panel-assets__modal-upload-image__btn-close"></div>-->
+<!--            <form class="panel-assets__modal-upload-image__form-uploader">-->
+<!--                <input type="file" class="form-uploader__input-file" multiple>-->
+<!--                <input type="submit" value="Upload" class="form-uploader__input-submit">-->
+<!--            </form>-->
+<!--        </section>-->
+<!--    </div>-->
+
+    <div class="panel-assets__modal-load-url-image__filter modal__filter">
+        <section class="panel-assets__modal-load-url-image modal">
+            <div class="panel-assets__modal-load-url-image__header modal__header">
+                <p class="modal__header__title">DIRECCION WEB (IMAGEN)</p>
+                <div class="modal__header__btn-close-modal icon-cross"></div>
+            </div>
+            <div class="panel-assets__modal-load-url-image__body modal__body">
+                <input type="text" placeholder="e.g http://domain.com/dog.svg">
+            </div>
+            <div class="panel-assets__modal-load-url-image__footer modal__footer">
+                <button class="btn-accept modal__footer__btn-action">Accept</button>
+                <button class="btn-cancel modal__footer__btn-action">Cancel</button>
+            </div>
+
         </section>
     </div>
     <!--==============================
@@ -348,77 +295,82 @@
                 <li>Object Properties</li>
             </ul>
         </div>
-        <div class="panel-inspector__container-areas">
-            <div class="panel-inspector__area-scene-objects area">
-                <div class="panel-inspector__area-scene-objects__listing-objects-entrance">
-                    <p class="area-scene-objects__listing-objects-entrance__title">Objects with Effects</p>
-                    <div class="area-scene-objects__listing-objects-entrance__box-items ">
-                        <div class="area-scene-objects__listing-objects-entrance__box-items__item clearfix" style="display:none;">
-                            <div class="icon">
-                                <img src="" alt="" class="">
-                            </div>
-                            <div class="input-field-box delay">
-                                <label for="">Delay</label>
-                                <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
-                                <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
-                            </div>
-                            <div class="input-field-box duration">
-                                <label for="">Duration</label>
-                                <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
-                                <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+        <div class="container-areas-viewport">
+            <div class="panel-inspector__container-areas">
+                <div class="panel-inspector__area-scene-objects area">
+                    <div class="panel-inspector__area-scene-objects__listing-objects-entrance">
+                        <p class="area-scene-objects__listing-objects-entrance__title">Objects with Effects</p>
+                        <div class="area-scene-objects__listing-objects-entrance__box-items ">
+                            <div class="area-scene-objects__listing-objects-entrance__box-items__item clearfix" style="display:none;">
+                                <div class="icon">
+                                    <div class="image"><img src="" alt="" class=""></div>
+
+                                </div>
+                                <div class="fields-container">
+                                    <div class="input-field-box delay">
+                                        <label for="">Delay</label>
+                                        <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                                        <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+                                    </div>
+                                    <div class="input-field-box duration">
+                                        <label for="">Duration</label>
+                                        <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                                        <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="panel-inspector__area-scene-objects__listing-objects-all">
-                    <p class="area-scene-objects__listing-objects-all__title">Objects with</p>
-                    <ul class="area-scene-objects__listing-objects-all__box-items ">
-                        <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" style="display:none;">
-                            <img src="" alt="" class="icon">
-                            <div class="group-object-name">
-                            </div>
-                            <div class="group-box-actions">
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="panel-inspector__area-object-properties area">
-                <div class="box-related-widgets clearfix">
-                    <div class="widget-property-left widget">
-                        <label>Left</label>
-                        <div class="property-input"><button class="btn-decrease"></button><input type="text" property="left" class="field-value"/><button class="btn-increase"></button></div>
+                    <div class="panel-inspector__area-scene-objects__listing-objects-all">
+                        <p class="area-scene-objects__listing-objects-all__title">Objects with</p>
+                        <ul class="area-scene-objects__listing-objects-all__box-items ">
+                            <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" style="display:none;">
+                                <img src="" alt="" class="icon">
+                                <div class="group-object-name">
+                                </div>
+                                <div class="group-box-actions">
+                                </div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                <div class="box-related-widgets clearfix">
-                    <div class="widget-property-top widget">
-                        <label>Top</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="top" class="field-value"/><button class="btn-increase"></button></div>
+                <div class="panel-inspector__area-object-properties area">
+                    <div class="box-related-widgets clearfix">
+                        <div class="widget-property-left widget">
+                            <label>Left</label>
+                            <div class="property-input"><button class="btn-decrease"></button><input type="text" property="left" class="field-value"/><button class="btn-increase"></button></div>
+                        </div>
+                    </div>
+                    <div class="box-related-widgets clearfix">
+                        <div class="widget-property-top widget">
+                            <label>Top</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="top" class="field-value"/><button class="btn-increase"></button></div>
+                        </div>
+                    </div>
+                    <div class="box-related-widgets clearfix">
+                        <div class="widget-property-scaleX widget">
+                            <label>scale X</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+                        </div>
+                    </div>
+                    <div class="box-related-widgets clearfix">
+                        <div class="widget-property-scaleY widget">
+                            <label>scale Y</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleY" class="field-value"/><button class="btn-increase"></button></div>
+                        </div>
+                    </div>
+                    <div class="box-related-widgets clearfix">
+                        <div class="widget-property-angle widget">
+                            <label>Angle</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="angle" class="field-value"/><button class="btn-increase"></button></div>
+                        </div>
+                    </div>
+                    <div class="box-related-widgets clearfix">
+                        <div class="widget-property-opacity widget">
+                            <label>Opacity</label><div class="property-input"><input step="10"  type="range" property="opacity" class="range-value"/><input type="text" property="opacity" class="field-value"/></div>
+                        </div>
                     </div>
                 </div>
-                <div class="box-related-widgets clearfix">
-                    <div class="widget-property-scaleX widget">
-                        <label>scale X</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
-                    </div>
-                </div>
-                <div class="box-related-widgets clearfix">
-                    <div class="widget-property-scaleY widget">
-                        <label>scale Y</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleY" class="field-value"/><button class="btn-increase"></button></div>
-                    </div>
-                </div>
-                <div class="box-related-widgets clearfix">
-                    <div class="widget-property-angle widget">
-                        <label>Angle</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="angle" class="field-value"/><button class="btn-increase"></button></div>
-                    </div>
-                </div>
-                <div class="box-related-widgets clearfix">
-                    <div class="widget-property-opacity widget">
-                        <label>Opacity</label><div class="property-input"><input step="10"  type="range" property="opacity" class="range-value"/><input type="text" property="opacity" class="field-value"/></div>
-                    </div>
-                </div>
-            </div>
 
+            </div>
         </div>
-
 
     </section>
 
@@ -447,7 +399,7 @@
                 <section class="action-editor">
                     <div class="action-editor__properties-area">
                         <div class="action-editor__properties-area__toolbar">
-                            <div class="btn-reset-timeline tool"><span class="icon-restart"></span></div>
+                            <div class="btn-reset-timeline tool"><span class="icon-previous"></span></div>
                             <div class="btn-play-timeline tool"></div>
                             <div class="btn-delete-keyframe tool"> <span class="icon-bin"></span></div>
                             <nav class="menu-functions tool">
@@ -563,6 +515,7 @@
     ==============================-->
 
     <div class="section-image-assets__dummy-drag-asset"></div>
+    <div class="section-text-assets__dummy-drag-asset"></div>
 
     <div class="section-image-assets__item__menu-options">
     </div>

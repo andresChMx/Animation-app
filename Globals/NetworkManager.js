@@ -80,5 +80,66 @@ var NetworkManager={
         return query.get().then(function(documents){
             return documents.docs;
         });
+    },
+    // getUnsplashImageByCategory:function(image_category){
+    //     return fetch('https://api.unsplash.com/search/photos?per_page=20&page=1&query=' +image_category,{
+    //         method: 'GET',
+    //         headers:{
+    //             Authorization:"Client-ID gOUrrohaPV7U-niVpa-h6fvcxpIRlfnCCYYBOxX8Xgg"
+    //         }
+    //     }).then(function(response){
+    //         return response.json();
+    //     })
+    // },
+    getUnsplashImagesBySearch:function(provider,search,category,pageNumber){
+        if(provider==="unsplash"){
+            let url;
+            if(search==="" && category===""){
+                url='https://api.unsplash.com/photos?per_page=20' + "&page=" + pageNumber;
+            }else{
+                url='https://api.unsplash.com/search/photos?per_page=20&query=' + category + " " + search + "&page=" + pageNumber;
+            }
+            return fetch(url,{
+                method: 'GET',
+                headers:{
+                    Authorization:"Client-ID QQmyUrAS1cohjKsY_QffE9It1YWX-bkSdOgYLdIa2kw"
+                }
+            }).then(function(response){
+                return response.json();
+            }).then(function(data){
+                console.log(data);
+                let readyModel;
+                if(search==="" && category===""){
+                    readyModel=data.map(function(value,index){ // simulating the true structure of the data retrived from "database"
+                        return {id:"1",url_thumbnail:value.urls.thumb,url_image:value.urls.regular,user_id:"",category:"",name:""}
+                    });
+                }else{
+                    readyModel=data.results.map(function(value,index){ // simulating the true structure of the data retrived from "database"
+                        return {id:"1",url_thumbnail:value.urls.thumb,url_image:value.urls.regular,user_id:"",category:"",name:""}
+                    });
+                }
+
+                return readyModel;
+            })
+        }else if(provider==="pixabay"){
+            let url;
+            if(search===""){
+                url="https://pixabay.com/api/?key=20037884-4e79307345d2c17fae1b64e13&image_type=vector&per_page=20&page=" + pageNumber;
+            }else{
+                url="https://pixabay.com/api/?key=20037884-4e79307345d2c17fae1b64e13&image_type=vector&per_page=20&page=" + pageNumber + "&q=" + search;
+            }
+            return fetch(url,{
+                method: 'GET',
+            }).then(function(response){
+                return response.json();
+            }).then(function(data){
+                console.log(data);
+                let readyModel=data.hits.map(function(value,index){ // simulating the true structure of the data retrived from "database"
+                    return {id:"1",url_thumbnail:value.previewURL,url_image:value.largeImageURL,user_id:"",category:"",name:""}
+                });
+                return readyModel;
+            })
+        }
+
     }
 }

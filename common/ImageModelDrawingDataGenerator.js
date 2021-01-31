@@ -2,7 +2,9 @@ var ImageModelDrawingDataGenerator=fabric.util.createClass({
     initialize:function(){
         this.canvasElem=document.createElement("canvas");
         this.canvasElem.id="auxCanvas"
-        this.auxCanvasForTexts=new fabric.StaticCanvas("auxCanvas");
+        // this.auxCanvasForTexts=new fabric.StaticCanvas("auxCanvas");
+        this.auxCanvasForTexts=document.createElement("canvas");
+        this.auxCanvasForTextsContext=this.auxCanvasForTexts.getContext("2d");
     },
     _triangleWidthHeight:function(arr, i, j){
         return [arr[2*j]-arr[2*i], arr[2*j+1]-arr[2*i+1]]
@@ -112,12 +114,13 @@ var ImageModelDrawingDataGenerator=fabric.util.createClass({
     },
 
     // text related
-    generateTextDrawingData:function(animableText,imgWidth,imgHeight){
+    generateTextDrawingData:function(animableText,imgWidth,imgHeight,pathOpenTypeObjects){
         let coords=this.getLeftTopLines(animableText);
         let commandsPath=[];
         for(let i=0;i<animableText.textLines.length;i++){
-            let commandsTmp=OpenTypeFontManager.GeneratePath(FontsFileName[animableText.fontFamily],animableText.fontSize,coords[i].left,coords[i].top,animableText.textLines[i]);
-            commandsPath.push(commandsTmp);
+            let openTypePath=OpenTypeFontManager.GeneratePath(FontsFileName[animableText.fontFamily],animableText.fontSize,coords[i].left,coords[i].top,animableText.textLines[i]);
+            commandsPath.push(openTypePath.commands);
+            pathOpenTypeObjects.push(openTypePath);
         }
 
         var current, // current instruction
@@ -215,29 +218,36 @@ var ImageModelDrawingDataGenerator=fabric.util.createClass({
             }
           return result;
     },
-    generateTextBaseImage:function(animableText){
+    generateTextBaseImage:function(animableText,openTypePaths){
         let dimX=animableText.getWidthInDrawingCache();
         let dimY=animableText.getHeightInDrawingCache();
-        this.auxCanvasForTexts.setWidth(dimX);
-        this.auxCanvasForTexts.setHeight(dimY);
-        let tmpText=new fabric.Text(animableText.text,{
-            left:0,
-            top:0,
-            textAlign:animableText.textAlign,
-            lineHeight:animableText.lineHeight,
-            fontFamily:animableText.fontFamily,
-            fontSize:animableText.fontSize,
-            fill:animableText.fill,
+        this.auxCanvasForTexts.width=dimX;
+        this.auxCanvasForTexts.height=dimY;
+        // let tmpText=new fabric.Text(animableText.text,{
+        //     left:0,
+        //     top:0,
+        //     textAlign:animableText.textAlign,
+        //     lineHeight:animableText.lineHeight,
+        //     fontFamily:animableText.fontFamily,
+        //     fontSize:animableText.fontSize,
+        //     fill:animableText.fill,
+        //
+        //     originX:"left",
+        //     originY:"top",
+        // });
+        // this.auxCanvasForTexts.add(tmpText);
+        for(let i=0;i<openTypePaths.length;i++){
+            openTypePaths[i].draw(this.auxCanvasForTextsContext);
 
-            originX:"left",
-            originY:"top",
-        });
-        this.auxCanvasForTexts.add(tmpText);
+            this.auxCanvasForTextsContext.fillStyle=animableText.fill;
+            this.auxCanvasForTextsContext.fill();
+
+        }
+
+
         let image=new Image();
-        image.src=this.auxCanvasForTexts.toDataURL({
-            format: 'png',
-        });
-        this.auxCanvasForTexts.clear();
+        image.src=this.auxCanvasForTexts.toDataURL();
+        this.auxCanvasForTextsContext.clearRect(0,0,dimX,dimY);
         return image;
     },
     getLeftTopLines:function(animableText){

@@ -149,7 +149,7 @@ fabric.Object.prototype.getCustom=function(property){ // gets properties in worl
 }
 
 fabric.Object.prototype.getGlobalPosition=function(){// POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
-    let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
+    let newPoint=fabric.util.transformPoint(new fabric.Point(this.aCoords.tl.x,this.aCoords.tl.y),this.canvas.viewportTransform);
     newPoint.x+=this.canvas._offset.left;
     newPoint.y+=this.canvas._offset.top;
     return newPoint;
@@ -249,12 +249,12 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     getEntranceMode:function(){
         return this.entranceMode;
     },
-    getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
-        let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
-        newPoint.x+=this.canvas._offset.left;
-        newPoint.y+=this.canvas._offset.top;
-        return newPoint;
-    },
+    // getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
+    //     let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
+    //     newPoint.x+=this.canvas._offset.left;
+    //     newPoint.y+=this.canvas._offset.top;
+    //     return newPoint;
+    // },
     render:function(ctx){
         /*se sobreescribio por que cuando un objeto sale de vista, no se renderizaba, es tamos oviando eso
         esa parte del metodo render original*/
@@ -302,7 +302,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         this.imageDrawingData=this.setupImageDrawingDTO();
         this.animator=new Animator(this);
         this.setFontSize(72);
-        this.setFontFamily(FontsNames["bauhs 93"]);
+        this.setFontFamily(options.fontFamily);
         /*---------------------------*/
     },//exitEditing
     setupEntraceModesSettings:function(){
@@ -355,12 +355,12 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         return this.height; // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
     },
 
-    getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
-        let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
-        newPoint.x+=this.canvas._offset.left;
-        newPoint.y+=this.canvas._offset.top;
-        return newPoint;
-    },
+    // getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
+    //     let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
+    //     newPoint.x+=this.canvas._offset.left;
+    //     newPoint.y+=this.canvas._offset.top;
+    //     return newPoint;
+    // },
     render:function(ctx){
         /*se sobreescribio por que cuando un objeto sale de vista, no se renderizaba, es tamos oviando eso
         esa parte del metodo render original*/

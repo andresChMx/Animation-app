@@ -21,12 +21,25 @@
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Globals/NetworkManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/NetworkManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Globals/OpenTypeFontManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/OpenTypeFontManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Globals/Variables.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/Variables.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/WindowManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/icomoon.eot" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/icomoon.eot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/icomoon.svg" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/icomoon.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/icomoon.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/icomoon.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/icomoon.woff" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/icomoon.woff" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles/font-icons.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles/font-icons.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -194,7 +207,13 @@
       <workItem from="1610216954090" duration="24108000" />
       <workItem from="1610293543124" duration="15991000" />
       <workItem from="1610330861713" duration="5767000" />
-      <workItem from="1611676456901" duration="364000" />
+      <workItem from="1611676456901" duration="36322000" />
+      <workItem from="1611758625617" duration="16724000" />
+      <workItem from="1611789069288" duration="13337000" />
+      <workItem from="1611855281548" duration="1826000" />
+      <workItem from="1611934152638" duration="29953000" />
+      <workItem from="1612042223367" duration="7463000" />
+      <workItem from="1612060933027" duration="8491000" />
     </task>
     <servers />
   </component>
@@ -246,29 +265,21 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="569" y="201" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1050@0.0.1920.1050" timestamp="1608214205489" />
-    <state x="308" y="107" width="1628" height="993" key="dock-window-1" timestamp="1602996513706">
+    <state x="246" y="226" width="878" height="801" key="find.popup" timestamp="1612074956801">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="308" y="107" width="1628" height="993" key="dock-window-1/0.0.1920.1050@0.0.1920.1050" timestamp="1602996513706" />
-    <state x="92" y="92" width="1736" height="866" key="dock-window-2" timestamp="1602996543928">
-      <screen x="0" y="0" width="1920" height="1050" />
-    </state>
-    <state x="92" y="92" width="1736" height="866" key="dock-window-2/0.0.1920.1050@0.0.1920.1050" timestamp="1602996543928" />
-    <state x="464" y="249" width="878" height="801" key="find.popup" timestamp="1610337629772">
-      <screen x="0" y="0" width="1920" height="1050" />
-    </state>
-    <state x="464" y="249" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1610337629772" />
+    <state x="246" y="226" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1612074956801" />
     <state width="600" height="428" key="javadoc.popup" timestamp="1603662965310">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="600" height="428" key="javadoc.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1603662965310" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1609871273765">
+    <state x="616" y="237" key="run.anything.popup" timestamp="1612069641703">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1609871273765" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1610260825804">
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1612069641703" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1611818013312">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1610260825804" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1611818013312" />
   </component>
 </project>

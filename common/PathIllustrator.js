@@ -416,7 +416,7 @@ var PathIllustrator=fabric.util.createClass({
         this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
         this.ctx.drawImage(this.data.getBaseImageOf(k),0,0,this.canvas.width,this.canvas.height)
         this.ctx.globalCompositeOperation="source-in";
-        //this.ctx.stroke();
+        // this.ctx.stroke();
         this.ctx.fill();
         this.ctx.globalCompositeOperation="source-over";
         this.ctx.drawImage(this.prevPathSnapshot,0,0);

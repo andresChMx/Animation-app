@@ -60,6 +60,8 @@ var CanvasManager={
         MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnTextOptionClicked,this);
 
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDummyDraggingEnded,this);
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnTextAssetDraggableDropped,this);
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageURLLoaded,this);
         WindowManager.registerOnKeyDeletePressed(this);
         },
     initCamera:function(){
@@ -187,8 +189,16 @@ var CanvasManager={
             lowImage.crossOrigin="anonymous";
             highImage.crossOrigin="anonymous";
             let tmpCount=0;
-            lowImage.onload=function(){tmpCount++;if(tmpCount===2){imgsReady()}}
-            highImage.onload=function(){tmpCount++;if(tmpCount===2){imgsReady()}}
+            if(model.url_thumbnail===model.url_image){
+                highImage.onload=function(){lowImage=highImage;imgsReady();}
+                highImage.src=model.url_image;
+            }else{
+                lowImage.onload=function(){tmpCount++;if(tmpCount===2){imgsReady()}}
+                highImage.onload=function(){tmpCount++;if(tmpCount===2){imgsReady()}}
+
+                lowImage.src=model.url_thumbnail;
+                highImage.src=model.url_image;
+            }
             function imgsReady(){
                 model.imgHigh=highImage;
                 model.imgLow=lowImage;
@@ -214,8 +224,7 @@ var CanvasManager={
                 self.notifyOnObjAddedToListObjectsWithEntrance.bind(self)(animObj);
                 self.notifyOnAnimableObjectAdded.bind(self)(animObj);
             }
-            lowImage.src=model.url_thumbnail;
-            highImage.src=model.url_image;
+
 
              // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea
         }else{ //(type==="TextAnimable")
@@ -224,8 +233,8 @@ var CanvasManager={
                 "top":100,
                 "originX":"custom",
                 "originY":"custom",
-                "imageDrawingData":model,
-
+                //"imageDrawingData":model,
+                "fontFamily":model.fontFamily,
                 "name":"Object X",
             })
             animObj.setEntranceMode(EntranceModes.text_drawn); //textos tambien tendran entrada siendo dibujados
@@ -316,6 +325,18 @@ var CanvasManager={
         let model=args[0];
         this.createAnimableObject(model);
     },
+    notificationPanelAssetsOnTextAssetDraggableDropped:function(args){
+        let fontFamily=args[0];
+        let model={fontFamily:fontFamily}
+        this.createAnimableObject(model,"TextAnimable")
+    },
+    notificationPanelAssetsOnImageURLLoaded:function(args){
+      let url=args[0];
+
+      console.log(url);
+      let model={id:"1",url_thumbnail:url,url_image:url,user_id:"",category:"",name:""};
+        this.createAnimableObject(model);
+    },
     notificationPanelActionEditorOnMarkerDragEnded:function(){
         for(let i=0;i<this.listAnimableObjects.length;i++){
             this.listAnimableObjects[i].setCoords();
@@ -333,7 +354,7 @@ var SectionFloatingMenu={
     HTMLElement:null,
     MODELOptions:[
         {
-            icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/bring-forward-icon_qngr0u.png",
+            icon:"icon-front",
             description:"Move forward",
             action:function(animableObject){
                 CanvasManager.canvas.bringForward(animableObject);
@@ -341,7 +362,7 @@ var SectionFloatingMenu={
             HTMLElement:null
         },
         {
-            icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/send-back-icon_acfzvo.png",
+            icon:"icon-back",
             description:"Move backward",
             action:function (animableObject){
                 CanvasManager.canvas.sendBackwards(animableObject);
@@ -349,7 +370,7 @@ var SectionFloatingMenu={
             HTMLElement:null
         },
         {
-            icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/delete-icon_logtrc.png",
+            icon:"icon-bin",
             description:"Remove",
             action:function (){
                 CanvasManager.removeActiveAnimableObject();
@@ -357,7 +378,7 @@ var SectionFloatingMenu={
             HTMLElement:null
         },
         {
-            icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/settings-icon_jsw4qf.png",
+            icon:"icon-settings",
             description:"Configure Object",
             action:function (animableObject){
                 CanvasManager.SectionConfigureObject.showModal(animableObject);
@@ -365,7 +386,7 @@ var SectionFloatingMenu={
             HTMLElement:null
         },
         {
-            icon:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603599363/icons/settings-icon_jsw4qf.png",
+            icon:"icon-edit",
             description:"design path for this object",
             action:function(animableObject){
                 CanvasManager.childNotificationOnDesignPathOptionClicked(animableObject);
@@ -394,12 +415,12 @@ var SectionFloatingMenu={
     },
     generateHTMLOption:function(model,id){
         let newOpt=document.createElement("div");
-        newOpt.style.backgroundImage="url("+model.icon+")";
-        newOpt.className="canvas-animator__object__menu-options__option"
+        newOpt.className="canvas-animator__object__menu-options__option";
+        newOpt.classList.add(model.icon);
         newOpt.style.width=40 +"px";
         newOpt.style.height=40 +"px";
         newOpt.addEventListener("click",this.OnOptionClicked.bind(this))
-        newOpt.setAttribute("index",id)
+        newOpt.setAttribute("index",id);
         this.HTMLElement.appendChild(newOpt);
 
         model.HTMLElement=newOpt;
@@ -430,7 +451,7 @@ var SectionFloatingMenu={
             if(optionsToDisable[i]===0){
                 this.MODELOptions[i].HTMLElement.style.display="none";
             }else{
-                this.MODELOptions[i].HTMLElement.style.display="block";
+                this.MODELOptions[i].HTMLElement.style.display="flex";
             }
         }
     },

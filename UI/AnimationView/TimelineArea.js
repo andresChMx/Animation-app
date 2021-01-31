@@ -96,7 +96,7 @@ let Marker = fabric.util.createClass(Component, {
     type: "marker_component",
     HTMLElement: null,
     globalState: {},
-    localState: {colors: {idle: "#0D263D"}},
+    localState: {colors: {idle: "#29a3d2"}},
     isPressed: false,
     mouseState: {},
     initialize: function (canvas, globalState, mouseState) {
@@ -228,7 +228,7 @@ let ScrollBarButton = fabric.util.createClass(Component, {
 
     initialize: function (canvas, globalState, mouseState) {
         this.callSuper("initialize", globalState, mouseState)
-        this.localState = {colors: {idle: "#A1ACB1",innerCircle:"#6B7276"}};
+        this.localState = {colors: {idle: "#3B3A39",innerCircle:"#29a3d2"}};
         this.observerOnDragged = null;
         this.offsetMouseX = 0;
         this.offsetMouseY = 0;
@@ -289,7 +289,7 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
         this.canvas = canvas;
         this.canvas.addComponent(this);
 
-        this.localState = {colors: {idle: "#A1ACB1"}};
+        this.localState = {colors: {idle: "#3B3A39"}};
 
         this.offsetMouseX = 0;
         this.offsetMouseY = 0;
@@ -595,7 +595,7 @@ let TimeLineActions = fabric.util.createClass({
     setupComponentsCoords: function () {
         let timeBarLeft = 0;
         let timeBarTop = 0;
-        let timeBarHeight = 23;
+        let timeBarHeight = 30;
         let scrollBarHeight = 18;
         this.timeBarComponent.setLocalCoords(timeBarLeft, timeBarTop, this.globalState.coords.width, timeBarHeight);
         this.keysBarComponent.setLocalCoords(timeBarLeft, timeBarHeight, this.globalState.coords.width, this.globalState.coords.height - timeBarHeight);
@@ -695,7 +695,7 @@ let TimeLineTimeBar = fabric.util.createClass(Component, {
     globalState: {},
     localState: {
         coords: {left: 0, top: 0, width: 0, height: 0},
-        colors: {idle: "#F2F5F7", onMouseOver: "yellow", onMouseClick: "green", text: "#808080"}
+        colors: {idle: "#242323", onMouseOver: "yellow", onMouseClick: "green", text: "rgba(255,255,255,.6)"}
     },
     mouseState: {},
     snapshotLastState: null,
@@ -795,7 +795,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     type: "keys-bar_component",
     localState: {
         coords: {left: 0, top: 0, width: 0, height: 0},
-        colors: {idle: "#ffffff", selection: "yellow", onMouseClick: "green", text: "white",guidelines:"rgb(230,230,230)"}
+        colors: {idle: "#1A161D", selection: "yellow", onMouseClick: "green", text: "white",guidelines:"rgba(255,255,255,0.1)"}
     },
     initialize: function (canvas, globalState, mouseState, listLanesName) {
         this.callSuper('initialize', globalState, mouseState);
@@ -1287,9 +1287,11 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         //ctx.fillStyle = this.localState.colors.idle;
         //ctx.strokeStyle = this.localState.colors.stroke
         //ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
-        ctx.moveTo(this.localState.coords.left,this.localState.coords.top+this.localState.coords.height);
-        ctx.lineTo(this.localState.coords.left+this.localState.coords.width,this.localState.coords.top+this.localState.coords.height);
-        ctx.stroke();
+
+        // ctx.moveTo(this.localState.coords.left,this.localState.coords.top+this.localState.coords.height);
+        // ctx.lineTo(this.localState.coords.left+this.localState.coords.width,this.localState.coords.top+this.localState.coords.height);
+        // ctx.stroke();
+
         this._renderAnimationsBoxes(ctx);
 
         // for (let i = 0; i < this.counterActiveKeyFrames; i++) {

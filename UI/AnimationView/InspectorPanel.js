@@ -1,9 +1,5 @@
 let SectionToolBox={
     HTMLElement:null,
-    toolsActions:{
-        projectTools:["preview"],
-        textTools:["add-text"]
-    },
 
     parentClass:null,
     init:function(parentClass){
@@ -12,21 +8,21 @@ let SectionToolBox={
         let me=this;
         this.MODELTools=[
             {
-                icon:"",
+                icon:"icon-floppy-disk",
                 label:"Save",
                 action:function(){
 
                 }
             },
             {
-                icon:"",
+                icon:"icon-preview",
                 label:"Preview",
                 action:function(){
                     me.parentClass.childNotificationOnToolPreviewClicked();
                 }
             },
             {
-                icon:"",
+                icon:"icon-publish",
                 label:"Publish",
                 action:function(){
 
@@ -47,7 +43,7 @@ let SectionToolBox={
         icon.className=iconClassName;
         label.textContent=labelName;
         container.className="panel-inspector__toolbox__tool-item";
-        icon.className="icon"
+        icon.classList.add("icon");
         label.className="label";
         container.setAttribute("index",index)
         container.appendChild(icon);
@@ -264,7 +260,7 @@ var SectionObjectsEntraceEditor={
         propInputDuration.onNewValue(this.childNotificationOnDurationNewValue.bind(this));
         this.listPropertyInputsByItem.push({duration:propInputDuration,delay:propInputDelay});
 
-        newItem.style.display="block";
+        newItem.style.display="flex";
         newItem.addEventListener("click",this.onHTMLItemClicked.bind(this))
         this.HTMLElement.appendChild(newItem);
     },
@@ -284,12 +280,12 @@ var SectionObjectsEntraceEditor={
     },
     /*EVENTOS INTERNOS*/
     childNotificationOnDurationNewValue:function(value,target){
-        let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode)-1;
+        let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode.parentNode)-1;
         CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceDuration=value;
 
     },
     childNotificationOnDelayNewValue:function(value,target){
-        let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode)-1;
+        let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode.parentNode)-1;
         CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceDelay=value;
 
     },

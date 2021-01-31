@@ -1,3 +1,0 @@
-readjust selection box after transformation
-configuration object area
-configuration object area > change design of entrace modes from radio boxes to icons
