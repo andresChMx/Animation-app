@@ -160,13 +160,22 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
+        /*fabric.Object setting*/
+        this.padding=20;
+        this.transparentCorners= false;
+        this.cornerColor="rgb(0,0,0)";
+        this.name="ObjectX";
         this.centeredRotation=false;
-        this.name=options.name;
+        this.originX='custom';
+        this.originY='custom';
+        /*FIN -- fabric.Object setting*/
+
         this.entranceMode=null;
         this.entraceModesSettings={};
         this.setupEntraceModesSettings();
         this.imageAssetModel=options.imageAssetModel;
-        this.imageDrawingData=this.setupImageDrawingDTO(options);
+        this.imageDrawingData=this.setupImageDrawingDTO(options.imgHighDefinition,
+                                                        options.imgLowDefinition);
         this.animator=new Animator(this);
         this.setEntranceMode(EntranceModes.drawn); //debe estar a drawn antes de generar la imagen final mascarada (la siguiente funcion invocada)
         if(this.type==="ImageAnimable"){ // since the subclasse (CameraAnimable) are invoking this constructor ()
@@ -185,10 +194,10 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
 
         }
     },
-    setupImageDrawingDTO:function(options){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHigh
+    setupImageDrawingDTO:function(imgHighDefinition,imgLowDefinition){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHigh
         return {
-            imgHigh:options.imgHighDefinition,
-            imgLow:options.imgLowDefinition,
+            imgHigh:imgHighDefinition,
+            imgLow:imgLowDefinition,
             imgMasked:null,
             points:[],
             linesWidths:[],
@@ -284,6 +293,132 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         ctx.restore();
     },
 })
+var SVGAnimable=fabric.util.createClass(ImageAnimable,{
+    applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
+    type:'SVGAnimable',
+    initialize:function(options,callback){
+        this.svgString="";
+        let self=this;
+        this.loadSVGFromURL(options.imageAssetModel.url_image,function(svgString,image){
+            self.svgString=svgString;
+            options.imgHighDefinition=image;
+            options.imgLowDefinition=image;
+            self.callSuper('initialize', image, options);
+            callback();
+        });
+
+    },
+
+
+    loadSVGFromURL: function(url,callback) {/*fabric modified method*/
+        url = url.replace(/^\n\s*/, '').trim();
+        new fabric.util.request(url, {
+            method: 'get',
+            onComplete: onComplete
+        });
+        let self=this;
+        function onComplete(r) {
+
+            var xml = r.responseXML;
+
+            // INICIO MODIFICACION
+            let svg = r.response;
+            let blob = new Blob([svg], {type: 'image/svg+xml'});
+            let url = URL.createObjectURL(blob);
+
+            let image=new Image();
+            image.src=url;
+            image.onload=function(){
+
+                let dimmension=self.applyViewboxTransform(xml.documentElement);
+                xml.documentElement.setAttribute("width",dimmension.width);
+                xml.documentElement.setAttribute("height",dimmension.height);
+
+                let newSvgString=(new XMLSerializer).serializeToString(xml.documentElement);
+                blob = new Blob([newSvgString], {type: 'image/svg+xml'});
+                url = URL.createObjectURL(blob);
+                image.src=url;
+                image.onload=function(){
+                    callback(newSvgString,image);
+                }
+            }
+            // FIN MODIFICACION
+
+        }
+    },
+    applyViewboxTransform:function(element){/*fabric modified method*/ /*obtener dimensiones reales de svg*/
+        var reViewBoxAttrValue = new RegExp(
+            '^' +
+            '\\s*(' + fabric.reNum + '+)\\s*,?' +
+            '\\s*(' + fabric.reNum + '+)\\s*,?' +
+            '\\s*(' + fabric.reNum + '+)\\s*,?' +
+            '\\s*(' + fabric.reNum + '+)\\s*' +
+            '$'
+        );
+        let parseUnit = fabric.util.parseUnit;
+        var viewBoxAttr = element.getAttribute('viewBox'),
+            scaleX = 1,
+            scaleY = 1,
+            minX = 0,
+            minY = 0,
+            viewBoxWidth, viewBoxHeight, matrix, el,
+            widthAttr = element.getAttribute('width'),
+            heightAttr = element.getAttribute('height'),
+            x = element.getAttribute('x') || 0,
+            y = element.getAttribute('y') || 0,
+            preserveAspectRatio = element.getAttribute('preserveAspectRatio') || '',
+            missingViewBox = (!viewBoxAttr || !fabric.svgViewBoxElementsRegEx.test(element.nodeName)
+                || !(viewBoxAttr = viewBoxAttr.match(reViewBoxAttrValue))),
+            missingDimAttr = (!widthAttr || !heightAttr || widthAttr === '100%' || heightAttr === '100%'),
+            toBeParsed = missingViewBox && missingDimAttr,
+            parsedDim = { }, translateMatrix = '', widthDiff = 0, heightDiff = 0;
+
+        parsedDim.width = 0;
+        parsedDim.height = 0;
+        parsedDim.toBeParsed = toBeParsed;
+
+        if (toBeParsed) {
+            return parsedDim;
+        }
+
+        if (missingViewBox) {
+            parsedDim.width = parseUnit(widthAttr);
+            parsedDim.height = parseUnit(heightAttr);
+            return parsedDim;
+        }
+        minX = -parseFloat(viewBoxAttr[1]);
+        minY = -parseFloat(viewBoxAttr[2]);
+        viewBoxWidth = parseFloat(viewBoxAttr[3]);
+        viewBoxHeight = parseFloat(viewBoxAttr[4]);
+        parsedDim.minX = minX;
+        parsedDim.minY = minY;
+        parsedDim.viewBoxWidth = viewBoxWidth;
+        parsedDim.viewBoxHeight = viewBoxHeight;
+        if (!missingDimAttr) {
+            parsedDim.width = parseUnit(widthAttr);
+            parsedDim.height = parseUnit(heightAttr);
+            scaleX = parsedDim.width / viewBoxWidth;
+            scaleY = parsedDim.height / viewBoxHeight;
+        }
+        else {
+            parsedDim.width = viewBoxWidth;
+            parsedDim.height = viewBoxHeight;
+        }
+        return parsedDim
+    },
+    setupEntraceModesSettings:function(){
+        this.entraceModesSettings[this.applicableEntrenceModes[0]]={
+
+        }
+        this.entraceModesSettings[this.applicableEntrenceModes[1]]={
+            showHand:true,
+            fillRevealMode:'fadein'  // fadein || drawn
+        }
+        this.entraceModesSettings[this.applicableEntrenceModes[2]]={
+
+        }
+    },
+});
 var TextAnimable=fabric.util.createClass(fabric.IText, {
     //drawn y text_draw NO son lo mismo, ya que su logica es diferente
     applicableEntrenceModes: [EntranceModes.none,EntranceModes.text_drawn,EntranceModes.dragged,EntranceModes.text_typed],//FOR UI

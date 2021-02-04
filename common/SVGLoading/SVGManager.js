@@ -27,7 +27,7 @@ var SVGManager=fabric.util.createClass({
     calcDrawingDataFromUrl_forcePaths:function(url,imgWidth,imgHeight,strokeWidth,callback){
         this.calcDrawingData(url,imgWidth,imgHeight,"force_paths","url",callback,strokeWidth)
     },
-    calcDrawingData:function(source,imgWidth,imgHeight,loadingMode,sourceType,callback,strokeWidth=8000){
+    calcDrawingData:function(source,imgWidth,imgHeight,loadingMode,sourceType,callback,strokeWidth=50){
         let result= {
             points: [],
             linesWidths:[],
@@ -38,6 +38,7 @@ var SVGManager=fabric.util.createClass({
         let f=function(objects, options) {
             var obj = fabric.util.groupSVGElements(objects, options);
             let listObjects=[]
+            console.log(obj);
             if(obj.type==="path"){
                 listObjects=[obj];
             }else if(obj.type==="group"){
@@ -237,7 +238,7 @@ var SVGManager=fabric.util.createClass({
 
                 case 'h': // horizontal lineto, relative
                     x += current[1];
-                    ctx.lineTo(x + l, y + t);
+
                     result.strokesTypes[layerIndex].push("l");
                     result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);

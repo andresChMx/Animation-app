@@ -994,7 +994,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     _drawSelection: function (ctx) {
         if (this.selecting) {
             ctx.beginPath();
-            ctx.strokeStyle="black";
+            ctx.strokeStyle="white";
             ctx.setLineDash([5,5]);
             ctx.fillStyle = this.localState.colors.selection;
             ctx.rect(this.mousePosXOnDragStated, this.mousePosYOnDragStated, this.selectionWidth, this.selectionHeight);
@@ -1229,10 +1229,10 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         this.counterActiveKeyFrames=0;
     },
     sortKeyFramesByTime:function(){
-        insertionSort(this.keyFrames,this.counterActiveKeyFrames);
+        Utils.insertionSort(this.keyFrames,this.counterActiveKeyFrames);
         for(let i=0;i<this.listListActiveKeyFramesByIds.length;i++){
             if(this.listListActiveKeyFramesByIds[i]===undefined){continue;}
-            insertionSort(this.listListActiveKeyFramesByIds[i],this.listListActiveKeyFramesByIds[i].length);
+            Utils.insertionSort(this.listListActiveKeyFramesByIds[i],this.listListActiveKeyFramesByIds[i].length);
         }
     },
     updateKeyFramesIndexByObject:function(){

@@ -148,6 +148,7 @@ button{
     top:0;
     z-index:3000;
     background:rgba(0,0,0,.5);
+    display: none;
 }
 .modal__header{
     width:100%;
@@ -748,14 +749,14 @@ button{
 .panel-assets__menu-sections{
     background: #1c1b1b;
     display: flex;
-    justify-content: space-evenly;
+
 }
 .panel-assets__menu-sections__item{
     font-weight: bold;
     font-size:1.15rem;
-    padding:13px;
-    text-align: center;
-    flex-grow:1;
+    padding:13px 0;
+    text-align:center;
+    width:20%;
     color:rgba(255,255,255,.6);
     border-bottom:none;
     cursor:pointer;
@@ -1011,7 +1012,7 @@ button{
 /*modal load image from url*/
 .panel-assets__modal-load-url-image.modal{
     height:180px;
-    width:400px
+    width:400px;
 }
 .panel-assets__modal-load-url-image__body{
     padding:0 10px;

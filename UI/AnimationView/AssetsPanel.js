@@ -499,6 +499,37 @@ var SectionTextAssets={
         }
     }
 };
+var SectionShapeAssets={
+    HTMLElement:null,
+
+    listAssets:ko.observableArray([]),
+    MODELAssets:[
+        {icon:"icon-start",category:"Arrows",path:[{x:0,y:0}]},
+        {icon:"icon-start",category:"bubles",path:[{x:0,y:0}]},
+        {icon:"icon-start",category:"",path:[{x:0,y:0}]},
+    ],
+    init:function(){
+        this.HTMLElement=document.querySelector(".panel-assets__sections-container .section-assets.text");
+        this.initAssets();
+    },
+    initAssets:function(){
+        let row=document.createElement("div");
+        row.className="assets-row";
+        for(let i=0;i<this.MODELAssets.length;i++){
+            this.createAsset(this.MODELAssets[i]);
+        }
+    },
+    createAsset:function(assetModel){
+        let asset=new AssetShape(assetModel,this);
+        this.listAssets.push(asset);
+    },
+    childNotificationOnAssetDraggingStarted:function(model){
+        this.lastModelOnAssetDragged=model;
+        this.isAssetPressed=true;
+        //this.HTMLDummyAssetDrag.style.display="block";
+    }
+}
+
 var PanelAssets={
     name:'PanelAssets',
     events:{
@@ -515,6 +546,7 @@ var PanelAssets={
     htmlElementNormalHeight:0,
     SectionImageAssets:SectionImageAssets,
     SectionTextAssets:SectionTextAssets,
+    SectionShapeAssets:SectionShapeAssets,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-assets");
         this.HTMLCollMenuOptions=document.querySelector(".panel-assets__menu-sections").children;
@@ -570,7 +602,27 @@ var PanelAssets={
     }
 }
 
+var AssetShape=function(model,parentClass){
+    this.HTMLElement=null;
 
+    this.model=null;
+    this.parentClass=null;
+    this.constructor=function(){
+        this.model=model;
+        this.parentClass=parentClass;
+    }
+    this.koBindingSetupHTML=function(HTMLContainer){
+        this.HTMLElement=HTMLContainer;
+        this.HTMLElement.ondragstart=function(){return false;}
+        this.HTMLElement.addEventListener("mousedown",this.OnMouseDown.bind(this));
+    }
+    this.OnMouseDown=function(){
+        this.notifyOnDraggingStarted();
+    }
+    this.notifyOnDraggingStarted=function(){
+        this.parentClass.childNotificationOnAssetDraggingStarted(this.model);
+    }
+};
 var AssetImage=function(model,parentClass){
     this.HTMLElement=null;
     this.HTMLDraggable=null;
@@ -619,4 +671,4 @@ ko.bindingHandlers.setupEvents={
         valueAccesor();
     }
 }
-ko.applyBindings(SectionImageAssets);
+ko.applyBindings(PanelAssets);

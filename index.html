@@ -186,6 +186,7 @@
         <nav class="panel-assets__menu-sections">
             <div class="panel-assets__menu-sections__item">Images</div>
             <div class="panel-assets__menu-sections__item">Videos</div>
+            <div class="panel-assets__menu-sections__item">Shapes</div>
             <div class="panel-assets__menu-sections__item">Fonts</div>
             <div class="panel-assets__menu-sections__item">Music</div>
         </nav>
@@ -217,7 +218,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="section-assets__box-assets" data-bind="foreach: listAssets">
+                <div class="section-assets__box-assets" data-bind="foreach: SectionImageAssets.listAssets">
                     <div class="image-asset" data-bind="setupEvents: koBindingSetupHTML($element)" >
                         <div class="image-asset__inner-container">
                             <img src="" data-bind="attr:{src:model.url_thumbnail}" crossorigin alt="" class="image-asset__inner-container__image" >
@@ -232,6 +233,38 @@
 
             <div class="section-assets video">
                 assets video
+            </div>
+            <div class="section-assets shape">
+                <div class="section-assets__box-options">
+                    <div class="section-assets__box-options__first-row">
+                        <button class="btn-add-image">Add Custom Shape</button>
+                    </div>
+                    <div class="section-assets__box-options__second-row">
+                        <div class="section-assets__box-options__second-row__menu-categories">
+                            <button id="shape__control-left" class="icon-double-left"></button>
+                            <ul class="section-assets__box-options__menu-categories__list-categories">
+                                <li value="" >All</li>
+                                <li value="business" >Business</li>
+                                <li value="people" >people</li>
+                                <li value="background" >Backgrounds</li>
+                                <li value="technology" >Technology</li>
+                                <li value="nature" >Nature</li>
+                                <li value="health" >Health</li>
+                                <li value="animal" >Animals</li>
+                                <li value="vector" >Vectors</li>
+                            </ul>
+                            <button id="shape__control-right" class="icon-double-right"></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-assets__box-assets" data-bind="foreach: SectionShapeAssets.listAssets">
+                    <div class="shape-asset" data-bind="setupEvents: koBindingSetupHTML($element)" >
+                        <i data-bind="attr:{class:model.icon}"></i>
+                    </div>
+                </div>
+                <div class="section-assets__btn-load-more">
+                    Load More...
+                </div>
             </div>
             <div class="section-assets text">
                 <div class="section-assets__box-options">

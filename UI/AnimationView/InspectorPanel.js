@@ -265,7 +265,7 @@ var SectionObjectsEntraceEditor={
         this.HTMLElement.appendChild(newItem);
     },
     _getAnimableObjectIcon:function(animObjWithEntrance){
-        if(animObjWithEntrance.type==="ImageAnimable"){
+        if(animObjWithEntrance.type==="ImageAnimable" || animObjWithEntrance.type==="SVGAnimable"){
             return animObjWithEntrance.imageDrawingData.imgLow.cloneNode();
         }else if(animObjWithEntrance.type==="TextAnimable"){
             return this.iconTextAnimable.cloneNode();

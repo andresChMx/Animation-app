@@ -24,8 +24,10 @@ var PathDesignerController=fabric.util.createClass({
 
     },
     notificationCanvasManagerOnDesignPathOptionClicked:function(args){
-        this.imageDrawingData=args[0];
-        this.objectDesigning=args[1];
+        let animableObject=args[0];
+        this.objectDesigning=animableObject;
+        this.imageDrawingData=animableObject.imageDrawingData;
+
         if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
             this.wakeUpComponentes(this.imageDrawingData);
         }else if(this.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
@@ -55,11 +57,7 @@ var PathDesignerController=fabric.util.createClass({
         this.previewManager.wakeUp(imageDrawingData);//tiene acceso al drawinData ya que tiene referencia al canvasManager y drawingManager
         this.notifyOnSetupCompleted();
     },
-    isSVG:function(urlstring){
-        const regex1 = RegExp('.svg$', 'i');
 
-        return regex1.test(urlstring);
-    },
     notificationPanelDesignerOptionsOnSettingActionClicked:function(args){
         let actionId=args[0];
         switch (actionId){
@@ -129,7 +127,7 @@ var PathDesignerController=fabric.util.createClass({
     loadingPathsFromSVG:function(loadingMode){
         let self=this;
         if(this.imageDrawingData!=null){
-            this.svgManager.calcDrawingData(this.imageDrawingData.url,this.imageDrawingData.imgHigh.naturalWidth,this.imageDrawingData.imgHigh.naturalHeight,loadingMode,"url",function( svgLoadedData){
+            this.svgManager.calcDrawingData(this.objectDesigning.imageAssetModel.url_image,this.imageDrawingData.imgHigh.naturalWidth,this.imageDrawingData.imgHigh.naturalHeight,loadingMode,"url",function( svgLoadedData){
 
                 (function Wait(){
                     if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),1);return;}
@@ -172,7 +170,8 @@ var PathDesignerController=fabric.util.createClass({
         ])
     },
     notifyOnSetupCompleted:function(){
-        let imageModelIsSVG=this.isSVG(this.imageDrawingData.url);
+
+        let imageModelIsSVG=Utils.isSVG(this.objectDesigning.imageAssetModel.url_image);
         for(let i=0;i<this.listObserversOnSetupCompleted.length;i++){
             this.listObserversOnSetupCompleted[i].notificationOnSetupCompleted(imageModelIsSVG);
         }

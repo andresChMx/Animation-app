@@ -65,7 +65,7 @@ var CanvasManager={
         WindowManager.registerOnKeyDeletePressed(this);
         },
     initCamera:function(){
-        fabric.Image.fromURLCustom("https://res.cloudinary.com/dkhbeokkp/image/upload/v1609085185/fco0mtxh19dzino8qded.jpg",function(animCamera){
+        fabric.Image.fromURLCustom("https://res.cloudinary.com/djtqhafqe/image/upload/v1612398280/ooatfbhhb8is66s3d9i0.svg",function(animCamera){
             this.camera=animCamera;
             this.listAnimableObjects.push(animCamera);
             this.canvas.add(animCamera);
@@ -200,22 +200,12 @@ var CanvasManager={
                 highImage.src=model.url_image;
             }
             function imgsReady(){
-                model.imgHigh=highImage;
-                model.imgLow=lowImage;
                 let animObj=new ImageAnimable(highImage,{
                     "left":WindowManager.mouse.x-self.canvas._offset.left,
                     "top":WindowManager.mouse.y-self.canvas._offset.top,
-                    "originX":'custom',
-                    "originY":'custom',
                     "imageAssetModel":model,
                     "imgHighDefinition":highImage,
                     "imgLowDefinition":lowImage,
-
-                    "padding":20,
-                    "transparentCorners": false,
-
-                    cornerColor:"rgb(0,0,0)",
-                    "name":"Object X"
                 })
                 animObj.setCoords();
                 self.listAnimableObjects.push(animObj);
@@ -227,7 +217,21 @@ var CanvasManager={
 
 
              // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea
-        }else{ //(type==="TextAnimable")
+        }else if(type==="SVGAnimable"){
+            let animObj=new SVGAnimable({
+                "left":WindowManager.mouse.x-self.canvas._offset.left,
+                "top":WindowManager.mouse.y-self.canvas._offset.top,
+                "imageAssetModel":model,
+            },function (){
+                animObj.setCoords();
+                self.listAnimableObjects.push(animObj);
+                self.listAnimableObjectsWithEntrance.push(animObj);
+                self.canvas.add(animObj);
+                self.notifyOnObjAddedToListObjectsWithEntrance.bind(self)(animObj);
+                self.notifyOnAnimableObjectAdded.bind(self)(animObj);
+            });
+
+        } else{ //(type==="TextAnimable")
             let animObj=new TextAnimable("asdfasdfasdf",{
                 "left":100,
                 "top":100,
@@ -305,7 +309,7 @@ var CanvasManager={
         this.removeActiveAnimableObject()
     },
     childNotificationOnDesignPathOptionClicked:function(currentSelectedObject){
-        MainMediator.notify(this.name,this.events.OnDesignPathOptionClicked,[currentSelectedObject.imageDrawingData,currentSelectedObject])
+        MainMediator.notify(this.name,this.events.OnDesignPathOptionClicked,[currentSelectedObject])
     },
     notificationPanelInspectorOnTextOptionClicked:function(args){
         let action=args[0];
@@ -332,10 +336,12 @@ var CanvasManager={
     },
     notificationPanelAssetsOnImageURLLoaded:function(args){
       let url=args[0];
-
-      console.log(url);
       let model={id:"1",url_thumbnail:url,url_image:url,user_id:"",category:"",name:""};
+      if(Utils.isSVG(url)){
+        this.createAnimableObject(model,"SVGAnimable");
+      }else{
         this.createAnimableObject(model);
+      }
     },
     notificationPanelActionEditorOnMarkerDragEnded:function(){
         for(let i=0;i<this.listAnimableObjects.length;i++){
@@ -475,7 +481,13 @@ var SectionFloatingMenu={
             this.desableOptions([1,1,1,1,0]);
             this.showMenu(positionInViewportCoords.x, positionInViewportCoords.y);
 
-        }else if(activeAnimableObject.type==="CameraAnimable"){
+        }else if(activeAnimableObject.type==="SVGAnimable"){
+            this.lastAnimableObjectActive=activeAnimableObject;
+            let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
+            this.desableOptions([1,1,1,1,1]);
+            this.showMenu(positionInViewportCoords.x, positionInViewportCoords.y);
+        }
+        else if(activeAnimableObject.type==="CameraAnimable"){
             this.hiddeMenu();
         }
     },
