@@ -1,16 +1,68 @@
+var CurveSegmentTool={
+    getBezier:function(p1x,p1y,c1x,c1y,c2x,c2y,p2x,p2y,temperature) {
+        let t = temperature;
+        let u0 = 1;
+        let u1 = 1 - t;
+        let qxa = u0 * u0 * p1x;
+        let qxb = u1 * u1 * p1x + c1x * 2 * t * u1 + c2x * t * t;
+        let qxc = c1x;
+        let qxd = c1x * u1 * u1 + c2x * 2 * t * u1 + p2x * t * t;
+
+        let qya = u0 * u0 * p1y;
+        let qyb = u1 * u1 * p1y + c1y * 2 * t * u1 + c2y * t * t;
+        let qyc = c1y;
+        let qyd = c1y * u1 * u1 + c2y * 2 * t * u1 + p2y * t * t;
+
+        let xb = qxa * u1 + qxc * t;
+        let xc = qxb;
+        let xd = qxb * u1 + qxd * t;
+
+        let yb = qya * u1 + qyc * t;
+        let yc = qyb;
+        let yd = qyb * u1 + qyd * t;
+
+        return [xb, yb, xc, yc, xd, yd];
+    },
+    getQuadratic:function(p1x,p1y,c1x,c1y,p2x,p2y,temperature){
+        let t=temperature;
+        let v1X=p1x+(c1x-p1x)*t;
+        let v1Y=p1y+(c1y-p1y)*t;
+        let newCtpX=v1X;
+        let newCtpY=v1Y;
+        let newP2X=v1X+((c1x+(p2x-c1x)*t)-v1X)*t;
+        let newP2Y=v1Y+((c1y+(p2y-c1y)*t)-v1Y)*t;
+        return [newCtpX,newCtpY,newP2X,newP2Y];
+    },
+    getLine:function(startX,startY,endX,endY,position){
+        return{
+            x: this._getLValue(position,startX,endX),
+            y: this._getLValue(position,startY,endY)
+        }
+    },
+    _getLValue:function(t,p1,p2){
+        return p1 + t*(p2-p1);
+    },
+}
+
 var PathIllustrator=fabric.util.createClass({
     initialize:function(canvas,ctx,dataAdapter,loopMode){
-        this.observersOnDrawingNewObject=[];
+        this.observersOnDrawingNewObject=null;
         this.observerOnLastObjectDrawingFinished=null;
         this.canvas=canvas;
         this.ctx=ctx;
 
         this.data=dataAdapter;
         this.loopMode=loopMode;
-        this.prevPathSnapshot=new Image();
+
+        this.baseImageCanvas=document.createElement("canvas");
+        this.baseImageCtx=this.baseImageCanvas.getContext("2d");
+
+        this.prevPathCanvas=document.createElement("canvas");
+        this.prevPathSnapshot=this.prevPathCanvas.getContext("2d");
 
         this.counterInterruption=0;
         this.endLoop=false;
+        this.flagCompleted=false;
 
         //vars for previewer
         this.lastPicIndex=0;
@@ -33,7 +85,7 @@ var PathIllustrator=fabric.util.createClass({
     setupPreviewSceneVars:function(){
         if(this.data.getObjectsToDrawLength()<=0){return;}
         this.ctx.lineCap = "round";
-        this.endLoop=false;
+        this.flagCompleted=false;
         this.animStartTime=0;
         this.animFinishTime=0;
         this.animTotalProgress=0; //0-total duratthis.
@@ -47,173 +99,198 @@ var PathIllustrator=fabric.util.createClass({
         this.flagFirstTime=true;
     },
     start:function(){
-        if(this.data.getObjectsToDrawLength()<=0){return};//SI NO HAY OBJECTOS PARA DIBUJAR NO INICIAMOS CUANDO NOS LO SOLICITEN
+        if(this.data.getObjectsToDrawLength()<=0){return}//SI NO HAY OBJECTOS PARA DIBUJAR NO INICIAMOS CUANDO NOS LO SOLICITEN
         this.endLoop=false;
         this._loop();
     },
     finish:function(){
-        this.endLoop=true;
-        this.counterInterruption=-1;
+        // this.flagCompleted=true;
+    },
+    delete:function(){
+        this.baseImageCanvas.remove();
+        this.prevPathCanvas.remove();
     },
     generateFinalImage:function(callbackOnFinish){
-        let k=0;
-        let i=this.getFirstPathListIndex(k,-1);
-        let j=0;
-        let totalCantPathStrokes=this.getTotalStrokesInImage(k);
-        let oldValI=i;
+        this.k=0;
+        this.i=this.getFirstPathListIndex(this.k,-1);
+        this.j=0;
+        let totalCantPathStrokes=this.getTotalStrokesInImage(this.k);
+        let oldValI=this.i;
         let p=0;
-        this.canvas.width=this.data.getBaseImageOf(k).naturalWidth;
-        this.canvas.height=this.data.getBaseImageOf(k).naturalHeight;
-        this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
+        this.canvas.width=this.data.getBaseImageOf(this.k).naturalWidth;
+        this.canvas.height=this.data.getBaseImageOf(this.k).naturalHeight;
+        this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
+
+        this.prevPathCanvas.width=this.canvas.width;
+        this.prevPathCanvas.height=this.canvas.height;
+
+        this.baseImageCanvas.width=this.canvas.width;
+        this.baseImageCanvas.height=this.canvas.height;
+        this.baseImageCtx.drawImage(this.data.getBaseImageOf(this.k),0,0)
+
         this.ctx.lineCap="round";
         (function looper(){
             for(p;p<totalCantPathStrokes;p++){
-                if(oldValI!==i){//se paso a otro path
-                    oldValI=i;
-                    this.drawCurrentStrokes(k);
-                    this.prevPathSnapshot.src=this.canvas.toDataURL();
-                    this.ctx.beginPath();
-                    this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
-                    this.prevPathSnapshot.onload=function(){
-                        setTimeout(function(){
-                        looper.bind(this)();
-                        }.bind(this),64)
-                    }.bind(this)
-                    break;
+                if(oldValI!==this.i){//se paso a otro path
+                    oldValI=this.i;
+                    this.data.getIllustrationFunction(this.k)(this.canvas,this.ctx,this.baseImageCanvas,this.prevPathCanvas);
+                    this.prevPathSnapshot.drawImage(this.canvas,0,0);
+                    this._setupCanvasOnNewLayer();
                 }
-                //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
-                this.drawCompletePath(k,i,j);
-                let indexes=this.getNextPath(k,i,j,1);
-                i=indexes[0];
-                j=indexes[1];
+
+                this.drawCompletePath(this.k,this.i,this.j);
+                let indexes=this.getNextPath(this.k,this.i,this.j,1);
+                this.i=indexes[0];
+                this.j=indexes[1];
             }
             if(p===totalCantPathStrokes){
-                this.drawCurrentStrokes(k);
+                this.data.getIllustrationFunction(this.k)(this.canvas,this.ctx,this.baseImageCanvas,this.prevPathCanvas);
                 callbackOnFinish(this.canvas.toDataURL());
             }
         }.bind(this)())
 
     },
     _manualDrawingLoop:function(nowTime){
-        if(this.endLoop || this.data.getObjectsToDrawLength()<=0){return null;}
+        if(this.flagCompleted || this.data.getObjectsToDrawLength()<=0){return null;}
         let finalSegmentPoint={x:null,y:null}; //for the animation hand which belongs to a DrawingCacheManager
         if(nowTime>=this.animFinishTime || this.flagFirstTime){ // siguiente imagen o primera vez
-            let imageFinalFrame=new Image();
-            if(!this.flagFirstTime){
-                //// Completing not drawn lines
-                if(this.data.getEntraceModeOf(this.k)===EntranceModes.drawn){
-                    imageFinalFrame=this.data.getFinalMaskedImageOf(this.k);
-                }else if(this.data.getEntraceModeOf(this.k)===EntranceModes.text_drawn){
-                    imageFinalFrame=this.data.getFinalMaskedImageOf(this.k);
-                }
-            }else{
-                imageFinalFrame.src=this.canvas.toDataURL();
-            }
-            this.k++;
-            if(this.k===this.data.getObjectsToDrawLength()){
-                if(this.loopMode){
-                    this.k=0;
-                }else{
-                    this.notifyOnLastObjectDrawingFinished(this.k-1,imageFinalFrame);
-                    this.finish();return null;
-                }
-            }
-            ///
-            if(this.flagFirstTime){
-                this.notifyOnDrawingNewObject(0,0,imageFinalFrame);
-            }else{
-                this.notifyOnDrawingNewObject(this.k-1,this.k,imageFinalFrame);
-            }
-
-            //calculando momento final de la animacion de la imagen
-            let offsetTime=nowTime-this.animFinishTime;
-
-            this.animStartTime=nowTime-offsetTime;
-            this.animFinishTime=this.animStartTime+this.data.getDurationOf(this.k)+ this.data.getDelayOf(this.k);
-            this.animTotalProgress=0;
-            this.prevStrokeTurnIndex=0;
-
-            //Buscando los indicices del primer stroke
-            this.i=this.getFirstPathListIndex(this.k,-1);
-            this.j=0;
-            //Setting up canvas for new image (cleaning, empty snapshot, setup linewidth)
-            this.ctx.beginPath();
-            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-            this.prevPathSnapshot.src=this.canvas.toDataURL();
-            if(this.data.getListLinesWidthsLength(this.k)>0){
-                this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
-            }
-            this.ctx.lineCap = "round";
-            // pintara un texto o una imagen
-            if(this.data.getEntraceModeOf(this.k)===EntranceModes.drawn){
-                this.functionDrawingMode=this.drawCurrentStrokes.bind(this);
-            }else if(this.data.getEntraceModeOf(this.k)===EntranceModes.text_drawn){
-                this.functionDrawingMode=this.drawCurrentFills.bind(this);
-                this.ctx.fillStyle=this.data.getTextFillColor(this.k);
-            }
-            ////// Calculando tiempo de cada stroke
-            let totalCantPathStrokes=this.getTotalStrokesInImage(this.k);
-            this.animStrokeDuration=this.data.getDurationOf(this.k)/totalCantPathStrokes;
-
+            this._setupOnNewImage(nowTime);
             this.flagFirstTime=false;
         }else{
-            this.animTotalProgress=nowTime-this.animStartTime;
-
-            if(this.data.getPathListLength(this.k)!==0){
-                if(!Preprotocol.wantConsume){
-                    //return;
-                }else{
-                    let animTrueProgress=this.animTotalProgress-this.data.getDelayOf(this.k);
-                    if(animTrueProgress<0){return null;}
-                    Preprotocol.wantDelete=false;
-                    //animTrueProgress=Math.max(0,animTrueProgress);
-                    let indexPathTurn=Math.floor(animTrueProgress/this.animStrokeDuration);
-                    let cantJumps=indexPathTurn-this.prevStrokeTurnIndex;
-                    let oldValI=this.i;
-                    let flagNewPath=false;
-                    let p=0;
-                    for(p=0;p<cantJumps;p++){
-                        if(oldValI!==this.i){//se paso a otro path
-                            oldValI=this.i;
-                            flagNewPath=true;
-
-                            this.functionDrawingMode(this.k);
-                            this.prevPathSnapshot.src=this.canvas.toDataURL();
-                            this.ctx.beginPath();
-                            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.he);
-                            this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
-                            this.ctx.lineCap = "round";
-                            break;
-                        }
-                        //TODO: verificar su cambio de path y aplicar conifguracion de linewiddth y beginpath
-                        this.drawCompletePath(this.k,this.i,this.j);
-                        let indexes=this.getNextPath(this.k,this.i,this.j,1);
-                        this.i=indexes[0];
-                        this.j=indexes[1];
-                    }
-                    if(!flagNewPath){
-                        if(oldValI!==this.i){//se paso a otro path
-                            this.functionDrawingMode(this.k);
-                            this.prevPathSnapshot.src=this.canvas.toDataURL();
-                            this.ctx.beginPath();
-                            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.he);
-                            this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
-                            this.ctx.lineCap = "round";
-                        }else{
-                            finalSegmentPoint=this.drawCurveSegment(this.k,this.i,this.j,(animTrueProgress%this.animStrokeDuration)/this.animStrokeDuration);
-                            this.functionDrawingMode(this.k);
-                        }
-                        this.prevStrokeTurnIndex=indexPathTurn;
-                    }else{
-                        this.prevStrokeTurnIndex+=p;
-                    }
-                    //FIN AQUI ANIMACIONES
-                    Preprotocol.wantDelete=true;
-                }
-            }
+            finalSegmentPoint=this._illustrateImage(nowTime);
         }
         return finalSegmentPoint;
     },
+    _designerDrawingLoop:function(nowTime){
+        if(this.flagCompleted || this.data.getObjectsToDrawLength()<=0){return null;}
+        if(nowTime>=this.animFinishTime || this.flagFirstTime){ // siguiente imagen o primera vez
+            console.log(nowTime);
+            this._setupOnNewImage(nowTime);
+            this.flagFirstTime=false;
+        }else{
+            if(this.animStrokeDuration===Infinity){return}
+            if(this.data.getPathListLength(null)!==0) {
+                if (!Preprotocol.wantConsume) {
+                    //return;
+                } else {
+                    Preprotocol.wantDelete=false;
+                    this._illustrateImage(nowTime);
+                    Preprotocol.wantDelete = true;
+                }
+            }
+        }
+    },
+    _setupOnNewImage:function(nowTime){
+        let imageFinalFrame=new Image();
+        if(!this.flagFirstTime){
+            //// Completing not drawn lines
+            if(this.data.getEntraceModeOf(this.k)===EntranceModes.drawn){
+                imageFinalFrame=this.data.getFinalMaskedImageOf(this.k);
+            }else if(this.data.getEntraceModeOf(this.k)===EntranceModes.text_drawn){
+                imageFinalFrame=this.data.getFinalMaskedImageOf(this.k);
+            }
+        }
+        //Finding next image index, if final, then exit everything
+        this.k++;
+        if(this.k===this.data.getObjectsToDrawLength()){
+            if(this.loopMode){
+                this.k=0;
+            }else{
+                this.notifyOnLastObjectDrawingFinished(this.k-1,imageFinalFrame);
+                this.flagCompleted=true;return null;
+            }
+        }
+        /// notifing on new new object to be drawn
+        if(this.flagFirstTime){
+            this.notifyOnDrawingNewObject(0,0,null);
+        }else{
+            this.notifyOnDrawingNewObject(this.k-1,this.k,imageFinalFrame);
+        }
+        // initilize baseImageCanvas
+        this.baseImageCanvas.width=this.data.getWidthCanvasCacheOf(this.k);
+        this.baseImageCanvas.height=this.data.getHeightCanvasCacheOf(this.k);
+        this.baseImageCtx.drawImage(this.data.getBaseImageOf(this.k),0,0,this.baseImageCanvas.width,this.baseImageCanvas.height);
+
+        //calculando momento final de la animacion de la imagen
+        let offsetTime=nowTime-this.animFinishTime;
+
+        this.animStartTime=nowTime-offsetTime;
+        this.animFinishTime=this.animStartTime+this.data.getDurationOf(this.k)+ this.data.getDelayOf(this.k);
+        this.animTotalProgress=0;
+        this.prevStrokeTurnIndex=0;
+
+        //Buscando los indicices del primer stroke
+        this.i=this.getFirstPathListIndex(this.k,-1);
+        this.j=0;
+        //Setting up canvas for new image (cleaning, empty snapshot, setup linewidth)
+
+        this._setupCanvasOnNewLayer();
+
+        this.prevPathSnapshot.drawImage(this.canvas,0,0);
+        // pintara un texto o una imagen
+
+        this.functionDrawingMode=this.data.getIllustrationFunction(this.k);
+
+        ////// Calculando tiempo de cada stroke
+        let totalCantPathStrokes=this.getTotalStrokesInImage(this.k);
+        this.animStrokeDuration=this.data.getDurationOf(this.k)/totalCantPathStrokes;
+
+    },
+    _illustrateImage:function(nowTime){
+        let finalSegmentPoint={x:null,y:null};  // Coordinate for the drawing Hand
+        this.animTotalProgress=nowTime-this.animStartTime;
+
+        if(this.data.getPathListLength(this.k)!==0){
+
+            let animTrueProgress=this.animTotalProgress-this.data.getDelayOf(this.k);
+            if(animTrueProgress<0){return null;}
+
+            let indexPathTurn=Math.floor(animTrueProgress/this.animStrokeDuration);
+            let cantJumps=indexPathTurn-this.prevStrokeTurnIndex;
+            let oldValI=this.i;
+            for(let p=0;p<cantJumps;p++){
+                if(oldValI!==this.i){//se paso a otro path
+                    oldValI=this.i;
+
+                    this.functionDrawingMode(this.canvas,this.ctx,this.baseImageCanvas,this.prevPathCanvas);
+                    this.prevPathSnapshot.drawImage(this.canvas,0,0);
+
+                    this._setupCanvasOnNewLayer();
+                }
+                this.drawCompletePath(this.k,this.i,this.j);
+                let indexes=this.getNextPath(this.k,this.i,this.j,1);
+                this.i=indexes[0];
+                this.j=indexes[1];
+            }
+
+            if(oldValI!==this.i){//se paso a otro path
+                this.functionDrawingMode(this.canvas,this.ctx,this.baseImageCanvas,this.prevPathCanvas);
+                this.prevPathSnapshot.drawImage(this.canvas,0,0);
+
+                this._setupCanvasOnNewLayer();
+            }
+
+            finalSegmentPoint=this.drawCurveSegment(this.k,this.i,this.j,(animTrueProgress%this.animStrokeDuration)/this.animStrokeDuration);
+            this.functionDrawingMode(this.canvas,this.ctx,this.baseImageCanvas,this.prevPathCanvas);
+
+            this.prevStrokeTurnIndex=indexPathTurn;
+        }
+        return finalSegmentPoint;
+    },
+    _setupCanvasOnNewLayer:function(){
+        this.ctx.beginPath();
+        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+        this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
+
+        if(this.data.getTypeOf(this.k)==="SVGAnimable" && this.data.getPathTypeOf(this.k)===ImageType.CREATED_NOPATH){
+            this.ctx.strokeStyle=this.data.getLineColorAt(this.k,this.i);
+        }
+        if(this.data.getTypeOf(this.k)==="TextAnimable"){
+            this.ctx.fillStyle=this.data.getFillColorOf(this.k);
+        }
+        this.ctx.lineCap = "round";
+    },
+
     _loop:function(){
         this.ctx.lineCap = "round";
         let flagFirstTime=true;
@@ -247,11 +324,7 @@ var PathIllustrator=fabric.util.createClass({
                     prevStrokeTurnIndex=0;
 
                     //seleccionar funcion de dibujado
-                    if(this.data.getEntraceModeOf(k)===EntranceModes.drawn){
-                            functionDrawingMode=this.drawCurrentStrokes.bind(this);
-                    }else if(this.data.getEntraceModeOf(k)===EntranceModes.text_drawn){
-                        functionDrawingMode=this.drawCurrentFills.bind(this);
-                    }
+                    functionDrawingMode=this.data.getIllustrationFunction(k);
                     //Encontrar los indices del primer stroke
                     i=this.getFirstPathListIndex(k,-1);
                     j=0;
@@ -259,7 +332,7 @@ var PathIllustrator=fabric.util.createClass({
                     this.ctx.beginPath();
                     this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
 
-                    this.prevPathSnapshot.src=this.canvas.toDataURL();
+                    this.prevPathSnapshot.drawImage(this.canvas,0,0);
                     //this.notifyOnDrawingNewObject(0,0,this.canvas.toDataURL());
                     if(this.data.getListLinesWidthsLength(k)>0){
                         this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
@@ -289,7 +362,7 @@ var PathIllustrator=fabric.util.createClass({
                                 j=indexes[1];
                                 this.drawCompletePath(k,indexes[0],indexes[1]);
                             }
-                            functionDrawingMode(k);
+                            functionDrawingMode(this.canvas,this.ctx,this.data.getBaseImageOf(k),this.prevPathSnapshot);
                         }
                             k++;
                             if(k===this.data.getObjectsToDrawLength()){
@@ -313,11 +386,7 @@ var PathIllustrator=fabric.util.createClass({
                             i=this.getFirstPathListIndex(k,-1);
                             j=0;
                             // pintara un texto o una imagen
-                            if(this.data.getEntraceModeOf(k)===EntranceModes.drawn){
-                                functionDrawingMode=this.drawCurrentStrokes.bind(this);
-                            }else if(this.data.getEntraceModeOf(k)===EntranceModes.text_drawn){
-                                functionDrawingMode=this.drawCurrentFills.bind(this);
-                            }
+                            functionDrawingMode=this.data.getIllustrationFunction(k);
                             //Setting up canvas for new image (cleaning, empty snapshot, setup linewidth)
                             this.ctx.beginPath();
                             this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
@@ -355,7 +424,7 @@ var PathIllustrator=fabric.util.createClass({
                                         oldValI=i;
                                         flagNewPath=true;
 
-                                        functionDrawingMode(k);
+                                        functionDrawingMode(this.canvas,this.ctx,this.data.getBaseImageOf(k),this.prevPathSnapshot);
                                         this.prevPathSnapshot.src=this.canvas.toDataURL();
                                         this.ctx.beginPath();
                                         this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
@@ -370,14 +439,14 @@ var PathIllustrator=fabric.util.createClass({
                                 if(!flagNewPath){
                                     if(oldValI!==i){//se paso a otro path
 
-                                        functionDrawingMode(k);
+                                        functionDrawingMode(this.canvas,this.ctx,this.data.getBaseImageOf(k),this.prevPathSnapshot);
                                         this.prevPathSnapshot.src=this.canvas.toDataURL();
                                         this.ctx.beginPath();
                                         this.ctx.lineWidth=this.data.getLineWidthAt(k,i);
 
                                     }else{
                                         this.drawCurveSegment(k,i,j,(animTrueProgress%animStrokeDuration)/animStrokeDuration);
-                                        functionDrawingMode(k);
+                                        functionDrawingMode(this.canvas,this.ctx,this.data.getBaseImageOf(k),this.prevPathSnapshot);
                                     }
                                     prevStrokeTurnIndex=indexPathTurn;
                                 }else{
@@ -401,27 +470,6 @@ var PathIllustrator=fabric.util.createClass({
 
     },
 
-    drawCurrentStrokes:function(k){
-        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-        this.ctx.drawImage(this.data.getBaseImageOf(k),0,0,this.canvas.width,this.canvas.height)
-        this.ctx.globalCompositeOperation="destination-in";
-        this.ctx.stroke();
-        this.ctx.globalCompositeOperation="source-over";
-        this.ctx.drawImage(this.prevPathSnapshot,0,0);
-
-    },
-    drawCurrentFills:function(k){
-        // this.ctx.strokeStyle="red";
-        // this.ctx.lineWidth="2";
-        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-        this.ctx.drawImage(this.data.getBaseImageOf(k),0,0,this.canvas.width,this.canvas.height)
-        this.ctx.globalCompositeOperation="source-in";
-        // this.ctx.stroke();
-        this.ctx.fill();
-        this.ctx.globalCompositeOperation="source-over";
-        this.ctx.drawImage(this.prevPathSnapshot,0,0);
-
-    },
     // captureCanvas(img,callback){
     //     this.canvas.toBlob(function(blob){
     //         let self=this;
@@ -512,13 +560,13 @@ var PathIllustrator=fabric.util.createClass({
         if(len<2){return null;}
         let finalSegmentPoint={x:null,y:null}; // for the scene previewer, specifically the hand movement
         if(this.data.getStrokeTypeAt(k,i,pAIndex)==="l"){
-            let point=this.getLineCurvePoint(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex),this.data.getStrokeCoordXAt(k,i,pAIndex+1),this.data.getStrokeCoordYAt(k,i,pAIndex+1),
+            let point=CurveSegmentTool.getLine(this.data.getStrokeCoordXAt(k,i,pAIndex),this.data.getStrokeCoordYAt(k,i,pAIndex),this.data.getStrokeCoordXAt(k,i,pAIndex+1),this.data.getStrokeCoordYAt(k,i,pAIndex+1),
                 temperature);
             this.ctx.lineTo(point.x,point.y);
             finalSegmentPoint.x=point.x;
             finalSegmentPoint.y=point.y;
         }else if(this.data.getStrokeTypeAt(k,i,pAIndex)==="c"){
-            let points=this._getBezierCtrlPoints(
+            let points=CurveSegmentTool.getBezier(
                 this.data.getStrokeCoordXAt(k,i,pAIndex),
                 this.data.getStrokeCoordYAt(k,i,pAIndex),
                 this.data.getCtrlPointCoordXAt(k,i,(2*(pAIndex))*2),
@@ -533,7 +581,7 @@ var PathIllustrator=fabric.util.createClass({
             finalSegmentPoint.x=points[4];
             finalSegmentPoint.y=points[5];
         }else if(this.data.getStrokeTypeAt(k,i,pAIndex)==="q"){
-            let points=this._getQuadraticCtrlPoints(
+            let points=CurveSegmentTool.getQuadratic(
                 this.data.getStrokeCoordXAt(k,i,pAIndex),
                 this.data.getStrokeCoordYAt(k,i,pAIndex),
                 this.data.getCtrlPointCoordXAt(k,i,(2*pAIndex)*2),
@@ -546,7 +594,7 @@ var PathIllustrator=fabric.util.createClass({
             finalSegmentPoint.x=points[2];
             finalSegmentPoint.y=points[3];
         }else if(this.data.getStrokeTypeAt(k,i,pAIndex)==="q1"){
-            let points=this._getQuadraticCtrlPoints(
+            let points=CurveSegmentTool.getQuadratic(
                 this.data.getStrokeCoordXAt(k,i,pAIndex),
                 this.data.getStrokeCoordYAt(k,i,pAIndex),
                 this.data.getCtrlPointCoordXAt(k,i,(2*pAIndex+1)*2),
@@ -565,62 +613,6 @@ var PathIllustrator=fabric.util.createClass({
         }
         return finalSegmentPoint;
     },
-    _getBezierCtrlPoints:function(p1x,p1y,c1x,c1y,c2x,c2y,p2x,p2y,temperature){
-        let t=temperature;
-        let u0=1;
-        let u1=1-t;
-        let qxa=u0*u0*p1x;
-        let qxb=u1*u1*p1x + c1x*2*t*u1 + c2x*t*t;
-        let qxc=c1x;
-        let qxd=c1x*u1*u1 + c2x*2*t*u1+ p2x*t*t;
-
-        let qya=u0*u0*p1y;
-        let qyb=u1*u1*p1y + c1y*2*t*u1 + c2y*t*t;
-        let qyc=c1y;
-        let qyd=c1y*u1*u1 + c2y*2*t*u1 + p2y*t*t;
-
-        let xb=qxa*u1 +qxc*t ;
-        let xc=qxb;
-        let xd=qxb*u1+qxd*t;
-        
-        let yb=qya*u1+qyc*t ;
-        let yc=qyb;
-        let yd=qyb*u1+qyd*t;
-
-        return [xb,yb,xc,yc,xd,yd];
-    },
-    _getQuadraticCtrlPoints:function(p1x,p1y,c1x,c1y,p2x,p2y,temperature){
-        let t=temperature;
-        let v1X=p1x+(c1x-p1x)*t;
-        let v1Y=p1y+(c1y-p1y)*t;
-        let newCtpX=v1X;
-        let newCtpY=v1Y;
-        let newP2X=v1X+((c1x+(p2x-c1x)*t)-v1X)*t;
-        let newP2Y=v1Y+((c1y+(p2y-c1y)*t)-v1Y)*t;
-        return [newCtpX,newCtpY,newP2X,newP2Y];
-
-
-    },
-    _getQBezierValue:function(t,p1,p2,p3){
-        var iT = 1 - t;
-        return iT * iT * p1 + 2 * iT * t * p2 + t * t * p3;
-    },
-
-    _getLValue:function(t,p1,p2){
-        return p1 + t*(p2-p1);
-    },
-    getQuadraticCurvePoint:function(startX, startY, cpX, cpY, endX, endY, position) {
-        return {
-            x:  this._getQBezierValue(position, startX, cpX, endX),
-            y:  this._getQBezierValue(position, startY, cpY, endY)
-        };
-    },
-    getLineCurvePoint:function(startX,startY,endX,endY,position){
-        return{
-            x: this._getLValue(position,startX,endX),
-            y: this._getLValue(position,startY,endY)
-        }
-    },
     getTotalStrokesInImage:function(k){
         let totalCantPathStrokes=0;
         for(let i=0;i<this.data.getPathListLength(k);i++){
@@ -630,10 +622,16 @@ var PathIllustrator=fabric.util.createClass({
         return totalCantPathStrokes;
     },
     notifyOnDrawingNewObject:function(lastObjIndex,newObjIndex,lastDataUrl){//suscritos : su manejador de este en la vista PreviewerView (DrawingCacheManager)
-        this.observersOnDrawingNewObject.notificationOnDrawingNewObject(lastObjIndex,newObjIndex,lastDataUrl);
+        if(this.observersOnDrawingNewObject){
+            this.observersOnDrawingNewObject.notificationOnDrawingNewObject(lastObjIndex,newObjIndex,lastDataUrl);
+        }
+        this.prevPathCanvas.width=this.data.getWidthCanvasCacheOf(newObjIndex);
+        this.prevPathCanvas.height=this.data.getHeightCanvasCacheOf(newObjIndex);
     },
     notifyOnLastObjectDrawingFinished:function(indexLastObject,finalObjectImage){
-        this.observerOnLastObjectDrawingFinished.notificationOnLastObjectDrawingFinished(indexLastObject,finalObjectImage);
+        if(this.observerOnLastObjectDrawingFinished){
+            this.observerOnLastObjectDrawingFinished.notificationOnLastObjectDrawingFinished(indexLastObject,finalObjectImage);
+        }
     },
     registerOnDrawingNewObject:function(obj){
         this.observersOnDrawingNewObject=obj;
@@ -642,10 +640,13 @@ var PathIllustrator=fabric.util.createClass({
         this.observerOnLastObjectDrawingFinished=obj;
     }
 })
+
+
 var IllustratorDataAdapterPreview=fabric.util.createClass({
-    initialize:function(drawingManager,canvasDrawingManager,scalerFactorX,scalerFactorY,imgHigh){
+    initialize:function(drawingManager,canvasDrawingManager,previewManager,scalerFactorX,scalerFactorY,imgHigh){
         this.drawingManager=drawingManager;
         this.canvasDrawingManager=canvasDrawingManager;
+        this.previewManager=previewManager;
 
         this.scalerFactorX=scalerFactorX;
         this.scalerFactorY=scalerFactorY;
@@ -690,14 +691,33 @@ var IllustratorDataAdapterPreview=fabric.util.createClass({
     getDelayOf:function(k){
         return this.delay;
     },
+    getWidthCanvasCacheOf:function(k){
+        return this.previewManager.canvas.width;
+    },
+    getHeightCanvasCacheOf:function(k){
+        return this.previewManager.canvas.height;
+
+    },
+    getTypeOf:function(k){
+        return "ImageAnimable";
+    },
+    getPathTypeOf:function(k){
+        return ImageType.CREATED_PATHDESIGNED;
+    },
     getBaseImageOf:function(k){
         return this.baseImage;
+    },
+    getFinalMaskedImageOf:function(k){
+        return null;
     },
     getObjectsToDrawLength:function(){
         return 1;
     },
     getEntraceModeOf:function(k){
         return EntranceModes.drawn;
+    },
+    getIllustrationFunction:function(k){
+        return ImageAnimable.prototype.illustrationFunction;
     }
 })
 
@@ -724,7 +744,9 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
     getPathListLength:function(k,){
         return this.listAnimableObjectsWithDrawnEntrances[k].imageDrawingData.points.length;
     },
-
+    getPathTypeOf:function(k){
+        return this.listAnimableObjectsWithDrawnEntrances[k].imageDrawingData.type;
+    },
     getCtrlPointCoordXAt:function(k,i,j){
         return this.listAnimableObjectsWithDrawnEntrances[k].imageDrawingData.ctrlPoints[i][j]
             * this.listAnimableObjectsWithDrawnEntrances[k].getWidthInDrawingCache();
@@ -749,6 +771,17 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
         return this.listAnimableObjectsWithDrawnEntrances[k].imageDrawingData.linesWidths[i]
             * this.listAnimableObjectsWithDrawnEntrances[k].getWidthInDrawingCache();
     },
+    getLineColorAt:function(k,i){
+        return this.listAnimableObjectsWithDrawnEntrances[k].imageDrawingData.linesColors[i];
+    },
+    getFillColorOf:function(k){/*for texts*/
+        if(this.listAnimableObjectsWithDrawnEntrances[k].type==="TextAnimable"){
+            return this.listAnimableObjectsWithDrawnEntrances[k].fill;
+        }else{
+            alert("ERROR CONOCIDOO: el pathillustrator solicito fill color a un obj no TextAnimable");
+            return "#000000";
+        }
+    },
     getDurationOf:function(k){
         return this.listAnimableObjectsWithDrawnEntrances[k].animator.entranceDuration;
     },
@@ -768,12 +801,11 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
     getEntraceModeOf:function(k){
         return this.listAnimableObjectsWithDrawnEntrances[k].getEntranceMode();
     },
-    getTextFillColor:function(k){
-        if(this.listAnimableObjectsWithDrawnEntrances[k].type==="TextAnimable"){
-            return this.listAnimableObjectsWithDrawnEntrances[k].fill;
-        }else{
-            alert("ERROR CONOCIDOO: el pathillustrator solicito fill color a un obj no TextAnimable");
-            return "#000000";
-        }
+    getTypeOf:function(k){
+        return this.listAnimableObjectsWithDrawnEntrances[k].type;
+    },
+
+    getIllustrationFunction:function(k){
+        return this.listAnimableObjectsWithDrawnEntrances[k].illustrationFunction.bind(this.listAnimableObjectsWithDrawnEntrances[k]);
     }
 })

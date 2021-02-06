@@ -75,6 +75,8 @@ var DrawingCacheManager=fabric.util.createClass({
                 finalSegmentPoint=fabric.util.transformPoint(new fabric.Point(finalSegmentPoint.x,finalSegmentPoint.y),objMatrix);
                 finalSegmentPoint=fabric.util.transformPoint(finalSegmentPoint,this.UIScenePreviewerCanvas.viewportTransform);
                 this.drawingHand.updatePosition(finalSegmentPoint.x,finalSegmentPoint.y);
+            }else{
+                this.drawingHand.updatePosition(-1000,-1000);
             }
         }
     },
@@ -101,7 +103,7 @@ var DrawingCacheManager=fabric.util.createClass({
         },
     sleep:function(){
         this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-        this.pathIllustrator.finish();
+        this.pathIllustrator.delete();
         this.pathIllustrator=null;
     },
 });

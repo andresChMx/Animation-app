@@ -1,10 +1,7 @@
-var ImageModelDrawingDataGenerator=fabric.util.createClass({
+var ImageAnimableDataGenerator=fabric.util.createClass({
     initialize:function(){
         this.canvasElem=document.createElement("canvas");
         this.canvasElem.id="auxCanvas"
-        // this.auxCanvasForTexts=new fabric.StaticCanvas("auxCanvas");
-        this.auxCanvasForTexts=document.createElement("canvas");
-        this.auxCanvasForTextsContext=this.auxCanvasForTexts.getContext("2d");
     },
     _triangleWidthHeight:function(arr, i, j){
         return [arr[2*j]-arr[2*i], arr[2*j+1]-arr[2*i+1]]
@@ -113,6 +110,15 @@ var ImageModelDrawingDataGenerator=fabric.util.createClass({
         return layers;
     },
 
+});
+
+var TextAnimableDataGenerator=fabric.util.createClass({
+    initialize: function () {
+        this.auxCanvasForTexts=document.createElement("canvas");
+        this.auxCanvasForTextsContext=this.auxCanvasForTexts.getContext("2d");
+
+    },
+
     // text related
     generateTextDrawingData:function(animableText,imgWidth,imgHeight,pathOpenTypeObjects){
         let coords=this.getLeftTopLines(animableText);
@@ -135,88 +141,88 @@ var ImageModelDrawingDataGenerator=fabric.util.createClass({
             l = 0,
             t = 0;
 
-          let result={
-              strokesTypes:[],
-              points:[],
-              ctrlPoints:[],
-              linesWidths:[],
-              pathsNames:[]
-          }
-          let layerIndex=-1;
+        let result={
+            strokesTypes:[],
+            points:[],
+            ctrlPoints:[],
+            linesWidths:[],
+            pathsNames:[]
+        }
+        let layerIndex=-1;
 
 
-            for(let p=0;p<commandsPath.length;p++) {
-                layerIndex++;
-                result.strokesTypes.push([]);
-                result.points.push([]);
-                result.ctrlPoints.push([]);
-                result.linesWidths.push(1);
-                result.pathsNames.push("Path " +layerIndex);
-                for (let i = 0; i < commandsPath[p].length; i++) {
-                    let current = Object.values(commandsPath[p][i]);
-                    switch (current[0]) { // first letter
-                        case 'L': // lineto, absolute
-                            x = current[1];
-                            y = current[2];
-                            result.strokesTypes[layerIndex].push("l");
-                            result.points[layerIndex].push((x + l) / imgWidth, (y + t) / imgHeight);
+        for(let p=0;p<commandsPath.length;p++) {
+            layerIndex++;
+            result.strokesTypes.push([]);
+            result.points.push([]);
+            result.ctrlPoints.push([]);
+            result.linesWidths.push(1);
+            result.pathsNames.push("Path " +layerIndex);
+            for (let i = 0; i < commandsPath[p].length; i++) {
+                let current = Object.values(commandsPath[p][i]);
+                switch (current[0]) { // first letter
+                    case 'L': // lineto, absolute
+                        x = current[1];
+                        y = current[2];
+                        result.strokesTypes[layerIndex].push("l");
+                        result.points[layerIndex].push((x + l) / imgWidth, (y + t) / imgHeight);
+                        result.ctrlPoints[layerIndex].push(-1, -1, -1, -1);
+                        break;
+                    case 'M': // moveTo, absolute
+                        x = current[1];
+                        y = current[2];
+                        subpathStartX = x;
+                        subpathStartY = y;
+
+                        result.points[layerIndex].push((x + l) / imgWidth, (y + t) / imgHeight);
+                        if (i !== 0) {
+                            result.strokesTypes[layerIndex].push("m");
                             result.ctrlPoints[layerIndex].push(-1, -1, -1, -1);
-                            break;
-                        case 'M': // moveTo, absolute
-                            x = current[1];
-                            y = current[2];
-                            subpathStartX = x;
-                            subpathStartY = y;
+                        } else {
 
-                            result.points[layerIndex].push((x + l) / imgWidth, (y + t) / imgHeight);
-                            if (i !== 0) {
-                                result.strokesTypes[layerIndex].push("m");
-                                result.ctrlPoints[layerIndex].push(-1, -1, -1, -1);
-                            } else {
-
-                            }
-                            break;
-                        case 'C': // bezierCurveTo, absolute
-                            x = current[5];
-                            y = current[6];
-                            controlX = current[3];
-                            controlY = current[4];
-                            result.strokesTypes[layerIndex].push("c");
-                            result.points[layerIndex].push((x + l) / imgWidth, (y + t) / imgHeight);
-                            result.ctrlPoints[layerIndex].push(
-                                (current[1] + l) / imgWidth,
-                                (current[2] + t) / imgHeight,
-                                (controlX + l) / imgWidth,
-                                (controlY + t) / imgHeight
-                            );
-                            break;
-                        case 'Q': // quadraticCurveTo, absolute
-                            tempX = current[3];
-                            tempY = current[4];
+                        }
+                        break;
+                    case 'C': // bezierCurveTo, absolute
+                        x = current[5];
+                        y = current[6];
+                        controlX = current[3];
+                        controlY = current[4];
+                        result.strokesTypes[layerIndex].push("c");
+                        result.points[layerIndex].push((x + l) / imgWidth, (y + t) / imgHeight);
+                        result.ctrlPoints[layerIndex].push(
+                            (current[1] + l) / imgWidth,
+                            (current[2] + t) / imgHeight,
+                            (controlX + l) / imgWidth,
+                            (controlY + t) / imgHeight
+                        );
+                        break;
+                    case 'Q': // quadraticCurveTo, absolute
+                        tempX = current[3];
+                        tempY = current[4];
 
 
-                            result.strokesTypes[layerIndex].push("q");
-                            result.points[layerIndex].push((tempX + l) / imgWidth, (tempY + t) / imgHeight);
-                            result.ctrlPoints[layerIndex].push(
-                                (current[1] + l) / imgWidth,
-                                (current[2] + t) / imgHeight,
-                                (-1) / imgWidth,
-                                (-1) / imgHeight
-                            );
-                            x = tempX;
-                            y = tempY;
-                            controlX = current[1];
-                            controlY = current[2];
-                            break;
-                        case 'z':
-                        case 'Z':
-                            x = subpathStartX;
-                            y = subpathStartY;
-                            break;
-                    }
+                        result.strokesTypes[layerIndex].push("q");
+                        result.points[layerIndex].push((tempX + l) / imgWidth, (tempY + t) / imgHeight);
+                        result.ctrlPoints[layerIndex].push(
+                            (current[1] + l) / imgWidth,
+                            (current[2] + t) / imgHeight,
+                            (-1) / imgWidth,
+                            (-1) / imgHeight
+                        );
+                        x = tempX;
+                        y = tempY;
+                        controlX = current[1];
+                        controlY = current[2];
+                        break;
+                    case 'z':
+                    case 'Z':
+                        x = subpathStartX;
+                        y = subpathStartY;
+                        break;
                 }
             }
-          return result;
+        }
+        return result;
     },
     generateTextBaseImage:function(animableText,openTypePaths){
         let dimX=animableText.getWidthInDrawingCache();
@@ -310,4 +316,15 @@ var ImageModelDrawingDataGenerator=fabric.util.createClass({
 
         return {left:left,top:top};
     },
+});
+
+var SVGAnimableDataGenerator=fabric.util.createClass({
+    initialize: function () {
+        this.svgManager=new SVGManager();
+    },
+    generateDrawingData:function(svgString,imgWidth,imgHeight,callback){
+        this.svgManager.calcDrawingData(svgString,imgWidth,imgHeight,"force_paths","string",function( svgLoadedData){
+            callback(svgLoadedData);
+        })
+    }
 });

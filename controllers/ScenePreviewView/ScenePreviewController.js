@@ -7,7 +7,11 @@ var ScenePreviewController=fabric.util.createClass({
         this.drawingHand=new DrawingHand();
         this.drawingCacheManager=new DrawingCacheManager(this.drawingHand);
         this.UIPanelPreviewerCanvas=null;
-        this.pointsGenerator=new ImageModelDrawingDataGenerator();
+
+        this.imageAnimDataGenerator=new ImageAnimableDataGenerator();
+        this.textAnimDataGenerator=new TextAnimableDataGenerator();
+        this.svgAnimDataGenerator=new SVGAnimableDataGenerator();
+
         this.animator=new ControllerAnimator(null); // el UIPanelPreviewerCanvas en este punto aun vale null, cuando carga el UI de este controller se popula con la refernecia al canvas (setPreviewerCanvas)
         this.animator.onTick(this.callBackOnAnimatorTick.bind(this));
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnDurationInput,this)
@@ -82,10 +86,10 @@ var ScenePreviewController=fabric.util.createClass({
                 objectToBeAnimated=object;
             }else if(object.getEntranceMode()===EntranceModes.text_drawn){
                 let pathOpenTypeObjects=[] //for each line we need the path to generate the image
-                let result=this.pointsGenerator.generateTextDrawingData(object,object.getWidthInDrawingCache(),object.getHeightInDrawingCache(),pathOpenTypeObjects);
+                let result=this.textAnimDataGenerator.generateTextDrawingData(object,object.getWidthInDrawingCache(),object.getHeightInDrawingCache(),pathOpenTypeObjects);
                 object.imageDrawingData = result;
                 object.imageDrawingData.type=TextType.PROVIDED;
-                object.imageDrawingData.imgHigh=this.pointsGenerator.generateTextBaseImage(object,pathOpenTypeObjects);
+                object.imageDrawingData.imgHigh=this.textAnimDataGenerator.generateTextBaseImage(object,pathOpenTypeObjects);
                 object.imageDrawingData.imgMasked=object.imageDrawingData.imgHigh;
 
                 objectToBeAnimated=new DrawableImage({
@@ -118,17 +122,26 @@ var ScenePreviewController=fabric.util.createClass({
     },
     generateDrawingDataOnDrawableObject:function(animableObj){
         if(animableObj.imageDrawingData.type===ImageType.CREATED_NOPATH){
+            if(animableObj.type==="SVGAnimable"){
+                this.svgAnimDataGenerator.generateDrawingData(animableObj.svgString,animableObj.width,animableObj.height,function(svgDrawingData){
+                    svgDrawingData.imgHigh=animableObj.imageDrawingData.imgHigh;
+                    svgDrawingData.imgLow=animableObj.imageDrawingData.imgLow;
+                    svgDrawingData.imgMasked=animableObj.imageDrawingData.imgHigh;
+                    svgDrawingData.type=animableObj.imageDrawingData.type;
+
+                    animableObj.imageDrawingData=svgDrawingData;
+                })
+                return;
+            }
+
             //calculate points and ctrlPoints and strokestyes (para el pathillustrator)
-            this.pointsGenerator.generateDefaultDrawingPointsAndLineWidth(animableObj.imageDrawingData, 35)
-            animableObj.imageDrawingData.ctrlPoints=this.pointsGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageDrawingData.points);
-            animableObj.imageDrawingData.strokesTypes=this.pointsGenerator.generateStrokesTypesFromPoints(animableObj.imageDrawingData.points);
-            //animableObj.imageDrawingData.pathsNames=this.pointsGenerator.generateLayerNames(animableObj.imageDrawingData.points)
+            this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(animableObj.imageDrawingData, 35)
+            animableObj.imageDrawingData.ctrlPoints=this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageDrawingData.points);
+            animableObj.imageDrawingData.strokesTypes=this.imageAnimDataGenerator.generateStrokesTypesFromPoints(animableObj.imageDrawingData.points);
+            //animableObj.imageDrawingData.pathsNames=this.imageAnimDataGenerator.generateLayerNames(animableObj.imageDrawingData.points)
         }else if(animableObj.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
             // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
-            animableObj.imageDrawingData.ctrlPoints=this.pointsGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageDrawingData.points);
-        }
-        else if(animableObj.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
-            //NOTHING BECAUSE POINTS AND CTRLPOINTS ARE ALREADY CALCULATED
+            animableObj.imageDrawingData.ctrlPoints=this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageDrawingData.points);
         }
     },
     clearDrawingDataOnDrawableObjects:function(){

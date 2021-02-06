@@ -21,16 +21,16 @@
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/DrawingCacheManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/util.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -210,7 +210,12 @@
       <workItem from="1612197788075" duration="13526000" />
       <workItem from="1612310052228" duration="11359000" />
       <workItem from="1612365048487" duration="24467000" />
-      <workItem from="1612397776380" duration="559000" />
+      <workItem from="1612397776380" duration="1158000" />
+      <workItem from="1612457329440" duration="9520000" />
+      <workItem from="1612476582328" duration="19523000" />
+      <workItem from="1612540479737" duration="33351000" />
+      <workItem from="1612592616050" duration="5490000" />
+      <workItem from="1612624086644" duration="22668000" />
     </task>
     <servers />
   </component>
@@ -242,14 +247,18 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="689" y="269" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1610065204651" />
-    <state x="92" y="92" width="1736" height="866" key="DiffContextDialog" timestamp="1603911902248">
+    <state x="92" y="92" width="1736" height="866" key="DiffContextDialog" timestamp="1612505073066">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="92" y="92" width="1736" height="866" key="DiffContextDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1603911902248" />
+    <state x="92" y="92" width="1736" height="866" key="DiffContextDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1612505073066" />
     <state x="739" y="277" key="FileChooserDialogImpl" timestamp="1607913452052">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="739" y="277" key="FileChooserDialogImpl/0.0.1920.1050@0.0.1920.1050" timestamp="1607913452052" />
+    <state x="539" y="265" key="IDE.errors.dialog" timestamp="1612550463500">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="539" y="265" key="IDE.errors.dialog/0.0.1920.1050@0.0.1920.1050" timestamp="1612550463500" />
     <state x="460" y="155" key="SettingsEditor" timestamp="1607298926094">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -258,14 +267,14 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="569" y="201" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1050@0.0.1920.1050" timestamp="1608214205489" />
-    <state x="246" y="226" width="878" height="801" key="find.popup" timestamp="1612382628119">
+    <state x="78" y="117" width="878" height="801" key="find.popup" timestamp="1612463009854">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="246" y="226" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1612382628119" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1612385168507">
+    <state x="78" y="117" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1612463009854" />
+    <state x="616" y="237" key="run.anything.popup" timestamp="1612587678265">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1612385168507" />
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1612587678265" />
     <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1611818013312">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

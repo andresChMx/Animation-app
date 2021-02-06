@@ -15,10 +15,7 @@ var PathDesignerController=fabric.util.createClass({
         this.previewManager=new PreviewManager(this.drawingManager,this.canvasManager);
         this.svgManager=new SVGManager();
 
-        this.hasLoadedFromSVG=false;
-
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
-        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnLoadSVGClicked,this);
 
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
 
@@ -74,14 +71,7 @@ var PathDesignerController=fabric.util.createClass({
                 this.imageDrawingData.pathsNames=listPathsNames;
                 this.imageDrawingData.strokesTypes=listPathStrokesType;
 
-                if(this.hasLoadedFromSVG || this.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
-                    if(this.getTotalStrokesAmount(matPoints)===0) {
-                        this.imageDrawingData.type=ImageType.CREATED_NOPATH;
-                    }else{
-                        this.imageDrawingData.type=ImageType.CREATED_PATHLOADED;
-                        this.imageDrawingData.ctrlPoints=this.drawingManager.getMatrixCtrlPoints();
-                    }
-                }else if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
+                if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
                     if(this.getTotalStrokesAmount(matPoints)===0) {
 
                     }else{
@@ -93,6 +83,7 @@ var PathDesignerController=fabric.util.createClass({
                     }
                 }
                 this.objectDesigning.generateFinalMaskedImage();
+
                 this.objectDesigning=null;
                 this.imageDrawingData=null;
                 (function Wait(){
@@ -105,7 +96,6 @@ var PathDesignerController=fabric.util.createClass({
 
                     Preprotocol.wantConsume=true;
                 }.bind(this)())
-                this.hasLoadedFromSVG=false;
             break;
             case "cancel":
             //debugger;
@@ -120,7 +110,6 @@ var PathDesignerController=fabric.util.createClass({
                         Preprotocol.wantConsume=true;
 
                 }.bind(this)())
-                this.hasLoadedFromSVG=false;
             break;
         }
     },
@@ -158,25 +147,23 @@ var PathDesignerController=fabric.util.createClass({
         }
         return totalCantPaths;
     },
-    notificationPanelDesignerOptionsOnBtnLoadSVGClicked:function(){
-        let self=this;
-        PanelDesignerOptions.SectionPathDesignerPopup.showMessage("", "loading mode:",[
-            {
-                name:"force Strokes",action:function(){self.loadingPathsFromSVG.bind(self)("force_paths")}
-            },
-            {
-                name:"Not Forcing", action:function(){self.loadingPathsFromSVG.bind(self)("no-force")}
-            }
-        ])
-    },
+    // notificationPanelDesignerOptionsOnBtnLoadSVGClicked:function(){
+    //     let self=this;
+    //     PanelDesignerOptions.SectionPathDesignerPopup.showMessage("", "loading mode:",[
+    //         {
+    //             name:"force Strokes",action:function(){self.loadingPathsFromSVG.bind(self)("force_paths")}
+    //         },
+    //         {
+    //             name:"Not Forcing", action:function(){self.loadingPathsFromSVG.bind(self)("no-force")}
+    //         }
+    //     ])
+    // },
     notifyOnSetupCompleted:function(){
-
-        let imageModelIsSVG=Utils.isSVG(this.objectDesigning.imageAssetModel.url_image);
         for(let i=0;i<this.listObserversOnSetupCompleted.length;i++){
-            this.listObserversOnSetupCompleted[i].notificationOnSetupCompleted(imageModelIsSVG);
+            this.listObserversOnSetupCompleted[i].notificationOnSetupCompleted();
         }
     },
-    registerOnSetupCompleted:function(obj){
+    registerOnSetupCompleted:function(obj){ /*JUST FOR ITS UI CLASS*/
 
         this.listObserversOnSetupCompleted.push(obj);
     }

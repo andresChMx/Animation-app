@@ -22,6 +22,11 @@ var PreviewManager=fabric.util.createClass({
         this.scalerFactorY;
         this.scalerLineWidth;
 
+        this.endLoop=false;
+        this.counterInterruption=0;
+        this.flagFirstTime=false;
+
+        this.requestAnimID=null;
     },
     wakeUp:function(imageDrawingData){
         this.imageDrawingData=imageDrawingData;
@@ -41,32 +46,74 @@ var PreviewManager=fabric.util.createClass({
         this.scalerFactorX=this.canvas.width/this.canvasDrawingManager.canvasOriginalWidth;
         this.scalerFactorY=this.canvas.height/this.canvasDrawingManager.canvasOriginalHeight;
     
-        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this.scalerFactorX,this.scalerFactorY,this.imageDrawingData.imgHigh);
+        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this,this.scalerFactorX,this.scalerFactorY,this.imageDrawingData.imgHigh);
         this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,this.illustratorDataAdapter,true);
-        this.pathIllustrator.start();
+        this.pathIllustrator.setupPreviewSceneVars();
+        this.start();
+    },
+    start:function(){
+        this.flagFirstTime=true;
+        this.endLoop=false;
+        this.loop();
+    },
+    loop:function(){
+        let animStartTime=0;
+        let progress=0;
+
+        (function tick(){
+            this.counterInterruption--;
+            if(this.counterInterruption<0){
+                if(this.flagFirstTime){
+                    animStartTime=+new Date();
+
+                    this.flagFirstTime=false;
+
+                    this.pathIllustrator.flagFirstTime=true;
+                    this.pathIllustrator.setupPreviewSceneVars();
+                }
+
+                let nowTime=+ new Date();
+                progress=nowTime-animStartTime;
+
+                this.pathIllustrator._designerDrawingLoop(progress);
+
+            }else{
+                this.flagFirstTime=true;
+            }
+            if(!this.endLoop){
+                this.requestAnimID=fabric.util.requestAnimFrame(tick.bind(this));
+            }
+        }.bind(this)());
     },
     sleep:function(){
+        if(this.requestAnimID){
+           window.cancelAnimationFrame(this.requestAnimID);
+           this.requestAnimID=null;
+        }
+        this.endLoop=true;
+        this.counterInterruption=-1;
+
         this.pathIllustrator.finish();
         this.pathIllustrator=null;
     },
     notificationOnPointModified:function(pointIndex,pathIndex){
-        this.pathIllustrator.counterInterruption=100;
+        this.counterInterruption=100;
     },
     notificationOnMouseUp:function(mouseX,mouseY){
-        this.pathIllustrator.counterInterruption=100;
+        this.counterInterruption=100;
     },
     notificationPanelDesignerOptionsOnSettingLineWidthChanged:function(args){
-        this.pathIllustrator.counterInterruption=100;
+        this.counterInterruption=100;
     },
     notificationPanelDesignerOptionsOnBtnAddPathClicked:function(){
-        this.pathIllustrator.counterInterruption=100;
+        this.counterInterruption=100;
     },
     notificationPanelDesignerOptionsOnBtnDeletePathClicked:function(index){
-        this.pathIllustrator.counterInterruption=100;
+        this.counterInterruption=100;
     },  
     notificationPanelDesignerOptionsOnSettingDurationChanged:function(args){
         let value=args[0];
-        this.pathIllustrator.counterInterruption=100;
+        this.counterInterruption=100;
         if(isNaN(value)){
             this.pathIllustrator.data.duration=3000;
         }

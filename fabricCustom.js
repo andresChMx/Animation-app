@@ -155,6 +155,7 @@ fabric.Object.prototype.getGlobalPosition=function(){// POSITION OF THIS OBJECT 
     return newPoint;
 }
 fabric.Object.prototype.name="ObjectC";
+
 var ImageAnimable=fabric.util.createClass(fabric.Image,{
     applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
     type:'ImageAnimable',
@@ -197,18 +198,18 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     setupImageDrawingDTO:function(imgHighDefinition,imgLowDefinition){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHigh
         return {
             imgHigh:imgHighDefinition,
-            imgLow:imgLowDefinition,
+            imgLow:imgLowDefinition, /*for ui, when appears in lists*/
             imgMasked:null,
             points:[],
             linesWidths:[],
             pathsNames:[],
             strokesTypes:[],
             ctrlPoints:[],
-            type:ImageType.CREATED_NOPATH
+            type:ImageType.CREATED_NOPATH // BECAUSE YOU COULD HAVE DESIGNED THEIR PATHS OR NOT
         }
     },
     generateFinalMaskedImage:function(){
-        let dataGenerator=new ImageModelDrawingDataGenerator();
+        let dataGenerator=new ImageAnimableDataGenerator();
 
         let canvas=document.createElement("canvas");
         let ctx=canvas.getContext("2d");
@@ -309,6 +310,11 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
 
     },
 
+    setupImageDrawingDTO:function(imgHighDefinition,imgLowDefinition){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHigh
+        let data=this.callSuper("setupImageDrawingDTO",imgHighDefinition,imgLowDefinition);
+        data.linesColors=[];
+        return data;
+    },
 
     loadSVGFromURL: function(url,callback) {/*fabric modified method*/
         url = url.replace(/^\n\s*/, '').trim();
@@ -525,6 +531,34 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         ctx.restore();
     },
 });
+
+ImageAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(baseImage,0,0,canvas.width,canvas.height)
+    ctx.globalCompositeOperation="destination-in";
+    ctx.stroke();
+    ctx.globalCompositeOperation="source-over";
+    ctx.drawImage(prevPathSnapshot,0,0);
+}
+TextAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(baseImage,0,0,canvas.width,canvas.height);
+    ctx.globalCompositeOperation="source-in";
+    ctx.fill();
+    ctx.globalCompositeOperation="source-over";
+    ctx.drawImage(prevPathSnapshot,0,0);
+}
+SVGAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot){
+    if(this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
+        ImageAnimable.prototype.illustrationFunction(canvas,ctx,baseImage,prevPathSnapshot);
+    }else{
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.stroke();
+        ctx.drawImage(prevPathSnapshot,0,0);
+
+    }
+}
+
 var CameraAnimable=fabric.util.createClass(ImageAnimable,{
     applicableEntrenceModes:[EntranceModes.none],//FOR UI
     type:"CameraAnimable",

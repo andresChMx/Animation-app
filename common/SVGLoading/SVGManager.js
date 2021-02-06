@@ -27,13 +27,14 @@ var SVGManager=fabric.util.createClass({
     calcDrawingDataFromUrl_forcePaths:function(url,imgWidth,imgHeight,strokeWidth,callback){
         this.calcDrawingData(url,imgWidth,imgHeight,"force_paths","url",callback,strokeWidth)
     },
-    calcDrawingData:function(source,imgWidth,imgHeight,loadingMode,sourceType,callback,strokeWidth=50){
+    calcDrawingData:function(source,imgWidth,imgHeight,loadingMode,sourceType,callback,strokeWidth=2.5){
         let result= {
             points: [],
             linesWidths:[],
             pathsNames:[],
             strokesTypes: [],
-            ctrlPoints:[]
+            linesColors:[],
+            ctrlPoints:[],
         }
         let f=function(objects, options) {
             var obj = fabric.util.groupSVGElements(objects, options);
@@ -74,6 +75,7 @@ var SVGManager=fabric.util.createClass({
     /*METODOS PRIVADOS*/
     parseFabricGroup:function(group,imgWidth,imgHeight,strokeWidth,loadingMode,result){
         let layerIndex=-1;
+
         for(let i=0;i<group.length;i++){
             if(group[i].type==="path"){
                layerIndex=this.parsePath(group[i],imgWidth,imgHeight,strokeWidth,result,layerIndex,loadingMode);
@@ -171,7 +173,7 @@ var SVGManager=fabric.util.createClass({
             }else{
                 strokeWidth=strokeWidth;
             }
-        }else{
+        }else{ // TODO: BORRAR ESTE ELSE
             if(pathObj.hasOwnProperty("strokeWidth")) {
 
                 strokeWidth = pathObj.strokeWidth;
@@ -179,6 +181,7 @@ var SVGManager=fabric.util.createClass({
                 return layerIndex;
             }
         }
+
 
 
         let fliX=pathObj.flipX?-1:1;
@@ -208,12 +211,21 @@ var SVGManager=fabric.util.createClass({
             t=imgHeight
         }
 
+
         layerIndex++;
         result.strokesTypes.push([]);
         result.points.push([]);
         result.ctrlPoints.push([]);
         result.linesWidths.push(strokeWidth/imgWidth);
-        result.pathsNames.push("Path " +layerIndex)
+        result.pathsNames.push("Path " +layerIndex);
+
+        if(pathObj.fill){
+            result.linesColors.push(pathObj.fill);
+        }else if(pathObj.stroke){
+            result.linesColors.push(pathObj.stroke);
+        }else{
+            result.linesColors.push("#000000");
+        }
 
         for (var i = 0, len =pathObj.path.length; i < len; ++i) {
             current =pathObj.path[i];
@@ -275,9 +287,8 @@ var SVGManager=fabric.util.createClass({
                     if(i!==0){
                         result.strokesTypes[layerIndex].push("m");
                         result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
-                    }else{
-
                     }
+
                     break;
 
                 case 'M': // moveTo, absolute
@@ -290,9 +301,8 @@ var SVGManager=fabric.util.createClass({
                     if(i!==0){
                         result.strokesTypes[layerIndex].push("m");
                         result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
-                    }else{
-
                     }
+
                     break;
 
                 case 'c': // bezierCurveTo, relative
@@ -544,6 +554,8 @@ var SVGManager=fabric.util.createClass({
                     break;
             }
             previous = current;
+
+            firstPathStroke=false;
         }
         return layerIndex;
     }
