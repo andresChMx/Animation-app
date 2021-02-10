@@ -2,8 +2,6 @@ var PreviewManager=fabric.util.createClass({
     initialize:function(drawingManager,canvasDrawingManager){
         this.canvas=document.getElementById("cPreview");
         this.ctx=this.canvas.getContext("2d");
-        this.prevPathSnapshot=new Image();
-        this.actualSnapshot=new Image();
         this.parentWidth=300 -10-10;
         this.imageDrawingData=null;
         
@@ -40,7 +38,6 @@ var PreviewManager=fabric.util.createClass({
             this.canvas.height=this.parentWidth;
             this.canvas.width=this.parentWidth*aspect
         }
-        this.prevPathSnapshot.src=this.canvas.toDataURL();
         this.endLoop=false;
 
         this.scalerFactorX=this.canvas.width/this.canvasDrawingManager.canvasOriginalWidth;
@@ -93,7 +90,7 @@ var PreviewManager=fabric.util.createClass({
         this.endLoop=true;
         this.counterInterruption=-1;
 
-        this.pathIllustrator.finish();
+        this.pathIllustrator.delete();
         this.pathIllustrator=null;
     },
     notificationOnPointModified:function(pointIndex,pathIndex){

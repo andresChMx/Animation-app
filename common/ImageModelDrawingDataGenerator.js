@@ -18,11 +18,11 @@ var ImageAnimableDataGenerator=fabric.util.createClass({
         return [x2 - v[0] * t * d01 / d012, y2 - v[1] * t * d01 / d012,
             x2 + v[0] * t * d12 / d012, y2 + v[1] * t * d12 / d012 ];
     },
-    generateCrtlPointsFromPointsMatrix:function(matPts){
-        if(matPts.length==0){
+    generateCrtlPointsFromPointsMatrix:function(matPts,OUTImageDrawingData){
+        if(matPts.length===0){
             return;
         }
-        let list=[];
+        console.log(OUTImageDrawingData.ctrlPoints);
         for (var i = 0; i <matPts.length; i += 1) {
             let newCrtlPoints=[-1,-1];
             if(matPts[i].length>=3){
@@ -32,30 +32,27 @@ var ImageAnimableDataGenerator=fabric.util.createClass({
             }
             newCrtlPoints.push(-1);
             newCrtlPoints.push(-1);
-            list.push(newCrtlPoints);
+            OUTImageDrawingData.ctrlPoints.push(newCrtlPoints)
         }
-        return list;
+        console.log(OUTImageDrawingData.ctrlPoints);
     },
 
 
 
-    generateDefaultDrawingPointsAndLineWidth:function (imageDrawingData,lineWidthWanted){
-        let imageWidth=imageDrawingData.imgHigh.naturalWidth;
-        let imageHeight=imageDrawingData.imgHigh.naturalHeight;
+    generateDefaultDrawingPointsAndLineWidth:function (imageWidth,imageHeight,OUTimageDrawingData,lineWidthWanted){
 
-        let matPoints=[]
-        let listLinesWidths=[lineWidthWanted/imageWidth];
-        matPoints.push([]);
+        OUTimageDrawingData.points.push([]);
+        OUTimageDrawingData.linesWidths.push(lineWidthWanted/imageWidth);
         let p1x,p1y,p2x,p2y;
 
-        let layerIndex=0;
+        let layerIndex=OUTimageDrawingData.points.length-1;
         let contPointsLayer=0;
         for(let i=0;i<imageHeight+imageWidth;i+=(lineWidthWanted-lineWidthWanted/4)){
             if(contPointsLayer>50){
                 layerIndex++;
                 contPointsLayer=0;
-                matPoints.push([])
-                listLinesWidths.push(lineWidthWanted/imageWidth);
+                OUTimageDrawingData.points.push([]);
+                OUTimageDrawingData.linesWidths.push(lineWidthWanted/imageWidth);
             }//new layer
 
             if(i<imageWidth){
@@ -73,33 +70,27 @@ var ImageAnimableDataGenerator=fabric.util.createClass({
                 p2y=imageHeight;
             }
             contPointsLayer+=2;
-
-            matPoints[layerIndex].push(
+            OUTimageDrawingData.points[layerIndex].push(
                 p1x/imageWidth,
                 p1y/imageHeight,
                 p2x/imageWidth,
                 p2y/imageHeight
             );
         }
-        imageDrawingData.points=matPoints;
-        imageDrawingData.linesWidths=listLinesWidths;
     },
-    generateStrokesTypesFromPoints:function(matPoints){
-        let matStrokes=[];
-
+    generateStrokesTypesFromPoints:function(matPoints,OUTImageDrawingData){
         for(let i=0;i<matPoints.length;i++){
-            matStrokes.push([]);
+            OUTImageDrawingData.strokesTypes.push([]);
             let len=matPoints[i].length;
             if(len<2){continue}
-            if(len==2){
-                matStrokes[i].push("l");
+            if(len===2){
+                OUTImageDrawingData.strokesTypes[i].push("l");
             }else{
                 for(let j=0;j<matPoints[i].length;j++){
-                    matStrokes[i].push("l");
+                    OUTImageDrawingData.strokesTypes[i].push("l");
                 }
             }
         }
-        return matStrokes;
     },
 
     generateLayerNames:function(matPoints){
@@ -110,6 +101,12 @@ var ImageAnimableDataGenerator=fabric.util.createClass({
         return layers;
     },
 
+    /*SVGAnimable with NOPATH specific*/
+    generateMissingLinesColors:function(indexFinalTruePaths,OUTImageDrawingData){
+        for(let i=indexFinalTruePaths;i<OUTImageDrawingData.points.length;i++){
+            OUTImageDrawingData.linesColors.push("#000000");
+        }
+    }
 });
 
 var TextAnimableDataGenerator=fabric.util.createClass({
@@ -322,9 +319,13 @@ var SVGAnimableDataGenerator=fabric.util.createClass({
     initialize: function () {
         this.svgManager=new SVGManager();
     },
-    generateDrawingData:function(svgString,imgWidth,imgHeight,callback){
-        this.svgManager.calcDrawingData(svgString,imgWidth,imgHeight,"force_paths","string",function( svgLoadedData){
-            callback(svgLoadedData);
+    generateDrawingData:function(svgString,imgWidth,imgHeight,forceStrokeDrawing,callback){
+        let loadingMode="no_force";
+        if(forceStrokeDrawing){
+            loadingMode="force_paths";
+        }
+        this.svgManager.calcDrawingData(svgString,imgWidth,imgHeight,loadingMode,"string",function(svgLoadedData,indexFinalTrueLayer){
+            callback(svgLoadedData,indexFinalTrueLayer);
         })
     }
 });

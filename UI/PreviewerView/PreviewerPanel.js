@@ -46,7 +46,7 @@ var PanelPreviewer={
         let totalDuration=this.scenePreviewerController.animator.totalDuration;
         let normalizedProgress=progress/totalDuration;
         this.HTMLControls_progressBar.style.width=this.progressBarCompleteWidth*normalizedProgress + "px";
-        if(progress===totalDuration){ //termino la animacion
+        if(progress===totalDuration && this.scenePreviewerController.animator.state===ControllerAnimatorState.paused){ //termino la animacion
             this.HTMLControls_playBtn.classList.remove("pause");
         }
     },

@@ -70,7 +70,6 @@ var ControllerAnimator=fabric.util.createClass({
         (function tick(){
             let time= +new Date();
             self.totalProgress=time>self.animFinishTime?self.totalDuration:time-self.animStartTime;
-            self.cbOnTickProgress(self.totalProgress);
             if(!(time>self.animFinishTime) || self.flagDoLastUpdate){
                 self._updateObjectsAccordAnims(self);
                 self.canvasToDisplay.renderAll();
@@ -81,6 +80,8 @@ var ControllerAnimator=fabric.util.createClass({
                 //termino animacion
                 self.stopAnimation();
             }
+            self.cbOnTickProgress(self.totalProgress);
+
         }())
 
     },

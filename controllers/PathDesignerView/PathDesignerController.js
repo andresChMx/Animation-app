@@ -45,13 +45,14 @@ var PathDesignerController=fabric.util.createClass({
         if(imageDrawingData.pathsNames.length===0){
             imageDrawingData.strokesTypes.push([]);
             imageDrawingData.points.push([]);
-            imageDrawingData.ctrlPoints.push([]);
+            // imageDrawingData.ctrlPoints.push([]);
             imageDrawingData.linesWidths.push(10);
             imageDrawingData.pathsNames.push("Path 1")
         }
         this.canvasManager.wakeUp(imageDrawingData);
         this.drawingManager.wakeUp(imageDrawingData);
         this.previewManager.wakeUp(imageDrawingData);//tiene acceso al drawinData ya que tiene referencia al canvasManager y drawingManager
+
         this.notifyOnSetupCompleted();
     },
 
@@ -59,12 +60,18 @@ var PathDesignerController=fabric.util.createClass({
         let actionId=args[0];
         switch (actionId){
             case "save":
+
                 //let matCtrlPoints=this.drawingManager.getMatrixCrtlPoints();
-                
-                let matPoints=this.drawingManager.getMatrixPathsPoints();
-                let listLinesWidths=this.canvasManager.getLinesWidthsNormalized();
-                let listPathsNames=this.drawingManager.listPathsNames;
-                let listPathStrokesType= this.canvasManager.getListPathStrokesType();
+                let matPoints=[];
+                let listLinesWidths=[];
+                let listPathsNames=[];
+                let listPathStrokesType=[];
+                if(this.drawingManager.getTotalAmountPoints()!==0){
+                    matPoints=this.drawingManager.getMatrixPathsPoints();
+                    listLinesWidths=this.canvasManager.getLinesWidthsNormalized();
+                    listPathsNames=this.drawingManager.listPathsNames;
+                    listPathStrokesType= this.canvasManager.getListPathStrokesType();
+                }
 
                 this.imageDrawingData.points=matPoints;
                 this.imageDrawingData.linesWidths=listLinesWidths;

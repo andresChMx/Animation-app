@@ -195,6 +195,7 @@ var DrawingManager=fabric.util.createClass({
 
     },
     wakeUp:function(imageDrawingData){
+
         if(imageDrawingData.type===ImageType.CREATED_NOPATH){
             this.initPathsNamesAsEmpty();
             this.ctrlPointsManager.initCtrlPointsAsEmpty()
@@ -223,6 +224,15 @@ var DrawingManager=fabric.util.createClass({
     },
     loadPathsNames:function(imageDrawingData){
         this.listPathsNames=imageDrawingData.pathsNames.slice(0);
+    },
+    getTotalAmountPoints:function() {
+        let amount=0;
+        for (let i = 0; i < this.canvasManager.listPoints.length; i++) {
+            for (let j = 0; j < this.canvasManager.listPoints[i].length; j++) {
+                amount++;
+            }
+        }
+        return amount;
     },
     getMatrixPathsPoints:function(){
         let mat=[];

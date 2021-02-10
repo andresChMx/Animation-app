@@ -7,10 +7,17 @@ var Animator=fabric.util.createClass({
             "scaleX":[],
             "scaleY":[],
             "angle":[],
-            "opacity":[]
+            "opacity":[],
         };
-        this.entranceDuration=3000; //objects with entrace effect
-        this.entranceDelay=0;       //objects with entrace effect
+        this.dictHiddenAnimations={};
+
+        this.entranceTimes={    //objects with entrace effect
+            startTime:0,
+            delay:0,
+            duration:3000,
+            transitionDelay:0, /*for now only used by SVGAnimables that have "fadein" fillRevealMode*/
+        };
+
         this.animableObject=animableObject;
     },
     setAnimableObject:function(obj){
@@ -45,6 +52,33 @@ var Animator=fabric.util.createClass({
                 }
             }
         }
+        for(const prop in this.dictHiddenAnimations){
+            let anims=this.dictHiddenAnimations[prop]
+            for(let i=0;i<anims.length;i++){
+                let anim=anims[i];
+                if(anim.hasTwoKeys()){
+                    let value=anim.tick(currentTime)
+                    if(value==="tiempoMenor"){
+                        if(this.isFirstIndex(i)){
+                            this.animableObject[anim.property]=anim.startValue;
+                            break;
+                        }
+                    }else if (value==="tiempoMayor"){
+                        if(this.isLastIndex(i,anims.length)){
+                            this.animableObject[anim.property]=anim.endValue;
+                            break;
+                        }
+                    }
+                    else{
+                        this.animableObject[anim.property]=value;
+                        break;
+                    }
+                }else{
+                    this.animableObject[anim.property]=anim.startValue;
+                }
+            }
+        }
+
         this.animableObject.setBatch(dictNewPropertysValues);
     },
 
@@ -84,6 +118,19 @@ var Animator=fabric.util.createClass({
     updateAnimation:function(property,indexAnimation, startValue,endValue,startMoment,endMoment){
         this.dictAnimations[property][indexAnimation].updateValues(startValue,endValue,startMoment,endMoment);
     },*/
+    addHiddenAnimationsLane:function(property){
+        this.dictHiddenAnimations[property]=[];
+    },
+    addHiddenAnimation:function(property,startValue,endValue,startMoment,endMoment,easingType,tweenType){
+        if(!this.dictHiddenAnimations[property]){alert("ERROR: Trataste de agregar una HIDDEN ANIMATION a un carril que no existe");return;}
+        this.dictHiddenAnimations[property].push(new Animation(property,startValue,endValue,startMoment,endMoment,easingType,tweenType));
+        },
+    updateHiddenAnimation:function(){
+
+    },
+    removeHiddenAnimation:function(property,index){
+        this.dictHiddenAnimations[property].splice(index,1);
+    },
 
     hasPropertyAnimations:function(prop){
         return (this.dictAnimations[prop].length>0);

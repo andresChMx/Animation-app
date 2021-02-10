@@ -108,16 +108,28 @@
                             opciones de el modo none
                         </div>
                         <div class="drawn-mode-settings mode-settings">
-                            <div class="form-group drawn-mode-widget__resulting-drawing drawn-mode-widged">
+                            <div class="form-group drawn-mode-widget__hand drawn-mode-widged">
                                 <label for="checkbox-show-hand" class="widget-label">Show Hand </label>
                                 <input id="checkbox-show-hand" type="checkbox">
                             </div>
-                            <div class="form-group drawn-mode-widget__resulting-drawing drawn-mode-widged" >
-                                <p class="widget-label">Resulting Drawing </p>
-                                <div class="box-resulting-drawing-buttons">
-                                    <div class="resulting-drawing-button button-custom" id="original"><img src="" alt=""><span class="tooltip">Original Image</span></div>
-                                    <div class="resulting-drawing-button button-custom" id="masked"><img src="" alt=""><span class="tooltip">Resulting Image</span></div>
+                            <div class="form-group drawn-mode-widget__resulting-drawing drawn-mode-widged multiselection-widget" >
+                                <p class="multiselection-widget__title">Resulting Drawing </p>
+                                <div class="box-resulting-drawing-buttons multiselection-widget__box-options">
+                                    <div class="resulting-drawing-button multiselection-widget__option " id="original"><img src="" alt=""><span class="tooltip">Original Image</span></div>
+                                    <div class="resulting-drawing-button multiselection-widget__option " id="masked"><img src="" alt=""><span class="tooltip">Resulting Image</span></div>
                                 </div>
+                            </div>
+                            <div class="form-group drawn-mode-widget__fill-reveal drawn-mode-widged multiselection-widget">
+                                <p class="multiselection-widget__title">Fill Reveal Mode </p>
+                                <div class="box-fill-reveal-buttons multiselection-widget__box-options">
+                                    <div class="fill-reveal-button multiselection-widget__option" id="fadein"><img src="" alt=""><span class="tooltip">Fill appears with fade in effect</span></div>
+                                    <div class="fill-reveal-button multiselection-widget__option" id="drawn_fill"><img src="" alt=""><span class="tooltip">Fill appears with drawing effect</span></div>
+                                    <div class="fill-reveal-button multiselection-widget__option" id="no-fill"><img src="" alt=""><span class="tooltip">No Fill</span></div>
+                                </div>
+                            </div>
+                            <div class="form-group drawn-mode-widget__force-stroke-drawing drawn-mode-widged multiselection-widget">
+                                <label for="checkbox-force-stroke-drawing" class="widget-label">Force Stroke Drawing </label>
+                                <input id="checkbox-force-stroke-drawing" type="checkbox">
                             </div>
                         </div>
                         <div class="dragged-mode-settings mode-settings">
@@ -167,6 +179,9 @@
                         </div>
                         <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options CameraAnimable">
                             opciones de objetos de tipo CameraAnimable
+                        </div>
+                        <div class="canvas-animator__object-configuration__appearance-settings__box-options__object-type-options SVGAnimable">
+                            opciones de objetos de tipo SVGAnimable
                         </div>
                     </div>
                 </div>

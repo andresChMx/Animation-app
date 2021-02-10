@@ -540,21 +540,28 @@ var SectionConfigureObject={
                 getVal:function(){return this.value;},
             },
             drawn_showHand:{
-                htmlElem:document.querySelector(".drawn-mode-widget__resulting-drawing"),
-                initEvent:function(){this.htmlElem.querySelector("#checkbox-show-hand").addEventListener("change",this.OnTriggered.bind(this))},
-                removeEvent:function(){this.htmlElem.querySelector("#checkbox-show-hand").removeEventListener("change",this.OnTriggered.bind(this))},
+                htmlElem:document.querySelector(".drawn-mode-widget__hand"),
+                initEvent:function(){
+                    this.htmlElem.style.display="block";
+                    this.htmlElem.querySelector("#checkbox-show-hand").addEventListener("change",this.OnTriggered.bind(this))},
+                removeEvent:function(){
+                    this.htmlElem.style.display="none";
+                    this.htmlElem.querySelector("#checkbox-show-hand").removeEventListener("change",this.OnTriggered.bind(this))},
                 OnTriggered:function(e){},
                 setVal:function(showBool){this.htmlElem.querySelector("#checkbox-show-hand").checked=showBool;},
                 getVal:function(){return this.htmlElem.querySelector("#checkbox-show-hand").checked;}
             },
             drawn_finalDrawingAppearance:{
                 value:"",
-                htmlElem:document.querySelector(".drawn-mode-widget__resulting-drawing .box-resulting-drawing-buttons"),
+                htmlElem:document.querySelector(".drawn-mode-widget__resulting-drawing"),
+                htmlOptions:document.querySelectorAll(".drawn-mode-widget__resulting-drawing .resulting-drawing-button"),
                 initEvent:function(){
-                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].addEventListener("click",this.OnTriggered.bind(this));}
+                    this.htmlElem.style.display="block";
+                    for(let i=0;i<this.htmlOptions.length;i++){this.htmlOptions[i].addEventListener("click",this.OnTriggered.bind(this));}
                 },
                 removeEvent:function(){
-                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].removeEventListener("click",this.OnTriggered.bind(this));}
+                    this.htmlElem.style.display="none";
+                    for(let i=0;i<this.htmlOptions.length;i++){this.htmlOptions[i].removeEventListener("click",this.OnTriggered.bind(this));}
                 },
                 OnTriggered:function(e){
                     if(e.target.className==="tooltip"){return;}
@@ -562,16 +569,57 @@ var SectionConfigureObject={
                 },
                 setVal:function(appearance){
                     this.value=appearance;
-                    for(let i=0;i<this.htmlElem.children.length;i++){
-                        if(this.htmlElem.children[i].id===appearance){
-                            this.htmlElem.children[i].classList.add("active");
+                    for(let i=0;i<this.htmlOptions.length;i++){
+                        if(this.htmlOptions[i].id===appearance){
+                            this.htmlOptions[i].classList.add("active");
                         }else{
-                            this.htmlElem.children[i].classList.remove("active");
+                            this.htmlOptions[i].classList.remove("active");
                         }
                     }
                 },
                 getVal:function(){return this.value;}
-            }
+            },
+            drawn_fillRevealMode:{
+                value:"",
+                htmlElem:document.querySelector(".drawn-mode-widget__fill-reveal"),
+                htmlOptions:document.querySelectorAll(".drawn-mode-widget__fill-reveal .fill-reveal-button"),
+                initEvent:function(){
+                    this.htmlElem.style.display="block";
+                    for(let i=0;i<this.htmlOptions.length;i++){this.htmlOptions[i].addEventListener("click",this.OnTriggered.bind(this));}
+                },
+                removeEvent:function(){
+                    this.htmlElem.style.display="none";
+                    for(let i=0;i<this.htmlOptions.length;i++){this.htmlOptions[i].removeEventListener("click",this.OnTriggered.bind(this));}
+                },
+                OnTriggered:function(e){
+                    if(e.target.className==="tooltip"){return;}
+                    this.setVal(e.target.id);
+                },
+                setVal:function(fillMode){
+                    console.log(fillMode);
+                    this.value=fillMode;
+                    for(let i=0;i<this.htmlOptions.length;i++){
+                        if(this.htmlOptions[i].id===fillMode){
+                            this.htmlOptions[i].classList.add("active");
+                        }else{
+                            this.htmlOptions[i].classList.remove("active");
+                        }
+                    }
+                },
+                getVal:function(){return this.value;}
+            },
+            drawn_forceStrokeDrawing:{
+                htmlElem:document.querySelector(".drawn-mode-widget__force-stroke-drawing"),
+                initEvent:function(){
+                    this.htmlElem.style.display="block";
+                    this.htmlElem.querySelector("#checkbox-force-stroke-drawing").addEventListener("change",this.OnTriggered.bind(this))},
+                removeEvent:function(){
+                    this.htmlElem.style.display="none";
+                    this.htmlElem.querySelector("#checkbox-force-stroke-drawing").removeEventListener("change",this.OnTriggered.bind(this))},
+                OnTriggered:function(e){},
+                setVal:function(showBool){this.htmlElem.querySelector("#checkbox-force-stroke-drawing").checked=showBool;},
+                getVal:function(){return this.htmlElem.querySelector("#checkbox-force-stroke-drawing").checked;}
+            },
         }
 
         this.widgetsTextAnimableObjectAppareance={
@@ -678,9 +726,14 @@ var SectionConfigureObject={
 
         //INIT WIDGETS
     },
-    initEventsWidgetsEntranceModes:function(){
-        for(let i in this.widgetsEntraceMode){
-            this.widgetsEntraceMode[i].initEvent();
+    initEventsWidgetsEntranceModes:function(animableObject){
+        this.widgetsEntraceMode["modeSelector"].initEvent();
+        for(let i=0;i<animableObject.applicableEntrenceModes.length;i++){
+            let unnormalizedMode=animableObject.applicableEntrenceModes[i]
+            let normalizedMode=this.normalizeObjectEntraceMode(animableObject.applicableEntrenceModes[i]);
+            for(let key in animableObject.entraceModesSettings[unnormalizedMode]){
+                this.widgetsEntraceMode[normalizedMode + "_"+ key].initEvent();
+            }
         }
     },
     removeEventsWidgetsEntranceModes:function (){
@@ -704,12 +757,15 @@ var SectionConfigureObject={
             this.activateEntraceModeRadios(animableObject);
             this.activateObjectAppareanceArea(animableObject.type);
 
-            this.initEventsWidgetsEntranceModes();
+            this.initEventsWidgetsEntranceModes(animableObject);
             this.fillWidgetsEntranceMode(animableObject);
 
             if(animableObject.type==="ImageAnimable"){
 
-            }else if(animableObject.type==="TextAnimable"){
+            }else if(animableObject.type==="SVGAnimable"){
+
+            }
+            else if(animableObject.type==="TextAnimable"){
                 this.initEventsWidgetsTextAnimable()
                 this.fillWidgetsObjectAppareanceTextAnimable(animableObject);
             }else if(animableObject.type==="CameraAnimable"){
@@ -761,6 +817,7 @@ var SectionConfigureObject={
         }
     },
     OnBtnCloseClicked:function(){
+        this.removeEventsWidgetsEntranceModes();
         this.hiddeModel();
     },
     /*SE PROCESA LA INFORMACION EDITADA*/
@@ -769,7 +826,7 @@ var SectionConfigureObject={
             // entrace mode widgets processing
             let entranceModeChoosen= this.unnormalizeUIEntraceMode(this.widgetsEntraceMode.modeSelector.getVal());
             if(this.currentAnimableObject.getEntranceMode() !==entranceModeChoosen){
-                if(entranceModeChoosen===EntranceModes.none && this.currentAnimableObject.getEntranceMode()!==EntranceModes.none){
+                if(entranceModeChoosen===EntranceModes.none && this.currentAnimableObject.entranceMode!==EntranceModes.none){
                     CanvasManager.removeFromListObjectsWithEntrance(this.currentAnimableObject);
                 }
                 else if(this.currentAnimableObject.entranceMode===EntranceModes.none && entranceModeChoosen!==EntranceModes.none){
@@ -783,7 +840,6 @@ var SectionConfigureObject={
                 let normalizedApplicableMode=this.normalizeObjectEntraceMode(this.currentAnimableObject.applicableEntrenceModes[i]);
                 for(let key in this.currentAnimableObject.entraceModesSettings[unnormalizedApplicapleMode]){
                     let val=this.widgetsEntraceMode[normalizedApplicableMode + "_"+ key].getVal();
-                    console.log(val);
                     this.currentAnimableObject.entraceModesSettings[unnormalizedApplicapleMode][key]=val;
                 }
             }
@@ -805,6 +861,7 @@ var SectionConfigureObject={
             }
 
         }
+
         this.removeEventsWidgetsEntranceModes();
 
         this.hiddeModel();

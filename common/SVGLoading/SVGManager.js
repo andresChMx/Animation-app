@@ -1,5 +1,9 @@
 var SVGManager=fabric.util.createClass({
     initialize:function (){
+        this.imgWidth=null;
+        this.imgHeight=null;
+        this.parsedFabricObj=null;  //path || group
+        this.parsedFabricObjTransform=null;
     },
     fetchTextSVGData:function(animableText,callback){
         let request={
@@ -36,19 +40,24 @@ var SVGManager=fabric.util.createClass({
             linesColors:[],
             ctrlPoints:[],
         }
+        this.imgWidth=imgWidth;
+        this.imgHeight=imgHeight;
+
         let f=function(objects, options) {
             var obj = fabric.util.groupSVGElements(objects, options);
-            let listObjects=[]
+            let listObjects=[];
             console.log(obj);
             if(obj.type==="path"){
+                obj.left-=imgWidth/2;
+                obj.top-=imgHeight/2;
                 listObjects=[obj];
             }else if(obj.type==="group"){
                 listObjects=obj.getObjects();
             }else{
                 alert("ERROORR conocido: el objeto retornado por fabric es otra cosa no contemplada wdf" );
             }
-            this.parseFabricGroup(listObjects,imgWidth,imgHeight,strokeWidth,loadingMode,result);
-            callback(result);
+            let indexFinalTrueLayer=this.parseFabricGroup(listObjects,strokeWidth,loadingMode,result);
+            callback(result,indexFinalTrueLayer);
         }.bind(this);
 
         if(sourceType==="url"){
@@ -56,7 +65,6 @@ var SVGManager=fabric.util.createClass({
         }else if(sourceType==="string"){
             fabric.loadSVGFromString(source,f);
         }
-
 
         /*
         fabric.loadSVGFromURLCustom(url, function(objects, options) {
@@ -73,16 +81,84 @@ var SVGManager=fabric.util.createClass({
     },
 
     /*METODOS PRIVADOS*/
-    parseFabricGroup:function(group,imgWidth,imgHeight,strokeWidth,loadingMode,result){
+    parseFabricGroup:function(group,strokeWidth,loadingMode,result){
         let layerIndex=-1;
-
+        let listRevealPaths=[];
         for(let i=0;i<group.length;i++){
+            let path=null;
             if(group[i].type==="path"){
-               layerIndex=this.parsePath(group[i],imgWidth,imgHeight,strokeWidth,result,layerIndex,loadingMode);
+                path=group[i];
+            }else if(group[i].type==="polygon" || group[i].type==="polyline"){
+                let pathStr="";
+                for(let j=0;j<group[i].points.length;j++){
+                    let x=group[i].points[j].x;
+                    let y=group[i].points[j].y;
+                    if(j===0){
+                        pathStr+="M " +x + " " + y + " ";
+                    }else{
+                        pathStr+="L " +x + " " + y + " ";
+                    }
+                }
+                pathStr+="z";
+
+                let mat=group[i].calcTransformMatrix();
+                let options=fabric.util.qrDecompose(mat);
+                let auxPath=new fabric.Path(pathStr,{
+                    strokeWidth:group[i].strokeWidth,
+                    stroke:group[i].stroke,
+                    fill:group[i].fill,
+                    angle:options.angle,
+                    scaleX:options.scaleX, scaleY:options.scaleY,
+                    skewX:options.skewX, skewY:options.skewY,
+                    left:options.translateX, top:options.translateY
+                })
+                path=auxPath;
+            }else if(group[i].type==="line"){
+                let line=group[i];
+                let pathStr="M " +line.x1 + " " + line.y1  + " L " +line.x2 + " " + line.y2 ;
+                let mat=group[i].calcTransformMatrix();
+                let options=fabric.util.qrDecompose(mat);
+                let auxPath=new fabric.Path(pathStr,{
+                    strokeWidth:group[i].strokeWidth,
+                    stroke:group[i].stroke,
+                    fill:group[i].fill,
+                    angle:options.angle,
+                    scaleX:options.scaleX, scaleY:options.scaleY,
+                    skewX:options.skewX, skewY:options.skewY,
+                    left:options.translateX, top:options.translateY
+                })
+                path=auxPath;
+            }else{
+                continue;
             }
+
+            if(path.stroke && this.isTransparentColor(path.stroke)){
+                listRevealPaths.push(path);
+                continue;
+            }
+            layerIndex=this.parsePath(path,strokeWidth,result,layerIndex,loadingMode,listRevealPaths/*OUT*/);
+
         }
 
-        console.log(result);
+        if(listRevealPaths.length>0){
+            let indexTruePaths=layerIndex;
+            for(let i=0;i<listRevealPaths.length;i++){
+                layerIndex=this.parsePath(listRevealPaths[i],strokeWidth,result,layerIndex,loadingMode,listRevealPaths/*OUT*/);
+            }
+            return indexTruePaths;
+        }else{
+            return layerIndex;
+        }
+
+    },
+    isTransparentColor:function(color){
+        const regex = /rgba\(\d+,\d+,\d+,(\d+)\)/;
+        const res=color.match(regex);
+        if(res && res.length>1){
+            let val=parseInt(res[1]);
+            if(!isNaN(val)){return val===0;}
+        }
+        return false;
     },
     utilParseArc :function(fx, fy, coords) {
         var rx = coords[0],
@@ -165,18 +241,26 @@ var SVGManager=fabric.util.createClass({
         fabric.arcToSegmentsCache[argsString] = result;
         return result;
     },
-
-    parsePath:function(pathObj,imgWidth,imgHeight,strokeWidth,result,layerIndex,loadingMode){
+    transformPoint:function(x,y){
+        let newP=fabric.util.transformPoint({x:x,y:y},this.parsedFabricObjTransform,);
+        newP.x+=this.imgWidth/2;
+        newP.y+=this.imgHeight/2;
+        return {x:newP.x/this.imgWidth,y:newP.y/this.imgHeight};
+    },
+    parsePath:function(pathObj,strokeWidth,result,layerIndex,loadingMode,listRevealPaths/*OUT*/){
         if(loadingMode==="force_paths"){
-            if(pathObj.hasOwnProperty("strokeWidth")){
+            if(pathObj.hasOwnProperty("strokeWidth") && pathObj.strokeWidth !==null){
                 strokeWidth=pathObj.strokeWidth;
             }else{
                 strokeWidth=strokeWidth;
             }
-        }else{ // TODO: BORRAR ESTE ELSE
-            if(pathObj.hasOwnProperty("strokeWidth")) {
-
-                strokeWidth = pathObj.strokeWidth;
+        }else{
+            if(pathObj.hasOwnProperty("stroke") && pathObj.stroke !==null ) {
+                if(pathObj.hasOwnProperty("strokeWidth")){
+                    strokeWidth = pathObj.strokeWidth;
+                }else{
+                    return layerIndex
+                }
             }else{
                 return layerIndex;
             }
@@ -184,10 +268,6 @@ var SVGManager=fabric.util.createClass({
 
 
 
-        let fliX=pathObj.flipX?-1:1;
-        let fliY=pathObj.flipY?-1:1;
-        imgWidth=imgWidth/pathObj.scaleX*fliX;
-        imgHeight=imgHeight/pathObj.scaleY*fliY;
         var current, // current instruction
             previous = null,
             subpathStartX = 0,
@@ -198,35 +278,29 @@ var SVGManager=fabric.util.createClass({
             controlY = 0, // current control point y
             tempX,
             tempY,
-            l = 0,
-            t = 0;
-        //l=pathObj.aCoords.tl.x/pathObj.scaleX,
-        //t=pathObj.aCoords.tl.y/pathObj.scaleY;
-        //l=-pathObj.pathOffset.x+pathObj.left/pathObj.scaleX +imgWidth/2,
-        //t=-pathObj.pathOffset.y+pathObj.top/pathObj.scaleY +imgHeight/2;
-        if(pathObj.flipX){
-            l=imgWidth;
-        }
-        if(pathObj.flipY){
-            t=imgHeight
-        }
+            l = -pathObj.pathOffset.x,
+            t = -pathObj.pathOffset.y;
 
 
-        layerIndex++;
-        result.strokesTypes.push([]);
-        result.points.push([]);
-        result.ctrlPoints.push([]);
-        result.linesWidths.push(strokeWidth/imgWidth);
-        result.pathsNames.push("Path " +layerIndex);
-
-        if(pathObj.fill){
-            result.linesColors.push(pathObj.fill);
-        }else if(pathObj.stroke){
+        if(pathObj.stroke){
             result.linesColors.push(pathObj.stroke);
+        }else if(pathObj.fill){
+            result.linesColors.push(pathObj.fill);
         }else{
             result.linesColors.push("#000000");
         }
 
+        this.parsedFabricObjTransform=pathObj.calcTransformMatrix();
+        layerIndex++;
+        result.strokesTypes.push([]);
+        result.points.push([]);
+        result.ctrlPoints.push([]);
+        result.linesWidths.push(strokeWidth/this.imgWidth);
+        result.pathsNames.push("Path " +layerIndex);
+
+        let auxP1=null;
+        let auxP2=null;
+        let auxP3=null;
         for (var i = 0, len =pathObj.path.length; i < len; ++i) {
             current =pathObj.path[i];
             switch (current[0]) { // first letter
@@ -236,7 +310,8 @@ var SVGManager=fabric.util.createClass({
                     y += current[2];
 
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    auxP1=this.transformPoint(x + l,y+t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
@@ -244,7 +319,8 @@ var SVGManager=fabric.util.createClass({
                     x = current[1];
                     y = current[2];
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    auxP1=this.transformPoint(x + l,y+t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
@@ -252,28 +328,32 @@ var SVGManager=fabric.util.createClass({
                     x += current[1];
 
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    auxP1=this.transformPoint(x + l,y+t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
                 case 'H': // horizontal lineto, absolute
                     x = current[1];
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    auxP1=this.transformPoint(x + l,y+t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
                 case 'v': // vertical lineto, relative
                     y += current[1];
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    auxP1=this.transformPoint(x + l,y+t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
                 case 'V': // verical lineto, absolute
                     y = current[1];
                     result.strokesTypes[layerIndex].push("l");
-                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    auxP1=this.transformPoint(x + l,y+t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
                     result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
                     break;
 
@@ -282,8 +362,8 @@ var SVGManager=fabric.util.createClass({
                     y += current[2];
                     subpathStartX = x;
                     subpathStartY = y;
-
-                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    auxP1=this.transformPoint(x + l,y+t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
                     if(i!==0){
                         result.strokesTypes[layerIndex].push("m");
                         result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
@@ -296,8 +376,8 @@ var SVGManager=fabric.util.createClass({
                     y = current[2];
                     subpathStartX = x;
                     subpathStartY = y;
-
-                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    auxP1=this.transformPoint(x + l,y+t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
                     if(i!==0){
                         result.strokesTypes[layerIndex].push("m");
                         result.ctrlPoints[layerIndex].push(-1,-1,-1,-1);
@@ -312,12 +392,16 @@ var SVGManager=fabric.util.createClass({
                     controlY = y + current[4];
 
                     result.strokesTypes[layerIndex].push("c");
-                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
+                    auxP1=this.transformPoint(tempX + l,tempY + t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
+
+                    auxP2=this.transformPoint(x + current[1] + l,y + current[2] + t)
+                    auxP3=this.transformPoint(controlX + l,controlY + t)
                     result.ctrlPoints[layerIndex].push(
-                        (x + current[1] + l)/imgWidth,
-                        (y + current[2] + t)/imgHeight,
-                        (controlX + l)/imgWidth,
-                        (controlY + t)/imgHeight
+                        auxP2.x,
+                        auxP2.y,
+                        auxP3.x,
+                        auxP3.y
                     );
 
                     x = tempX;
@@ -330,12 +414,16 @@ var SVGManager=fabric.util.createClass({
                     controlX = current[3];
                     controlY = current[4];
                     result.strokesTypes[layerIndex].push("c");
-                    result.points[layerIndex].push((x + l)/imgWidth,(y+t)/imgHeight);
+                    auxP1=this.transformPoint(x + l,y+t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
+
+                    auxP2=this.transformPoint(current[1] + l,current[2] + t)
+                    auxP3=this.transformPoint(controlX + l,controlY + t)
                     result.ctrlPoints[layerIndex].push(
-                        (current[1] + l)/imgWidth,
-                        (current[2] + t )/imgHeight,
-                        (controlX + l )/imgWidth,
-                        (controlY + t)/imgHeight
+                        auxP2.x,
+                        auxP2.y,
+                        auxP3.x,
+                        auxP3.y
                     );
                     break;
 
@@ -359,13 +447,19 @@ var SVGManager=fabric.util.createClass({
 
 
                     result.strokesTypes[layerIndex].push("c");
-                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
+
+                    auxP1=this.transformPoint(tempX + l,tempY + t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
+
+                    auxP2=this.transformPoint(controlX + l,controlY + t)
+                    auxP3=this.transformPoint(x + current[1] + l,y + current[2] +t )
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/imgWidth,
-                        (controlY + t )/imgHeight,
-                        (x + current[1] + l)/imgWidth,
-                        (y + current[2] +t )/imgHeight
+                        auxP2.x,
+                        auxP2.y,
+                        auxP3.x,
+                        auxP3.y
                     );
+
                     // set control point to 2nd one of this command
                     // "... the first control point is assumed to be
                     // the reflection of the second control point on
@@ -393,13 +487,20 @@ var SVGManager=fabric.util.createClass({
                     }
 
                     result.strokesTypes[layerIndex].push("c");
-                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
+
+
+                    auxP1=this.transformPoint(tempX + l,tempY + t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
+
+                    auxP2=this.transformPoint(controlX + l,controlY + t)
+                    auxP3=this.transformPoint(current[1] + l,current[2] +t )
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/imgWidth,
-                        (controlY + t)/imgHeight,
-                        (current[1] + l)/imgWidth,
-                        (current[2] +t )/imgHeight
+                        auxP2.x,
+                        auxP2.y,
+                        auxP3.x,
+                        auxP3.y
                     );
+
                     x = tempX;
                     y = tempY;
 
@@ -422,13 +523,19 @@ var SVGManager=fabric.util.createClass({
 
 
                     result.strokesTypes[layerIndex].push("q");
-                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
+
+                    auxP1=this.transformPoint(tempX + l,tempY + t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
+
+                    auxP2=this.transformPoint(controlX + l,controlY + t)
+                    auxP3=this.transformPoint(-1,-1)
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/imgWidth,
-                        (controlY + t)/imgHeight,
-                        (-1)/imgWidth,
-                        (-1)/imgHeight
+                        auxP2.x,
+                        auxP2.y,
+                        auxP3.x,
+                        auxP3.y
                     );
+
                     x = tempX;
                     y = tempY;
                     break;
@@ -439,13 +546,19 @@ var SVGManager=fabric.util.createClass({
 
 
                     result.strokesTypes[layerIndex].push("q");
-                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
+
+                    auxP1=this.transformPoint(tempX + l,tempY + t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
+
+                    auxP2=this.transformPoint(current[1] + l,current[2] + t)
+                    auxP3=this.transformPoint(-1,-1)
                     result.ctrlPoints[layerIndex].push(
-                        (current[1] + l)/imgWidth,
-                        (current[2] + t)/imgHeight,
-                        (-1)/imgWidth,
-                        (-1)/imgHeight
+                        auxP2.x,
+                        auxP2.y,
+                        auxP3.x,
+                        auxP3.y
                     );
+
                     x = tempX;
                     y = tempY;
                     controlX = current[1];
@@ -471,13 +584,19 @@ var SVGManager=fabric.util.createClass({
                     }
 
                     result.strokesTypes[layerIndex].push("q");
-                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
+
+                    auxP1=this.transformPoint(tempX + l,tempY + t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
+
+                    auxP2=this.transformPoint(controlX + l,controlY + t)
+                    auxP3=this.transformPoint(-1,-1)
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/imgWidth,
-                        (controlY + t)/imgHeight,
-                        (-1)/imgWidth,
-                        (-1)/imgHeight
+                        auxP2.x,
+                        auxP2.y,
+                        auxP3.x,
+                        auxP3.y
                     );
+
                     x = tempX;
                     y = tempY;
 
@@ -500,13 +619,19 @@ var SVGManager=fabric.util.createClass({
                     }
 
                     result.strokesTypes[layerIndex].push("q");
-                    result.points[layerIndex].push((tempX + l)/imgWidth,(tempY + t)/imgHeight);
+
+                    auxP1=this.transformPoint(tempX + l,tempY + t)
+                    result.points[layerIndex].push(auxP1.x,auxP1.y);
+
+                    auxP2=this.transformPoint(controlX + l,controlY + t)
+                    auxP3=this.transformPoint(-1,-1)
                     result.ctrlPoints[layerIndex].push(
-                        (controlX + l)/imgWidth,
-                        (controlY + t)/imgHeight,
-                        (-1)/imgWidth,
-                        (-1)/imgHeight
+                        auxP2.x,
+                        auxP2.y,
+                        auxP3.x,
+                        auxP3.y
                     );
+
                     x = tempX;
                     y = tempY;
                     break;
@@ -554,8 +679,6 @@ var SVGManager=fabric.util.createClass({
                     break;
             }
             previous = current;
-
-            firstPathStroke=false;
         }
         return layerIndex;
     }

@@ -9,7 +9,7 @@ var DrawingCacheManager=fabric.util.createClass({
         // this.canvas.style.background="white";
         this.listDrawableObjects=[];
         //this.canvas=new OffscreenCanvas(100,1);
-        //document.body.append(this.canvas);
+        // document.body.append(this.canvas);
         
         this.pathIllustrator=null;
         this.drawingHand=drawingHand;

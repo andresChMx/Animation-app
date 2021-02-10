@@ -254,8 +254,8 @@ var SectionObjectsEntraceEditor={
 
         let propInputDelay=new PropertyInput(newItem.querySelector(".input-field-box.delay .property-input"));
         let propInputDuration=new PropertyInput(newItem.querySelector(".input-field-box.duration .property-input"));
-        propInputDelay.setValueWithUpdate(animObjWithEntrance.animator.entranceDelay);
-        propInputDuration.setValueWithUpdate(animObjWithEntrance.animator.entranceDuration);
+        propInputDelay.setValueWithUpdate(animObjWithEntrance.animator.entranceTimes.delay);
+        propInputDuration.setValueWithUpdate(animObjWithEntrance.animator.entranceTimes.duration);
         propInputDelay.onNewValue(this.childNotificationOnDelayNewValue.bind(this));
         propInputDuration.onNewValue(this.childNotificationOnDurationNewValue.bind(this));
         this.listPropertyInputsByItem.push({duration:propInputDuration,delay:propInputDelay});
@@ -281,12 +281,12 @@ var SectionObjectsEntraceEditor={
     /*EVENTOS INTERNOS*/
     childNotificationOnDurationNewValue:function(value,target){
         let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode.parentNode)-1;
-        CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceDuration=value;
+        CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceTimes.duration=value;
 
     },
     childNotificationOnDelayNewValue:function(value,target){
         let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode.parentNode)-1;
-        CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceDelay=value;
+        CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceTimes.delay=value;
 
     },
     onHTMLItemClicked:function(e){
@@ -475,8 +475,9 @@ var AreaObjectProperties={
                 },
                 OnFieldInput:function(e){
                     if(e.target.value===""){e.target.value=0;}
-                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
-                    this.setVal(e.target.value);
+                    let val=parseFloat(e.target.value);
+                    if(isNaN(val)){e.target.value=this.val;return;}
+                    this.setVal(val);
                     me.OnWidgetChanged(this.val,"left");
                 },
                 getInputFieldElem:function(){return this.htmlElem.children[1];},
@@ -500,8 +501,9 @@ var AreaObjectProperties={
                 },
                 OnFieldInput:function(e){
                     if(e.target.value===""){e.target.value=0;}
-                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
-                    this.setVal(e.target.value);
+                    let val=parseFloat(e.target.value);
+                    if(isNaN(val)){e.target.value=this.val;return;}
+                    this.setVal(val);
                     me.OnWidgetChanged(this.val,"top");
                 },
                 getInputFieldElem:function(){return this.htmlElem.children[1];},
@@ -525,8 +527,9 @@ var AreaObjectProperties={
                 },
                 OnFieldInput:function(e){
                     if(e.target.value===""){e.target.value=0;}
-                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
-                    this.setVal(e.target.value);
+                    let val=parseFloat(e.target.value);
+                    if(isNaN(val)){e.target.value=this.val;return;}
+                    this.setVal(val);
                     me.OnWidgetChanged(this.val,"scaleX");
                 },
                 getInputFieldElem:function(){return this.htmlElem.children[1];},
@@ -550,8 +553,9 @@ var AreaObjectProperties={
                 },
                 OnFieldInput:function(e){
                     if(e.target.value===""){e.target.value=0;}
-                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
-                    this.setVal(e.target.value);
+                    let val=parseFloat(e.target.value);
+                    if(isNaN(val)){e.target.value=this.val;return;}
+                    this.setVal(val);
                     me.OnWidgetChanged(this.val,"scaleY");
                 },
                 getInputFieldElem:function(){return this.htmlElem.children[1];},
@@ -569,14 +573,15 @@ var AreaObjectProperties={
                 },
                 OnButtonClicked:function(e){
                     if(e.target.className==="btn-decrease"){this.val-=5.0;
-                    }else if(e.target.className==="btn-increase"){this.val+=5.0;}
+                    }if(e.target.className==="btn-increase"){this.val+=5.0;}
                     this.setVal(this.val)
                     me.OnWidgetChanged(this.val,"angle");
                 },
                 OnFieldInput:function(e){
                     if(e.target.value===""){e.target.value=0;}
-                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
-                    this.setVal(e.target.value);
+                    let val=parseFloat(e.target.value);
+                    if(isNaN(val)){e.target.value=this.val;return;}
+                    this.setVal(val);
                     me.OnWidgetChanged(this.val,"angle");
                 },
                 getInputFieldElem:function(){return this.htmlElem.children[1];},
@@ -597,8 +602,9 @@ var AreaObjectProperties={
                 },
                 OnFieldInput:function(e){
                     if(e.target.value===""){e.target.value=0;}
-                    else if(isNaN(e.target.value)){e.target.value=this.val;return;}
-                    this.setVal(parseInt(e.target.value)/100.0);
+                    let val=parseFloat(e.target.value);
+                    if(isNaN(val)){e.target.value=this.val;return;}
+                    this.setVal(parseInt(val)/100.0);
                     me.OnWidgetChanged(this.val/100.0,"opacity");
                 },
                 getInputFieldElem:function(){return this.htmlElem.children[1];},

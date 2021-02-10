@@ -21,9 +21,8 @@ var ScenePreviewController=fabric.util.createClass({
         MainMediator.registerObserver(PanelPreviewer.name,PanelPreviewer.events.OnBtnClose,this);
         MainMediator.registerObserver(PanelPreviewer.name,PanelPreviewer.events.OnBtnPlay,this);
 
-        this.counterCallBacksDrawableTexts=0;
-        this.indexDrawableTexts=0;
-        this.listDelayedObjects=[];
+        this.counterCallbacksOnSVGAnimableLoading=0;
+        this.listSVGAnimablesWithNoPath=[]
     },
     callBackOnAnimatorTick:function(progress){
         MainMediator.notify(this.name,this.events.OnAnimatorTick,[progress])
@@ -55,11 +54,17 @@ var ScenePreviewController=fabric.util.createClass({
         * */
 
         /*
-        * recorremos todos los objetos del canvas, porque queremos el orden el que estan
+        * recorremos todos los objetos del canvas, porque queremos el orden el que estan. Ademas calculamos sus momentos de entrada
         * */
+        let startTimeCounter=0;
         for(let i=0;i<CanvasManager.listAnimableObjectsWithEntrance.length;i++){
             let animableObjWithEntrance=CanvasManager.listAnimableObjectsWithEntrance[i];
+
             animableObjWithEntrance.tmpIndexStartOrder=i;
+
+            animableObjWithEntrance.animator.entranceTimes.startTime=startTimeCounter;
+            startTimeCounter+=animableObjWithEntrance.animator.entranceTimes.delay + animableObjWithEntrance.animator.entranceTimes.duration;
+
         }
         let canvasObjects=CanvasManager.canvas.getObjects();
         for(let i=0;i<canvasObjects.length;i++){
@@ -67,19 +72,9 @@ var ScenePreviewController=fabric.util.createClass({
             let objectToBeAnimated=null;
             if(object.getEntranceMode()===EntranceModes.drawn){
                 this.generateDrawingDataOnDrawableObject(object);
-                objectToBeAnimated=new DrawableImage({
-                    cacheCanvas:this.drawingCacheManager.canvas,
-                    left:object.get("left"), top:object.get("top"),
-                    width:object.get("width"), height:object.get("height"), angle:object.get("angle"),
-                    scaleX:object.get("scaleX"), scaleY:object.get("scaleY"),
 
-                    pivotX:object.get("pivotX"), pivotY:object.get("pivotY"),
-                    pivotCornerX:object.get("pivotCornerX"), pivotCornerY:object.get("pivotCornerY"),
-                    originX: 'custom', originY: 'custom',
+                objectToBeAnimated=FactoryDrawableImages.create(object,this.drawingCacheManager.canvas);
 
-                    animations:object.animator.dictAnimations,
-                    entraceModesSettings:object.entraceModesSettings
-                });
                 listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
                 listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
             }else if(object.getEntranceMode()===EntranceModes.dragged){
@@ -92,19 +87,8 @@ var ScenePreviewController=fabric.util.createClass({
                 object.imageDrawingData.imgHigh=this.textAnimDataGenerator.generateTextBaseImage(object,pathOpenTypeObjects);
                 object.imageDrawingData.imgMasked=object.imageDrawingData.imgHigh;
 
-                objectToBeAnimated=new DrawableImage({
-                    cacheCanvas:this.drawingCacheManager.canvas,
-                    left:object.get("left"), top:object.get("top"),
-                    width:object.get("width"), height:object.get("height"), angle:object.get("angle"),
-                    scaleX:object.get("scaleX"), scaleY:object.get("scaleY"),
+                objectToBeAnimated=FactoryDrawableImages.create(object,this.drawingCacheManager.canvas);
 
-                    pivotX:object.get("pivotX"), pivotY:object.get("pivotY"),
-                    pivotCornerX:object.get("pivotCornerX"), pivotCornerY:object.get("pivotCornerY"),
-                    originX: 'custom', originY: 'custom',
-
-                    animations:object.animator.dictAnimations,
-                    entraceModesSettings:object.entraceModesSettings
-                });
                 listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
                 listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
             }else if(object.getEntranceMode()===EntranceModes.text_typed){
@@ -123,28 +107,94 @@ var ScenePreviewController=fabric.util.createClass({
     generateDrawingDataOnDrawableObject:function(animableObj){
         if(animableObj.imageDrawingData.type===ImageType.CREATED_NOPATH){
             if(animableObj.type==="SVGAnimable"){
-                this.svgAnimDataGenerator.generateDrawingData(animableObj.svgString,animableObj.width,animableObj.height,function(svgDrawingData){
-                    svgDrawingData.imgHigh=animableObj.imageDrawingData.imgHigh;
-                    svgDrawingData.imgLow=animableObj.imageDrawingData.imgLow;
-                    svgDrawingData.imgMasked=animableObj.imageDrawingData.imgHigh;
-                    svgDrawingData.type=animableObj.imageDrawingData.type;
+                this.listSVGAnimablesWithNoPath.push(animableObj);
+                this.counterCallbacksOnSVGAnimableLoading++;
+                this.svgManager=new SVGManager();
+                this.svgAnimDataGenerator.generateDrawingData(
+                    animableObj.svgString,
+                    animableObj.width,
+                    animableObj.height,
+                    animableObj.entraceModesSettings[EntranceModes.drawn].forceStrokeDrawing,
+                    function(svgDrawingData,indexFinalTrueLayer){
+                        animableObj.indexFinalTruePath=indexFinalTrueLayer;
 
-                    animableObj.imageDrawingData=svgDrawingData;
-                })
+                        if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="drawn_fill"){
+                            if(indexFinalTrueLayer===svgDrawingData.points.length-1){
+                                this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(
+                                    animableObj.imageDrawingData.imgHigh.naturalWidth,
+                                    animableObj.imageDrawingData.imgHigh.naturalHeight,
+                                    svgDrawingData,//OUT
+                                    35);
+                                this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
+                                    svgDrawingData.points,
+                                    svgDrawingData /*OUT*/
+                                );
+                                this.imageAnimDataGenerator.generateStrokesTypesFromPoints(
+                                    svgDrawingData.points,
+                                    svgDrawingData /*OUT*/
+                                );
+                                this.imageAnimDataGenerator.generateMissingLinesColors(
+                                    indexFinalTrueLayer,
+                                    svgDrawingData/*OUT*/
+                                );
+                            }
+                        }else{// in case fillRevealMode !== drawn_fill we do not need revealing paths
+                            if(indexFinalTrueLayer!==svgDrawingData.points.length-1){
+                                for(let i=indexFinalTrueLayer;i<svgDrawingData.points.length;i++){
+                                    for(let j in svgDrawingData){
+                                        svgDrawingData[j].splice(i,1);
+                                    }
+                                    i--;
+                                }
+                            }
+
+                            if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="fadein"){
+                                animableObj.addFadeInAnimation();
+                            }
+                            if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="no-fill"){
+
+                            }
+                        }
+
+                        svgDrawingData.imgHigh=animableObj.imageDrawingData.imgHigh;
+                        svgDrawingData.imgLow=animableObj.imageDrawingData.imgLow;
+                        svgDrawingData.imgMasked=animableObj.imageDrawingData.imgHigh;
+                        svgDrawingData.type=animableObj.imageDrawingData.type;
+
+                        animableObj.imageDrawingData=svgDrawingData;
+
+
+                        this.counterCallbacksOnSVGAnimableLoading--;
+                    }.bind(this)
+                );
                 return;
             }
 
             //calculate points and ctrlPoints and strokestyes (para el pathillustrator)
-            this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(animableObj.imageDrawingData, 35)
-            animableObj.imageDrawingData.ctrlPoints=this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageDrawingData.points);
-            animableObj.imageDrawingData.strokesTypes=this.imageAnimDataGenerator.generateStrokesTypesFromPoints(animableObj.imageDrawingData.points);
+            this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(
+                animableObj.imageDrawingData.imgHigh.naturalWidth,
+                animableObj.imageDrawingData.imgHigh.naturalHeight,
+                animableObj.imageDrawingData,//OUT
+                35);
+
+            this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
+                animableObj.imageDrawingData.points,
+                animableObj.imageDrawingData /*OUT*/
+            );
+            this.imageAnimDataGenerator.generateStrokesTypesFromPoints(
+                animableObj.imageDrawingData.points,
+                animableObj.imageDrawingData /*OUT*/
+            );
             //animableObj.imageDrawingData.pathsNames=this.imageAnimDataGenerator.generateLayerNames(animableObj.imageDrawingData.points)
         }else if(animableObj.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
             // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
-            animableObj.imageDrawingData.ctrlPoints=this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(animableObj.imageDrawingData.points);
+            this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
+                animableObj.imageDrawingData.points,
+                animableObj.imageDrawingData /*OUT*/
+            );
         }
     },
-    clearDrawingDataOnDrawableObjects:function(){
+    clearEntranceDataFromAnimableObjects:function(){
         for(let i=1;i<CanvasManager.listAnimableObjects.length;i++) {//omitiendo el primer porque es la camara
             let animableObj = CanvasManager.listAnimableObjects[i];
             if(animableObj.imageDrawingData.type===ImageType.CREATED_NOPATH || animableObj.imageDrawingData.type===TextType.PROVIDED){
@@ -158,6 +208,10 @@ var ScenePreviewController=fabric.util.createClass({
             }
             else if(animableObj.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
                 //NOTHING
+            }
+
+            if(animableObj.type==="SVGAnimable" && animableObj.entraceModesSettings["drawn"].fillRevealMode==="fadein"){
+                animableObj.removeFadeInAnimation();
             }
         }
     },
@@ -174,26 +228,32 @@ var ScenePreviewController=fabric.util.createClass({
         CanvasManager.camera.animator.start(this.UIPanelPreviewerCanvas);
         this.loadObjectsForAnimation(listForAnimator,listDrawableObjects,listAnimableWithDrawnEntrance);
 
-        this.drawingCacheManager.wakeUp(listDrawableObjects,listAnimableWithDrawnEntrance);
-        this.drawingCacheManager.addDrawingHandToCanvas(this.UIPanelPreviewerCanvas);
-        listForAnimator.push(this.drawingCacheManager);
-        this.animator.setListObjectsToAnimate(listForAnimator);
+        (function WaitForSVGAnimables(){
+            if(this.counterCallbacksOnSVGAnimableLoading!==0){setTimeout(WaitForSVGAnimables.bind(this),20);return;}
 
-        this.animator.setTotalProgress(0);
-        this.animator.playAnimation();
+            this.drawingCacheManager.wakeUp(listDrawableObjects,listAnimableWithDrawnEntrance);
+            this.drawingCacheManager.addDrawingHandToCanvas(this.UIPanelPreviewerCanvas);
+            listForAnimator.push(this.drawingCacheManager);
+            this.animator.setListObjectsToAnimate(listForAnimator);
+
+            this.animator.setTotalProgress(0);
+            this.animator.playAnimation();
+        }.bind(this)())
+
+
     },
     notificationPanelPreviewerOnBtnClose:function(){
-        this.listDelayedObjects=[];
         CanvasManager.camera.animator.stop();
         this.animator.stopAnimation();
         this.UIPanelPreviewerCanvas.clear();
         this.drawingCacheManager.sleep();
         CanvasManager.setCanvasOnAnimableObjects();
-        this.clearDrawingDataOnDrawableObjects()
+        this.clearEntranceDataFromAnimableObjects();
+        this.listSVGAnimablesWithNoPath=[];
     },
     notificationPanelPreviewerOnBtnPlay:function(args){
         let playOrPause=args[0]
-        if(this.animator.totalProgress===this.animator.totalDuration){
+        if(this.animator.totalProgress===this.animator.totalDuration && this.animator.state===ControllerAnimatorState.paused){
             this.drawingCacheManager.OnReplayPreview();
             this.animator.setTotalProgress(0);
             this.animator.playAnimation();

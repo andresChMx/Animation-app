@@ -200,6 +200,7 @@ button{
     cursor:pointer;
 }
 .canvas-animator__object-configuration .tooltip{
+    display: none;
     opacity:0;
     position:absolute;
     bottom:-35px;
@@ -209,8 +210,7 @@ button{
     border-radius: 5px;
     padding:3px;
     font-size:.7em;
-    transition: .2s opacity;
-    transition-delay:.5s;
+
 }
 /*input between buttons*/
 .property-input{
@@ -1182,7 +1182,45 @@ button{
     text-transform: uppercase;
     color:rgba(255,255,255,.5);
 }
+/*Object configuration widgets*/
+.multiselection-widget{
+    margin-bottom:20px;
 
+}
+.multiselection-widget__title{
+    display:inline;
+}
+.multiselection-widget__box-options{
+    display: inline-flex;
+}
+.multiselection-widget__option{
+    position:relative;
+    margin-left:10px;
+    width:50px;
+    height:50px;
+    border:1px solid #bfbfbf;
+}
+.multiselection-widget__option:after{ /*se refiere a cajas que se pueden convertir en botones*/
+    content:"";
+    display:block;
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    cursor:pointer;
+}
+.multiselection-widget__option.active{
+    border: 2px solid #0eabe9;
+    background: rgba(14,171,233,.3);
+}
+.multiselection-widget__option:hover .tooltip{
+    transition: .2s all;
+    transition-delay:.5s;
+    display:block;
+    opacity: 1;
+}
+/*entrace settings side*/
 .canvas-animator__object-configuration__entrance-settings{
     width:50%;
     padding:0 10px;
@@ -1232,32 +1270,8 @@ button{
     font-size: 1.15rem;
 }
 .canvas-animator__object-configuration__entrance-settings__box-mode-settings .mode-settings .drawn-mode-widged{
-    margin-bottom:20px;
+    display:none;
 }
-.canvas-animator__object-configuration__entrance-settings__box-mode-settings .mode-settings .widget-label{
-    display:inline;
-}
-.drawn-mode-widget__resulting-drawing{
-
-}
-.drawn-mode-widget__resulting-drawing .box-resulting-drawing-buttons{
-    display: inline-flex;
-}
-.drawn-mode-widget__resulting-drawing .box-resulting-drawing-buttons .resulting-drawing-button{
-    position:relative;
-    margin-left:10px;
-    width:50px;
-    height:50px;
-    border:1px solid #bfbfbf;
-}
-.drawn-mode-widget__resulting-drawing .box-resulting-drawing-buttons .resulting-drawing-button.active{
-    border: 2px solid #0eabe9;
-    background: rgba(14,171,233,.3);
-}
-.drawn-mode-widget__resulting-drawing .box-resulting-drawing-buttons .resulting-drawing-button:hover .tooltip{
-    opacity: 1;
-}
-
 
 /*appearance settings*/
 .canvas-animator__object-configuration__appearance-settings{

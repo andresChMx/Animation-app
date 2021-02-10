@@ -223,7 +223,10 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             return;
         }else if(this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
             // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
-            this.imageDrawingData.ctrlPoints=dataGenerator.generateCrtlPointsFromPointsMatrix(this.imageDrawingData.points);
+            dataGenerator.generateCrtlPointsFromPointsMatrix(
+                this.imageDrawingData.points,
+                this.imageDrawingData /*OUT*/ //SE ESTAN LIMPIANDO los ctrlPoints DESPUES DE GENERAR LA IMAGEN
+            );
         }
         else if(this.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
             //NOTHING BECAUSE POINTS AND CTRLPOINTS ARE ALREADY CALCULATED
@@ -232,7 +235,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         let illustratorDataAdapterCache=new IllustratorDataAdapterCache([this]);
         let pathIllustrator=new PathIllustrator(canvas,ctx,illustratorDataAdapterCache,false);
         pathIllustrator.generateFinalImage(function(dataUrl){
-            /*
+            /*  DEBUGGIN PURPOSES
             var link = document.createElement("a");
             link.download = name;
             link.href = dataUrl;
@@ -243,7 +246,10 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             */
             this.imageDrawingData.imgMasked=new Image();
             this.imageDrawingData.imgMasked.src=dataUrl;
+
+            //CLEANING
             canvas.remove();
+            this.imageDrawingData.ctrlPoints=[];
         }.bind(this))
     },
 
@@ -298,18 +304,45 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
     applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
     type:'SVGAnimable',
     initialize:function(options,callback){
-        this.svgString="";
+
         let self=this;
         this.loadSVGFromURL(options.imageAssetModel.url_image,function(svgString,image){
-            self.svgString=svgString;
             options.imgHighDefinition=image;
             options.imgLowDefinition=image;
+
             self.callSuper('initialize', image, options);
+
+            self.svgString=svgString;
+
+            //FILL REVEAL MODE VARIABLES
+            this.indexFinalTruePath=0; //used for fill reveal mode "fill_drawn"
+
+
+            // vars used for fill reveal mode "fadein"
+            this.auxEntranceDuration=0; // stores entrance duration value temporarily
+            self.animator.addHiddenAnimationsLane("fadeInTransitionOpacity");
+
             callback();
         });
 
     },
-
+    addFadeInAnimation:function(){
+        this.auxEntranceDuration=this.animator.entranceTimes.duration;
+        let fadeinDuration=this.animator.entranceTimes.duration*0.2;
+        let newEntranceDuration=this.animator.entranceTimes.duration-fadeinDuration;
+        this.animator.entranceTimes.duration=newEntranceDuration;
+        this.animator.entranceTimes.transitionDelay=fadeinDuration;
+        let startMoment=this.animator.entranceTimes.startTime+this.animator.entranceTimes.delay+newEntranceDuration;
+        let endMoment=startMoment+fadeinDuration;
+        if(this.animator.dictHiddenAnimations["fadeInTransitionOpacity"].length>0){alert("ERROR: SE INTENTO REGISTRAR ANIMMACION DE FADEIN CUANDO YA HABIA UNA");return;}
+        this.animator.addHiddenAnimation("fadeInTransitionOpacity",0,1,startMoment,endMoment,EnumAnimationEasingType.InOut,EnumAnimationTweenType.Sine);
+        console.log(this.animator.dictHiddenAnimations.fadeInTransitionOpacity[0]);
+        },
+    removeFadeInAnimation:function(){
+        this.animator.entranceTimes.transitionDelay=0;
+        this.animator.entranceTimes.duration=this.auxEntranceDuration;
+        this.animator.removeHiddenAnimation("fadeInTransitionOpacity",0);
+    },
     setupImageDrawingDTO:function(imgHighDefinition,imgLowDefinition){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHigh
         let data=this.callSuper("setupImageDrawingDTO",imgHighDefinition,imgLowDefinition);
         data.linesColors=[];
@@ -418,7 +451,8 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
         }
         this.entraceModesSettings[this.applicableEntrenceModes[1]]={
             showHand:true,
-            fillRevealMode:'fadein'  // fadein || drawn
+            forceStrokeDrawing:true,
+            fillRevealMode:'fadein'  // fadein || drawn_fill || no-fill
         }
         this.entraceModesSettings[this.applicableEntrenceModes[2]]={
 
@@ -532,7 +566,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
     },
 });
 
-ImageAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot){
+ImageAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.drawImage(baseImage,0,0,canvas.width,canvas.height)
     ctx.globalCompositeOperation="destination-in";
@@ -540,7 +574,7 @@ ImageAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevP
     ctx.globalCompositeOperation="source-over";
     ctx.drawImage(prevPathSnapshot,0,0);
 }
-TextAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot){
+TextAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.drawImage(baseImage,0,0,canvas.width,canvas.height);
     ctx.globalCompositeOperation="source-in";
@@ -548,13 +582,24 @@ TextAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPa
     ctx.globalCompositeOperation="source-over";
     ctx.drawImage(prevPathSnapshot,0,0);
 }
-SVGAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot){
+SVGAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){
     if(this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
         ImageAnimable.prototype.illustrationFunction(canvas,ctx,baseImage,prevPathSnapshot);
-    }else{
+    }else if(indexLayer<=this.indexFinalTruePath){
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.stroke();
         ctx.drawImage(prevPathSnapshot,0,0);
+    }
+    else if(this.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="drawn_fill"){
+        ctx.strokeStyle="red";
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(baseImage,0,0,canvas.width,canvas.height);
+        ctx.globalCompositeOperation="destination-in";
+        ctx.stroke();
+        ctx.globalCompositeOperation="source-over";
+        ctx.drawImage(prevPathSnapshot,0,0);
+    }else{
+
 
     }
 }
@@ -650,6 +695,9 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
 
         this.animator=new Animator(this);
         this.animator.dictAnimations=options.animations;
+        this.animator.dictHiddenAnimations=options.hiddenAnimations;
+        this.animator.entranceTimes=options.entranceTimes;
+
         this.entranceModesSettings=options.entraceModesSettings;
     },
     setTurn:function(is,finalImageMask){
@@ -677,6 +725,68 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         ctx.restore();
     },
   });
+
+var DrawableSVGImage=fabric.util.createClass(DrawableImage, {
+    initialize:function(options,imageHigh){
+        this.callSuper('initialize',options);
+        this.imageToBeFadeIn=imageHigh;
+        this.fadeInTransitionOpacity=0;
+    },
+    render:function(ctx){
+        ctx.save();
+        this._setOpacity(ctx);
+        this.transform(ctx);
+
+        if(this.myTurn){
+            if(this.fadeInTransitionOpacity!==0){
+                let currentGlobalAlpha=ctx.globalAlpha;
+                ctx.globalAlpha=currentGlobalAlpha*this.fadeInTransitionOpacity;
+                ctx.drawImage(this.imageToBeFadeIn,-this.width/2,-this.height/2)
+
+                let negativeAlpha=1-this.fadeInTransitionOpacity;
+
+                ctx.globalAlpha=currentGlobalAlpha*negativeAlpha;
+                ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
+                ctx.globalAlpha=currentGlobalAlpha;
+            }else{
+                ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
+
+            }
+        }else{
+            ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);
+        }
+        ctx.restore();
+    },
+});
+var FactoryDrawableImages={
+    create:function(object,cacheCanvas){
+        let options={
+            cacheCanvas:cacheCanvas,
+            left:object.get("left"), top:object.get("top"),
+            width:object.get("width"), height:object.get("height"), angle:object.get("angle"),
+            scaleX:object.get("scaleX"), scaleY:object.get("scaleY"), opacity:object.get("opacity"),
+
+            pivotX:object.get("pivotX"), pivotY:object.get("pivotY"),
+            pivotCornerX:object.get("pivotCornerX"), pivotCornerY:object.get("pivotCornerY"),
+            originX: 'custom', originY: 'custom',
+
+            animations:object.animator.dictAnimations,
+            hiddenAnimations:object.animator.dictHiddenAnimations,
+            entranceTimes:object.animator.entranceTimes,
+
+            entraceModesSettings:object.entraceModesSettings
+        };
+        if(object.type==="SVGAnimable" && object.entraceModesSettings["drawn"].fillRevealMode==="fadein"){
+            return new DrawableSVGImage(options,object.imageDrawingData.imgHigh);
+        }else if(object.type==="ImageAnimable"){
+            return new DrawableImage(options);
+        }else if(object.type==="TextAnimable"){
+            return new DrawableImage(options);
+        }else{
+            return new DrawableImage(options);
+        }
+    }
+}
 /*
 * Canvas en el que se toma en cuenta la opacidad, la cual es aplicar a todos los objetos. Usado para el canvas previewer
 * */
