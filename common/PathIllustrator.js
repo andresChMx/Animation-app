@@ -229,6 +229,7 @@ var PathIllustrator=fabric.util.createClass({
         let totalCantPathStrokes=this.getTotalStrokesInImage(this.k);
         this.animStrokeDuration=this.data.getDurationOf(this.k)/totalCantPathStrokes;
 
+
     },
     _illustrateImage:function(nowTime){
         let finalSegmentPoint={x:null,y:null};  // Coordinate for the drawing Hand

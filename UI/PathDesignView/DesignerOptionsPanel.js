@@ -1,3 +1,23 @@
+var SectionActions={
+    HTMLElement:null,
+    parentClass:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
+        this.HTMLElement=document.querySelector(".panel-designer-options__section-actions");
+        this.HTMLButtons=this.HTMLElement.children;
+        for(let i=0;i<this.HTMLButtons.length;i++){
+            this.HTMLButtons[i].addEventListener("click",this.OnActionTriggered.bind(this));
+        }
+    },
+    OnActionTriggered:function(e){
+        this.notifyOnActionClicked(e.target.id);
+    },
+    notifyOnActionClicked:function(actionId){
+        this.parentClass.childNotificationOnActionClicked(actionId);
+    }
+
+}
+
 var SectionSettings={
     HTMLElement:null,
 
@@ -5,20 +25,20 @@ var SectionSettings={
     init:function(parentClass){
         this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".panel-designer-options__section-settings");
-        this.setupHTMLSettingAction();
+
+        this.numericFieldLineWidth=null;
+        this.numericFieldDuration=null;
+
+        this.htmlBtnToolSelection=null;
+        this.htmlBtnToolAdd=null;
         this.setupHTMLSettingZoom();
         this.setupHTMLSettingTool();
         this.setupHTMLSettingLineWidth();
         this.setupHTMLSettingDuration();
 
-    },
-    setupHTMLSettingAction:function(){
-        let btnSave=document.querySelector(".setting-action__btn-save");
-        let btnCancel=document.querySelector(".setting-action__btn-cancel");
-        btnSave.addEventListener("click",this.notifyOnActionClicked.bind(this));
-        btnCancel.addEventListener("click",this.notifyOnActionClicked.bind(this));
 
     },
+
     setupHTMLSettingZoom:function(){
         let btnZoomOut=document.querySelector(".setting-zoom__btn-zoom-out");
         let btnZoomIn=document.querySelector(".setting-zoom__btn-zoom-in");
@@ -26,23 +46,42 @@ var SectionSettings={
         btnZoomIn.addEventListener("click",this.notifyOnZoomIn.bind(this));
     },
     setupHTMLSettingTool:function(){
-        let btnToolSelection=document.querySelector(".setting-tool__btn-tool-selection");
-        let btnToolAdd=document.querySelector(".setting-tool__btn-tool-add");
+        this.htmlBtnToolSelection=document.querySelector(".setting-tool__btn-tool-selection");
+        this.htmlBtnToolAdd=document.querySelector(".setting-tool__btn-tool-add");
         let btnToolRemove=document.querySelector(".setting-tool__btn-tool-remove");
-        btnToolSelection.addEventListener("click",this.notifyOnToolClicked.bind(this));
-        btnToolAdd.addEventListener("click",this.notifyOnToolClicked.bind(this));
+        this.htmlBtnToolSelection.addEventListener("click",this.notifyOnToolClicked.bind(this));
+        this.htmlBtnToolAdd.addEventListener("click",this.notifyOnToolClicked.bind(this));
         btnToolRemove.addEventListener("click",this.notifyOnToolClicked.bind(this));
     },
     setupHTMLSettingLineWidth:function(){
+        let self=this;
         let slider=document.querySelector(".setting-line-width__slider");
-        slider.addEventListener("change",this.notifyOnLineWidthChanged.bind(this))
+        let input=document.querySelector(".setting-line-width__field");
+        this.numericFieldLineWidth=new NumericField(input,"",1,100,ObserverType.temp);
+
+        slider.addEventListener("change",function(e){
+            this.numericFieldLineWidth.setValue(e.target.value);// this will make call the callback which will notify the new value (lines below)
+        }.bind(this));
+
+        this.numericFieldLineWidth.addListenerOnNewValue(function(value,e){
+            slider.value=value;
+            self.notifyOnLineWidthChanged(value);
+        })
     },
     setupHTMLSettingDuration:function(){
+        let self=this;
         let slider=document.querySelector(".setting-duration__slider");
-        slider.addEventListener("change",this.notifyOnDurationChanged.bind(this));
-    },
-    notifyOnActionClicked:function(e){
-        this.parentClass.childNotificationOnSettingActionClicked(e.target.id);
+        let input=document.querySelector(".setting-duration__field");
+        this.numericFieldDuration=new NumericField(input,"s",2,10,ObserverType.temp);
+
+        slider.addEventListener("change",function(e){
+            this.numericFieldDuration.setValue(e.target.value);// this will make call the callback which will notify the new value (lines below)
+        }.bind(this));
+
+        this.numericFieldDuration.addListenerOnNewValue(function(value,e){
+            slider.value=value;
+            self.notifyOnDurationChanged(value);
+        })
     },
     notifyOnZoomOut:function(){
 
@@ -53,14 +92,29 @@ var SectionSettings={
     },
     notifyOnToolClicked:function(e){
         this.parentClass.childNotificationOnToolClicked(e.target.id);
+
     },
-    notifyOnLineWidthChanged:function(e){
-        this.parentClass.childNotificationOnLineWidthChanged(e.target.value);
+    notifyOnLineWidthChanged:function(value){
+        this.parentClass.childNotificationOnLineWidthChanged(value);
     },
-    notifyOnDurationChanged:function(e){
-        this.parentClass.childNotificationOnDurationChanged(e.target.value);
+    notifyOnDurationChanged:function(value){
+        this.parentClass.childNotificationOnDurationChanged(value*1000);
     },
 
+    notificationOnToolChanged:function(currentTool){
+        console.log(currentTool);
+        this.htmlBtnToolAdd.classList.remove("active");
+        this.htmlBtnToolSelection.classList.remove("active");
+        if(this.htmlBtnToolAdd.id===currentTool){this.htmlBtnToolAdd.classList.add("active")}
+        else if(this.htmlBtnToolSelection.id===currentTool){this.htmlBtnToolSelection.classList.add("active")};
+    },
+    notificationOnControllerSetupCompleted:function(controllerIllustratorDuration){
+        this.numericFieldDuration.setValue(controllerIllustratorDuration/1000);
+    },
+    notificationOnPathIndexChanged:function(lineWidth){
+        console.log(lineWidth);
+        this.numericFieldLineWidth.setValue(lineWidth);
+    }
 
 }
 let SectionPaths={
@@ -177,7 +231,9 @@ let SectionPaths={
     notifyOnBtnLoadSVGClicked:function(){
         this.parentClass.childNotificationOnBtnLoadSVGClicked();
     },
-
+    notificationOnActionClicked:function(action){
+        this.sleep();
+    }
 }
 var SectionPathDesignerPopup={
     HTMLElement:null,
@@ -219,8 +275,8 @@ var PanelDesignerOptions={
         OnPathClicked:'OnPathClicked',
         OnBtnDeletePathClicked:'OnBtnDeletePathClicked',
         OnBtnLoadSVGClicked:'OnBtnLoadSVGClicked',
+        OnActionClicked:'OnActionClicked',
 
-        OnSettingActionClicked:'OnSettingActionClicked',
         OnSettingZoomOut:'OnSettingZoomOut',
         OnSettingZoomIn:'OnSettingZoomIn',
         OnSettingToolClicked:'OnSettingToolClicked',
@@ -228,13 +284,14 @@ var PanelDesignerOptions={
         OnSettingDurationChanged:'OnSettingDurationChanged'
     },
     HTMLElement:null,
-
+    SectionActions:SectionActions,
     SectionSettings:SectionSettings,
     SectionPaths:SectionPaths,
     SectionPathDesignerPopup:SectionPathDesignerPopup,
     designerController:null,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-designer-options");
+        this.SectionActions.init(this);
         this.SectionSettings.init(this);
         this.SectionPathDesignerPopup.init(this);
         this.SectionPaths.init(this);
@@ -244,15 +301,32 @@ var PanelDesignerOptions={
         this.designerController=obj;
         this.SectionPaths.designerController=obj;
         this.designerController.registerOnSetupCompleted(this);
+        this.designerController.registerOnLayerIndexChanged(this);
+        this.designerController.registerOnToolChanged(this);
     },
-    notificationCanvasManagerOnDesignPathOptionClicked:function(args){
+    wakeUp:function(){
         this.HTMLElement.style.display="block";
     },
-
+    sleep:function(){
+        this.HTMLElement.style.display="none";
+    },
+    notificationCanvasManagerOnDesignPathOptionClicked:function(args){
+        this.wakeUp();
+    },
+    /*controller notifications*/
+    notificationOnToolChanged:function(){
+        let tool=this.designerController.drawingManager.currentTool;
+        this.SectionSettings.notificationOnToolChanged(tool);
+    },
+    notificationOnPathIndexChanged:function(){
+        let lineWidth=this.designerController.drawingManager.getCurrentPathLineWidth();
+        this.SectionSettings.notificationOnPathIndexChanged(lineWidth);
+    },
     notificationOnSetupCompleted:function(){
+        let duration=this.designerController.previewManager.getIllustrationDuration();
+        this.SectionSettings.notificationOnControllerSetupCompleted(duration);
         this.SectionPaths.wakeUp();
     },
-
     childNotificationOnBtnAddPathClicked:function(){
         MainMediator.notify(this.name,this.events.OnBtnAddPathClicked,[])
     },
@@ -265,12 +339,10 @@ var PanelDesignerOptions={
     childNotificationOnBtnLoadSVGClicked:function(){
         MainMediator.notify(this.name,this.events.OnBtnLoadSVGClicked,[])
     },
-
-
-    childNotificationOnSettingActionClicked:function(targetId){
-        this.HTMLElement.style.display="none";
-        this.SectionPaths.sleep();
-        MainMediator.notify(this.name,this.events.OnSettingActionClicked,[targetId])
+    childNotificationOnActionClicked:function(actionId){
+        this.sleep();
+        this.SectionPaths.notificationOnActionClicked(actionId);
+        MainMediator.notify(this.name,this.events.OnActionClicked,[actionId])
     },
     childNotificationOnZoomOut:function(){
         MainMediator.notify(this.name,this.events.OnSettingZoomOut,[])

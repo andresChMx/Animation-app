@@ -98,7 +98,9 @@
     --secondary-color:#1c1b1b;
     --terciary-color:#242323;
     --fields-color:#292828;
-    --ligth-color:#29a3d2;
+    --item-object:#292828;
+    --ligth-color:#2D88FF;
+
     --panel-animation-height:200px;
     --panel-animation__top-menu_height:35px;
     --action-editor__timeline-area-width:80%;
@@ -189,7 +191,31 @@ button{
     border:0;
 }
 
-.button-custom:after{ /*se refiere a cajas que se pueden convertir en botones*/
+.btn-action{
+    color:white;
+    border:none;
+    font-size: 1.15rem;
+    background: var(--terciary-color);
+    border-radius: 6px;
+    padding:10px;
+    position: relative; /*important*/
+
+}
+.btn-action:after{
+    /*inherits from .button-solid-behaviour*/
+    content:"";
+    display:block;
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    cursor:pointer;
+}
+.button-solid-behaviour{
+    position: relative;
+}
+.button-solid-behaviour:after{ /*se refiere a cajas que se pueden convertir en botones, y que contienen otros elementos*/
     content:"";
     display:block;
     position:absolute;
@@ -352,7 +378,7 @@ button{
     margin: 0 6px;
 }
 .panel-animation__top-bar__area-editors-menus__action-editor-menu .display-timeline-progress.tool{
-    color:darkturquoise;
+    color:var(--ligth-color);
 }
 
 .panel-animation__top-bar__area-editors-menus__action-editor-menu .duration-form.tool{
@@ -457,55 +483,56 @@ button{
     content: "\e907";
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown{
+    border-radius: 8px;
+    border:2px solid rgba(255,255,255,.1);
     display:none;
     position:absolute;
     bottom:25px;
-    background:peru;
+    background:var(--fields-color);
     width:200px;
-    padding:10px;
+    padding:10px 20px;
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown.active{
     display:block;
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown__easing-list{
-    background:red;
     width:100%;
-    margin:0;
+    margin-bottom:10px;
 
     display:flex;
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown__easing-list .item-easing-list{
-    border-bottom:1px solid black;
+    border-bottom:1px solid rgba(255,255,255,.2);
     flex-grow: 1;
     margin:0 !important;
-    padding:3px;
+    padding:10px;
     text-align: center;
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown__easing-list .item-easing-list.active{
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid var(--ligth-color);
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown__tween-list{
 
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown__tween-list .item-tween-list{
     padding:5px 0;
-    text-align: center;
+    text-align: left;
     position: relative;
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown__tween-list .item-tween-list:before{
     content:"";
-    background:green;
+    background:var(--ligth-color);
     border-radius: 50%;
-    width:10px;
-    height:10px;
+    width:15px;
+    height:15px;
     position: absolute;
     top:50%;
-    left:4px;
+    right:0px;
     transform: translateY(-50%);
     display: none;
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown__tween-list .item-tween-list.active{
-    color:deepskyblue;
+    color:#2D88FF;
 }
 .action-editor__properties-area__toolbar .menu-functions__dropdown__tween-list .item-tween-list.active:before{
     display:block;
@@ -663,7 +690,7 @@ button{
     margin-right:10px;
 }
 .area-scene-objects__listing-objects-entrance__box-items #active-item{
-    background: rgba(68,246,240,.4);
+    background: rgba(45,136,255,.4);
 }
 /*--------------panel-inspector__area-scene-objects__listing-objects-all----------------*/
 .area-scene-objects__listing-objects-all__title{
@@ -682,13 +709,14 @@ button{
     list-style: none;
     font-size: 1.15rem;
     padding-left:8px;
-
+    background: var(--item-object);
+    margin-bottom:3px;
 }
 .area-scene-objects__listing-objects-all__box-items__item .group-object-name{
 }
 
 .area-scene-objects__listing-objects-all__box-items #active-item{
-    background: rgba(68,246,240,.4);
+    background: rgba(36, 131, 255,.3);
 }
 /*------------------------panel-inspector__area-object-properties----------------------*/
 .panel-inspector__area-object-properties{
@@ -747,7 +775,7 @@ button{
     flex-direction: column !important;
 }
 .panel-assets__menu-sections{
-    background: #1c1b1b;
+    background: var(--secondary-color);
     display: flex;
 
 }
@@ -771,7 +799,7 @@ button{
     top:0;
 }
 .panel-assets__menu-sections__item.active{
-    border-bottom:1px solid #29a3d2;
+    border-bottom:1px solid var(--ligth-color);
     color: white;
 }
 .panel-assets__sections-container{
@@ -802,14 +830,9 @@ button{
     justify-content: space-between;
     padding-top:10px;
 }
+
 .section-assets__box-options__first-row .btn-add-image{
 
-    color:white;
-    border:none;
-    font-size: 1.15rem;
-    background: #242323;
-    border-radius: 6px;
-    padding:10px;
 }
 .section-assets__box-options__first-row .search-field-box{
     display: flex;
@@ -819,7 +842,7 @@ button{
 .section-assets__box-options__first-row .search-field-box input{
     padding:0 10px;
     color:white;
-    background: #262525;
+    background: var(--fields-color);
     width: 90%;
     border-radius: 6px;
 }
@@ -871,7 +894,7 @@ button{
     display: inline-block;
 }
 .section-assets__box-options__menu-categories__list-categories li.active{
-    color:darkturquoise;
+    color:var(--ligth-color);
 }
 .section-assets__box-assets{
     display: flex;
@@ -1211,7 +1234,7 @@ button{
     cursor:pointer;
 }
 .multiselection-widget__option.active{
-    border: 2px solid #0eabe9;
+    border: 2px solid var(--ligth-color);
     background: rgba(14,171,233,.3);
 }
 .multiselection-widget__option:hover .tooltip{
@@ -1247,7 +1270,7 @@ button{
 
 }
 .canvas-animator__object-configuration__entrance-settings .entrance-button.active{
-    border: 2px solid #0eabe9;
+    border: 2px solid var(--ligth-color);
     background: rgba(14,171,233,.3);
 }
 .canvas-animator__object-configuration__entrance-settings .entrance-button .entrance-button__icon{
@@ -1303,7 +1326,7 @@ button{
 .canvas-animator__object-configuration__footer .btn-accept{
     margin-right:10px;
     color:white;
-    background: #0a72bc;
+    background: var(--ligth-color);
 }
 .canvas-animator__object-configuration__footer .btn-cancel{
     background: #d4d4d4;

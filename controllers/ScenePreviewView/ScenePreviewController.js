@@ -22,7 +22,9 @@ var ScenePreviewController=fabric.util.createClass({
         MainMediator.registerObserver(PanelPreviewer.name,PanelPreviewer.events.OnBtnPlay,this);
 
         this.counterCallbacksOnSVGAnimableLoading=0;
-        this.listSVGAnimablesWithNoPath=[]
+        this.listSVGAnimablesWithNoPath=[];
+
+        this.counterCallbacksOnImageTextLoading=0;
     },
     callBackOnAnimatorTick:function(progress){
         MainMediator.notify(this.name,this.events.OnAnimatorTick,[progress])
@@ -84,8 +86,13 @@ var ScenePreviewController=fabric.util.createClass({
                 let result=this.textAnimDataGenerator.generateTextDrawingData(object,object.getWidthInDrawingCache(),object.getHeightInDrawingCache(),pathOpenTypeObjects);
                 object.imageDrawingData = result;
                 object.imageDrawingData.type=TextType.PROVIDED;
-                object.imageDrawingData.imgHigh=this.textAnimDataGenerator.generateTextBaseImage(object,pathOpenTypeObjects);
-                object.imageDrawingData.imgMasked=object.imageDrawingData.imgHigh;
+
+                this.counterCallbacksOnImageTextLoading++;
+                this.textAnimDataGenerator.generateTextBaseImage(object,pathOpenTypeObjects,function(image){
+                    object.imageDrawingData.imgHigh=image;
+                    object.imageDrawingData.imgMasked=image;
+                    this.counterCallbacksOnImageTextLoading--;
+                }.bind(this));
 
                 objectToBeAnimated=FactoryDrawableImages.create(object,this.drawingCacheManager.canvas);
 
@@ -228,8 +235,8 @@ var ScenePreviewController=fabric.util.createClass({
         CanvasManager.camera.animator.start(this.UIPanelPreviewerCanvas);
         this.loadObjectsForAnimation(listForAnimator,listDrawableObjects,listAnimableWithDrawnEntrance);
 
-        (function WaitForSVGAnimables(){
-            if(this.counterCallbacksOnSVGAnimableLoading!==0){setTimeout(WaitForSVGAnimables.bind(this),20);return;}
+        (function WaitForSVGAnimablesAndTexts(){
+            if(this.counterCallbacksOnSVGAnimableLoading!==0 || this.counterCallbacksOnImageTextLoading!==0){setTimeout(WaitForSVGAnimablesAndTexts.bind(this),20);return;}
 
             this.drawingCacheManager.wakeUp(listDrawableObjects,listAnimableWithDrawnEntrance);
             this.drawingCacheManager.addDrawingHandToCanvas(this.UIPanelPreviewerCanvas);

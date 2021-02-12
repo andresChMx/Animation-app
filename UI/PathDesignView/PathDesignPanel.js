@@ -5,9 +5,9 @@ var PanelPathsDesigner={
 
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
 
-        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
     },
-    notificationPanelDesignerOptionsOnSettingActionClicked:function(){
+    notificationPanelDesignerOptionsOnActionClicked:function(){
         this.HTMLElement.style.display="none";
     },
     notificationCanvasManagerOnDesignPathOptionClicked:function(args){

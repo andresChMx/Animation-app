@@ -50,16 +50,16 @@ var WindowManager={
 
         window.addEventListener("keyup",this.onKeyUp.bind(this))
 
-        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
 
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
 
     },
-    notificationPanelDesignerOptionsOnSettingActionClicked:function(actionId){
+    notificationPanelDesignerOptionsOnActionClicked:function(actionId){
         let self=WindowManager;
-        for(var obsListTmp in self.listObservers[ObserverType.temp] ){
-            self.listObservers[ObserverType.temp][obsListTmp]=[];
-        }
+        // for(var obsListTmp in self.listObservers[ObserverType.temp] ){
+        //     self.listObservers[ObserverType.temp][obsListTmp]=[];
+        // }
         self.activeObserverType=ObserverType.main;
     },
     /*PanelAssets.SectionImageAssets*/

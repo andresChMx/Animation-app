@@ -221,7 +221,7 @@ var TextAnimableDataGenerator=fabric.util.createClass({
         }
         return result;
     },
-    generateTextBaseImage:function(animableText,openTypePaths){
+    generateTextBaseImage:function(animableText,openTypePaths,callback){
         let dimX=animableText.getWidthInDrawingCache();
         let dimY=animableText.getHeightInDrawingCache();
         this.auxCanvasForTexts.width=dimX;
@@ -249,9 +249,11 @@ var TextAnimableDataGenerator=fabric.util.createClass({
 
 
         let image=new Image();
+        image.onload=function(){
+            callback(image);
+        }
         image.src=this.auxCanvasForTexts.toDataURL();
         this.auxCanvasForTextsContext.clearRect(0,0,dimX,dimY);
-        return image;
     },
     getLeftTopLines:function(animableText){
         let OBJ=animableText;

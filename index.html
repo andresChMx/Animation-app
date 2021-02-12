@@ -17,7 +17,7 @@
             padding:0;
         }
         body{
-            background:rgb(59, 59, 59);
+            background:#2b2b2b;
         }
     </style>
 
@@ -86,19 +86,19 @@
                 <div class="canvas-animator__object-configuration__entrance-settings">
                     <p class="canvas-animator__object-configuration__entrance-settings__title title">Entrace Modes</p>
                     <div class="canvas-animator__object-configuration__entrance-settings__box-buttons">
-                        <div class="form-group entrance-button button-custom" id="none"><!--el radio box debe ser segundo hijo-->
+                        <div class="form-group entrance-button button-solid-behaviour" id="none"><!--el radio box debe ser segundo hijo-->
                             <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
                             <p class="entrance-button__label" >None</p>
                         </div>
-                        <div class="form-group entrance-button button-custom" id="drawn">
+                        <div class="form-group entrance-button button-solid-behaviour" id="drawn">
                             <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
                             <p class="entrance-button__label" >Drawn</p>
                         </div>
-                        <div class="form-group entrance-button button-custom" id="dragged">
+                        <div class="form-group entrance-button button-solid-behaviour" id="dragged">
                             <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
                             <p class="entrance-button__label" >Dragged</p>
                         </div>
-                        <div class="form-group entrance-button button-custom" id="typed">
+                        <div class="form-group entrance-button button-solid-behaviour" id="typed">
                             <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
                             <p class="entrance-button__label" >Typed</p>
                         </div>
@@ -209,7 +209,7 @@
             <div class="section-assets images">
                 <div class="section-assets__box-options">
                     <div class="section-assets__box-options__first-row">
-                        <button class="btn-add-image">Add Local Image</button>
+                        <button class="btn-add-image btn-action">Add Local Image</button>
                         <div class="search-field-box">
                             <input type="text">
                             <button><i class="icon-search"></i></button>
@@ -477,39 +477,48 @@
     ==================================================PATHS DESIGNER====================================================
     =====================================================================================================================-->
     <section class="panel-designer-options">
+        <div class="panel-designer-options__section-actions">
+            <button class="section-actions__save btn-action" id="save">Save and return</button>
+            <button class="section-actions__cancel btn-action" id="cancel">Cancel design</button>
+        </div>
         <div class="panel-designer-options__section-preview">
             <lable class="section-previoew__title">Preview: </lable>
             <div class="panel-designer-options__section-preview__canvas-container">
-                <canvas class="panel-designer-options__section-preview__canvas-container__canvas" id="cPreview"></canvas>  
-
+                <canvas class="panel-designer-options__section-preview__canvas-container__canvas" id="cPreview"></canvas>
             </div>
         </div>
         <div class="panel-designer-options__section-settings">
-            <div class="section-settings__setting-action">
-                <label class="setting-action__title">Actions: </label>
-                <button class="setting-action__btn-save" id="save">Save and return</button>
-                <button class="setting-action__btn-cancel" id="cancel">Cancel design</button>
-            </div>
-            <div class="section-settings__setting-zoom">
-                <label class="setting-zoom__title">Zoon: </label>
-                <button class="setting-zoom__btn-zoom-out">-</button>
-                <button class="setting-zoom__btn-zoom-in">+</button>
-            </div>
-            <div class="section-settings__setting-tool">
-                <label class="setting-tool__title">Tools: </label>
-                <button class="setting-tool__btn-tool-selection" id="selection">-></button>
-                <button class="setting-tool__btn-tool-add" id="add">+</button>
-                <button class="setting-tool__btn-tool-remove" id="remove">-</button>
-
+            <div class="row">
+                <div class="section-settings__setting-tool">
+                    <label class="setting-tool__title">Illus.: </label>
+                    <button class="setting-tool__btn-tool-selection button-solid-behaviour" id="selection"><i class="icon-cursor"></i></button>
+                    <button class="setting-tool__btn-tool-add button-solid-behaviour" id="add"><i class="icon-pencil"></i></button>
+                    <button class="setting-tool__btn-tool-remove button-solid-behaviour" id="remove"><i class="icon-bin"></i></button>
+                </div>
+                <div class="section-settings__setting-zoom">
+                    <label class="setting-zoom__title">Zoom: </label>
+                    <button class="setting-zoom__btn-zoom-out button-solid-behaviour"><i class="icon-search"></i></button>
+                    <button class="setting-zoom__btn-zoom-in button-solid-behaviour"><i class="icon-search"></i></button>
+                </div>
             </div>
             <div class="section-settings__setting-line-width">
-                <label class="setting-line-width__title">Path line Width: </label>
-                <input type="range" min="1" max="100" value="10" class="setting-line-width__slider"/>
-            </div> 
+                <div class="row">
+                    <label class="setting-line-width__title">Path line Width: </label>
+                    <input type="text" class="setting-line-width__field">
+                </div>
+                <div>
+                    <input type="range" min="1" max="100" value="10" class="setting-line-width__slider"/>
+                </div>
+            </div>
             <div class="section-settings__setting-duration">
-                <label for="" class="setting-duration__title">Animation Duration: </label>
-                <input type="range" min="2" max="10" step="1"  value="3" class="setting-duration__slider"/>
-            </div>          
+                <div class="row">
+                    <label for="" class="setting-duration__title">Animation Duration: </label>
+                    <input type="text" class="setting-duration__field">
+                </div>
+                <div>
+                    <input type="range" min="2" max="10" step="1"  value="3" class="setting-duration__slider"/>
+                </div>
+            </div>
         </div>
         <div class="panel-designer-options__section-paths">
             <p class="panel-designer-options__section-paths__title">Paths: </p>
@@ -606,6 +615,7 @@
     <script src="./controllers/ScenePreviewView/ScenePreviewController.js"></script>
 
     <script src="UI/WindowManager.js"></script>
+    <script src="UI/CommonComponenets.js"></script>
     <script src="UI/AuthenticationView/AuthenticationView.js"></script>
     <script src="UI/AnimationView/CanvasManager.js"></script>
     <script src="UI/AnimationView/AnimationPanel.js"></script>

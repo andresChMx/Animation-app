@@ -149,80 +149,7 @@ var BoxText=function(parentNode){
     };
     this.init(parentNode);
 }
-/*
-* As a component of elements that are removable e.g list all objects, list objects with entrance effects
-* */
-var PropertyInput=function(containerElem){
-    this.init=function(containerElem){
-        this.cbOnNewValue=function(){};
-        this.htmlBtnDicrease=containerElem.children[0];
-        this.htmlInput=containerElem.children[1];
-        this.htmlBtnIncrease=containerElem.children[2];
 
-        this.value="";
-
-        this.refFuncOnBtnClicked=this.OnBtnClicked.bind(this);
-        this.refFuncOnInputFocusOut=this.OnInputFocusOut.bind(this);
-        this.refFuncOnInputFocusIn=this.OnInputFocusIn.bind(this);
-
-        this.htmlBtnDicrease.addEventListener("click",this.refFuncOnBtnClicked);
-        this.htmlBtnIncrease.addEventListener("click",this.refFuncOnBtnClicked);
-        this.htmlInput.addEventListener("focusin",this.refFuncOnInputFocusIn);
-        this.htmlInput.addEventListener("focusout",this.refFuncOnInputFocusOut);
-        WindowManager.registerOnKeyEnterPressed(this);
-    };
-    this.OnBtnClicked=function(e){
-        if(e.target.className==="btn-decrease"){
-            this.setValue(this.value-1);
-        }else if(e.target.className==="btn-increase"){
-            this.setValue(this.value+1);}
-        this.htmlInput.value=this.value+"s";
-        this.cbOnNewValue(this._convertValueToMiliSec(this.value),this.htmlInput);
-    };
-    this.OnInputFocusIn=function(e){
-        this.htmlInput.value=this.value;
-        this.htmlInput.select();
-    };
-    this.OnInputFocusOut=function(e){
-        this.setValue(e.target.value)
-        this.htmlInput.value=this.value + "s";
-        this.cbOnNewValue(this._convertValueToMiliSec(this.value),this.htmlInput);
-    };
-    this.setValue=function(value){
-        let tmpValue=parseFloat(value);
-        if(!isNaN(tmpValue)){
-            if(tmpValue<0){this.value=0}
-            else{this.value=tmpValue}
-        }
-        else if(value===""){this.value=0;}
-    }
-    this.setValueWithUpdate=function(value){
-        this.setValue(value/1000);
-        this.htmlInput.value=this.value + "s";
-    };
-    this.remove=function(){
-        this.htmlBtnDicrease.removeEventListener("click",this.refFuncOnBtnClicked);
-        this.htmlBtnIncrease.removeEventListener("click",this.refFuncOnBtnClicked);
-        this.htmlInput.removeEventListener("focusin",this.refFuncOnInputFocusIn);
-        this.htmlInput.removeEventListener("focusout",this.refFuncOnInputFocusOut);
-        WindowManager.unregisterOnKeyEnterPressed(this);
-    }
-    this.notificationOnKeyEnterUp=function(){
-        let documentActiveElement=document.activeElement;
-        if(documentActiveElement===this.htmlInput){
-            this.htmlInput.blur();
-            this.htmlInput.value=this.value + "s";
-            this.cbOnNewValue(this._convertValueToMiliSec(this.value),this.htmlInput);
-        }
-    }
-    this._convertValueToMiliSec=function(val){
-        return val*1000;
-    };
-    this.onNewValue=function(callback){
-        this.cbOnNewValue=callback;
-    };
-    this.init(containerElem);
-}
 var SectionObjectsEntraceEditor={
     HTMLElement:null,
     init:function(){
@@ -252,12 +179,12 @@ var SectionObjectsEntraceEditor={
         let icon=newItem.querySelector(".icon img");
         icon.replaceWith(this._getAnimableObjectIcon(animObjWithEntrance));
 
-        let propInputDelay=new PropertyInput(newItem.querySelector(".input-field-box.delay .property-input"));
-        let propInputDuration=new PropertyInput(newItem.querySelector(".input-field-box.duration .property-input"));
-        propInputDelay.setValueWithUpdate(animObjWithEntrance.animator.entranceTimes.delay);
-        propInputDuration.setValueWithUpdate(animObjWithEntrance.animator.entranceTimes.duration);
-        propInputDelay.onNewValue(this.childNotificationOnDelayNewValue.bind(this));
-        propInputDuration.onNewValue(this.childNotificationOnDurationNewValue.bind(this));
+        let propInputDelay=new TimeButtonedField(newItem.querySelector(".input-field-box.delay .property-input"), "s",0,600, 0.5);
+        let propInputDuration=new TimeButtonedField(newItem.querySelector(".input-field-box.duration .property-input"), "s",0,600, 0.5);
+        propInputDelay.setValue(animObjWithEntrance.animator.entranceTimes.delay);
+        propInputDuration.setValue(animObjWithEntrance.animator.entranceTimes.duration);
+        propInputDelay.addListenerOnNewValue(this.childNotificationOnDelayNewValue.bind(this));
+        propInputDuration.addListenerOnNewValue(this.childNotificationOnDurationNewValue.bind(this));
         this.listPropertyInputsByItem.push({duration:propInputDuration,delay:propInputDelay});
 
         newItem.style.display="flex";
@@ -461,155 +388,102 @@ var AreaObjectProperties={
         this.widgetsObjectProperties={
             left:{
                 htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-left .property-input"),
-                val:0,
+                buttonedField:null,
                 initEvents:function(){
-                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                    this.buttonedField=new ButtonedField(this.htmlElem,"",-Infinity,Infinity,5);
+                    this.buttonedField.addListenerOnNewValue(this.OnNumericFieldNewValue.bind(this));
                 },
-                OnButtonClicked:function(e){
-                    if(e.target.className==="btn-decrease"){this.val-=5.0;
-                    }else if(e.target.className==="btn-increase"){this.val+=5.0;}
-                    this.setVal(this.val);
-                    me.OnWidgetChanged(this.val,"left");
+                OnNumericFieldNewValue:function(val,e){
+                    me.OnWidgetChanged(val,"left");
                 },
-                OnFieldInput:function(e){
-                    if(e.target.value===""){e.target.value=0;}
-                    let val=parseFloat(e.target.value);
-                    if(isNaN(val)){e.target.value=this.val;return;}
-                    this.setVal(val);
-                    me.OnWidgetChanged(this.val,"left");
-                },
-                getInputFieldElem:function(){return this.htmlElem.children[1];},
-                setVal:function(val){this.val=val;this.htmlElem.children[1].value=val;},
-                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+                getInputFieldElem:function(){return this.buttonedField.htmlInput},
+                setVal:function(val){this.buttonedField.setValue(val,false);},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");},
+                enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
 
             },
             top:{
                 htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-top .property-input"),
-                val:0,
+                buttonedField:null,
                 initEvents:function(){
-                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                    this.buttonedField=new ButtonedField(this.htmlElem,"",-Infinity,Infinity,5);
+                    this.buttonedField.addListenerOnNewValue(this.OnNumericFieldNewValue.bind(this));
                 },
-                OnButtonClicked:function(e){
-                    if(e.target.className==="btn-decrease"){this.val-=5.0;
-                    }else if(e.target.className==="btn-increase"){this.val+=5.0;}
-                    this.setVal(this.val);
-                    me.OnWidgetChanged(this.val,"top");
+                OnNumericFieldNewValue:function(val,e){
+                    me.OnWidgetChanged(val,"top");
                 },
-                OnFieldInput:function(e){
-                    if(e.target.value===""){e.target.value=0;}
-                    let val=parseFloat(e.target.value);
-                    if(isNaN(val)){e.target.value=this.val;return;}
-                    this.setVal(val);
-                    me.OnWidgetChanged(this.val,"top");
-                },
-                getInputFieldElem:function(){return this.htmlElem.children[1];},
-                setVal:function(val){this.val=val;this.htmlElem.children[1].value=val;},
-                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+                getInputFieldElem:function(){return this.buttonedField.htmlInput},
+                setVal:function(val){this.buttonedField.setValue(val,false);},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");},
+                enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
 
             },
             scaleX:{
                 htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-scaleX .property-input"),
-                val:0,
+                buttonedField:null,
                 initEvents:function(){
-                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                    this.buttonedField=new ButtonedField(this.htmlElem,"",-Infinity,Infinity,0.1);
+                    this.buttonedField.addListenerOnNewValue(this.OnNumericFieldNewValue.bind(this));
                 },
-                OnButtonClicked:function(e){
-                    if(e.target.className==="btn-decrease"){this.val-=0.1;
-                    }else if(e.target.className==="btn-increase"){this.val+=0.1;}
-                    this.setVal(this.val);
-                    me.OnWidgetChanged(this.val,"scaleX");
+                OnNumericFieldNewValue:function(val,e){
+                    me.OnWidgetChanged(val,"scaleX");
                 },
-                OnFieldInput:function(e){
-                    if(e.target.value===""){e.target.value=0;}
-                    let val=parseFloat(e.target.value);
-                    if(isNaN(val)){e.target.value=this.val;return;}
-                    this.setVal(val);
-                    me.OnWidgetChanged(this.val,"scaleX");
-                },
-                getInputFieldElem:function(){return this.htmlElem.children[1];},
-                setVal:function(val){this.val=val; this.htmlElem.children[1].value=val;},
-                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
-
+                getInputFieldElem:function(){return this.buttonedField.htmlInput},
+                setVal:function(val){this.buttonedField.setValue(val,false);},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");},
+                enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
             },
             scaleY:{
                 htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-scaleY .property-input"),
-                val:0,
+                buttonedField:null,
                 initEvents:function(){
-                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                    this.buttonedField=new ButtonedField(this.htmlElem,"",-Infinity,Infinity,0.1);
+                    this.buttonedField.addListenerOnNewValue(this.OnNumericFieldNewValue.bind(this));
                 },
-                OnButtonClicked:function(e){
-                    if(e.target.className==="btn-decrease"){this.val-=0.1;}
-                    else if(e.target.className==="btn-increase"){this.val+=0.1;}
-                    this.setVal(this.val);
-                    me.OnWidgetChanged(this.val,"scaleY");
+                OnNumericFieldNewValue:function(val,e){
+                    me.OnWidgetChanged(val,"scaleY");
                 },
-                OnFieldInput:function(e){
-                    if(e.target.value===""){e.target.value=0;}
-                    let val=parseFloat(e.target.value);
-                    if(isNaN(val)){e.target.value=this.val;return;}
-                    this.setVal(val);
-                    me.OnWidgetChanged(this.val,"scaleY");
-                },
-                getInputFieldElem:function(){return this.htmlElem.children[1];},
-                setVal:function(val){this.val=val;this.htmlElem.children[1].value=val;},
-                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+                getInputFieldElem:function(){return this.buttonedField.htmlInput},
+                setVal:function(val){this.buttonedField.setValue(val,false);},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");},
+                enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
 
             },
             angle:{
                 htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-angle .property-input"),
-                val:0,
+                buttonedField:null,
                 initEvents:function(){
-                    this.htmlElem.children[0].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[2].addEventListener("click",this.OnButtonClicked.bind(this));
-                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                    this.buttonedField=new ButtonedField(this.htmlElem,"",-Infinity,Infinity,5);
+                    this.buttonedField.addListenerOnNewValue(this.OnNumericFieldNewValue.bind(this));
                 },
-                OnButtonClicked:function(e){
-                    if(e.target.className==="btn-decrease"){this.val-=5.0;
-                    }if(e.target.className==="btn-increase"){this.val+=5.0;}
-                    this.setVal(this.val)
-                    me.OnWidgetChanged(this.val,"angle");
+                OnNumericFieldNewValue:function(val,e){
+                    me.OnWidgetChanged(val,"angle");
                 },
-                OnFieldInput:function(e){
-                    if(e.target.value===""){e.target.value=0;}
-                    let val=parseFloat(e.target.value);
-                    if(isNaN(val)){e.target.value=this.val;return;}
-                    this.setVal(val);
-                    me.OnWidgetChanged(this.val,"angle");
-                },
-                getInputFieldElem:function(){return this.htmlElem.children[1];},
-                setVal:function(val){this.val=parseFloat(val);this.htmlElem.children[1].value=this.val;},
-                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+                getInputFieldElem:function(){return this.buttonedField.htmlInput},
+                setVal:function(val){this.buttonedField.setValue(val,false);},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");},
+                enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
 
             },
             opacity:{
                 htmlElem:document.querySelector(".panel-inspector__area-object-properties .widget-property-opacity .property-input"),
-                val:0,
+                field:null,
                 initEvents:function(){
                     this.htmlElem.children[0].addEventListener("change",this.OnRangeChanged.bind(this));
-                    this.htmlElem.children[1].addEventListener("focusout",this.OnFieldInput.bind(this));
+                    this.field=new NumericField(this.htmlElem.children[1],"",0,100)
+                    this.field.addListenerOnNewValue(this.OnFieldNewValue.bind(this))
+                },
+                OnFieldNewValue:function(value,e){
+                    me.OnWidgetChanged(value/100.0,"opacity");
+                    this.htmlElem.children[0].value=value;
                 },
                 OnRangeChanged:function(e){
-                    this.setVal(parseInt(e.target.value)/100.0);
-                    me.OnWidgetChanged(this.val/100.0,"opacity");
-                },
-                OnFieldInput:function(e){
-                    if(e.target.value===""){e.target.value=0;}
-                    let val=parseFloat(e.target.value);
-                    if(isNaN(val)){e.target.value=this.val;return;}
-                    this.setVal(parseInt(val)/100.0);
-                    me.OnWidgetChanged(this.val/100.0,"opacity");
+                    this.field.setValue(e.target.value);
                 },
                 getInputFieldElem:function(){return this.htmlElem.children[1];},
-                setVal:function(val){this.val=parseFloat(val)*100.0;this.htmlElem.children[0].value=this.val;this.htmlElem.children[1].value=this.val;},
-                disable:function(){this.htmlElem.parentElement.classList.add("disable");}, enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
+                setVal:function(val){this.field.setValue(val*100,false);this.htmlElem.children[0].value=val*100;},
+                disable:function(){this.htmlElem.parentElement.classList.add("disable");},
+                enable:function(){this.htmlElem.parentElement.classList.remove("disable");}
             }
         }
         this.initEvents();
@@ -717,7 +591,7 @@ var PanelInspector={
         this.AreaObjectProperties.init(this);
 
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
-        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
 
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjAddedToListWithEntrance,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjDeletedFromListWidthEntraces,this);
@@ -729,7 +603,7 @@ var PanelInspector={
     notificationCanvasManagerOnDesignPathOptionClicked:function(args){
         this.HTMLElement.style.display="none";
     },
-    notificationPanelDesignerOptionsOnSettingActionClicked:function(data){
+    notificationPanelDesignerOptionsOnActionClicked:function(data){
         this.HTMLElement.style.display="block"
     },
     notificationCanvasManagerOnObjAddedToListWithEntrance:function(args){

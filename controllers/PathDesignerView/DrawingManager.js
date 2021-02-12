@@ -164,12 +164,12 @@ var CrtlPoinstManagement=fabric.util.createClass({
     },
 })
 var DrawingManager=fabric.util.createClass({
-    initialize:function(canvasManager){
+    initialize:function(parentClass,canvasManager){
         this.tools={
             selection:"selection",
             add:"add",
-            remove:"remove"
         }
+        this.parentClass=parentClass;
         this.listObserversOnSetupCompleted=[];
 
 
@@ -210,7 +210,9 @@ var DrawingManager=fabric.util.createClass({
         this.canvasManager.updatePathData(this.ctrlPointsManager.list,this.canvasManager.listPoints);
 
         this.totalAmountPaths=this.canvasManager.listPoints.length;
-        this.currentPathIndex=0;
+
+        this.changePathIndex(0);
+        this.changeCurrentDrawingTool(this.tools.selection);
     },
     sleep:function(){
         this.totalAmountPaths=1;
@@ -260,6 +262,13 @@ var DrawingManager=fabric.util.createClass({
         }
         return mat;
     },
+    getCurrentPathLineWidth:function(){
+        return this.canvasManager.getPathLineWidth(this.currentPathIndex);
+    },
+    changePathIndex:function(index){
+        this.currentPathIndex=index;
+        this.parentClass.childNotificationOnPathIndexChanged(index);
+    },
     addPathAtLast:function(){
         this.canvasManager.addPath();
         this.ctrlPointsManager.addPath();
@@ -267,16 +276,15 @@ var DrawingManager=fabric.util.createClass({
         let pathName="Path" + this.totalAmountPaths
         this.listPathsNames.push(pathName);
 
-        this.currentPathIndex=this.totalAmountPaths;
         this.totalAmountPaths=this.canvasManager.listPoints.length;
-        
+
     },
     removePathAt:function(index){
         (function Wait(){
             if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),5);return;}
                 Preprotocol.wantConsume=false;
 
-                if(this.totalAmountPaths===1 || this.index>=this.totalAmountPaths){
+                if(this.totalAmountPaths===1 || index>=this.totalAmountPaths){
                     Preprotocol.wantConsume=true;
                     return;
                 }
@@ -284,7 +292,11 @@ var DrawingManager=fabric.util.createClass({
                 this.ctrlPointsManager.removePathAt(index);
                 this.listPathsNames.splice(index,1)
                 if(index<=this.currentPathIndex){
-                    this.currentPathIndex=this.currentPathIndex===0?0:this.currentPathIndex-1;
+                    if(this.currentPathIndex===0){
+                        this.changePathIndex(0);
+                    }else{
+                        this.changePathIndex(this.currentPathIndex-1);
+                    }
                 }
                 this.totalAmountPaths--;
                 
@@ -314,19 +326,22 @@ var DrawingManager=fabric.util.createClass({
         }
         //this.canvasManager.
     },
-
+    changeCurrentDrawingTool:function(tool){
+        this.currentTool=tool;
+        this.parentClass.childNotificationOnToolChanged();
+    },
     //NOTIFICAIONES SETTINGS SECTION
     notificationPanelDesignerOptionsOnSettingToolClicked:function(args){
         let toolId=args[0];
         switch(toolId){
             case this.tools.selection:
-                this.currentTool=this.tools.selection;
+                this.changeCurrentDrawingTool(this.tools.selection);
             break;
             case this.tools.add:
-                this.currentTool=this.tools.add;
+                this.changeCurrentDrawingTool(this.tools.add);
             break;
             case this.tools.remove:
-                this.currentTool=this.tools.remove;
+                console.log("Removing points");
             break;
         }
     },
@@ -338,6 +353,7 @@ var DrawingManager=fabric.util.createClass({
 
     notificationPanelDesignerOptionsOnBtnAddPathClicked:function(){
         this.addPathAtLast();
+        this.changePathIndex(this.totalAmountPaths-1)
     },
     notificationPanelDesignerOptionsOnBtnDeletePathClicked:function(args){
         let indexLayer=args[0];
@@ -345,6 +361,6 @@ var DrawingManager=fabric.util.createClass({
     },
     notificationPanelDesignerOptionsOnPathClicked:function(args){
         let indexLayer=args[0];
-        this.currentPathIndex=indexLayer;
+        this.changePathIndex(indexLayer);
     },
 })

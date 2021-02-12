@@ -1,16 +1,24 @@
+.row{
+    display:flex;
+}
 .panel-designer-options{
     position:absolute;
     top:0;
     right:0;
     display:none;
-    background:red;
+    background:var(--primary-color);
     height:100%;
     width:300px;
     z-index: 100;
     color:white;
+    font-size: 1.15rem;
+
+}
+.panel-designer-options__section-actions{
+    padding:10px 8px;
 }
 .panel-designer-options__section-preview{
-    background:peru;
+    background:var(--secondary-color);
     width:100%;
     padding:10px;
 }
@@ -24,18 +32,78 @@
     justify-content: center;
     align-items: center;
     width:100%;
-    background:purple;
 }
 .panel-designer-options__section-preview__canvas-container__canvas{
-    
     background: rgb(255, 255, 255);
 }
+
+.panel-designer-options__section-settings{
+    margin-top:20px;
+    padding:0 8px;
+}
+.panel-designer-options__section-settings > div{
+    margin-bottom:20px;
+}
+
+.section-settings__setting-tool{
+}
+.section-settings__setting-tool button{
+    width:20px;
+    height:20px;
+    background:var(--terciary-color);
+    color:rgba(255,255,255,.6);
+    border:none;
+}
+.section-settings__setting-tool button.active{
+    color:rgba(255,255,255,1);
+    background:var(--secondary-color);
+}
+.section-settings__setting-zoom{
+    margin-left:auto;
+}
+.section-settings__setting-zoom button{
+    width:20px;
+    height:20px;
+    background:var(--terciary-color);
+    color:rgba(255,255,255,.6);
+    border:none;
+}
+
+.section-settings__setting-line-width{
+
+}
+.section-settings__setting-line-width .row{
+    justify-content: space-between;
+}
+.setting-line-width__field{
+    width:40px;
+}
+.setting-line-width__slider{
+    width:100%;
+}
+
+.section-settings__setting-duration{
+
+}
+.section-settings__setting-duration .row{
+    justify-content: space-between;
+}
+.setting-duration__field{
+    width:40px;
+}
+
+.setting-duration__slider{
+    width:100%;
+}
+
+
 
 .panel-designer-options__section-paths{
     padding:10px;
 }
 .panel-designer-options__section-paths__title{
     font-size:1.2em;
+    margin-bottom:10px;
 }
 .panel-designer-options__section-paths__paths-box{
     display:flex;
@@ -47,7 +115,7 @@
 }
 
 .panel-designer-options__section-paths__paths-box .path__inner-container{
-    background: rgb(116, 116, 56);
+    background: var(--item-object);
     width:100%;
     height:30px;
     padding:5px;
@@ -69,7 +137,7 @@
     display:none;
 }
 .panel-designer-options__section-paths__paths-box .path.active .path__inner-container{
-    background:purple;
+    background: rgba(45,136,255,.4);
 }
 .panel-designer-options__section-paths__paths-box .path.over .path__space-effect{
     display: block;
@@ -92,7 +160,7 @@
     width:100%;
     height:100%;
     display:none;
-    background:green;
+    background: #2b2b2b;
     z-index:10;
     overflow:auto;
     /*display:flex;*/

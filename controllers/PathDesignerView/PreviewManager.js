@@ -26,6 +26,9 @@ var PreviewManager=fabric.util.createClass({
 
         this.requestAnimID=null;
     },
+    getIllustrationDuration:function(){
+        return this.pathIllustrator.data.duration;
+    },
     wakeUp:function(imageDrawingData){
         this.imageDrawingData=imageDrawingData;
         let imgWidth=imageDrawingData.imgHigh.naturalWidth;
@@ -111,17 +114,9 @@ var PreviewManager=fabric.util.createClass({
     notificationPanelDesignerOptionsOnSettingDurationChanged:function(args){
         let value=args[0];
         this.counterInterruption=100;
-        if(isNaN(value)){
-            this.pathIllustrator.data.duration=3000;
+        console.log(value);
+        if(!isNaN(value)){
+            this.pathIllustrator.data.duration=value;
         }
-        else if(value<2){
-            this.pathIllustrator.data.duration=3000;
-        }
-        else if(value>10){
-            this.pathIllustrator.data.duration=3000;
-        }else{
-            this.pathIllustrator.data.duration=value*1000;
-        }
-
     }
 })

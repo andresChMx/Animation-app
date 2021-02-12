@@ -258,33 +258,21 @@ var SectionActionEditorMenu={
             },
             durationField:{
                 htmlElem:document.querySelector(".panel-animation__top-bar__area-editors-menus__action-editor-menu .duration-form .property-input"),
-                val:3000,
+                prevValue:0,
+                field:null,
                 initEvents:function(){
-                    this.htmlElem.children[0].addEventListener("click",this.OnTrigger.bind(this));
-                    this.htmlElem.children[1].addEventListener("focusout",this.OnTrigger.bind(this));
-                    this.htmlElem.children[2].addEventListener("click",this.OnTrigger.bind(this));
+                    this.field=new TimeButtonedField(this.htmlElem,"s",3,15000,0.5);
+                    this.field.addListenerOnNewValue(this.OnFieldNewValue.bind(this));
+                    this.field.setValue(10000);
                 },
-                OnTrigger:function(e){
-                    let durationBefore=this.val;
-                    if(e.target.className==="btn-decrease"){this.setVal(this.val-5)}
-                    else if(e.target.className==="btn-increase"){this.setVal(this.val+5)}
-                    else{
-                        if(isNaN(parseInt(e.target.value))){this.setVal(this.val);}
-                        else{this.setVal(e.target.value)}
-                    }
-                    me.OnWidgetChanged("update-duration", {before:durationBefore,after:this.val});
+                OnFieldNewValue:function(value,e){
+                    me.OnWidgetChanged("update-duration", {before:this.prevValue,after:value});
+                    this.prevValue=value;
                 },
                 setVal:function(val){
-                    val=val<0?0:val;val=parseInt(val);this.htmlElem.children[1].value=val;this.val=val;
+                    this.field.setValue(val);
                 },
-                getVal:function(){return this.val;},
-                notificationOnKeyEnterUp:function(){
-                    let documentActiveElement=document.activeElement;
-                    if(documentActiveElement===this.htmlElem.children[1]) {
-                        documentActiveElement.blur();
-                        this.OnTrigger({target: documentActiveElement});
-                    }
-                }
+                // getVal:function(){return this.field},
             }
         }
         this.initHTMLTweenMenu();
@@ -292,9 +280,6 @@ var SectionActionEditorMenu={
         this.initEvents();
 
         this.widgetsTimelineTools.btnPlay.setVal(this.widgetsTimelineTools.btnPlay.val);
-        this.widgetsTimelineTools.durationField.setVal(this.widgetsTimelineTools.durationField.val);
-
-        this.notifyOnDurationInput(this.widgetsTimelineTools.durationField.getVal(),this.widgetsTimelineTools.durationField.getVal());
         },
     initHTMLTweenMenu:function(){
         let list=this.widgetsKeyframeTools.menuFunctions.htmlElem.querySelector('.dropdown').children[1];
@@ -320,7 +305,6 @@ var SectionActionEditorMenu={
     initEvents:function(){
         for(let i in this.widgetsKeyframeTools){this.widgetsKeyframeTools[i].initEvents();}
         for(let i in this.widgetsTimelineTools){this.widgetsTimelineTools[i].initEvents();}
-        WindowManager.registerOnKeyEnterPressed(this);
     },
     OnWidgetChanged:function(action,value){
         switch(action){
@@ -355,9 +339,6 @@ var SectionActionEditorMenu={
     },
     notifyOnBtnPauseTimeline:function(){
         this.parentClass.childNotificationOnBtnPauseTimeline();
-    },
-    notificationOnKeyEnterUp:function(){
-        this.widgetsTimelineTools.durationField.notificationOnKeyEnterUp();
     },
     notificationOnKeyBarSelectionUpdated:function (listAnimations,listSelectedKeyFrames){
         this.widgetsKeyframeTools.menuFunctions.setVal(listAnimations,listSelectedKeyFrames);
@@ -621,7 +602,6 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
     name:'PanelActionEditor',
     events:{
         OnDurationInput:'OnDurationInput',
-        OnFieldPropertyInput:'OnFieldPropertyInput',
         OnMarkerDragStarted:'OnMarkerDragStarted',
         OnMarkerDragged:'OnMarkerDragged',
         OnMarkerDragEnded:'OnMarkerDragEnded'
@@ -749,13 +729,13 @@ var PanelAnimation={//LA VENTANA COMPLETA
         this.HTMLElement=document.querySelector(".panel-animation");
         this.HTMLElement.style.width=window.innerWidth + "px";
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
-        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
     },
     setController:function(obj){
         this.timelineController=obj;
         this.PanelActionEditor.setController(obj);
     },
-    notificationPanelDesignerOptionsOnSettingActionClicked:function(){
+    notificationPanelDesignerOptionsOnActionClicked:function(){
         let self=PanelAnimation;
         this.HTMLElement.style.display="block";
     },

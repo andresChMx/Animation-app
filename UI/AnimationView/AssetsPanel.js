@@ -552,8 +552,8 @@ var PanelAssets={
         this.HTMLCollMenuOptions=document.querySelector(".panel-assets__menu-sections").children;
         this.HTMLCollSectionsAssets=document.querySelector(".panel-assets__sections-container").children;
         this.htmlElementNormalHeight=this.HTMLElement.offsetHeight;
-        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
-
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
         this.SectionImageAssets.init(this);
         this.SectionTextAssets.init(this);
         this.initEvents();
@@ -586,10 +586,18 @@ var PanelAssets={
         this.HTMLSectionAssetActive=this.HTMLCollSectionsAssets[index];
         this.HTMLSectionAssetActive.classList.add("active");
     },
-    notificationPanelDesignerOptionsOnSettingActionClicked:function(){
-        this.HTMLElement.style.height=this.htmlElementNormalHeight;
+    display:function(){
+        this.HTMLElement.style.display="flex";
     },
-
+    hide:function(){
+        this.HTMLElement.style.display="none";
+    },
+    notificationPanelDesignerOptionsOnActionClicked:function(){
+        this.display();
+    },
+    notificationCanvasManagerOnDesignPathOptionClicked:function(){
+        this.hide();
+    },
     childNotificationOnImageAssetDummyDraggingEnded:function(lastModelOnItemDragged){
         MainMediator.notify(this.name,this.events.OnImageAssetDummyDraggingEnded,[lastModelOnItemDragged]);
     },

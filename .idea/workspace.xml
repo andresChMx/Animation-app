@@ -20,15 +20,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/UI/CommonComponenets.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/ControllerAnimator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ControllerAnimator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/PathDesignView/PathDesignPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PathDesignView/PathDesignPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/WindowManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/ImageModelDrawingDataGenerator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/PathIllustrator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/PathIllustrator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/SVGLoading/SVGManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/CanvasDrawingManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/DrawingManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PathDesignerController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/PathDesignerView/PreviewManager.js" afterDir="false" />
@@ -37,6 +40,7 @@
       <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stylesPathsDesigner.css" beforeDir="false" afterPath="$PROJECT_DIR$/stylesPathsDesigner.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -227,6 +231,9 @@
       <workItem from="1612740062676" duration="28262000" />
       <workItem from="1612824259686" duration="24967000" />
       <workItem from="1612884196205" duration="42147000" />
+      <workItem from="1612968452004" duration="12627000" />
+      <workItem from="1613002743672" duration="21281000" />
+      <workItem from="1613057796870" duration="45408000" />
     </task>
     <servers />
   </component>
@@ -278,17 +285,17 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="569" y="201" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1050@0.0.1920.1050" timestamp="1608214205489" />
-    <state x="37" y="116" width="878" height="801" key="find.popup" timestamp="1612923758886">
+    <state x="664" y="206" width="878" height="801" key="find.popup" timestamp="1613114434166">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="37" y="116" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1612923758886" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1612928178426">
+    <state x="664" y="206" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1613114434166" />
+    <state x="616" y="237" key="run.anything.popup" timestamp="1613096787915">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1612928178426" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1611818013312">
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1613096787915" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1612975622329">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1611818013312" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1612975622329" />
   </component>
 </project>

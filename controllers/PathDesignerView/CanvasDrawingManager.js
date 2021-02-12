@@ -16,7 +16,7 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.canvasOriginalHeight=0;
         this.drawingPath=null;
         
-        this.canvas=new fabric.Canvas('cPathsDesigner',{ width: window.innerWidth+200, height: window.innerHeight ,backgroundColor: 'rgb(123,123,123)',selection:false});
+        this.canvas=new fabric.Canvas('cPathsDesigner',{ width: window.innerWidth+200, height: window.innerHeight ,backgroundColor: 'rgb(255,255,255)',selection:false});
 
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingZoomOut,this);
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingZoomIn,this);
@@ -169,6 +169,9 @@ var CanvasDrawingManager=fabric.util.createClass({
         }
         this.listPoints.splice(new_index, 0, this.listPoints.splice(old_index, 1)[0]);
         this.listLinesWidths.splice(new_index, 0, this.listLinesWidths.splice(old_index, 1)[0]);
+    },
+    getPathLineWidth:function(pathIndex){
+        return this.listLinesWidths[pathIndex];
     },
     setPathLineWidth:function(value,pathIndex){
         this.listLinesWidths[pathIndex]=value;

@@ -56,7 +56,6 @@ var CanvasManager={
         //PanelInspector.SectionLanesEditor.registerOnFieldInput(this);
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnDurationInput,this);
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this)
-        MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnFieldPropertyInput,this);
         MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnTextOptionClicked,this);
 
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDummyDraggingEnded,this);
@@ -81,36 +80,35 @@ var CanvasManager={
     },
     panningAndZoomBehaviour:function(){
         let isDragging=false;
-        let selection=false;
         let lastPosX=false;
         let lastPosY=false;
         this.canvas.on('mouse:down', function(opt) {
             var evt = opt.e;
             if (evt.altKey === true) {
-                this.isDragging = true;
-                this.selection = false;
-                this.lastPosX = evt.clientX;
-                this.lastPosY = evt.clientY;
+                isDragging = true;
+                this.canvas.selection = false;
+                lastPosX = evt.clientX;
+                lastPosY = evt.clientY;
             }
-        });
+        }.bind(this));
         this.canvas.on('mouse:move', function(opt) {
             if (isDragging) {
                 var e = opt.e;
-                var vpt = this.viewportTransform;
-                vpt[4] += e.clientX - this.lastPosX;
-                vpt[5] += e.clientY - this.lastPosY;
-                this.requestRenderAll();
-                this.lastPosX = e.clientX;
-                this.lastPosY = e.clientY;
+                var vpt = this.canvas.viewportTransform;
+                vpt[4] += e.clientX - lastPosX;
+                vpt[5] += e.clientY - lastPosY;
+                this.canvas.requestRenderAll();
+                lastPosX = e.clientX;
+                lastPosY = e.clientY;
             }
-        });
+        }.bind(this));
         this.canvas.on('mouse:up', function(opt) {
             // on mouse up we want to recalculate new interaction
             // for all objects, so we call setViewportTransform
-            this.setViewportTransform(this.viewportTransform);
-            this.isDragging = false;
-            this.selection = true;
-        });
+            this.canvas.setViewportTransform(this.canvas.viewportTransform);
+            isDragging = false;
+            this.canvas.selection = true;
+        }.bind(this));
         this.canvas.on('mouse:wheel', function(opt) {
             var delta = opt.e.deltaY;
             var zoom = this.canvas.getZoom();
@@ -120,22 +118,22 @@ var CanvasManager={
             this.canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
             opt.e.preventDefault();
             opt.e.stopPropagation();
-            var vpt = this.canvas.viewportTransform;
-            if (zoom < 400 / 1000) {
-                vpt[4] = 200 - 1000 * zoom / 2;
-                vpt[5] = 200 - 1000 * zoom / 2;
-            } else {
-                if (vpt[4] >= 0) {
-                    vpt[4] = 0;
-                } else if (vpt[4] < this.canvas.getWidth() - 1000 * zoom) {
-                    vpt[4] = this.canvas.getWidth() - 1000 * zoom;
-                }
-                if (vpt[5] >= 0) {
-                    vpt[5] = 0;
-                } else if (vpt[5] < this.canvas.getHeight() - 1000 * zoom) {
-                    vpt[5] = this.canvas.getHeight() - 1000 * zoom;
-                }
-            }
+            // var vpt = this.canvas.viewportTransform;
+            // if (zoom < 400 / 1000) {
+            //     vpt[4] = 200 - 1000 * zoom / 2;
+            //     vpt[5] = 200 - 1000 * zoom / 2;
+            // } else {
+            //     if (vpt[4] >= 0) {
+            //         vpt[4] = 0;
+            //     } else if (vpt[4] < this.canvas.getWidth() - 1000 * zoom) {
+            //         vpt[4] = this.canvas.getWidth() - 1000 * zoom;
+            //     }
+            //     if (vpt[5] >= 0) {
+            //         vpt[5] = 0;
+            //     } else if (vpt[5] < this.canvas.getHeight() - 1000 * zoom) {
+            //         vpt[5] = this.canvas.getHeight() - 1000 * zoom;
+            //     }
+            // }
         }.bind(this))
     },
     /*METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTOS DE ENTRADA (DRAWN Y DRAGGED)*/
@@ -315,15 +313,6 @@ var CanvasManager={
         let action=args[0];
 
         this.createAnimableObject({url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603741009/text_xzcmse.png"},"TextAnimable")
-    },
-    notificationPanelActionEditorOnFieldPropertyInput:function(args){
-        let propName=args[0];let propNewValue=args[1];
-        let activeAnimObj=this.getSelectedAnimableObj();
-        if(activeAnimObj){
-            activeAnimObj.set(propName,parseFloat(propNewValue));
-            activeAnimObj.setCoords();
-            this.canvas.renderAll();
-        }
     },
     notificationPanelAssetsOnImageAssetDummyDraggingEnded:function(args){
         let model=args[0];
@@ -718,6 +707,7 @@ var SectionConfigureObject={
         this.currentSelectedOptions={};
 
         this.initEvents();
+        this.generateHTMLWidgets();
     },
     initEvents:function(){
         this.HTMLcloseBtn.addEventListener("click",this.OnBtnCloseClicked.bind(this));
@@ -725,6 +715,17 @@ var SectionConfigureObject={
         this.HTMLAcceptBtn.addEventListener("click",this.OnBtnAcceptClicked.bind(this))
 
         //INIT WIDGETS
+    },
+    generateHTMLWidgets:function(){
+        //text animable widgets
+        //- font family
+        let select=document.querySelector(".text-animable-object-widget #font-family");
+        for(let i in FontsNames){
+            let option=document.createElement("option");
+            option.textContent=i;
+            option.value=FontsNames[i];
+            select.appendChild(option);
+        }
     },
     initEventsWidgetsEntranceModes:function(animableObject){
         this.widgetsEntraceMode["modeSelector"].initEvent();

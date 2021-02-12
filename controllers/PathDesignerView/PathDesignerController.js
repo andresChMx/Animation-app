@@ -6,19 +6,35 @@ var PathDesignerController=fabric.util.createClass({
     
     initialize:function(){
         this.listObserversOnSetupCompleted=[];
+        this.listObserversOnLayerIndexChanged=[];
+        this.listObserversOnToolChanged=[];
         this.imageDrawingData=null;
         this.objectDesigning=null;
 
         this.canvasManager=new CanvasDrawingManager();
-        this.drawingManager=new DrawingManager(this.canvasManager);
+        this.drawingManager=new DrawingManager(this,this.canvasManager);
 
         this.previewManager=new PreviewManager(this.drawingManager,this.canvasManager);
         this.svgManager=new SVGManager();
 
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
 
-        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingActionClicked,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
 
+    },
+    wakeUpComponentes:function(imageDrawingData){
+        if(imageDrawingData.pathsNames.length===0){
+            imageDrawingData.strokesTypes.push([]);
+            imageDrawingData.points.push([]);
+            // imageDrawingData.ctrlPoints.push([]);
+            imageDrawingData.linesWidths.push(10);
+            imageDrawingData.pathsNames.push("Path 1")
+        }
+        this.canvasManager.wakeUp(imageDrawingData);
+        this.drawingManager.wakeUp(imageDrawingData);
+        this.previewManager.wakeUp(imageDrawingData);//tiene acceso al drawinData ya que tiene referencia al canvasManager y drawingManager
+
+        this.notifyOnSetupCompleted();
     },
     notificationCanvasManagerOnDesignPathOptionClicked:function(args){
         let animableObject=args[0];
@@ -41,22 +57,7 @@ var PathDesignerController=fabric.util.createClass({
             }
         }
     },
-    wakeUpComponentes:function(imageDrawingData){
-        if(imageDrawingData.pathsNames.length===0){
-            imageDrawingData.strokesTypes.push([]);
-            imageDrawingData.points.push([]);
-            // imageDrawingData.ctrlPoints.push([]);
-            imageDrawingData.linesWidths.push(10);
-            imageDrawingData.pathsNames.push("Path 1")
-        }
-        this.canvasManager.wakeUp(imageDrawingData);
-        this.drawingManager.wakeUp(imageDrawingData);
-        this.previewManager.wakeUp(imageDrawingData);//tiene acceso al drawinData ya que tiene referencia al canvasManager y drawingManager
-
-        this.notifyOnSetupCompleted();
-    },
-
-    notificationPanelDesignerOptionsOnSettingActionClicked:function(args){
+    notificationPanelDesignerOptionsOnActionClicked:function(args){
         let actionId=args[0];
         switch (actionId){
             case "save":
@@ -120,6 +121,12 @@ var PathDesignerController=fabric.util.createClass({
             break;
         }
     },
+    childNotificationOnPathIndexChanged:function(){
+        this.notifyOnPathIndexChanged();
+    },
+    childNotificationOnToolChanged:function(){
+        this.notifyOnToolChanged();
+    },
     loadingPathsFromSVG:function(loadingMode){
         let self=this;
         if(this.imageDrawingData!=null){
@@ -165,14 +172,29 @@ var PathDesignerController=fabric.util.createClass({
     //         }
     //     ])
     // },
+    notifyOnPathIndexChanged:function(){
+        for(let i=0;i<this.listObserversOnLayerIndexChanged.length;i++){
+            this.listObserversOnLayerIndexChanged[i].notificationOnPathIndexChanged();
+        }
+    },
     notifyOnSetupCompleted:function(){
         for(let i=0;i<this.listObserversOnSetupCompleted.length;i++){
             this.listObserversOnSetupCompleted[i].notificationOnSetupCompleted();
         }
     },
+    notifyOnToolChanged:function(){
+        for(let i=0;i<this.listObserversOnToolChanged.length;i++){
+            this.listObserversOnToolChanged[i].notificationOnToolChanged();
+        }
+    },
     registerOnSetupCompleted:function(obj){ /*JUST FOR ITS UI CLASS*/
-
         this.listObserversOnSetupCompleted.push(obj);
+    },
+    registerOnLayerIndexChanged:function(obj){
+        this.listObserversOnLayerIndexChanged.push(obj);
+    },
+    registerOnToolChanged:function(obj){
+        this.listObserversOnToolChanged.push(obj);
     }
 
 })

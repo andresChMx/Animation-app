@@ -686,7 +686,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         this.set('label', options.label || '');
 
         this.cacheCanvas=options.cacheCanvas;
-    //this.mainCanvas=options.mainCanvas;
+
         this.myTurn=false;
         this.lastSnapShot=new Image();
         this.lastSnapShot.src=this.cacheCanvas.toDataURL();
