@@ -119,13 +119,12 @@ var CanvasDrawingManager=fabric.util.createClass({
 
     addPoint:function(x,y,pathIndex){
         let point=new fabric.Circle({radius:3,left:x,top:y,originX:"center",originY:"center"});
+        point.hasControls=false;
         point.on("moving",this.OnPointModified.bind(this))
         point.pointIndex=this.listPoints[pathIndex].length;
         point.pathIndex=pathIndex;
         this.canvas.add(point);
         this.listPoints[pathIndex].push(point);
-
-        
     },
     addStrokeType:function(pathIndex){
         let len=this.listPoints[pathIndex].length;
@@ -138,12 +137,39 @@ var CanvasDrawingManager=fabric.util.createClass({
             if(len==3){this.listPathStrokesType[pathIndex][0]="q1";this.listPathStrokesType[pathIndex].push("q")}
             else{this.listPathStrokesType[pathIndex][strokesLen-1]="c";this.listPathStrokesType[pathIndex].push("q");}
         }
+
+    },
+    removePathLastPoint:function(pathIndex){
+        let indexLastPoint=this.listPoints[pathIndex].length-1;
+        if(indexLastPoint>=0){
+            let point=this.listPoints[pathIndex][indexLastPoint];
+            this.canvas.remove(point);
+            this.listPoints[pathIndex].splice(indexLastPoint,1);
+            this._removeStrokeType(pathIndex);
+        }
+    },
+    _removeStrokeType:function(pathIndex){
+        let len=this.listPoints[pathIndex].length;
+        if(len<2){this.listPathStrokesType[pathIndex]=[];return;}
+        let lenStrokes=this.listPathStrokesType[pathIndex].length;
+        this.listPathStrokesType[pathIndex].splice(lenStrokes-1,1);
+        if(len==2){
+            this.listPathStrokesType[pathIndex][0]="l";
+        }else{
+            if(len==3){
+                this.listPathStrokesType[pathIndex][1]="q";
+            }
+            else{
+                this.listPathStrokesType[pathIndex][lenStrokes-2]="q";
+            }
+        }
     },
     addPath:function(){
         this.listPoints.push([]);
         this.listLinesWidths.push(10);
         this.listPathsColors.push(this.genearteRandomColor());
         this.listPathStrokesType.push([]);
+
     },
     removePathAt:function(index){
         for(let i=0;i<this.listPoints[index].length;i++){

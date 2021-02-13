@@ -152,7 +152,9 @@ var BoxText=function(parentNode){
 
 var SectionObjectsEntraceEditor={
     HTMLElement:null,
-    init:function(){
+    parentClass:null,
+    init:function(parentClass){
+        this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".area-scene-objects__listing-objects-entrance__box-items");
         this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
 
@@ -178,6 +180,11 @@ var SectionObjectsEntraceEditor={
         let newItem=this.HTMLBoxItem.cloneNode(true);
         let icon=newItem.querySelector(".icon img");
         icon.replaceWith(this._getAnimableObjectIcon(animObjWithEntrance));
+
+        let moveUp=newItem.querySelector(".btn-move-up");
+        let moveDown=newItem.querySelector(".btn-move-down");
+        moveUp.addEventListener("click",this.OnBtnMoveUpPressed.bind(this));
+        moveDown.addEventListener("click",this.OnBtnMoveDownPressed.bind(this));
 
         let propInputDelay=new TimeButtonedField(newItem.querySelector(".input-field-box.delay .property-input"), "s",0,600, 0.5);
         let propInputDuration=new TimeButtonedField(newItem.querySelector(".input-field-box.duration .property-input"), "s",0,600, 0.5);
@@ -206,6 +213,41 @@ var SectionObjectsEntraceEditor={
         this.HTMLElement.children[index+1].remove();// index-1 porque siempre hay un item oculto en el box items
     },
     /*EVENTOS INTERNOS*/
+    OnBtnMoveUpPressed:function(e){
+        let index=[].slice.call(this.HTMLElement.children).indexOf(e.target.parentNode.parentNode)-1;
+        if((index)>0){
+            let indexInCollection=index+1;
+            let item=this.HTMLElement.children[indexInCollection];
+            let prevItem=this.HTMLElement.children[indexInCollection-1];
+
+            this.HTMLElement.removeChild(item)
+            this.HTMLElement.insertBefore(item,prevItem);
+
+
+            let prevInputs=this.listPropertyInputsByItem[indexInCollection];
+            this.listPropertyInputsByItem[indexInCollection]=this.listPropertyInputsByItem[indexInCollection-1];
+            this.listPropertyInputsByItem[indexInCollection-1]=prevInputs;
+
+            //ReplaceWith: elimina el elemento que se va a remplazar (target) y extrae el elemento que sera el sustituto de donde se encuentre (lo elimina de su pre posicion) y lo pone en la posicion del target que recordemos ya fue eliminado
+        }
+        this.parentClass.childNotificationOnBtnMoveUpEntranceOrderPressed(index);
+    },
+    OnBtnMoveDownPressed:function(e){
+        let index=[].slice.call(this.HTMLElement.children).indexOf(e.target.parentNode.parentNode)-1;
+        if((index)<this.HTMLElement.children.length-2){
+            let indexInCollection=index+1;
+            let item=this.HTMLElement.children[indexInCollection];
+            let nextItem=this.HTMLElement.children[indexInCollection+1];
+
+            this.HTMLElement.removeChild(nextItem)
+            this.HTMLElement.insertBefore(nextItem,item);
+
+            let prevInputs=this.listPropertyInputsByItem[indexInCollection];
+            this.listPropertyInputsByItem[indexInCollection]=this.listPropertyInputsByItem[indexInCollection+1];
+            this.listPropertyInputsByItem[indexInCollection+1]=prevInputs;
+        }
+        this.parentClass.childNotificationOnBtnMoveDownEntranceOrderPressed(index);
+    },
     childNotificationOnDurationNewValue:function(value,target){
         let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode.parentNode)-1;
         CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceTimes.duration=value;
@@ -217,6 +259,7 @@ var SectionObjectsEntraceEditor={
 
     },
     onHTMLItemClicked:function(e){
+        console.log("CLICKEADKLFJASDJFAKDSJFLK");
         let HTMLElem=e.target;
         while(HTMLElem.className!=="area-scene-objects__listing-objects-entrance__box-items__item clearfix"){
             HTMLElem=HTMLElem.parentNode;
@@ -564,7 +607,11 @@ var PanelInspector={
     events:{
         OnBtnPreviewClicked:'OnBtnPreviewClicked',
         OnTextOptionClicked:'OnTextOptionClicked',
-        OnObjectPropertyWidgedChanged:'OnObjectPropertyWidgedChanged'
+        OnObjectPropertyWidgedChanged:'OnObjectPropertyWidgedChanged',
+
+        OnBtnMoveUpObjectEntranceOrder:'OnBtnMoveUpObjectEntranceOrder',
+        OnBtnMoveDownObjectEntranceOrder:'OnBtnMoveDownObjectEntranceOrder',
+
     },
     HTMLElement:null,
     htmlElementNormalHeight:0,
@@ -585,7 +632,7 @@ var PanelInspector={
 
         this.SectionToolBox.init(this);
         this.SectionMenuAreas.init(this);
-        this.SectionObjectsEntraceEditor.init();
+        this.SectionObjectsEntraceEditor.init(this);
         this.SectionAnimableObjectsEditor.init();
 
         this.AreaObjectProperties.init(this);
@@ -625,6 +672,12 @@ var PanelInspector={
     notificationCanvasManagerOnAnimableObjectDeleted:function(args){
         let indexInAnimableObjsList=args[0];
         this.SectionAnimableObjectsEditor.notificationOnAnimableObjectDeleted(indexInAnimableObjsList);
+    },
+    childNotificationOnBtnMoveUpEntranceOrderPressed:function(index){
+        MainMediator.notify(this.name,this.events.OnBtnMoveUpObjectEntranceOrder,[index]);
+    },
+    childNotificationOnBtnMoveDownEntranceOrderPressed:function(index){
+        MainMediator.notify(this.name,this.events.OnBtnMoveDownObjectEntranceOrder,[index]);
     },
     childNotificationOnTextOptionClicked:function(action){
         MainMediator.notify(this.name,this.events.OnTextOptionClicked,[action]);

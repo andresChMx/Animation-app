@@ -35,8 +35,6 @@ var SectionSettings={
         this.setupHTMLSettingTool();
         this.setupHTMLSettingLineWidth();
         this.setupHTMLSettingDuration();
-
-
     },
 
     setupHTMLSettingZoom:function(){

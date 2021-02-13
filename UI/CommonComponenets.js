@@ -6,13 +6,21 @@ var NumericField=fabric.util.createClass({
         this.minVal=minVal;
         this.maxVal=maxVal;
         this.sufix=sufix;
-        this.htmlElement=element;
 
         this.refFuncOnInputFocusIn=this.OnInputFocusIn.bind(this);
         this.refFuncOnInputFocusOut=this.OnInputFocusOut.bind(this);
+        WindowManager.registerOnKeyEnterPressed(this,this.windowObserverType);
+        this.setupDOMComponents(element)
+    },
+    setupDOMComponents:function(htmlElem){
+        this.htmlElement=htmlElem;
+
+        this.htmlElement.removeEventListener("focusin",this.refFuncOnInputFocusIn);
+        this.htmlElement.removeEventListener("focusout",this.refFuncOnInputFocusOut);
+
         this.htmlElement.addEventListener("focusin",this.refFuncOnInputFocusIn);
         this.htmlElement.addEventListener("focusout",this.refFuncOnInputFocusOut);
-        WindowManager.registerOnKeyEnterPressed(this,this.windowObserverType);
+
     },
     OnInputFocusIn:function(){
         this.htmlElement.value=this.value;
@@ -33,6 +41,9 @@ var NumericField=fabric.util.createClass({
         if(invokeCallBack){
             this.cbOnNewValue(this.value,this.htmlElement)
         }
+    },
+    getValue:function(){
+        return this.value;
     },
     remove:function(){
         this.htmlElement.removeEventListener("focusin",this.refFuncOnInputFocusIn);
@@ -77,6 +88,9 @@ var ButtonedField=fabric.util.createClass({
     },
     setValue:function(value,inkoveCallBack=true){
         this.numericField.setValue(value,inkoveCallBack);
+    },
+    getValue:function(){
+        return this.numericField.getValue();
     },
     addListenerOnNewValue:function(callback){
         this.cbOnNewValue=callback;

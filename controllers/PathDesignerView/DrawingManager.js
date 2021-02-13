@@ -72,10 +72,13 @@ var CrtlPoinstManagement=fabric.util.createClass({
         }
     },
 
-    recalcCtrlPointsForDeletedPoint:function(indexPath){
-        let length=this.list[indexPath].length;
-        this.list[indexPath].slice(length-1-4,4);
-        //flata para diferetnes cantidades de elementos
+    recalcCtrlPointsForDeletedPoint:function(pts,indexPath){
+        if(pts.length>1){
+            let length=this.list[indexPath].length;
+            this.list[indexPath].splice(length-1-3,4);
+        }else{
+            this.list[indexPath]=[-1,-1,-1,-1];
+        }
     },
     recalcCtrlPointsForNewPoint:function(pts,indexPath){
         this.list[indexPath].pop();
@@ -89,6 +92,7 @@ var CrtlPoinstManagement=fabric.util.createClass({
         this.list[indexPath].push(-1);
         this.list[indexPath].push(-1);
     },
+
     recalcCtrlPointsPointArea:function(pts,pointIndex,pathIndex){
         let length=pts.length;
         if(length<=4){
@@ -168,6 +172,7 @@ var DrawingManager=fabric.util.createClass({
         this.tools={
             selection:"selection",
             add:"add",
+            remove:"remove",
         }
         this.parentClass=parentClass;
         this.listObserversOnSetupCompleted=[];
@@ -341,7 +346,19 @@ var DrawingManager=fabric.util.createClass({
                 this.changeCurrentDrawingTool(this.tools.add);
             break;
             case this.tools.remove:
-                console.log("Removing points");
+                (function Wait(){
+                    if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),5);return;}
+                    Preprotocol.wantConsume=false;
+
+                    this.canvasManager.removePathLastPoint(this.currentPathIndex);
+                    this.ctrlPointsManager.recalcCtrlPointsForDeletedPoint(this.canvasManager.listPoints[this.currentPathIndex],this.currentPathIndex);
+                    this.canvasManager.updatePathData(this.ctrlPointsManager.list,this.canvasManager.listPoints);
+                    this.canvasManager.canvas.requestRenderAll();
+
+                    Preprotocol.wantConsume=true;
+
+                }.bind(this)())
+
             break;
         }
     },

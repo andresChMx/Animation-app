@@ -15,6 +15,7 @@ var PreviewManager=fabric.util.createClass({
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnAddPathClicked,this);
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnDeletePathClicked,this);
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingDurationChanged,this);
+        MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnSettingToolClicked,this);
 
         this.scalerFactorX;
         this.scalerFactorY;
@@ -100,6 +101,9 @@ var PreviewManager=fabric.util.createClass({
         this.counterInterruption=100;
     },
     notificationOnMouseUp:function(mouseX,mouseY){
+        this.counterInterruption=100;
+    },
+    notificationPanelDesignerOptionsOnSettingToolClicked:function(){
         this.counterInterruption=100;
     },
     notificationPanelDesignerOptionsOnSettingLineWidthChanged:function(args){

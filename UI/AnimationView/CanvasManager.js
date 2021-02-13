@@ -57,6 +57,9 @@ var CanvasManager={
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnDurationInput,this);
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this)
         MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnTextOptionClicked,this);
+        MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnMoveUpObjectEntranceOrder,this);
+        MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnMoveDownObjectEntranceOrder,this);
+
 
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDummyDraggingEnded,this);
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnTextAssetDraggableDropped,this);
@@ -249,6 +252,20 @@ var CanvasManager={
             self.notifyOnAnimableObjectAdded.bind(self)(animObj);
         }
     },
+    moveUpObjectInEntranceList:function(index){
+        if(index>0){
+            let tmp=this.listAnimableObjectsWithEntrance[index];
+            this.listAnimableObjectsWithEntrance[index]=this.listAnimableObjectsWithEntrance[index-1];
+            this.listAnimableObjectsWithEntrance[index-1]=tmp;
+        }
+    },
+    moveDownObjectInEntranceList:function(index){
+        if(index<this.listAnimableObjectsWithEntrance.length-1){
+            let tmp=this.listAnimableObjectsWithEntrance[index];
+            this.listAnimableObjectsWithEntrance[index]=this.listAnimableObjectsWithEntrance[index+1];
+            this.listAnimableObjectsWithEntrance[index+1]=tmp;
+        }
+    },
     createAnimableText:function(){
 
     },
@@ -308,6 +325,14 @@ var CanvasManager={
     },
     childNotificationOnDesignPathOptionClicked:function(currentSelectedObject){
         MainMediator.notify(this.name,this.events.OnDesignPathOptionClicked,[currentSelectedObject])
+    },
+    notificationPanelInspectorOnBtnMoveDownObjectEntranceOrder:function(args){
+        let index=args[0];
+        this.moveDownObjectInEntranceList(index);
+    },
+    notificationPanelInspectorOnBtnMoveUpObjectEntranceOrder:function(args){
+        let index=args[0];
+        this.moveUpObjectInEntranceList(index);
     },
     notificationPanelInspectorOnTextOptionClicked:function(args){
         let action=args[0];
