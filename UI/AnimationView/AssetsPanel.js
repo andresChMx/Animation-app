@@ -189,7 +189,6 @@ let SectionImageAssets={
             label:"Delete Asset",
             action:function(){
                 let self=SectionImageAssets;
-                console.log("de elimino asert");
             }
         }
     ],
@@ -209,7 +208,7 @@ let SectionImageAssets={
         this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".panel-assets__sections-container .section-assets.image");
 
-        this.HTMLDummyAssetDrag=document.querySelector(".section-image-assets__dummy-drag-asset");
+        this.HTMLDummyAssetDrag=document.querySelector(".section-image-assets__floating-draggable.image-asset");
         this.HTMLDummyAssetDrag.style.width=200 + "px";
         this.HTMLDummyAssetDrag.style.height=200 + "px";
 
@@ -220,10 +219,10 @@ let SectionImageAssets={
         this.HTMLMenuCategories=document.querySelector(".section-assets.images .section-assets__box-options__second-row__menu-categories");
         this.HTMLMenuCategoriesControlButtons=this.HTMLMenuCategories.querySelectorAll("button");
         this.HTMLMenuCategoriesListCategories=this.HTMLMenuCategories.querySelectorAll("li");
+
         this.HTMLMenuCategoriesSelectedOption=null;
 
         this.HTMLBtnLoadMore=document.querySelector(".section-assets.images .section-assets__btn-load-more");
-        this.generateImageAssets(this.MODELItemAssets);
         this.generateHTMLMenuOptionsCollection(this.MODELItemMenuOptions);
         this.initEvents();
 
@@ -458,8 +457,12 @@ var SectionTextAssets={
     init:function(parentClass){
         this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".panel-assets__sections-container .section-assets.text");
-        this.HTMLDraggableElement=document.querySelector(".section-text-assets__dummy-drag-asset")
+        this.HTMLDraggableElement=document.querySelector(".section-image-assets__floating-draggable.text-asset")
         this.HTMLAssetPrefab=this.HTMLElement.querySelector(".text-asset");
+
+        this.HTMLDraggableElement.style.width=200 + "px";
+        this.HTMLDraggableElement.style.height=200 + "px";
+
         this.initListAssets();
         // registering as observer
         WindowManager.registerOnMouseMove(this);
@@ -483,6 +486,7 @@ var SectionTextAssets={
     OnAssetDragStarted:function(e){
         this.assetDragStarted=true;
         this.HTMLAssetBeenDragged=e.target;
+        this.HTMLDraggableElement.style.display="block";
     },
 
     notificationOnMouseMove:function(){
@@ -493,7 +497,7 @@ var SectionTextAssets={
     notificationOnMouseUp:function(){
         if(this.assetDragStarted){
             let fontFamily=getComputedStyle(this.HTMLAssetBeenDragged).getPropertyValue("font-family");
-            console.log(fontFamily);
+            this.HTMLDraggableElement.style.display="none";
             this.parentClass.childNotificationOnTextAssetDraggableDropped(fontFamily);
             this.assetDragStarted=false;
         }
@@ -508,26 +512,139 @@ var SectionShapeAssets={
         {icon:"icon-start",category:"bubles",path:[{x:0,y:0}]},
         {icon:"icon-start",category:"",path:[{x:0,y:0}]},
     ],
-    init:function(){
-        this.HTMLElement=document.querySelector(".panel-assets__sections-container .section-assets.text");
-        this.initAssets();
+    listAssetsPerPageCant:10,
+
+    lastModelOnItemDragged:null,
+    isItemPressed:false,
+    init:function(parentClass){
+        this.parentClass=parentClass;
+        this.HTMLElement=document.querySelector(".panel-assets__sections-container .section-assets.shape");
+
+        this.HTMLDummyAssetDrag=document.querySelector(".section-image-assets__floating-draggable.shape-asset");
+        this.HTMLDummyAssetDrag.style.width=200 + "px";
+        this.HTMLDummyAssetDrag.style.height=200 + "px";
+
+        this.HTMLBtnCreateShape=document.querySelector(".section-assets.shape .section-assets__box-options__first-row .btn-create-shape");
+        // this.HTMLFieldSearch=document.querySelector("");
+
+        this.HTMLMenuCategories=document.querySelector(".section-assets.shape .section-assets__box-options__second-row__menu-categories");
+        this.HTMLMenuCategoriesControlButtons=this.HTMLMenuCategories.querySelectorAll("button");
+        this.HTMLMenuCategoriesListCategories=this.HTMLMenuCategories.querySelectorAll("li");
+
+        this.HTMLMenuCategoriesSelectedOption=null;
+
+        this.HTMLBtnLoadMore=document.querySelector(".section-assets.shape .section-assets__btn-load-more");
+        this.initEvents();
+
+        /*setting up DOM elemes*/
+        this.HTMLMenuCategories.style.paddingLeft=this.HTMLMenuCategoriesControlButtons[0].offsetWidth +"px";
+
+
+        WindowManager.registerOnMouseUp(this);
+        WindowManager.registerOnMouseMove(this);
+
+        // simulating clicking in first category (all)
+        this.selectMenuCategoriesOption(this.HTMLMenuCategoriesListCategories[0]);
+        this.lastCategory="";
+        NetworkManager.fetchShapeAssets(this.lastCategory,this.listAssetsPageNumber).then(function(data){
+            this.MODELItemAssets=data;
+            this.listAssets([]);
+            this.generateImageAssets(this.MODELItemAssets);
+        }.bind(this));
     },
-    initAssets:function(){
-        let row=document.createElement("div");
-        row.className="assets-row";
-        for(let i=0;i<this.MODELAssets.length;i++){
-            this.createAsset(this.MODELAssets[i]);
+    initEvents:function(){
+        this.HTMLBtnCreateShape.addEventListener("click",this.OnButtonCreateShapeClicked.bind(this))
+        /*menu categories*/
+        this.HTMLMenuCategoriesControlButtons[0].addEventListener("click",this.OnMenuCategoriesControlButtonsPressed.bind(this));
+        this.HTMLMenuCategoriesControlButtons[1].addEventListener("click",this.OnMenuCategoriesControlButtonsPressed.bind(this));
+
+        for(let i=0;i<this.HTMLMenuCategoriesListCategories.length;i++){
+            this.HTMLMenuCategoriesListCategories[i].addEventListener("click",this.OnMenuCategoriesOptionClicked.bind(this));
+        }
+        this.HTMLBtnLoadMore.addEventListener("click",this.OnBtnLoadMore.bind(this))
+    },
+
+    OnButtonCreateShapeClicked:function(){
+        // this.ModalLoadURLImage.showModal();
+    },
+    OnMenuCategoriesControlButtonsPressed:function(e){
+        if(e.target.id==="shape__control-left"){
+            this.HTMLMenuCategories.parentNode.scrollLeft-=70;
+        }else if(e.target.id==="shape__control-right"){
+            this.HTMLMenuCategories.parentNode.scrollLeft+=70;
+        }
+        if(this.HTMLMenuCategories.parentNode.scrollLeft>this.HTMLMenuCategories.parentNode.scrollWidth){
+            this.HTMLMenuCategories.parentNode.scrollLeft=this.HTMLMenuCategories.parentNode.scrollWidth;
+        }
+        this.HTMLMenuCategoriesControlButtons[0].style.left=this.HTMLMenuCategories.parentNode.scrollLeft + "px";
+        this.HTMLMenuCategoriesControlButtons[1].style.right=-this.HTMLMenuCategories.parentNode.scrollLeft + "px";
+    },
+    OnMenuCategoriesOptionClicked:function(e){
+        this.selectMenuCategoriesOption(e.target);
+        this.listAssetsPageNumber=1;
+        this.lastCategory=e.target.getAttribute("value");
+        NetworkManager.fetchShapeAssets(this.lastCategory,this.listAssetsPageNumber).then(function(data){
+            this.MODELItemAssets=data;
+            this.listAssets([]);
+            this.generateImageAssets(this.MODELItemAssets);
+
+            if(this.listAssets().length>=this.listAssetsPerPageCant){//The button "Looad More" will only be shown if there are more than the mininum quantity of images loaded
+                this.HTMLBtnLoadMore.style.display="block";
+            }else{
+                this.HTMLBtnLoadMore.style.display="none";
+            }
+        }.bind(this));
+    },
+    OnBtnLoadMore:function(e){
+        this.listAssetsPageNumber++;
+        NetworkManager.getUnsplashImagesBySearch(this.lastCategory,this.listAssetsPageNumber).then(function(data){
+            this.generateImageAssets(data);
+            for(let i=0;i<data.length;i++){
+                this.MODELAssets.push(data[i]);
+            }
+        }.bind(this));
+    },
+    generateImageAssets:function(MODEL){
+        for(var i=0;i<MODEL.length;i++){
+            let asset=new AssetShape(MODEL[i],this);
+            this.listAssets.push(asset);
         }
     },
-    createAsset:function(assetModel){
-        let asset=new AssetShape(assetModel,this);
-        this.listAssets.push(asset);
+    selectMenuCategoriesOption:function(HTML_LI_Option){
+        if(this.HTMLMenuCategoriesSelectedOption){
+            this.HTMLMenuCategoriesSelectedOption.classList.remove("active");
+        }
+        HTML_LI_Option.classList.add("active");
+        this.HTMLMenuCategoriesSelectedOption=HTML_LI_Option;
+    },
+    setPositionHTMLDummyAsset:function(x,y){
+        this.HTMLDummyAssetDrag.style.left=x-this.HTMLDummyAssetDrag.offsetWidth/2 + "px";
+        this.HTMLDummyAssetDrag.style.top=y-this.HTMLDummyAssetDrag.offsetWidth/2+ "px";
+    },
+    hiddeHTMLDummyAsset:function(){
+        this.setPositionHTMLDummyAsset(-200,-200);
+        this.HTMLDummyAssetDrag.style.display="none";
+    },
+    notificationOnMouseUp:function(){
+        if(this.isItemPressed){
+            this.hiddeHTMLDummyAsset();
+            this.notifyOnDummyDraggingEnded();
+        }
+        this.isItemPressed=false;
+    },
+    notificationOnMouseMove:function(){
+        if(this.isItemPressed){
+            this.setPositionHTMLDummyAsset(WindowManager.mouse.x,WindowManager.mouse.y);
+        }
     },
     childNotificationOnAssetDraggingStarted:function(model){
-        this.lastModelOnAssetDragged=model;
-        this.isAssetPressed=true;
-        //this.HTMLDummyAssetDrag.style.display="block";
-    }
+        this.lastModelOnItemDragged=model;
+        this.isItemPressed=true;
+        this.HTMLDummyAssetDrag.style.display="block";
+    },
+    notifyOnDummyDraggingEnded:function(){
+        this.parentClass.childNotificationOnShapeAssetDraggableDropped(this.lastModelOnItemDragged);
+    },
 }
 
 var PanelAssets={
@@ -535,7 +652,8 @@ var PanelAssets={
     events:{
         OnImageURLLoaded:'OnImageURLLoaded',
         OnImageAssetDummyDraggingEnded:'OnImageAssetDummyDraggingEnded',
-        OnTextAssetDraggableDropped:'OnTextAssetDraggableDropped'
+        OnTextAssetDraggableDropped:'OnTextAssetDraggableDropped',
+        OnShapeAssetDraggableDropped:'OnShapeAssetDraggableDropped',
     },
     HTMLElement:null,
     HTMLCollMenuOptions:null,
@@ -556,6 +674,7 @@ var PanelAssets={
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
         this.SectionImageAssets.init(this);
         this.SectionTextAssets.init(this);
+        this.SectionShapeAssets.init(this);
         this.initEvents();
 
         /*Simulating click in first menu option*/
@@ -604,7 +723,9 @@ var PanelAssets={
     childNotificationOnTextAssetDraggableDropped:function(fontFamily){
         MainMediator.notify(this.name,this.events.OnTextAssetDraggableDropped,[fontFamily]);
     },
-
+    childNotificationOnShapeAssetDraggableDropped:function(shapeModel){
+        MainMediator.notify(this.name,this.events.OnShapeAssetDraggableDropped,[shapeModel]);
+    },
     childNotificationOnImageURLLoaded:function(url){
         MainMediator.notify(this.name,this.events.OnImageURLLoaded,[url]);
     }
@@ -612,7 +733,6 @@ var PanelAssets={
 
 var AssetShape=function(model,parentClass){
     this.HTMLElement=null;
-
     this.model=null;
     this.parentClass=null;
     this.constructor=function(){
@@ -621,25 +741,25 @@ var AssetShape=function(model,parentClass){
     }
     this.koBindingSetupHTML=function(HTMLContainer){
         this.HTMLElement=HTMLContainer;
-        this.HTMLElement.ondragstart=function(){return false;}
+        this.HTMLElement.style.height=this.HTMLElement.offsetWidth + "px";
+
         this.HTMLElement.addEventListener("mousedown",this.OnMouseDown.bind(this));
     }
-    this.OnMouseDown=function(){
+    this.OnMouseDown=function(e){
         this.notifyOnDraggingStarted();
     }
     this.notifyOnDraggingStarted=function(){
         this.parentClass.childNotificationOnAssetDraggingStarted(this.model);
     }
-};
+    this.constructor();
+}
+
 var AssetImage=function(model,parentClass){
     this.HTMLElement=null;
     this.HTMLDraggable=null;
     this.HTMLBtnMenu=null;
 
     this.model=null;
-
-    this.observerOnDraggingStarted=[];
-    this.observerOnMenuPressed=[];
     this.parentClass=null;
     this.constructor=function(){
         this.model=model;

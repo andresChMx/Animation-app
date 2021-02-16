@@ -69,35 +69,6 @@
     border:none;
 }
 
-.section-settings__setting-line-width{
-
-}
-.section-settings__setting-line-width .row{
-    justify-content: space-between;
-}
-.setting-line-width__field{
-    width:40px;
-}
-.setting-line-width__slider{
-    width:100%;
-}
-
-.section-settings__setting-duration{
-
-}
-.section-settings__setting-duration .row{
-    justify-content: space-between;
-}
-.setting-duration__field{
-    width:40px;
-}
-
-.setting-duration__slider{
-    width:100%;
-}
-
-
-
 .panel-designer-options__section-paths{
     padding:10px;
 }

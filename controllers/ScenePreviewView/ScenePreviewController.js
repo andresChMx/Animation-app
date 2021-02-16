@@ -202,8 +202,10 @@ var ScenePreviewController=fabric.util.createClass({
         }
     },
     clearEntranceDataFromAnimableObjects:function(){
-        for(let i=1;i<CanvasManager.listAnimableObjects.length;i++) {//omitiendo el primer porque es la camara
+        for(let i=0;i<CanvasManager.listAnimableObjects.length;i++) {//omitiendo el primer porque es la camara
             let animableObj = CanvasManager.listAnimableObjects[i];
+            if(animableObj.type==="CameraAnimable" || animableObj.type==="ShapeAnimable"){continue;}
+
             if(animableObj.imageDrawingData.type===ImageType.CREATED_NOPATH || animableObj.imageDrawingData.type===TextType.PROVIDED){
                 animableObj.imageDrawingData.points=[];
                 animableObj.imageDrawingData.linesWidths=[];

@@ -15,6 +15,9 @@ var NumericField=fabric.util.createClass({
     setupDOMComponents:function(htmlElem){
         this.htmlElement=htmlElem;
 
+        this.htmlElement.setAttribute("tag","NumericField"); //For SectionTransformObjects, where when a selection gets updated and
+        // a field is been edited, to been able to check quickly whether the document active element is a managed field
+
         this.htmlElement.removeEventListener("focusin",this.refFuncOnInputFocusIn);
         this.htmlElement.removeEventListener("focusout",this.refFuncOnInputFocusOut);
 
@@ -119,4 +122,95 @@ var TimeButtonedField=fabric.util.createClass(ButtonedField,{
     _convertMiliSecToSec:function(val){
         return val/1000;
     },
-})
+});
+
+/*EDITABLE LABEL*/
+var BoxText=function(parentNode){
+    this.init=function(parentNode){
+        this.cbOnNewValue=function(){};
+        this.htmlInput=null;
+        this.htmlLabel=null;
+        this.htmlContainer=null;
+        this.clickCount=0;
+        this.text="Name";
+
+        this.refFuncOnInputFocusOut=this.OnInputFocusOut.bind(this)
+        this.refFuncOnLabelClicked=this.OnLabelClicked.bind(this);
+        this.refFuncOnInputInput=this.OnInputInput.bind(this);
+
+        WindowManager.registerOnKeyEnterPressed(this);
+        this.initHTML(parentNode);
+    };
+    this.initHTML=function(parentNode){
+        this.htmlContainer=document.createElement("div");
+        this.htmlContainer.className="box-text";
+
+        this.htmlInput=document.createElement("input");
+        this.htmlInput.setAttribute("type","text");
+        this.htmlInput.addEventListener("focusout",this.refFuncOnInputFocusOut);
+        this.htmlInput.addEventListener("input",this.refFuncOnInputInput)
+        this.htmlInput.style.display="none";
+
+        this.htmlLabel=document.createElement("p");
+        this.htmlLabel.addEventListener("click",this.refFuncOnLabelClicked);
+        this.htmlContainer.appendChild(this.htmlLabel);
+        this.htmlContainer.appendChild(this.htmlInput);
+        parentNode.appendChild(this.htmlContainer);
+    };
+    this.OnLabelClicked=function(){
+        if(this.clickCount===0){
+            this.clickCount++;
+            setTimeout(function(){this.clickCount=0;}.bind(this),300);
+        }else if(this.clickCount===1){
+            this.activateEditMode();
+        }
+    };
+    this.OnInputFocusOut=function(){
+        this.deactivateEditMode();
+    };
+    this.OnInputInput=function(e){
+        if(e.target.value.length>23){
+            this.text=e.target.value.slice(0,23);
+            e.target.value=this.text;
+        }else{
+            this.text=e.target.value;
+        }
+
+    }
+    this.activateEditMode=function(){
+        this.htmlInput.value=this.text;
+        this.htmlLabel.style.display="none";
+        this.htmlInput.style.display="block";
+        this.htmlInput.select();
+    };
+    this.deactivateEditMode=function(){
+        this.htmlInput.blur();
+        this.htmlLabel.textContent=this.text;
+
+        this.htmlInput.style.display="none";
+        this.htmlLabel.style.display="block";
+        this.cbOnNewValue(this.text,this.htmlInput);
+    };
+
+    this.notificationOnKeyEnterUp=function(){
+        let documentActiveElement=document.activeElement;
+        if(documentActiveElement===this.htmlInput){
+            this.deactivateEditMode();
+        }
+    };
+    this.setText=function(text){
+        this.text=text;
+        this.htmlLabel.textContent=text;
+    };
+    this.remove=function(){
+        this.htmlLabel.removeEventListener("click",this.refFuncOnLabelClicked);
+        this.htmlInput.removeEventListener("focusout",this.refFuncOnInputFocusOut);
+        this.htmlInput.removeEventListener("input",this.refFuncOnInputInput);
+        this.htmlContainer.remove();
+        WindowManager.unregisterOnKeyEnterPressed(this);
+    };
+    this.onNewValue=function(callback){
+        this.cbOnNewValue=callback;
+    };
+    this.init(parentNode);
+}

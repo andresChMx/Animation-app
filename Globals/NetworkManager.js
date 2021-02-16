@@ -141,5 +141,13 @@ var NetworkManager={
             })
         }
 
+    },
+    fetchShapeAssets:function(category,pageNumber){
+        //{vectorURL:"url...svg",category:"arrows"}
+        let dummyData=[{vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1612833730/oficial/vg9xszhe1ztxwyuez02n.svg",thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1612833730/oficial/vg9xszhe1ztxwyuez02n.svg",category:"arrow"},
+            {vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1613355595/jb12u4diyhq5ydqgrk6z.svg",thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1613355595/jb12u4diyhq5ydqgrk6z.svg",category:"bubble"}];
+        return new Promise(function(resolutionFunc,rejectionFunc){
+            resolutionFunc(dummyData);
+        });
     }
 }

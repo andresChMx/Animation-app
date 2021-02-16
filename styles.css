@@ -126,7 +126,18 @@ input{
 button{
     border:none;
 }
-
+.container-floating-panels{
+    width:100%;
+    height:100%;
+    position: relative;
+}
+.floating-panel{
+    display:none;
+    position: absolute;
+    width:100%;
+    left:0;
+    top:0;
+}
 .modal{
     border-radius: 4px;
     position:absolute;
@@ -225,7 +236,7 @@ button{
     height:100%;
     cursor:pointer;
 }
-.canvas-animator__object-configuration .tooltip{
+.canvas-animator__object-entrance-configuration .tooltip{
     display: none;
     opacity:0;
     position:absolute;
@@ -304,6 +315,21 @@ button{
     font-size:1em;
 
 }
+
+/*range widget*/
+.range-widget{
+
+}
+.range-widget .row:first-child{
+    justify-content: space-between;
+}
+.range-widget__field{
+    width:40px;
+}
+.range-widget__slider{
+    width:100%;
+}
+
 /*================================*/
 /*AUTHENTICATION*/
 /*================================*/
@@ -725,26 +751,66 @@ button{
 }
 .area-scene-objects__listing-objects-all__box-items__item .group-object-name{
 }
-
+.area-scene-objects__listing-objects-all__box-items__item .group-box-actions{
+    margin-left:auto;
+}
 .area-scene-objects__listing-objects-all__box-items #active-item{
     background: rgba(36, 131, 255,.3);
 }
+/*floating-menu*/
+.section-animable-object-inspector__object-menu{
+    background:var(--terciary-color);
+    text-align: right;
+    position: absolute;
+    left:-200px;
+    top:-200px;
+}
+.section-animable-object-inspector__object-menu .object-menu-option{
+    color:white;
+    position: relative;
+    padding:10px 8px 10px 20px;
+}
+.section-animable-object-inspector__object-menu .object-menu-option .object-menu-option__submenu{
+    background:var(--terciary-color);
+    position:absolute;
+    width:100%;
+    color:white;
+    left:-100%;
+    top:0;
+    display:none;
+}
+.section-animable-object-inspector__object-menu .object-menu-option .object-menu-option__submenu .object-menu-suboption{
+    padding:10px 8px 10px 20px;
+}
+.section-animable-object-inspector__object-menu .object-menu-option:hover .object-menu-option__submenu{
+    display: block;
+}
 /*------------------------panel-inspector__area-object-properties----------------------*/
+
 .panel-inspector__area-object-properties{
 }
-.panel-inspector__area-object-properties .box-related-widgets{
+.area-objects-properties__zone__title{
+    font-size: 1.15rem;
+    font-weight: bold;
+    margin-bottom:15px;
+}
+/* zone object transformation properties*/
+.area-objects-properties__zone-transformations{
+    border-bottom:1px solid rgba(255,255,255,.2);
+    margin-bottom:10px;
+}
+.area-objects-properties__zone-transformations .box-related-widgets{
     height:25px;
     margin-bottom:10px;
 }
-.panel-inspector__area-object-properties .widget{
+.area-objects-properties__zone-transformations .widget{
     height:100%;
-    font-size:1.15rem;
+    font-size:1.13rem;
     display:flex;
-    justify-content: space-between;
     align-items: center;
     position:relative;
 }
-.panel-inspector__area-object-properties .widget.disable:after{
+.area-objects-properties__zone-transformations .widget.disable:after{
     content:"";
     display:block;
     width:100%;
@@ -754,23 +820,47 @@ button{
     left:0;top:0;
 
 }
-.panel-inspector__area-object-properties .widget label{
-    width:34%;
+.area-objects-properties__zone-transformations .widget label{
+    width:50%;
     line-height: 100%;
 }
 
 
-.panel-inspector__area-object-properties .widget-property-opacity .property-input .range-value{
+.area-objects-properties__zone-transformations .widget-property-opacity .property-input .range-value{
     width:70%;
     display:inline-block;
     vertical-align: middle;
 }
-.panel-inspector__area-object-properties .widget-property-opacity .property-input .field-value{
+.area-objects-properties__zone-transformations .widget-property-opacity .property-input .field-value{
     display: inline-block;
     margin:0;
     padding:0;
     width:25%
 }
+/* ------------------ area styling object properties */
+.area-objects-properties__zone-styles{
+    font-size:1.13rem;
+}
+.area-objects-properties__zone__title{
+}
+.area-objects-properties__zone-styles__box-floating-panels{
+}
+.area-objects-properties__zone-styles__box-floating-panels .floating-panel .styling-widget{
+    display:flex;
+    margin-bottom:10px;
+    height:25px;
+    align-items: center;
+}
+.area-objects-properties__zone-styles__box-floating-panels .floating-panel .range-widget{
+    display:block;
+}
+.area-objects-properties__zone-styles__box-floating-panels .floating-panel .styling-widget > label{
+    width:50%;
+}
+.floating-panel-textanimable .styling-widget.text-alignment .text-alignment__options span.active{
+    font-size:2rem;
+}
+
 /*=======================
 ==== PANEL ASSETS   =====
 ========================*/
@@ -911,16 +1001,35 @@ button{
     display: flex;
     flex-wrap: wrap;
 }
-/*specific for image assets*/
-.section-assets__box-assets .image-asset{
+.section-assets__box-assets > div{
     box-sizing: border-box;
     display:inline-block;
     width:50%;
-    
-    height:80px;
+
+    height:80px !important;
     padding:5px;
-    
 }
+.section-assets .section-assets__btn-load-more{
+    cursor:pointer;
+    font-size:1.15rem;
+    margin:15px auto;
+    width:50%;
+    border-radius: 20px;
+    border:1px solid white;
+    color:white;
+    text-align: center;
+    padding:5px;
+}
+.section-image-assets__floating-draggable{
+    position:absolute;
+    z-index: 1000;
+    display: none;
+    left:-200px;
+    top:-200px;
+    background:red;
+}
+
+/*specific for image assets*/
 .section-assets__box-assets .image-asset__inner-container{
     width:100%;
     height:100%;
@@ -964,14 +1073,9 @@ button{
     border-bottom:1px solid white;
     text-align:center;
 }
-.section-image-assets__dummy-drag-asset{
-    position:absolute;
+.section-image-assets__floating-draggable.image-asset{
     background:peru;
     opacity:0.7;
-    z-index: 1000;
-    display: none;
-    left:-200px;
-    top:-200px;
 }
 .panel-assets__buttons-add-resource button{
     background:peru;
@@ -981,17 +1085,6 @@ button{
     right:20px;
 }
 
-.section-assets.images .section-assets__btn-load-more{
-    cursor:pointer;
-    font-size:1.15rem;
-    margin:15px auto;
-    width:50%;
-    border-radius: 20px;
-    border:1px solid white;
-    color:white;
-    text-align: center;
-    padding:5px;
-}
 /*specific to textAnimable*/
 .section-assets.text .section-assets__box-options{
     display:none;
@@ -999,19 +1092,29 @@ button{
 .section-assets.text .section-assets__box-assets{
     justify-content: space-between;
 }
-.section-assets__box-assets .text-asset{
+.section-image-assets__floating-draggable.text-asset{
     font-size:2rem;
     padding:10px;
     width:50%;
     text-align: center;
 }
 .section-assets__box-assets .text-asset p{
+    font-size: 2rem;
     border:2px dotted rgba(255,255,255,.5);
     cursor:pointer;
     height:50px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+/*specific to shapeAssets*/
+.section-assets__box-assets .shape-asset img{
+    width:100%;
+    height:100%;
+    background:lightseagreen;
+}
+.section-image-assets__floating-draggable.shape-asset{
+
 }
 /*upload modal panel*/
 .panel-assets__modal-upload-image__filter{
@@ -1207,10 +1310,10 @@ button{
     border:1px solid #3b3b3b;
 }
 /*modal object configuration*/
-.canvas-animator__object-configuration__body{
+.canvas-animator__object-entrance-configuration__body{
     display:flex;
 }
-.canvas-animator__object-configuration__body .title{
+.canvas-animator__object-entrance-configuration__body .title{
     font-size: 1.13rem;
     font-weight: bold;
     text-transform: uppercase;
@@ -1255,19 +1358,19 @@ button{
     opacity: 1;
 }
 /*entrace settings side*/
-.canvas-animator__object-configuration__entrance-settings{
+.canvas-animator__object-entrance-configuration__entrance-settings{
     width:50%;
     padding:0 10px;
     display: flex;
     flex-direction: column;
     border-right:1px solid #bfbfbf;
 }
-.canvas-animator__object-configuration__entrance-settings__box-buttons{
+.canvas-animator__object-entrance-configuration__entrance-settings__box-buttons{
     display:flex;
     /*flex-wrap: wrap;*/
     padding:10px 0;
 }
-.canvas-animator__object-configuration__entrance-settings__box-buttons .entrance-button{
+.canvas-animator__object-entrance-configuration__entrance-settings__box-buttons .entrance-button{
     display:inline-block;
     width: 100%;
     height:100px;
@@ -1280,66 +1383,39 @@ button{
     overflow:hidden; /*por seguridad, para que ningun elemento interno escape, ya que si un elemento interno es clickado, error  */
 
 }
-.canvas-animator__object-configuration__entrance-settings .entrance-button.active{
+.canvas-animator__object-entrance-configuration__entrance-settings .entrance-button.active{
     border: 2px solid var(--ligth-color);
     background: rgba(14,171,233,.3);
 }
-.canvas-animator__object-configuration__entrance-settings .entrance-button .entrance-button__icon{
+.canvas-animator__object-entrance-configuration__entrance-settings .entrance-button .entrance-button__icon{
     height:70%;
     padding:0;
     display:block; /* ya que la imagen tiene in line-height in quitable*/
     margin:auto;
 }
-.canvas-animator__object-configuration__entrance-settings .entrance-button .entrance-button__label{
+.canvas-animator__object-entrance-configuration__entrance-settings .entrance-button .entrance-button__label{
     height:30%;
     font-size: 1.13rem;
 }
 /*entrance modes configuration widgets*/
-.canvas-animator__object-configuration__entrance-settings__box-mode-settings{
+.canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings{
     background: var(--terciary-color);
     flex-grow: 1;
 }
-.canvas-animator__object-configuration__entrance-settings__box-mode-settings .mode-settings{
+.canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings .mode-settings{
     padding:10px;
     font-size: 1.15rem;
 }
-.canvas-animator__object-configuration__entrance-settings__box-mode-settings .mode-settings .drawn-mode-widged{
+.canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings .mode-settings .drawn-mode-widged{
     display:none;
 }
-
-/*appearance settings*/
-.canvas-animator__object-configuration__appearance-settings{
-    width:50%;
-    padding:0 10px;
-}
-.canvas-animator__object-configuration__appearance-settings__box-options{
-    padding-top:10px;
-}
-.canvas-animator__object-configuration__appearance-settings__box-options__object-type-options .text-animable-object-widget{
-    margin-bottom: 20px;
-    font-size: 1.15rem;
-    height:25px;
-    display:flex;
-}
-.canvas-animator__object-configuration__appearance-settings__box-options__object-type-options .text-animable-object-widget label{
-
-    width:34%;
-}
-.canvas-animator__object-configuration__appearance-settings .text-alignment__options{
-    display:inline-block;
-    font-size: 1.5rem;
-    color:rgba(255,255,255,.5);
-}
-.canvas-animator__object-configuration__appearance-settings .text-alignment__options .active{
-    color:rgb(255,255,255);
-}
 /*footer*/
-.canvas-animator__object-configuration__footer .btn-accept{
+.canvas-animator__object-entrance-configuration__footer .btn-accept{
     margin-right:10px;
     color:white;
     background: var(--ligth-color);
 }
-.canvas-animator__object-configuration__footer .btn-cancel{
+.canvas-animator__object-entrance-configuration__footer .btn-cancel{
     background: #d4d4d4;
     color: #353535;
 }

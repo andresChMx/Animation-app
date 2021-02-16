@@ -51,7 +51,12 @@ var ImageType={/*ImageTypes are used when an object has entreancemode drawn or t
 var TextType={
     PROVIDED:'PROVIDED'
 }
-
+var AnimObjectOptionMenu={
+    duplicate:"duplicate",
+    delete:"delete",
+    removeMask:"removeMask",
+    addMask:"addMask",
+}
 /// images assets
 var IMAGE_ASSETS={
     arrows:[

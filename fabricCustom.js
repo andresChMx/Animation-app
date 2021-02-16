@@ -156,11 +156,14 @@ fabric.Object.prototype.getGlobalPosition=function(){// POSITION OF THIS OBJECT 
 }
 fabric.Object.prototype.name="ObjectC";
 
+
 var ImageAnimable=fabric.util.createClass(fabric.Image,{
     applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
+
     type:'ImageAnimable',
     initialize:function(element, options){
         this.callSuper('initialize', element,options);
+        this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask],
         /*fabric.Object setting*/
         this.padding=20;
         this.transparentCorners= false;
@@ -252,7 +255,6 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             this.imageDrawingData.ctrlPoints=[];
         }.bind(this))
     },
-
     getWidthInDrawingCache:function(){
         return this.imageDrawingData.imgHigh.naturalWidth;
     },
@@ -271,6 +273,25 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     //     newPoint.y+=this.canvas._offset.top;
     //     return newPoint;
     // },
+
+    applyClipping:function(animObject){
+        this.clipPath=animObject;
+        for(let i=0;i<this.applicableMenuOptions.length;i++){
+            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.addMask){
+                this.applicableMenuOptions[i]=AnimObjectOptionMenu.removeMask;
+                break;
+            }
+        }
+    },
+    removeClipping:function(){
+        this.clipPath=null;
+        for(let i=0;i<this.applicableMenuOptions.length;i++){
+            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.removeMask){
+                this.applicableMenuOptions[i]=AnimObjectOptionMenu.addMask;
+                break;
+            }
+        }
+    },
     render:function(ctx){
         /*se sobreescribio por que cuando un objeto sale de vista, no se renderizaba, es tamos oviando eso
         esa parte del metodo render original*/
@@ -304,6 +325,7 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
     applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
     type:'SVGAnimable',
     initialize:function(options,callback){
+        this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];
 
         let self=this;
         this.loadSVGFromURL(options.imageAssetModel.url_image,function(svgString,image){
@@ -319,7 +341,7 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
 
 
             // vars used for fill reveal mode "fadein"
-            this.auxEntranceDuration=0; // stores entrance duration value temporarily
+            this.auxEntranceDuration=0; // stores entrance effect duration value temporarily
             self.animator.addHiddenAnimationsLane("fadeInTransitionOpacity");
 
             callback();
@@ -462,6 +484,8 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
 var TextAnimable=fabric.util.createClass(fabric.IText, {
     //drawn y text_draw NO son lo mismo, ya que su logica es diferente
     applicableEntrenceModes: [EntranceModes.none,EntranceModes.text_drawn,EntranceModes.dragged,EntranceModes.text_typed],//FOR UI
+    applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
+
     type:"TextAnimable",
     initialize:function(text,options){
         /*exact copy of animable object*/
@@ -565,6 +589,348 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {
         ctx.restore();
     },
 });
+var ShapeAnimable=fabric.util.createClass(fabric.Path, {
+    applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
+    type:"ShapeAnimable",
+    initialize:function(pathList,options){
+        this.callSuper('initialize', pathList,options);
+        this.objectCaching=false;
+        this.absolutePositioned=true;
+        this.fill="rgba(0,0,0,.0)";
+        this.strokeWidth=1;
+        this.stroke="rgba(0,0,0,1)";
+
+        this.startRenderingPoint=0;
+        this.endRenderingPoint=100;
+        this.totalLength=PathLength.calculate(this.pathOffset.x,this.pathOffset.y,this.path)+10;
+        this.setEntranceMode(EntranceModes.none);
+        this.animator=new Animator(this);
+    },
+    setEntranceMode:function(mode){
+        this.entranceMode=mode;
+    },
+    getEntranceMode:function(){
+        return this.entranceMode;
+    },
+    _renderPathCommands: function(ctx) {
+        var current, // current instruction
+            previous = null,
+            subpathStartX = 0,
+            subpathStartY = 0,
+            x = 0, // current x
+            y = 0, // current y
+            controlX = 0, // current control point x
+            controlY = 0, // current control point y
+            tempX,
+            tempY,
+            l = -this.pathOffset.x,
+            t = -this.pathOffset.y;
+
+        let renderingPathNormalized=(this.endRenderingPoint/100);
+        let renderingPart=renderingPathNormalized*this.totalLength;
+        let negativeRenderingPart=(1-renderingPathNormalized)*this.totalLength;
+
+        let startPointNormalized=0;
+        let endPointNormalized=0;
+        if(this.startRenderingPoint<this.endRenderingPoint){
+            startPointNormalized=this.startRenderingPoint/100;
+            endPointNormalized=this.endRenderingPoint/100;
+        }else{
+            startPointNormalized=this.endRenderingPoint/100;
+            endPointNormalized=this.startRenderingPoint/100;
+        }
+
+        let pattern=[0,startPointNormalized*this.totalLength,(endPointNormalized-startPointNormalized)*this.totalLength,(1-endPointNormalized)*this.totalLength];
+        ctx.beginPath();
+
+        ctx.setLineDash(pattern);
+        for (var i = 0, len = this.path.length; i < len; ++i) {
+
+            current = this.path[i];
+
+            switch (current[0]) { // first letter
+
+                case 'l': // lineto, relative
+                    x += current[1];
+                    y += current[2];
+                    ctx.lineTo(x + l, y + t);
+                    break;
+
+                case 'L': // lineto, absolute
+                    x = current[1];
+                    y = current[2];
+                    ctx.lineTo(x + l, y + t);
+                    break;
+
+                case 'h': // horizontal lineto, relative
+                    x += current[1];
+                    ctx.lineTo(x + l, y + t);
+                    break;
+
+                case 'H': // horizontal lineto, absolute
+                    x = current[1];
+                    ctx.lineTo(x + l, y + t);
+                    break;
+
+                case 'v': // vertical lineto, relative
+                    y += current[1];
+                    ctx.lineTo(x + l, y + t);
+                    break;
+
+                case 'V': // verical lineto, absolute
+                    y = current[1];
+                    ctx.lineTo(x + l, y + t);
+                    break;
+
+                case 'm': // moveTo, relative
+                    x += current[1];
+                    y += current[2];
+                    subpathStartX = x;
+                    subpathStartY = y;
+                    ctx.moveTo(x + l, y + t);
+                    break;
+
+                case 'M': // moveTo, absolute
+                    x = current[1];
+                    y = current[2];
+                    subpathStartX = x;
+                    subpathStartY = y;
+                    ctx.moveTo(x + l, y + t);
+                    break;
+
+                case 'c': // bezierCurveTo, relative
+                    tempX = x + current[5];
+                    tempY = y + current[6];
+                    controlX = x + current[3];
+                    controlY = y + current[4];
+                    ctx.bezierCurveTo(
+                        x + current[1] + l, // x1
+                        y + current[2] + t, // y1
+                        controlX + l, // x2
+                        controlY + t, // y2
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+                    break;
+
+                case 'C': // bezierCurveTo, absolute
+                    x = current[5];
+                    y = current[6];
+                    controlX = current[3];
+                    controlY = current[4];
+                    ctx.bezierCurveTo(
+                        current[1] + l,
+                        current[2] + t,
+                        controlX + l,
+                        controlY + t,
+                        x + l,
+                        y + t
+                    );
+                    break;
+
+                case 's': // shorthand cubic bezierCurveTo, relative
+
+                    // transform to absolute x,y
+                    tempX = x + current[3];
+                    tempY = y + current[4];
+
+                    if (previous[0].match(/[CcSs]/) === null) {
+                        // If there is no previous command or if the previous command was not a C, c, S, or s,
+                        // the control point is coincident with the current point
+                        controlX = x;
+                        controlY = y;
+                    }
+                    else {
+                        // calculate reflection of previous control points
+                        controlX = 2 * x - controlX;
+                        controlY = 2 * y - controlY;
+                    }
+
+                    ctx.bezierCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        x + current[1] + l,
+                        y + current[2] + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    // set control point to 2nd one of this command
+                    // "... the first control point is assumed to be
+                    // the reflection of the second control point on
+                    // the previous command relative to the current point."
+                    controlX = x + current[1];
+                    controlY = y + current[2];
+
+                    x = tempX;
+                    y = tempY;
+                    break;
+
+                case 'S': // shorthand cubic bezierCurveTo, absolute
+                    tempX = current[3];
+                    tempY = current[4];
+                    if (previous[0].match(/[CcSs]/) === null) {
+                        // If there is no previous command or if the previous command was not a C, c, S, or s,
+                        // the control point is coincident with the current point
+                        controlX = x;
+                        controlY = y;
+                    }
+                    else {
+                        // calculate reflection of previous control points
+                        controlX = 2 * x - controlX;
+                        controlY = 2 * y - controlY;
+                    }
+                    ctx.bezierCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        current[1] + l,
+                        current[2] + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+
+                    // set control point to 2nd one of this command
+                    // "... the first control point is assumed to be
+                    // the reflection of the second control point on
+                    // the previous command relative to the current point."
+                    controlX = current[1];
+                    controlY = current[2];
+
+                    break;
+
+                case 'q': // quadraticCurveTo, relative
+                    // transform to absolute x,y
+                    tempX = x + current[3];
+                    tempY = y + current[4];
+
+                    controlX = x + current[1];
+                    controlY = y + current[2];
+
+                    ctx.quadraticCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+                    break;
+
+                case 'Q': // quadraticCurveTo, absolute
+                    tempX = current[3];
+                    tempY = current[4];
+
+                    ctx.quadraticCurveTo(
+                        current[1] + l,
+                        current[2] + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+                    controlX = current[1];
+                    controlY = current[2];
+                    break;
+
+                case 't': // shorthand quadraticCurveTo, relative
+
+                    // transform to absolute x,y
+                    tempX = x + current[1];
+                    tempY = y + current[2];
+
+                    if (previous[0].match(/[QqTt]/) === null) {
+                        // If there is no previous command or if the previous command was not a Q, q, T or t,
+                        // assume the control point is coincident with the current point
+                        controlX = x;
+                        controlY = y;
+                    }
+                    else {
+                        // calculate reflection of previous control point
+                        controlX = 2 * x - controlX;
+                        controlY = 2 * y - controlY;
+                    }
+
+                    ctx.quadraticCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+
+                    break;
+
+                case 'T':
+                    tempX = current[1];
+                    tempY = current[2];
+
+                    if (previous[0].match(/[QqTt]/) === null) {
+                        // If there is no previous command or if the previous command was not a Q, q, T or t,
+                        // assume the control point is coincident with the current point
+                        controlX = x;
+                        controlY = y;
+                    }
+                    else {
+                        // calculate reflection of previous control point
+                        controlX = 2 * x - controlX;
+                        controlY = 2 * y - controlY;
+                    }
+                    ctx.quadraticCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+                    break;
+
+                case 'a':
+                    // TODO: optimize this
+                    drawArc(ctx, x + l, y + t, [
+                        current[1],
+                        current[2],
+                        current[3],
+                        current[4],
+                        current[5],
+                        current[6] + x + l,
+                        current[7] + y + t
+                    ]);
+                    x += current[6];
+                    y += current[7];
+                    break;
+
+                case 'A':
+                    // TODO: optimize this
+                    drawArc(ctx, x + l, y + t, [
+                        current[1],
+                        current[2],
+                        current[3],
+                        current[4],
+                        current[5],
+                        current[6] + l,
+                        current[7] + t
+                    ]);
+                    x = current[6];
+                    y = current[7];
+                    break;
+
+                case 'z':
+                case 'Z':
+                    x = subpathStartX;
+                    y = subpathStartY;
+                    ctx.closePath();
+                    break;
+            }
+            previous = current;
+        }
+    },
+
+});
 
 ImageAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -609,6 +975,8 @@ var CameraAnimable=fabric.util.createClass(ImageAnimable,{
     type:"CameraAnimable",
     initialize:function(element,options){
         this.callSuper("initialize",element,options);
+        this.applicableMenuOptions=[]; //ya que estamos heredando de ImageAnimable, el cual al tene la opcion addMask, el menu es dinamico para el, por en se debe declara en su contructor para evitar que al
+        //alterar el menu se altere en todas las instancias, y como esta su contructor lo sobreescribira para todos sus subclases
         this.name="Camera";
         this.isCamera=true;
         this.started=false;
@@ -684,7 +1052,7 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         options || (options = { });
         this.callSuper('initialize',options);
         this.set('label', options.label || '');
-
+        this.objectCaching=false;                   // SOLUCIION BUG, ahora con solo sobreescribir _render funciona, antes se quedaba en blanco
         this.cacheCanvas=options.cacheCanvas;
 
         this.myTurn=false;
@@ -711,32 +1079,23 @@ var DrawableImage = fabric.util.createClass(fabric.Object, {
         label: this.get('label')
       });
     },
-    
-    render:function(ctx){
-        ctx.save();
-        this._setOpacity(ctx);
-        this.transform(ctx);
-        //ctx.imageSmoothingEnabled = false;
+    _render:function(ctx){
         if(this.myTurn){
-            ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2)
+            ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
         }else{
             ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);
         }
-        ctx.restore();
-    },
+    }
   });
 
 var DrawableSVGImage=fabric.util.createClass(DrawableImage, {
     initialize:function(options,imageHigh){
         this.callSuper('initialize',options);
         this.imageToBeFadeIn=imageHigh;
-        this.fadeInTransitionOpacity=0;
-    },
-    render:function(ctx){
-        ctx.save();
-        this._setOpacity(ctx);
-        this.transform(ctx);
 
+        this.fadeInTransitionOpacity=0; /*animated property*/
+    },
+    _render:function(ctx){
         if(this.myTurn){
             if(this.fadeInTransitionOpacity!==0){
                 let currentGlobalAlpha=ctx.globalAlpha;
@@ -755,7 +1114,6 @@ var DrawableSVGImage=fabric.util.createClass(DrawableImage, {
         }else{
             ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);
         }
-        ctx.restore();
     },
 });
 var FactoryDrawableImages={
@@ -769,6 +1127,8 @@ var FactoryDrawableImages={
             pivotX:object.get("pivotX"), pivotY:object.get("pivotY"),
             pivotCornerX:object.get("pivotCornerX"), pivotCornerY:object.get("pivotCornerY"),
             originX: 'custom', originY: 'custom',
+
+            clipPath:object.clipPath,
 
             animations:object.animator.dictAnimations,
             hiddenAnimations:object.animator.dictHiddenAnimations,

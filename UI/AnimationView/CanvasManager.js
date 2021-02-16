@@ -2,18 +2,23 @@ var CanvasManager={
     name:'CanvasManager',
     events:{
         OnSelectionUpdated:'OnSelectionUpdated',// cuando se crea, oculta o cambia a otro objeto
-        OnObjDeletedFromListWidthEntraces:'OnObjDeletedFromListWidthEntraces', // cuando se elimina un objeto del canvas (entonces de las dos listas)
+
         OnObjAddedToListWithEntrance:'OnObjAddedToListWithEntrance',//cuando se agrego o elimina un elemento de la lista listAnimableObjectsWithEntraces
-        OnObjModified:'OnObjModified',
         OnAnimableObjectAdded:'OnAnimableObjectAdded',
+        OnShapeAnimableAdded:"OnShapeAnimableAdded",
+        OnObjDeletedFromListWidthEntraces:'OnObjDeletedFromListWidthEntraces', // cuando se elimina un objeto del canvas (entonces de las dos listas)
         OnAnimableObjectDeleted:'OnAnimableObjectDeleted',
+        OnShapeAnimableDeleted:'OnShapeAnimableDeleted',
+
+        OnObjModified:'OnObjModified',
 
         OnDesignPathOptionClicked:'OnDesignPathOptionClicked',
     },
     HTMLElement:null,
     canvas:null,
-    listAnimableObjects:[],//NO TIENE UNA RAZON DE SER CLARA PERO SE ESPERA QUE CUANDO DENGAMOS QUE HACER ALGO EN LOS ELEMENTOS ANIMABLES, NO TENGMOS QUE RECORRER TODOS LOS ELEMENTOS DEL CANVAS, sino solo lso animables, ademas son los que se muestran en el objects editor
+    listAnimableObjects:[],//(SII QUE LA TIENE)NO TIENE UNA RAZON DE SER CLARA PERO SE ESPERA QUE CUANDO DENGAMOS QUE HACER ALGO EN LOS ELEMENTOS ANIMABLES, NO TENGMOS QUE RECORRER TODOS LOS ELEMENTOS DEL CANVAS, sino solo lso animables, ademas son los que se muestran en el objects editor
     listAnimableObjectsWithEntrance:[],// este es un subconjunto de la lista de arriba
+    listShapeAnimableObjects:[],
     camera:null,
 
     SectionFloatingMenu:null,
@@ -21,9 +26,9 @@ var CanvasManager={
 
     init:function(){
         this.SectionFloatingMenu=SectionFloatingMenu;
-        this.SectionConfigureObject=SectionConfigureObject;
+        this.SectionEntranceObjectConfiguration=SectionEntranceObjectConfiguration;
         this.SectionFloatingMenu.init();
-        this.SectionConfigureObject.init();
+        this.SectionEntranceObjectConfiguration.init();
 
         this.HTMLElement=document.querySelector(".canvas-animator");
         this.boundingClientRect=this.HTMLElement.getBoundingClientRect();
@@ -56,13 +61,13 @@ var CanvasManager={
         //PanelInspector.SectionLanesEditor.registerOnFieldInput(this);
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnDurationInput,this);
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this)
-        MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnTextOptionClicked,this);
         MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnMoveUpObjectEntranceOrder,this);
         MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnMoveDownObjectEntranceOrder,this);
 
 
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDummyDraggingEnded,this);
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnTextAssetDraggableDropped,this);
+        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnShapeAssetDraggableDropped,this);
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageURLLoaded,this);
         WindowManager.registerOnKeyDeletePressed(this);
         },
@@ -232,10 +237,26 @@ var CanvasManager={
                 self.notifyOnAnimableObjectAdded.bind(self)(animObj);
             });
 
-        } else{ //(type==="TextAnimable")
+        }else if(type==="ShapeAnimable"){
+            fabric.loadSVGFromURL(model.vectorUrl,function(objects, options){
+                var groupObj = fabric.util.groupSVGElements(objects, options);
+                let path=groupObj;// TODO: if more than 1 path fuse them into one
+                let shapeAnimable=new ShapeAnimable(path.path,{
+                    left:WindowManager.mouse.x-self.canvas._offset.left,
+                    top:WindowManager.mouse.y-self.canvas._offset.top,
+                })
+                shapeAnimable.setCoords();
+                self.listAnimableObjects.push(shapeAnimable);
+                self.listShapeAnimableObjects.push(shapeAnimable);
+                self.canvas.add(shapeAnimable);
+                self.notifyOnShapeAnimableObjectAdded.bind(self)(shapeAnimable);
+                self.notifyOnAnimableObjectAdded.bind(self)(shapeAnimable);
+            })
+        }
+        else{ //(type==="TextAnimable")
             let animObj=new TextAnimable("asdfasdfasdf",{
-                "left":100,
-                "top":100,
+                "left":WindowManager.mouse.x-self.canvas._offset.left,
+                "top":WindowManager.mouse.y-self.canvas._offset.top,
                 "originX":"custom",
                 "originY":"custom",
                 //"imageDrawingData":model,
@@ -281,12 +302,17 @@ var CanvasManager={
 
                 let indexInMainList=this.listAnimableObjects.indexOf(object);
                 let indexInObjsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(object);
+                let indexInShapeObjsList=this.listShapeAnimableObjects.indexOf(object);
                 if(indexInMainList!==-1){
                     this.listAnimableObjects.splice(indexInMainList,1);
                 }
                 if(indexInObjsWithEntrance!==-1){
                     this.listAnimableObjectsWithEntrance.splice(indexInObjsWithEntrance,1);
                     this.notifyOnObjDeletedFromListWithEntrance(indexInObjsWithEntrance);
+                }
+                if(indexInShapeObjsList!==-1){
+                    this.listShapeAnimableObjects.splice(indexInShapeObjsList,1);
+                    this.notifyOnShapeAnimableDeleted(indexInShapeObjsList);
                 }
                 this.canvas.remove(object);
                 this.notifyOnAnimableObjectDeleted(indexInMainList);
@@ -304,18 +330,25 @@ var CanvasManager={
     notifyOnObjAddedToListObjectsWithEntrance:function(animObj){
         MainMediator.notify(this.name,this.events.OnObjAddedToListWithEntrance,[animObj]);
     },
+    notifyOnShapeAnimableObjectAdded:function(animObj){
+        MainMediator.notify(this.name,this.events.OnShapeAnimableAdded,[animObj]);
+    },
     notifyOnAnimableObjectAdded:function(animObj){
         MainMediator.notify(this.name,this.events.OnAnimableObjectAdded,[animObj]);
     },
     notifyOnAnimableObjectDeleted:function(indexInAnimableObjectsList){
         MainMediator.notify(this.name,this.events.OnAnimableObjectDeleted,[indexInAnimableObjectsList]);
     },
-    notifyOnObjSelectionUpdated:function(opt){
-        MainMediator.notify(this.name,this.events.OnSelectionUpdated,[opt.target]);
-    },
     /*Object deleted from every where*/
     notifyOnObjDeletedFromListWithEntrance:function(indexInObjsWithEntrance){
         MainMediator.notify(this.name,this.events.OnObjDeletedFromListWidthEntraces,[indexInObjsWithEntrance]);
+    },
+    notifyOnShapeAnimableDeleted:function(indexInShapeAnimableList){
+        MainMediator.notify(this.name,this.events.OnShapeAnimableDeleted,[indexInShapeAnimableList]);
+    },
+
+    notifyOnObjSelectionUpdated:function(opt){
+        MainMediator.notify(this.name,this.events.OnSelectionUpdated,[opt.target]);
     },
     notifyOnObjModified:function(opt){
         MainMediator.notify(this.name,this.events.OnObjModified,[opt.target]);
@@ -334,11 +367,6 @@ var CanvasManager={
         let index=args[0];
         this.moveUpObjectInEntranceList(index);
     },
-    notificationPanelInspectorOnTextOptionClicked:function(args){
-        let action=args[0];
-
-        this.createAnimableObject({url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603741009/text_xzcmse.png"},"TextAnimable")
-    },
     notificationPanelAssetsOnImageAssetDummyDraggingEnded:function(args){
         let model=args[0];
         this.createAnimableObject(model);
@@ -347,6 +375,10 @@ var CanvasManager={
         let fontFamily=args[0];
         let model={fontFamily:fontFamily}
         this.createAnimableObject(model,"TextAnimable")
+    },
+    notificationPanelAssetsOnShapeAssetDraggableDropped:function(args){
+        let model=args[0];
+        this.createAnimableObject(model,"ShapeAnimable");
     },
     notificationPanelAssetsOnImageURLLoaded:function(args){
       let url=args[0];
@@ -401,7 +433,7 @@ var SectionFloatingMenu={
             icon:"icon-settings",
             description:"Configure Object",
             action:function (animableObject){
-                CanvasManager.SectionConfigureObject.showModal(animableObject);
+                CanvasManager.SectionEntranceObjectConfiguration.showModal(animableObject);
             },
             HTMLElement:null
         },
@@ -520,19 +552,18 @@ var SectionFloatingMenu={
     notificationCanvasManagerOnDesignPathOptionClicked:function(args){this.hiddeMenu();CanvasManager.canvas.discardActiveObject().renderAll();},
     notificationPanelInspectorOnBtnPreviewClicked:function(){this.hiddeMenu();CanvasManager.canvas.discardActiveObject().renderAll();}
 }
-var SectionConfigureObject={
+var SectionEntranceObjectConfiguration={
     HTMLElement:null,
     init:function(){
-        this.HTMLElement=document.querySelector(".canvas-animator__object-configuration__filter");
-        this.HTMLAreaEntranceSettings=document.querySelector(".canvas-animator__object-configuration__entrance-settings")
-        this.HTMLCollectionEntranceButtons=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-buttons .entrance-button")
-        this.HTMLCollectionModesAreas=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-mode-settings__mode-options")
+        this.HTMLElement=document.querySelector(".canvas-animator__object-entrance-configuration__filter");
+        this.HTMLAreaEntranceSettings=document.querySelector(".canvas-animator__object-entrance-configuration__entrance-settings")
+        this.HTMLCollectionEntranceButtons=document.querySelectorAll(".canvas-animator__object-entrance-configuration__entrance-settings__box-buttons .entrance-button")
+        this.HTMLCollectionModesAreas=document.querySelectorAll(".canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings__mode-options")
 
-        this.HTMLCollectionObjectAppearanceAreas=document.querySelectorAll(".canvas-animator__object-configuration__appearance-settings__box-options__object-type-options");
         this.widgetsEntraceMode={
             modeSelector:{
                 value:"",
-                htmlElem:document.querySelector(".canvas-animator__object-configuration__entrance-settings__box-buttons"),
+                htmlElem:document.querySelector(".canvas-animator__object-entrance-configuration__entrance-settings__box-buttons"),
                 initEvent:function(){
                     for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].addEventListener("click",this.OnTriggered.bind(this));}
                 },
@@ -542,7 +573,7 @@ var SectionConfigureObject={
                 OnTriggered:function(e){console.log(e.target);this.setVal(e.target.id);},
                 setVal:function(normalizedEntranceModeName){
                     for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].classList.remove("active");}
-                    let HTMLCollectionEntraceModesAreas=document.querySelectorAll(".canvas-animator__object-configuration__entrance-settings__box-mode-settings .mode-settings");
+                    let HTMLCollectionEntraceModesAreas=document.querySelectorAll(".canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings .mode-settings");
                     for(let i=0;i<this.htmlElem.children.length;i++){
                         if(this.htmlElem.children[i].id===normalizedEntranceModeName){
                             HTMLCollectionEntraceModesAreas[i].style.display="block";
@@ -636,103 +667,16 @@ var SectionConfigureObject={
             },
         }
 
-        this.widgetsTextAnimableObjectAppareance={
-            fontFamily:{
-                htmlElem:document.querySelector(".ImageAnimable-widged__font-family select"),
-                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
-                removeEvent:function(){this.htmlElem.removeEventListener("change",this.OnTriggered.bind(this))},
-                OnTriggered:function(e){},
-                setVal:function(val){this.htmlElem.value=val},
-                getVal:function(){return this.htmlElem.value},
-                },
-            textAlign:{
-                value:"",
-                htmlElem:document.querySelector(".ImageAnimable-widged__text-alignment .text-alignment__options"),
-                initEvent:function(){
-                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].addEventListener("click",this.OnTriggered.bind(this))}
-                },
-                removeEvent:function(){
-                    for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].removeEventListener("click",this.OnTriggered.bind(this))}
-                },
-                OnTriggered:function(e){
-                    this.setVal(e.target.id);
-                },
-                setVal:function(val){
-                    this.value=val;
-                    for(let i=0;i< this.htmlElem.children.length;i++){this.htmlElem.children[i].classList.remove("active")};
-                    this.htmlElem.querySelector("#" + val).classList.add("active");
-                },
-                getVal:function(){return this.value},
-                },
-            fontSize:{
-                htmlElem:document.querySelector(".ImageAnimable-widged__font-size .property-input"),
-                val:0,
-                initEvent:function(){
-                    this.htmlElem.children[0].addEventListener("click",this.OnTriggered.bind(this))
-                    this.htmlElem.children[1].addEventListener("input",this.OnTriggered.bind(this))
-                    this.htmlElem.children[2].addEventListener("click",this.OnTriggered.bind(this))
-                },
-                removeEvent:function(){
-                    this.htmlElem.children[0].removeEventListener("click",this.OnTriggered.bind(this))
-                    this.htmlElem.children[1].removeEventListener("input",this.OnTriggered.bind(this))
-                    this.htmlElem.children[2].removeEventListener("click",this.OnTriggered.bind(this))
-                },
-                OnTriggered:function(e){
-                    if(e.target.className==="btn-decrease"){this.setVal(this.val-5)}
-                    else if(e.target.className==="btn-increase"){this.setVal(this.val+5)}
-                    else{
-                        if(isNaN(parseInt(e.target.value))){this.setVal(this.val);}
-                        else{this.setVal(e.target.value)}
-                    }
-                },
-                setVal:function(val){
-                    val=val<0?0:val;
-                    val=parseInt(val);this.val=val;this.htmlElem.children[1].value=val},
-                getVal:function(){return this.val},
-                },
-            lineHeight:{
-                htmlElem:document.querySelector(".ImageAnimable-widged__line-height .property-input"),
-                initEvent:function(){
-                    this.htmlElem.children[0].addEventListener("click",this.OnTriggered.bind(this))
-                    this.htmlElem.children[1].addEventListener("input",this.OnTriggered.bind(this))
-                    this.htmlElem.children[2].addEventListener("click",this.OnTriggered.bind(this))
-                },
-                removeEvent:function(){
-                    this.htmlElem.children[0].removeEventListener("click",this.OnTriggered.bind(this))
-                    this.htmlElem.children[1].removeEventListener("input",this.OnTriggered.bind(this))
-                    this.htmlElem.children[2].removeEventListener("click",this.OnTriggered.bind(this))
-                },
-                OnTriggered:function(e){
-                    if(e.target.className==="btn-decrease"){this.setVal(this.val-0.05)}
-                    else if(e.target.className==="btn-increase"){this.setVal(this.val+0.05)}
-                    else{
-                        if(isNaN(parseFloat(e.target.value))){this.setVal(this.val);}
-                        else{this.setVal(e.target.value)}
-                    }
-                },
-                setVal:function(val){val=parseFloat(val);
-                val=val<0?0:val;
-                val=Math.round(val * 100) / 100;
-                this.val=val;this.htmlElem.children[1].value=val},
-                getVal:function(){return this.val;},
-            },
-            fillColor:{htmlElem:document.querySelector(".ImageAnimable-widged__fill-color input"),
-                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
-                removeEvent:function(){this.htmlElem.removeEventListener("change",this.OnTriggered.bind(this))},
-                OnTriggered:function(e){},
-                setVal:function(val){this.htmlElem.value=val},
-                getVal:function(){return this.htmlElem.value},
-                },
-        }
 
-        this.HTMLcloseBtn=document.querySelector(".canvas-animator__object-configuration__btn-close");
-        this.HTMLAcceptBtn=document.querySelector(".canvas-animator__object-configuration__footer .btn-accept")
+
+        this.HTMLcloseBtn=document.querySelector(".canvas-animator__object-entrance-configuration__btn-close");
+        this.HTMLAcceptBtn=document.querySelector(".canvas-animator__object-entrance-configuration__footer .btn-accept")
 
         this.currentAnimableObject=null;
         this.currentSelectedOptions={};
 
         this.initEvents();
-        this.generateHTMLWidgets();
+
     },
     initEvents:function(){
         this.HTMLcloseBtn.addEventListener("click",this.OnBtnCloseClicked.bind(this));
@@ -741,17 +685,7 @@ var SectionConfigureObject={
 
         //INIT WIDGETS
     },
-    generateHTMLWidgets:function(){
-        //text animable widgets
-        //- font family
-        let select=document.querySelector(".text-animable-object-widget #font-family");
-        for(let i in FontsNames){
-            let option=document.createElement("option");
-            option.textContent=i;
-            option.value=FontsNames[i];
-            select.appendChild(option);
-        }
-    },
+
     initEventsWidgetsEntranceModes:function(animableObject){
         this.widgetsEntraceMode["modeSelector"].initEvent();
         for(let i=0;i<animableObject.applicableEntrenceModes.length;i++){
@@ -767,36 +701,14 @@ var SectionConfigureObject={
             this.widgetsEntraceMode[i].removeEvent();
         }
     },
-    initEventsWidgetsTextAnimable:function(){
-        for(let i in this.widgetsTextAnimableObjectAppareance){
-            this.widgetsTextAnimableObjectAppareance[i].initEvent();
-        }
-    },
-    removeEventsWidgetsTextAnimable:function(){
-        for(let i in this.widgetsTextAnimableObjectAppareance){
-            this.widgetsTextAnimableObjectAppareance[i].removeEvent();
-        }
-    },
     showModal:function(animableObject){
         if(animableObject){
             this.currentAnimableObject=animableObject;
             this.activateEntraceModeRadios(animableObject);
-            this.activateObjectAppareanceArea(animableObject.type);
 
             this.initEventsWidgetsEntranceModes(animableObject);
             this.fillWidgetsEntranceMode(animableObject);
 
-            if(animableObject.type==="ImageAnimable"){
-
-            }else if(animableObject.type==="SVGAnimable"){
-
-            }
-            else if(animableObject.type==="TextAnimable"){
-                this.initEventsWidgetsTextAnimable()
-                this.fillWidgetsObjectAppareanceTextAnimable(animableObject);
-            }else if(animableObject.type==="CameraAnimable"){
-
-            }
             this.HTMLElement.style.display="block";
         }
     },
@@ -817,13 +729,6 @@ var SectionConfigureObject={
             }
         }
     },
-    fillWidgetsObjectAppareanceTextAnimable:function(animableObject){
-        this.widgetsTextAnimableObjectAppareance.fontFamily.setVal(animableObject.fontFamily);
-        this.widgetsTextAnimableObjectAppareance.textAlign.setVal(animableObject.textAlign);
-        this.widgetsTextAnimableObjectAppareance.fontSize.setVal(animableObject.fontSize);
-        this.widgetsTextAnimableObjectAppareance.lineHeight.setVal(animableObject.lineHeight);
-        this.widgetsTextAnimableObjectAppareance.fillColor.setVal(animableObject.fill);
-    },
     activateEntraceModeRadios:function(animableObject){
         for(let i=0;i<this.HTMLCollectionEntranceButtons.length;i++) {
             this.HTMLCollectionEntranceButtons[i].style.display="none";
@@ -833,15 +738,7 @@ var SectionConfigureObject={
             this.HTMLAreaEntranceSettings.querySelector("#" + applicableEntraceMode ).style.display="inline";
         }
     },
-    activateObjectAppareanceArea:function(animableObjectType){
-        for(let i=0;i<this.HTMLCollectionObjectAppearanceAreas.length;i++){
-            if(this.HTMLCollectionObjectAppearanceAreas[i].classList.contains(animableObjectType)){
-                this.HTMLCollectionObjectAppearanceAreas[i].style.display="block";
-            }else{
-                this.HTMLCollectionObjectAppearanceAreas[i].style.display="none";
-            }
-        }
-    },
+
     OnBtnCloseClicked:function(){
         this.removeEventsWidgetsEntranceModes();
         this.hiddeModel();
@@ -868,22 +765,6 @@ var SectionConfigureObject={
                     let val=this.widgetsEntraceMode[normalizedApplicableMode + "_"+ key].getVal();
                     this.currentAnimableObject.entraceModesSettings[unnormalizedApplicapleMode][key]=val;
                 }
-            }
-            // appareance options
-            if(this.currentAnimableObject.type==="ImageAnimable"){
-
-            }
-            else if(this.currentAnimableObject.type==="TextAnimable"){
-                this.currentAnimableObject.setFontFamily(this.widgetsTextAnimableObjectAppareance.fontFamily.getVal());
-                this.currentAnimableObject.fontSize=this.widgetsTextAnimableObjectAppareance.fontSize.getVal();
-                this.currentAnimableObject.lineHeight=this.widgetsTextAnimableObjectAppareance.lineHeight.getVal();
-                this.currentAnimableObject.textAlign=this.widgetsTextAnimableObjectAppareance.textAlign.getVal();
-                this.currentAnimableObject.set({"fill":this.widgetsTextAnimableObjectAppareance.fillColor.getVal()});
-
-                this.currentAnimableObject.exitEditing();
-                CanvasManager.canvas.renderAll();
-                this.removeEventsWidgetsTextAnimable();
-
             }
 
         }
