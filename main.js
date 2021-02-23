@@ -1,5 +1,4 @@
-  MainMediator.registerSubjects([WindowManager,PanelActionEditor,PanelAssets,CanvasManager,PanelInspector,PanelDesignerOptions,  PanelPreviewer]);
-
+MainMediator.registerSubjects([WindowManager,PanelActionEditor,PanelAssets,CanvasManager,PanelInspector,PanelDesignerOptions,  PanelPreviewer]);
 
   //var fontsLoader=new FontsLoader();
 
@@ -23,4 +22,3 @@
 
   /*---------------------------------------------------*/
   WindowManager.init();
-  CanvasManager.init();

@@ -30,10 +30,10 @@ var PreviewManager=fabric.util.createClass({
     getIllustrationDuration:function(){
         return this.pathIllustrator.data.duration;
     },
-    wakeUp:function(imageDrawingData){
+    wakeUp:function(imageDrawingData,baseImage){
         this.imageDrawingData=imageDrawingData;
-        let imgWidth=imageDrawingData.imgHigh.naturalWidth;
-        let imgHeight=imageDrawingData.imgHigh.naturalHeight;
+        let imgWidth=baseImage.naturalWidth;
+        let imgHeight=baseImage.naturalHeight;
         let aspect=imgWidth/imgHeight;
         if(imgWidth>imgHeight){
             this.canvas.width=this.parentWidth;
@@ -47,7 +47,7 @@ var PreviewManager=fabric.util.createClass({
         this.scalerFactorX=this.canvas.width/this.canvasDrawingManager.canvasOriginalWidth;
         this.scalerFactorY=this.canvas.height/this.canvasDrawingManager.canvasOriginalHeight;
     
-        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this,this.scalerFactorX,this.scalerFactorY,this.imageDrawingData.imgHigh);
+        this.illustratorDataAdapter=new IllustratorDataAdapterPreview(this.drawingManager,this.canvasDrawingManager,this,this.scalerFactorX,this.scalerFactorY,baseImage);
         this.pathIllustrator=new PathIllustrator(this.canvas,this.ctx,this.illustratorDataAdapter,true);
         this.pathIllustrator.setupPreviewSceneVars();
         this.start();

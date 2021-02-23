@@ -1,4 +1,4 @@
-var ImageAnimableDataGenerator=fabric.util.createClass({
+var ImageDrawingDataGenerator=fabric.util.createClass({
     initialize:function(){
         this.canvasElem=document.createElement("canvas");
         this.canvasElem.id="auxCanvas"
@@ -109,7 +109,7 @@ var ImageAnimableDataGenerator=fabric.util.createClass({
     }
 });
 
-var TextAnimableDataGenerator=fabric.util.createClass({
+var TextDrawingDataGenerator=fabric.util.createClass({
     initialize: function () {
         this.auxCanvasForTexts=document.createElement("canvas");
         this.auxCanvasForTextsContext=this.auxCanvasForTexts.getContext("2d");
@@ -222,8 +222,8 @@ var TextAnimableDataGenerator=fabric.util.createClass({
         return result;
     },
     generateTextBaseImage:function(animableText,openTypePaths,callback){
-        let dimX=animableText.getWidthInDrawingCache();
-        let dimY=animableText.getHeightInDrawingCache();
+        let dimX=animableText.entranceBehaviour.entranceMode.getWidthInDrawingCache();
+        let dimY=animableText.entranceBehaviour.entranceMode.getHeightInDrawingCache();
         this.auxCanvasForTexts.width=dimX;
         this.auxCanvasForTexts.height=dimY;
         // let tmpText=new fabric.Text(animableText.text,{
@@ -246,8 +246,6 @@ var TextAnimableDataGenerator=fabric.util.createClass({
             this.auxCanvasForTextsContext.fill();
 
         }
-
-
         let image=new Image();
         image.onload=function(){
             callback(image);

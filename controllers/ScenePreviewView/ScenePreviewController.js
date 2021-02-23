@@ -1,3 +1,7 @@
+var EntranceEffectManagerMap={
+    NoneEntranceMode:null,
+    DrawnEntranceMode:null,
+}
 var ScenePreviewController=fabric.util.createClass({
     name:'ScenePreviewController',
     events:{
@@ -8,8 +12,10 @@ var ScenePreviewController=fabric.util.createClass({
         this.drawingCacheManager=new DrawingCacheManager(this.drawingHand);
         this.UIPanelPreviewerCanvas=null;
 
-        this.imageAnimDataGenerator=new ImageAnimableDataGenerator();
-        this.textAnimDataGenerator=new TextAnimableDataGenerator();
+        EntranceEffectManagerMap.DrawnEntranceMode=this.drawingCacheManager;
+
+        this.imageAnimDataGenerator=new ImageDrawingDataGenerator();
+        this.textAnimDataGenerator=new TextDrawingDataGenerator();
         this.svgAnimDataGenerator=new SVGAnimableDataGenerator();
 
         this.animator=new ControllerAnimator(null); // el UIPanelPreviewerCanvas en este punto aun vale null, cuando carga el UI de este controller se popula con la refernecia al canvas (setPreviewerCanvas)
@@ -25,6 +31,7 @@ var ScenePreviewController=fabric.util.createClass({
         this.listSVGAnimablesWithNoPath=[];
 
         this.counterCallbacksOnImageTextLoading=0;
+        this.counterObjectsWithEntranceForWaiting=0;
     },
     callBackOnAnimatorTick:function(progress){
         MainMediator.notify(this.name,this.events.OnAnimatorTick,[progress])
@@ -33,7 +40,7 @@ var ScenePreviewController=fabric.util.createClass({
         this.UIPanelPreviewerCanvas=previewerCanvas;
         this.animator.canvasToDisplay=this.UIPanelPreviewerCanvas;
     },
-    loadObjectsForAnimation:function(listForAnimator,listDrawableObjects,listAnimableObjectDrawnEntrance){
+    loadObjectsForAnimation:function(listForAnimator,listAnimableObjectDrawnEntrance){
         /*
         * Tenemos 3 tipos de objetos (ImageAnimable, TextAnimable, CameraAnimable ) que reciden en el canvas principal
         *   * Llevan la palabra Animable porque son animables por el ControllerAnimator, es decir por la linea de tiempo
@@ -62,185 +69,168 @@ var ScenePreviewController=fabric.util.createClass({
         for(let i=0;i<CanvasManager.listAnimableObjectsWithEntrance.length;i++){
             let animableObjWithEntrance=CanvasManager.listAnimableObjectsWithEntrance[i];
 
-            animableObjWithEntrance.tmpIndexStartOrder=i;
-
             animableObjWithEntrance.animator.entranceTimes.startTime=startTimeCounter;
             startTimeCounter+=animableObjWithEntrance.animator.entranceTimes.delay + animableObjWithEntrance.animator.entranceTimes.duration;
 
+            this.counterObjectsWithEntranceForWaiting++;
+            animableObjWithEntrance.entranceBehaviour.wakeup(function(){//on data ready (util para textos y svgs)
+                listAnimableObjectDrawnEntrance[i]=animableObjWithEntrance;
+                this.counterObjectsWithEntranceForWaiting--;
+            }.bind(this));
         }
         let canvasObjects=CanvasManager.canvas.getObjects();
         for(let i=0;i<canvasObjects.length;i++){
+            // let objectToBeAnimated=null;
+            //
+            //
+            // if(object.getEntranceMode()===EntranceModes.drawn){
+            //     this.generateDrawingDataOnDrawableObject(object);
+            //
+            //     objectToBeAnimated=FactoryDrawableImages.create(object,this.drawingCacheManager.canvas);
+            //
+            //     listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
+            //     listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
+            // }else if(object.getEntranceMode()===EntranceModes.dragged){
+            //     objectToBeAnimated=object;
+            // }else if(object.getEntranceMode()===EntranceModes.text_drawn){
+            //     let pathOpenTypeObjects=[] //for each line we need the path to generate the image
+            //     let result=this.textAnimDataGenerator.generateTextDrawingData(object,object.getWidthInDrawingCache(),object.getHeightInDrawingCache(),pathOpenTypeObjects);
+            //     object.imageDrawingData = result;
+            //     object.imageDrawingData.type=TextType.PROVIDED;
+            //
+            //     this.counterCallbacksOnImageTextLoading++;
+            //     this.textAnimDataGenerator.generateTextBaseImage(object,pathOpenTypeObjects,function(image){
+            //         object.largeImage=image;
+            //         object.maskedImage=image;
+            //         this.counterCallbacksOnImageTextLoading--;
+            //     }.bind(this));
+            //
+            //     objectToBeAnimated=FactoryDrawableImages.create(object,this.drawingCacheManager.canvas);
+            //
+            //     listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
+            //     listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
+            // }else if(object.getEntranceMode()===EntranceModes.text_typed){
+            //     objectToBeAnimated=object;
+            // }else if(object.getEntranceMode()===EntranceModes.none){
+            //     objectToBeAnimated=object;
+            // }else{
+            //     alert("hay objectos que tienen entrance mode diferentes a los contemplados scenePreviewController.js");
+            // }
             let object=canvasObjects[i];
-            let objectToBeAnimated=null;
-            if(object.getEntranceMode()===EntranceModes.drawn){
-                this.generateDrawingDataOnDrawableObject(object);
 
-                objectToBeAnimated=FactoryDrawableImages.create(object,this.drawingCacheManager.canvas);
-
-                listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
-                listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
-            }else if(object.getEntranceMode()===EntranceModes.dragged){
-                objectToBeAnimated=object;
-            }else if(object.getEntranceMode()===EntranceModes.text_drawn){
-                let pathOpenTypeObjects=[] //for each line we need the path to generate the image
-                let result=this.textAnimDataGenerator.generateTextDrawingData(object,object.getWidthInDrawingCache(),object.getHeightInDrawingCache(),pathOpenTypeObjects);
-                object.imageDrawingData = result;
-                object.imageDrawingData.type=TextType.PROVIDED;
-
-                this.counterCallbacksOnImageTextLoading++;
-                this.textAnimDataGenerator.generateTextBaseImage(object,pathOpenTypeObjects,function(image){
-                    object.imageDrawingData.imgHigh=image;
-                    object.imageDrawingData.imgMasked=image;
-                    this.counterCallbacksOnImageTextLoading--;
-                }.bind(this));
-
-                objectToBeAnimated=FactoryDrawableImages.create(object,this.drawingCacheManager.canvas);
-
-                listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
-                listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
-            }else if(object.getEntranceMode()===EntranceModes.text_typed){
-                objectToBeAnimated=object;
-            }else if(object.getEntranceMode()===EntranceModes.none){
-                objectToBeAnimated=object;
-            }else{
-                alert("hay objectos que tienen entrance mode diferentes a los contemplados scenePreviewController.js");
-            }
             if(object.type!=="CameraAnimable"){
-                this.UIPanelPreviewerCanvas.add(objectToBeAnimated);
+                this.UIPanelPreviewerCanvas.add(object);
             }
-            listForAnimator.push(objectToBeAnimated);
+            listForAnimator.push(object);
         }
     },
-    generateDrawingDataOnDrawableObject:function(animableObj){
-        if(animableObj.imageDrawingData.type===ImageType.CREATED_NOPATH){
-            if(animableObj.type==="SVGAnimable"){
-                this.listSVGAnimablesWithNoPath.push(animableObj);
-                this.counterCallbacksOnSVGAnimableLoading++;
-                this.svgManager=new SVGManager();
-                this.svgAnimDataGenerator.generateDrawingData(
-                    animableObj.svgString,
-                    animableObj.width,
-                    animableObj.height,
-                    animableObj.entraceModesSettings[EntranceModes.drawn].forceStrokeDrawing,
-                    function(svgDrawingData,indexFinalTrueLayer){
-                        animableObj.indexFinalTruePath=indexFinalTrueLayer;
-
-                        if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="drawn_fill"){
-                            if(indexFinalTrueLayer===svgDrawingData.points.length-1){
-                                this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(
-                                    animableObj.imageDrawingData.imgHigh.naturalWidth,
-                                    animableObj.imageDrawingData.imgHigh.naturalHeight,
-                                    svgDrawingData,//OUT
-                                    35);
-                                this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
-                                    svgDrawingData.points,
-                                    svgDrawingData /*OUT*/
-                                );
-                                this.imageAnimDataGenerator.generateStrokesTypesFromPoints(
-                                    svgDrawingData.points,
-                                    svgDrawingData /*OUT*/
-                                );
-                                this.imageAnimDataGenerator.generateMissingLinesColors(
-                                    indexFinalTrueLayer,
-                                    svgDrawingData/*OUT*/
-                                );
-                            }
-                        }else{// in case fillRevealMode !== drawn_fill we do not need revealing paths
-                            if(indexFinalTrueLayer!==svgDrawingData.points.length-1){
-                                for(let i=indexFinalTrueLayer;i<svgDrawingData.points.length;i++){
-                                    for(let j in svgDrawingData){
-                                        svgDrawingData[j].splice(i,1);
-                                    }
-                                    i--;
-                                }
-                            }
-
-                            if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="fadein"){
-                                animableObj.addFadeInAnimation();
-                            }
-                            if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="no-fill"){
-
-                            }
-                        }
-
-                        svgDrawingData.imgHigh=animableObj.imageDrawingData.imgHigh;
-                        svgDrawingData.imgLow=animableObj.imageDrawingData.imgLow;
-                        svgDrawingData.imgMasked=animableObj.imageDrawingData.imgHigh;
-                        svgDrawingData.type=animableObj.imageDrawingData.type;
-
-                        animableObj.imageDrawingData=svgDrawingData;
-
-
-                        this.counterCallbacksOnSVGAnimableLoading--;
-                    }.bind(this)
-                );
-                return;
-            }
-
-            //calculate points and ctrlPoints and strokestyes (para el pathillustrator)
-            this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(
-                animableObj.imageDrawingData.imgHigh.naturalWidth,
-                animableObj.imageDrawingData.imgHigh.naturalHeight,
-                animableObj.imageDrawingData,//OUT
-                35);
-
-            this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
-                animableObj.imageDrawingData.points,
-                animableObj.imageDrawingData /*OUT*/
-            );
-            this.imageAnimDataGenerator.generateStrokesTypesFromPoints(
-                animableObj.imageDrawingData.points,
-                animableObj.imageDrawingData /*OUT*/
-            );
-            //animableObj.imageDrawingData.pathsNames=this.imageAnimDataGenerator.generateLayerNames(animableObj.imageDrawingData.points)
-        }else if(animableObj.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
-            // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
-            this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
-                animableObj.imageDrawingData.points,
-                animableObj.imageDrawingData /*OUT*/
-            );
-        }
-    },
+    // generateDrawingDataOnDrawableObject:function(animableObj){
+    //     if(animableObj.imageDrawingData.type===DrawingDataType.CREATED_NOPATH){
+    //         if(animableObj.type==="SVGAnimable"){
+    //             this.listSVGAnimablesWithNoPath.push(animableObj);
+    //             this.counterCallbacksOnSVGAnimableLoading++;
+    //             this.svgManager=new SVGManager();
+    //             this.svgAnimDataGenerator.generateDrawingData(
+    //                 animableObj.svgString,
+    //                 animableObj.width,
+    //                 animableObj.height,
+    //                 animableObj.entraceModesSettings[EntranceModes.drawn].forceStrokeDrawing,
+    //                 function(svgDrawingData,indexFinalTrueLayer){
+    //                     animableObj.indexFinalTruePath=indexFinalTrueLayer;
+    //
+    //                     if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="drawn_fill"){
+    //                         if(indexFinalTrueLayer===svgDrawingData.points.length-1){
+    //                             this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(
+    //                                 animableObj.largeImage.naturalWidth,
+    //                                 animableObj.largeImage.naturalHeight,
+    //                                 svgDrawingData,//OUT
+    //                                 35);
+    //                             this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
+    //                                 svgDrawingData.points,
+    //                                 svgDrawingData /*OUT*/
+    //                             );
+    //                             this.imageAnimDataGenerator.generateStrokesTypesFromPoints(
+    //                                 svgDrawingData.points,
+    //                                 svgDrawingData /*OUT*/
+    //                             );
+    //                             this.imageAnimDataGenerator.generateMissingLinesColors(
+    //                                 indexFinalTrueLayer,
+    //                                 svgDrawingData/*OUT*/
+    //                             );
+    //                         }
+    //                     }else{// in case fillRevealMode !== drawn_fill we do not need revealing paths
+    //                         if(indexFinalTrueLayer!==svgDrawingData.points.length-1){
+    //                             for(let i=indexFinalTrueLayer;i<svgDrawingData.points.length;i++){
+    //                                 for(let j in svgDrawingData){
+    //                                     svgDrawingData[j].splice(i,1);
+    //                                 }
+    //                                 i--;
+    //                             }
+    //                         }
+    //
+    //                         if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="fadein"){
+    //                             animableObj.addFadeInAnimation();
+    //                         }
+    //                         if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="no-fill"){
+    //
+    //                         }
+    //                     }
+    //
+    //                     svgDrawingData.type=animableObj.imageDrawingData.type;
+    //
+    //                     animableObj.imageDrawingData=svgDrawingData;
+    //
+    //
+    //                     this.counterCallbacksOnSVGAnimableLoading--;
+    //                 }.bind(this)
+    //             );
+    //             return;
+    //         }
+    //
+    //         //calculate points and ctrlPoints and strokestyes (para el pathillustrator)
+    //         this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(
+    //             animableObj.largeImage.naturalWidth,
+    //             animableObj.largeImage.naturalHeight,
+    //             animableObj.imageDrawingData,//OUT
+    //             35);
+    //
+    //         this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
+    //             animableObj.imageDrawingData.points,
+    //             animableObj.imageDrawingData /*OUT*/
+    //         );
+    //         this.imageAnimDataGenerator.generateStrokesTypesFromPoints(
+    //             animableObj.imageDrawingData.points,
+    //             animableObj.imageDrawingData /*OUT*/
+    //         );
+    //         //animableObj.imageDrawingData.pathsNames=this.imageAnimDataGenerator.generateLayerNames(animableObj.imageDrawingData.points)
+    //     }else if(animableObj.imageDrawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+    //         // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
+    //         this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
+    //             animableObj.imageDrawingData.points,
+    //             animableObj.imageDrawingData /*OUT*/
+    //         );
+    //     }
+    // },
     clearEntranceDataFromAnimableObjects:function(){
         for(let i=0;i<CanvasManager.listAnimableObjects.length;i++) {//omitiendo el primer porque es la camara
             let animableObj = CanvasManager.listAnimableObjects[i];
-            if(animableObj.type==="CameraAnimable" || animableObj.type==="ShapeAnimable"){continue;}
-
-            if(animableObj.imageDrawingData.type===ImageType.CREATED_NOPATH || animableObj.imageDrawingData.type===TextType.PROVIDED){
-                animableObj.imageDrawingData.points=[];
-                animableObj.imageDrawingData.linesWidths=[];
-                animableObj.imageDrawingData.ctrlPoints=[];
-                animableObj.imageDrawingData.strokesTypes=[];
-                animableObj.imageDrawingData.pathsNames=[];
-            }else if(animableObj.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
-                animableObj.imageDrawingData.ctrlPoints=[];
-            }
-            else if(animableObj.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
-                //NOTHING
-            }
-
-            if(animableObj.type==="SVGAnimable" && animableObj.entraceModesSettings["drawn"].fillRevealMode==="fadein"){
-                animableObj.removeFadeInAnimation();
-            }
+            animableObj.entranceBehaviour.sleep();
         }
     },
 
     notificationPanelInspectorOnBtnPreviewClicked:function(){
         let listForAnimator=[];//list that contains objects with no entrace (none) and objects in listDrawableObjects list. List for the animator
         //listas para el DrawingCacheManager (dibujador)
-        let listDrawableObjects=[]; //DrawableImage. lista para objetos con efecto de dibujado (son agregados al canvas y al animator), para el DrawingCacheManager, que orquestara el dibujado en orden de estos objetos
         let listAnimableWithDrawnEntrance=[]; // lista de objectos con tipo de entrada Drawn , son usados como DTOs para el DrawingCacheManager
         /*
         * animable: objeto de la escena  que es animado con linea de timpo
-        * drawable : objeto para la previsualizacion, al que se le asigna las animaciones de una naimable object que tiene modo de entrada dibujado
         * */
         CanvasManager.camera.animator.start(this.UIPanelPreviewerCanvas);
-        this.loadObjectsForAnimation(listForAnimator,listDrawableObjects,listAnimableWithDrawnEntrance);
+        this.loadObjectsForAnimation(listForAnimator,listAnimableWithDrawnEntrance);
 
-        (function WaitForSVGAnimablesAndTexts(){
-            if(this.counterCallbacksOnSVGAnimableLoading!==0 || this.counterCallbacksOnImageTextLoading!==0){setTimeout(WaitForSVGAnimablesAndTexts.bind(this),20);return;}
-
-            this.drawingCacheManager.wakeUp(listDrawableObjects,listAnimableWithDrawnEntrance);
+        (function WaitForObjectsWithEntrance(){
+            if(this.counterObjectsWithEntranceForWaiting!==0){setTimeout(WaitForObjectsWithEntrance.bind(this),20);return;}
+            this.drawingCacheManager.wakeUp(listAnimableWithDrawnEntrance);
             this.drawingCacheManager.addDrawingHandToCanvas(this.UIPanelPreviewerCanvas);
             listForAnimator.push(this.drawingCacheManager);
             this.animator.setListObjectsToAnimate(listForAnimator);
@@ -248,8 +238,6 @@ var ScenePreviewController=fabric.util.createClass({
             this.animator.setTotalProgress(0);
             this.animator.playAnimation();
         }.bind(this)())
-
-
     },
     notificationPanelPreviewerOnBtnClose:function(){
         CanvasManager.camera.animator.stop();
@@ -258,7 +246,7 @@ var ScenePreviewController=fabric.util.createClass({
         this.drawingCacheManager.sleep();
         CanvasManager.setCanvasOnAnimableObjects();
         this.clearEntranceDataFromAnimableObjects();
-        this.listSVGAnimablesWithNoPath=[];
+        CanvasManager.canvas.renderAll();
     },
     notificationPanelPreviewerOnBtnPlay:function(args){
         let playOrPause=args[0]

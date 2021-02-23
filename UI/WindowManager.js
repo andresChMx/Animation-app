@@ -136,6 +136,8 @@ var WindowManager={
     initUI:function(){
         document.body.style.width=window.innerWidth + "px";
         document.body.style.height=window.innerHeight + "px";
+
+        CanvasManager.init();
         /*AUTHENTICATION*/
         PanelAuthentication.init();
         /*ANIMATOR*/
@@ -148,7 +150,6 @@ var WindowManager={
 
         PanelAssets.init();
 
-
         /*paths desginer*/
         PanelDesignerOptions.init();
         PanelPathsDesigner.init();
@@ -156,6 +157,9 @@ var WindowManager={
         /*pewviewer*/
         PanelPreviewer.init();
 
-        MainMediator.notify(this.name,this.events.OnUILoaded,[]);
+        StaticResource.addListenerOnImagesReady(function(){
+            MainMediator.notify(this.name,this.events.OnUILoaded,[]);
+        }.bind(this))
+        StaticResource.init();
     }
 }

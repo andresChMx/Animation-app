@@ -1,4 +1,5 @@
 var EnumAnimationTweenType={
+    Linear:'Linear',
     Sine:'Sine',
     Cubic:'Cubic',
     Quint:'Quint',
@@ -73,7 +74,7 @@ var Animation=fabric.util.createClass({
         this.assembleFunctionName();
     },
     assembleFunctionName:function(){
-        if(this.easingType===EnumAnimationEasingType.Linear){
+        if(this.tweenType===EnumAnimationTweenType.Linear){
             this.functionName='Linear';
         }else{
             this.functionName='ease' + this.easingType + this.tweenType;
@@ -92,6 +93,18 @@ var Animation=fabric.util.createClass({
     },
     hasTwoKeys:function(){
         return this.endMoment!=-1 && this.endValue!=-1;
+    },
+    toObject:function(){
+        return {
+            type:"Animation",
+            startValue:this.startValue,
+            endValue:this.endValue,
+            startMoment:this.startMoment,
+            endMoment:this.endMoment,
+            property:this.property,
+            tweenType:this.tweenType,
+            easingType:this.easingType,
+        }
     }
 });
 var AnimationRotation=fabric.util.createClass(Animation,{

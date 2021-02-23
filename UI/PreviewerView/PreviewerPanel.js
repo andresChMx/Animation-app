@@ -25,7 +25,7 @@ var PanelPreviewer={
         this.initEvents();
         MainMediator.registerObserver(this.scenePreviewerController.name,this.scenePreviewerController.events.OnAnimatorTick,this)
         MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnPreviewClicked,this);
-        this.canvas=new CustomStaticCanvas('panel-previewer__canvas');
+        this.canvas=new PreviewerCanvas('panel-previewer__canvas');
         this.scenePreviewerController.setPreviewerCanvas(this.canvas);
     },
     setController:function(controller){//controllers are setted before initialization (init())

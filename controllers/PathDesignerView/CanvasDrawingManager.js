@@ -23,14 +23,14 @@ var CanvasDrawingManager=fabric.util.createClass({
 
 
     },
-    wakeUp:function(imageDrawingData){
+    wakeUp:function(imageDrawingData,baseImage){
         this.canvasZoomVal=1;
         this.canvas.on("mouse:move",this.OnMouseMoved.bind(this))
         this.canvas.on("mouse:up",this.OnMouseUp.bind(this))
 
-        this.canvasOriginalWidth=imageDrawingData.imgHigh.naturalWidth;
-        this.canvasOriginalHeight=imageDrawingData.imgHigh.naturalHeight;
-        let oImg=new fabric.Image(imageDrawingData.imgHigh,{
+        this.canvasOriginalWidth=baseImage.naturalWidth;
+        this.canvasOriginalHeight=baseImage.naturalHeight;
+        let oImg=new fabric.Image(baseImage,{
             "left":0,
             "top":0,
             "originX":"left",
@@ -42,7 +42,7 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.setupCanvasDimensions();
         this.initDrawingPath();
 
-        if(imageDrawingData.type===ImageType.CREATED_NOPATH){
+        if(imageDrawingData.type===DrawingDataType.CREATED_NOPATH){
             this.initDrawingDataAsEmpty();
         }else{
             this.loadPaths(imageDrawingData);

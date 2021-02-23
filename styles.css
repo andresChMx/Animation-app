@@ -315,7 +315,9 @@ button{
     font-size:1em;
 
 }
-
+.row{
+    display:flex;
+}
 /*range widget*/
 .range-widget{
 
@@ -851,10 +853,41 @@ button{
     height:25px;
     align-items: center;
 }
+
+.area-objects-properties__zone-styles__box-floating-panels .floating-panel#ShapeAnimable-styling-panel > .row{
+
+}
+.area-objects-properties__zone-styles__box-floating-panels .floating-panel#ShapeAnimable-styling-panel .styling-widget.fill{
+    position:relative;
+}
+.area-objects-properties__zone-styles__box-floating-panels .floating-panel#ShapeAnimable-styling-panel .styling-widget.transparent-fill{
+    position:absolute;
+    right:0;
+    top:0;
+    width:32%;
+
+    display: flex;
+    justify-content: flex-end;
+}
+.area-objects-properties__zone-styles__box-floating-panels .floating-panel#ShapeAnimable-styling-panel .styling-widget.stroke{
+    position:relative;
+
+}
+.area-objects-properties__zone-styles__box-floating-panels .floating-panel#ShapeAnimable-styling-panel .styling-widget.transparent-stroke{
+    position:absolute;
+    right:0;
+    top:0;
+    width:32%;
+
+    display: flex;
+    justify-content: flex-end;
+}
+
+
 .area-objects-properties__zone-styles__box-floating-panels .floating-panel .range-widget{
     display:block;
 }
-.area-objects-properties__zone-styles__box-floating-panels .floating-panel .styling-widget > label{
+.area-objects-properties__zone-styles__box-floating-panels .floating-panel > .styling-widget > label{
     width:50%;
 }
 .floating-panel-textanimable .styling-widget.text-alignment .text-alignment__options span.active{

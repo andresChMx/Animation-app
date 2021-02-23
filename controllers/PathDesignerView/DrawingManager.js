@@ -5,11 +5,11 @@ var CrtlPoinstManagement=fabric.util.createClass({
     /*
     wakeUp:function(canvasManagerPoints,drawingData,imgWidth,imgHeight){
         //this.list=[]; en sleep() ya se limpia
-        if(drawingData.type===ImageType.CREATED_NOPATH){
+        if(drawingData.type===DrawingDataType.CREATED_NOPATH){
 
-        }else if(drawingData.type===ImageType.CREATED_PATHDESIGNED){
+        }else if(drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
             this.generateCrtlPointsFromPointsMatrix(canvasManagerPoints);
-        }else if(drawingData.type===ImageType.CREATED_PATHLOADED){
+        }else if(drawingData.type===DrawingDataType.CREATED_PATHLOADED){
             this.generateCrtlPointsFromLoadedData(drawingData,imgWidth,imgHeight)
         }
 
@@ -199,17 +199,17 @@ var DrawingManager=fabric.util.createClass({
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnBtnDeletePathClicked,this);
 
     },
-    wakeUp:function(imageDrawingData){
+    wakeUp:function(imageDrawingData,baseImage){
 
-        if(imageDrawingData.type===ImageType.CREATED_NOPATH){
+        if(imageDrawingData.type===DrawingDataType.CREATED_NOPATH){
             this.initPathsNamesAsEmpty();
             this.ctrlPointsManager.initCtrlPointsAsEmpty()
-        }else if(imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
+        }else if(imageDrawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
             this.loadPathsNames(imageDrawingData);
             this.ctrlPointsManager.generateCrtlPointsFromPointsMatrix(this.canvasManager.listPoints)
-        }else if(imageDrawingData.type===ImageType.CREATED_PATHLOADED){
+        }else if(imageDrawingData.type===DrawingDataType.CREATED_PATHLOADED){
             this.loadPathsNames(imageDrawingData);
-            this.ctrlPointsManager.generateCrtlPointsFromLoadedData(imageDrawingData,imageDrawingData.imgHigh.naturalWidth,imageDrawingData.imgHigh.naturalHeight)
+            this.ctrlPointsManager.generateCrtlPointsFromLoadedData(imageDrawingData,baseImage.naturalWidth,baseImage.naturalHeight)
         }
 
         this.canvasManager.updatePathData(this.ctrlPointsManager.list,this.canvasManager.listPoints);

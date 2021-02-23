@@ -178,10 +178,11 @@ let SectionImageAssets={
 
     lastModelOnItemMenuBtnClicked:null,
     lastModelOnItemDragged:null,
+    lastThumbnailOnItemDragged:null,
     baseUrl:"https://res.cloudinary.com/dswkzmiyh",
     //https://www.alamy.com/happy-family-with-young-children-hand-drawn-doodle-vector-illustration-sketch-drawing-family-isolated-on-white-background-young-family-with-son-and-daughter-image344422627.html
     MODELItemAssets:[
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603391302/700_FO49918911_12cfed34802ecb4daaa7a7b7fddd464d_w2lfrh.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:ImageType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603391302/700_FO49918911_12cfed34802ecb4daaa7a7b7fddd464d_w2lfrh.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:DrawingDataType.CREATED_NOPATH,delay:0}},
     ],
     //state:imported-empty,imported-designed,ours, bitmap-empty,bitmap-designed,svg-emtpy,svg-designed,svg-custom,
     MODELItemMenuOptions:[
@@ -412,9 +413,10 @@ let SectionImageAssets={
         }
 
     },
-    childNotificationOnAssetDraggingStarted:function(model){
+    childNotificationOnAssetDraggingStarted:function(model,thumbnailImg){
         let self=SectionImageAssets;
         self.lastModelOnItemDragged=model;
+        self.lastThumbnailOnItemDragged=thumbnailImg;
         self.isItemPressed=true;
         self.HTMLDummyAssetDrag.style.display="block";
     },
@@ -443,7 +445,7 @@ let SectionImageAssets={
         this.parentClass.childNotificationOnImageURLLoaded(url);
     },
     notifyOnDummyDraggingEnded:function(){
-        this.parentClass.childNotificationOnImageAssetDummyDraggingEnded(this.lastModelOnItemDragged);
+        this.parentClass.childNotificationOnImageAssetDummyDraggingEnded(this.lastModelOnItemDragged,this.lastThumbnailOnItemDragged);
     },
 
 }
@@ -717,8 +719,8 @@ var PanelAssets={
     notificationCanvasManagerOnDesignPathOptionClicked:function(){
         this.hide();
     },
-    childNotificationOnImageAssetDummyDraggingEnded:function(lastModelOnItemDragged){
-        MainMediator.notify(this.name,this.events.OnImageAssetDummyDraggingEnded,[lastModelOnItemDragged]);
+    childNotificationOnImageAssetDummyDraggingEnded:function(lastModelOnItemDragged,lastThumbnailOnItemDragged){
+        MainMediator.notify(this.name,this.events.OnImageAssetDummyDraggingEnded,[lastModelOnItemDragged,lastThumbnailOnItemDragged]);
     },
     childNotificationOnTextAssetDraggableDropped:function(fontFamily){
         MainMediator.notify(this.name,this.events.OnTextAssetDraggableDropped,[fontFamily]);
@@ -784,7 +786,7 @@ var AssetImage=function(model,parentClass){
         }
     }
     this.notifyOnDraggingStarted=function(){
-        this.parentClass.childNotificationOnAssetDraggingStarted(this.model);
+        this.parentClass.childNotificationOnAssetDraggingStarted(this.model,this.HTMLElement.querySelector(".image-asset__inner-container__image"));
     }
     this.notifyOnMenuPressed=function(){
         this.parentClass.childNotificationOnAssetMenuPressed(this.model);

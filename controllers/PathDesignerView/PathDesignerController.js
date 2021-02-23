@@ -22,7 +22,7 @@ var PathDesignerController=fabric.util.createClass({
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
 
     },
-    wakeUpComponentes:function(imageDrawingData){
+    wakeUpComponentes:function(imageDrawingData,baseImage){
         if(imageDrawingData.pathsNames.length===0){
             imageDrawingData.strokesTypes.push([]);
             imageDrawingData.points.push([]);
@@ -30,32 +30,21 @@ var PathDesignerController=fabric.util.createClass({
             imageDrawingData.linesWidths.push(10);
             imageDrawingData.pathsNames.push("Path 1")
         }
-        this.canvasManager.wakeUp(imageDrawingData);
-        this.drawingManager.wakeUp(imageDrawingData);
-        this.previewManager.wakeUp(imageDrawingData);//tiene acceso al drawinData ya que tiene referencia al canvasManager y drawingManager
+        this.canvasManager.wakeUp(imageDrawingData,baseImage);
+        this.drawingManager.wakeUp(imageDrawingData,baseImage);
+        this.previewManager.wakeUp(imageDrawingData,baseImage);//tiene acceso al drawinData ya que tiene referencia al canvasManager y drawingManager
 
         this.notifyOnSetupCompleted();
     },
     notificationCanvasManagerOnDesignPathOptionClicked:function(args){
         let animableObject=args[0];
-        this.objectDesigning=animableObject;
-        this.imageDrawingData=animableObject.imageDrawingData;
 
-        if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
-            this.wakeUpComponentes(this.imageDrawingData);
-        }else if(this.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
-            if(this.imageDrawingData.points.length===0){
-                //TODO: query firebase points,ctrlPoints,lineswidths,pathsNames,strokesTypes,type
-            }else{
-                this.wakeUpComponentes(this.imageDrawingData);
-            }
-        }else if (this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
-            if(this.imageDrawingData.points.length===0) {
-                //TODO: query firebase points,lineswidths,pathsNames,type, strokesTypes
-            }else{
-                this.wakeUpComponentes(this.imageDrawingData);
-            }
-        }
+        this.objectDesigning=animableObject;
+
+        this.imageDrawingData=animableObject.getDrawingData();
+
+
+        this.wakeUpComponentes(this.imageDrawingData,this.objectDesigning.largeImage);
     },
     notificationPanelDesignerOptionsOnActionClicked:function(args){
         let actionId=args[0];
@@ -79,17 +68,17 @@ var PathDesignerController=fabric.util.createClass({
                 this.imageDrawingData.pathsNames=listPathsNames;
                 this.imageDrawingData.strokesTypes=listPathStrokesType;
 
-                if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
+                if(this.imageDrawingData.type===DrawingDataType.CREATED_NOPATH){
                     if(this.getTotalStrokesAmount(matPoints)===0) {
-
                     }else{
-                        this.imageDrawingData.type = ImageType.CREATED_PATHDESIGNED;
+                        this.imageDrawingData.type = DrawingDataType.CREATED_PATHDESIGNED;
                     }
-                }else if(this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
+                }else if(this.imageDrawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
                     if(this.getTotalStrokesAmount(matPoints)===0) {
-                        this.imageDrawingData.type=ImageType.CREATED_NOPATH;
+                        this.imageDrawingData.type=DrawingDataType.CREATED_NOPATH;
                     }
                 }
+
                 this.objectDesigning.generateFinalMaskedImage();
 
                 this.objectDesigning=null;
@@ -127,32 +116,32 @@ var PathDesignerController=fabric.util.createClass({
     childNotificationOnToolChanged:function(){
         this.notifyOnToolChanged();
     },
-    loadingPathsFromSVG:function(loadingMode){
-        let self=this;
-        if(this.imageDrawingData!=null){
-            this.svgManager.calcDrawingData(this.objectDesigning.imageAssetModel.url_image,this.imageDrawingData.imgHigh.naturalWidth,this.imageDrawingData.imgHigh.naturalHeight,loadingMode,"url",function( svgLoadedData){
-
-                (function Wait(){
-                    if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),1);return;}
-                    Preprotocol.wantConsume=false;
-
-                    this.hasLoadedFromSVG=true;
-
-                    svgLoadedData.type=ImageType.CREATED_PATHLOADED;
-                    svgLoadedData.url=this.imageDrawingData.url;
-                    svgLoadedData.imgHigh=this.imageDrawingData.imgHigh;
-
-                    this.previewManager.sleep();
-                    this.drawingManager.sleep();
-                    this.canvasManager.sleep();
-
-                    Preprotocol.wantConsume=true;
-                    this.wakeUpComponentes(svgLoadedData);
-                }.bind(self)())
-
-            })
-        }
-    },
+    // loadingPathsFromSVG:function(loadingMode){
+    //     let self=this;
+    //     if(this.imageDrawingData!=null){
+    //         this.svgManager.calcDrawingData(this.objectDesigning.imageAssetModel.url_image,this.imageDrawingData.imgHigh.naturalWidth,this.imageDrawingData.imgHigh.naturalHeight,loadingMode,"url",function( svgLoadedData){
+    //
+    //             (function Wait(){
+    //                 if(!Preprotocol.wantDelete){setTimeout(Wait.bind(this),1);return;}
+    //                 Preprotocol.wantConsume=false;
+    //
+    //                 this.hasLoadedFromSVG=true;
+    //
+    //                 svgLoadedData.type=DrawingDataType.CREATED_PATHLOADED;
+    //                 svgLoadedData.url=this.imageDrawingData.url;
+    //                 svgLoadedData.imgHigh=this.imageDrawingData.imgHigh;
+    //
+    //                 this.previewManager.sleep();
+    //                 this.drawingManager.sleep();
+    //                 this.canvasManager.sleep();
+    //
+    //                 Preprotocol.wantConsume=true;
+    //                 this.wakeUpComponentes(svgLoadedData);
+    //             }.bind(self)())
+    //
+    //         })
+    //     }
+    // },
     getTotalStrokesAmount:function(matrixPoints){
         let totalCantPaths=0;
         for(let i=0;i<matrixPoints.length;i++){

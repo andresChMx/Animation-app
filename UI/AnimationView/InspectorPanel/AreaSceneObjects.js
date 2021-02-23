@@ -8,8 +8,6 @@ var SectionObjectsEntraceEditor={
 
         this.lastActiveHTMLItems=[];
         this.listPropertyInputsByItem=[{}]; //it contains a first dummy element, because in the items collection there is a first dummy element as well that serves to clone
-        this.iconTextAnimable=new Image();
-        this.iconTextAnimable.src="https://res.cloudinary.com/daqft8zr2/image/upload/v1608394852/icons/tyyt12ejtdymwgj28owt.png"
 
     },
 
@@ -27,7 +25,7 @@ var SectionObjectsEntraceEditor={
     createHTMLItem:function(animObjWithEntrance){
         let newItem=this.HTMLBoxItem.cloneNode(true);
         let icon=newItem.querySelector(".icon img");
-        icon.replaceWith(this._getAnimableObjectIcon(animObjWithEntrance));
+        icon.replaceWith(animObjWithEntrance.thumbnailImage.cloneNode());
 
         let moveUp=newItem.querySelector(".btn-move-up");
         let moveDown=newItem.querySelector(".btn-move-down");
@@ -45,13 +43,6 @@ var SectionObjectsEntraceEditor={
         newItem.style.display="flex";
         newItem.addEventListener("click",this.onHTMLItemClicked.bind(this))
         this.HTMLElement.appendChild(newItem);
-    },
-    _getAnimableObjectIcon:function(animObjWithEntrance){
-        if(animObjWithEntrance.type==="ImageAnimable" || animObjWithEntrance.type==="SVGAnimable"){
-            return animObjWithEntrance.imageDrawingData.imgLow.cloneNode();
-        }else if(animObjWithEntrance.type==="TextAnimable"){
-            return this.iconTextAnimable.cloneNode();
-        }
     },
     deleteHTMLItemAt:function(index){
         this.listPropertyInputsByItem[index+1].duration.remove();
@@ -175,7 +166,7 @@ var SectionAnimableObjectsEditor={
             mapSubMenusOptions:{
                 "addMask":function(target,parent,currentSelectedObject){
                     let index=[].slice.call(parent.children).indexOf(target);
-                    let maskingObject=CanvasManager.listShapeAnimableObjects[index];
+                    let maskingObject=CanvasManager.listClipableAnimableObjects[index];
                     currentSelectedObject.applyClipping(maskingObject);
 
                     CanvasManager.canvas.renderAll();
@@ -214,8 +205,8 @@ var SectionAnimableObjectsEditor={
             },
             _populateShapeObjectsName:function(){
                 let addMaskOptionSubmenu=this.htmlElemt.querySelector("#addMask").children[1];
-                for(let i=0;i<CanvasManager.listShapeAnimableObjects.length;i++){
-                    addMaskOptionSubmenu.children[i].textContent=CanvasManager.listShapeAnimableObjects[i].name;
+                for(let i=0;i<CanvasManager.listClipableAnimableObjects.length;i++){
+                    addMaskOptionSubmenu.children[i].textContent=CanvasManager.listClipableAnimableObjects[i].name;
                 }
             },
             createShapeObjectItem:function(animObj){
@@ -233,15 +224,17 @@ var SectionAnimableObjectsEditor={
 
         this.lastActiveHTMLItems=[]; //performance matters, when selection updated, whe know that elements are stylized, so we know what to clean
 
-        this.notificationOnAnimableObjectAdded(CanvasManager.camera); //ya que cuando se creo la camara este aun no se habia suscrito al CanvasManager, por eso lo haremos manualmente
+        // this.notificationOnAnimableObjectAdded(CanvasManager.camera); //ya que cuando se creo la camara este aun no se habia suscrito al CanvasManager, por eso lo haremos manualmente
     },
     createItem:function(animObject){
         let newItem=this.HTMLBoxItem.cloneNode(this);
         newItem.style.display="flex";
-        let containerLabel=newItem.querySelector(".group-object-name");
         this.HTMLElement.appendChild(newItem);
+        newItem.querySelector(".group-box-actions__lock-object").checked=animObject.getLockState();
+        newItem.querySelector(".group-box-actions__visible-object").checked=animObject.getVisibilityState();
         newItem.addEventListener("click",this.OnItemClicked.bind(this));
 
+        let containerLabel=newItem.querySelector(".group-object-name");
         //Boxtext initialization
         let boxText=new BoxText(containerLabel);
         boxText.setText(animObject.name);
@@ -277,9 +270,18 @@ var SectionAnimableObjectsEditor={
         CanvasManager.canvas.setActiveObject(CanvasManager.listAnimableObjects[trueIndex]);
 
         if(e.target.className==="group-box-actions__btn-menu"){
-            console.log(CanvasManager.listAnimableObjects[trueIndex].applicableMenuOptions);
-            this.objectMenu.enableOptions(CanvasManager.listAnimableObjects[trueIndex].applicableMenuOptions);
+            this.objectMenu.enableOptions(CanvasManager.getSelectedAnimableObj().applicableMenuOptions);
             this.showObjectMenu();
+        }else if(e.target.className==="group-box-actions__lock-object"){
+            CanvasManager.getSelectedAnimableObj().setLockState(e.target.checked);
+            if(e.target.checked){
+                CanvasManager.canvas.discardActiveObject();
+            }
+        }else if(e.target.className==="group-box-actions__visible-object"){
+            CanvasManager.getSelectedAnimableObj().setVisibilityState(e.target.checked);
+            if(!(e.target.checked)){
+                CanvasManager.canvas.discardActiveObject();
+            }
         }
 
         CanvasManager.canvas.renderAll();

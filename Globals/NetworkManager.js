@@ -2,10 +2,10 @@ function Save(){
     //saving other things
     //saving image models -> collection: images
     // for i in imagesModels
-    //      if(imagesModels[i].paths.type==ImageType.CREATED_NO_PATH){
+    //      if(imagesModels[i].paths.type==DrawingDataType.CREATED_NO_PATH){
     //          NOTHING
     //      }
-    //      else if(imagesModels[i].paths.type==ImageType.CREATED_PATHDESIGNED || CREATED_PATHLOADED){
+    //      else if(imagesModels[i].paths.type==DrawingDataType.CREATED_PATHDESIGNED || CREATED_PATHLOADED){
     //          SAVING ALL FIELDS
     //      }
 }
@@ -107,10 +107,9 @@ var NetworkManager={
             }).then(function(response){
                 return response.json();
             }).then(function(data){
-                console.log(data);
                 let readyModel;
                 if(search==="" && category===""){
-                    readyModel=data.map(function(value,index){ // simulating the true structure of the data retrived from "database"
+                   readyModel=data.map(function(value,index){ // simulating the true structure of the data retrived from "database"
                         return {id:"1",url_thumbnail:value.urls.thumb,url_image:value.urls.regular,user_id:"",category:"",name:""}
                     });
                 }else{
@@ -142,6 +141,7 @@ var NetworkManager={
         }
 
     },
+
     fetchShapeAssets:function(category,pageNumber){
         //{vectorURL:"url...svg",category:"arrows"}
         let dummyData=[{vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1612833730/oficial/vg9xszhe1ztxwyuez02n.svg",thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1612833730/oficial/vg9xszhe1ztxwyuez02n.svg",category:"arrow"},
@@ -149,5 +149,64 @@ var NetworkManager={
         return new Promise(function(resolutionFunc,rejectionFunc){
             resolutionFunc(dummyData);
         });
+    },
+
+    loadImage:function(url,oldImage=null){// esta opcion genera una imagne apartir de una url a un svg, ademas retorna el string svg para evitar tener que hacer otra peticion para parcear la imagen svg a fabric object
+        return new Promise(function(resolve, reject){
+            let img;
+            if(oldImage){
+                img=oldImage;
+            }else{
+                img=new Image();
+            }
+            img.crossOrigin="anonymous"
+            img.onload=function(){
+                resolve(img);
+            }
+            img.onerror=function(){
+                reject();
+            }
+            img.src=url;
+        })
+    },
+    loadSVG:function(url,callback){/*modification of fabric.loadSVGFromURL*/
+        url = url.replace(/^\n\s*/, '').trim();
+        new fabric.util.request(url, {
+            method: 'get',
+            onComplete: onComplete
+        });
+        let self=this;
+        function onComplete(r) {
+            if(r.status===200){
+                var xml = r.responseXML;
+                let svg = r.response;
+                let blob = new Blob([svg], {type: 'image/svg+xml'});
+                let url = URL.createObjectURL(blob);
+
+                let image=new Image();
+                image.src=url;
+                image.onload=function(){
+
+                    let dimmension=applyViewboxTransform(xml.documentElement); // calculando dimencioens reales del svg
+                    //establenciendo las dimenciones halladas en el codigo svg, para que cuando se cree una Imagen() a partir de
+                    //ese codigo se haga con las dimenciones correctas, ya que si no hacemos esto, las dimenciones se calcularan
+                    //de otra manera que aun no se como, pero no coincidiran con las de fabric, las cuales si son correctas
+                    xml.documentElement.setAttribute("width",dimmension.width);
+                    xml.documentElement.setAttribute("height",dimmension.height);
+                    //generando imagen a partir de svg string con modificado (dimenciones establecidas)
+                    let newSvgString=(new XMLSerializer).serializeToString(xml.documentElement);
+                    blob = new Blob([newSvgString], {type: 'image/svg+xml'});
+                    url = URL.createObjectURL(blob);
+                    image.src=url;
+                    image.onload=function(){
+                        callback(newSvgString,image,false);
+                    }
+                }
+            }else{
+                callback(null,null,true)
+            }
+
+
+        }
     }
 }

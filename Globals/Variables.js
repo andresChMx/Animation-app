@@ -34,15 +34,17 @@ var FontsFileName={ // allows as to get the name file of the font in the server 
 
 }
 
-const EntranceModes={/*Entrance modes are only applicable to Escene objects (ImageAnimable, TextAnimable, CameraAnimable)*/
-    drawn:"drawn",
-    dragged:"dragged",
-    none:"none",
+const EntranceName={/*Entrance modes are only applicable to Escene objects (ImageAnimable, TextAnimable, CameraAnimable)*/
+    image_drawn:"ImageDrawn",
+    dragged:"Dragged",
+    none:"None",
 
-    text_drawn:"text_drawn",
-    text_typed:"text_typed"
+    svg_drawn:"SVGDrawn",
+
+    text_drawn:"TextDrawn",
+    text_typed:"TextTyped"
 }
-var ImageType={/*ImageTypes are used when an object has entreancemode drawn or text_drawn*/
+var DrawingDataType={/*DrawingDataTypes are used when an object has entreancemode drawn or text_drawn*/
     PROVIDED:"PROVIDED",
     CREATED_PATHLOADED:"CREATED_PATHLOADED",
     CREATED_PATHDESIGNED:"CREATED_PATHDESIGNED",
@@ -56,6 +58,10 @@ var AnimObjectOptionMenu={
     delete:"delete",
     removeMask:"removeMask",
     addMask:"addMask",
+}
+/*RUTES*/
+var RUTES={
+    assets_images:"assets/images/"
 }
 /// images assets
 var IMAGE_ASSETS={

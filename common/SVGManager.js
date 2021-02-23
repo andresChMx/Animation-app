@@ -46,7 +46,6 @@ var SVGManager=fabric.util.createClass({
         let f=function(objects, options) {
             var obj = fabric.util.groupSVGElements(objects, options);
             let listObjects=[];
-            console.log(obj);
             if(obj.type==="path"){
                 obj.left-=imgWidth/2;
                 obj.top-=imgHeight/2;
@@ -132,14 +131,12 @@ var SVGManager=fabric.util.createClass({
                 continue;
             }
 
-            if(path.stroke && this.isTransparentColor(path.stroke)){
+            if(path.stroke && this.isTransparentColor(path.stroke)){/*se considera path de revelado, cuando tiene definido un color de borde y este sea transparente, esto es algo muy raro que se de (el hecho qe sea transparente)*/
                 listRevealPaths.push(path);
                 continue;
             }
             layerIndex=this.parsePath(path,strokeWidth,result,layerIndex,loadingMode,listRevealPaths/*OUT*/);
-
         }
-
         if(listRevealPaths.length>0){
             let indexTruePaths=layerIndex;
             for(let i=0;i<listRevealPaths.length;i++){
@@ -255,12 +252,8 @@ var SVGManager=fabric.util.createClass({
                 strokeWidth=strokeWidth;
             }
         }else{
-            if(pathObj.hasOwnProperty("stroke") && pathObj.stroke !==null ) {
-                if(pathObj.hasOwnProperty("strokeWidth")){
-                    strokeWidth = pathObj.strokeWidth;
-                }else{
-                    return layerIndex
-                }
+            if(pathObj.hasOwnProperty("stroke") && pathObj.stroke !==null && pathObj.hasOwnProperty("strokeWidth")) {
+                strokeWidth = pathObj.strokeWidth;
             }else{
                 return layerIndex;
             }

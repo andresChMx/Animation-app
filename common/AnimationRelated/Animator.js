@@ -155,7 +155,18 @@ var Animator=fabric.util.createClass({
                 }
             }
         }
-
+    },
+    toObject:function(){
+        let object={};
+        object.entranceTimes=fabric.util.object.clone(this.entranceTimes);
+        let dictAnimations={};
+        for(let key in this.dictAnimations){
+            dictAnimations[key]=this.dictAnimations[key].map(function(anim,index){
+                return anim.toObject();
+            })
+        }
+        object.dictAnimations=dictAnimations;
+        return object;
     }
 });
 var AnimatorCamera=fabric.util.createClass(Animator,{

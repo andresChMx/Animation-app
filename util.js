@@ -28,6 +28,10 @@ var Utils={
     isSVG:function(urlstring){
         const regex1 = RegExp('.svg$', 'i');
         return regex1.test(urlstring);
+    },
+    capitalize:function(s) {
+        if (typeof s !== 'string') return ''
+        return s.charAt(0).toUpperCase() + s.slice(1)
     }
 }
 var PathLength={

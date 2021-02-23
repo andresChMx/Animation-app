@@ -180,7 +180,6 @@ var SectionTransformObject={
 
 var AdapterSetValue={
     set:function(object,property,value){
-        console.log(value);
         if(object.type==="TextAnimable") {
             if(property==="fontFamily"){
                 object.setFontFamily(value);
@@ -233,12 +232,25 @@ var SectionStylingObject={
                 setVal:function(val){this.htmlElem.value=val},
                 getInputFieldElem:function(){return this.htmlElem},
             },
+            transparentFill:{
+            htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.transparent-fill input"),
+                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
+            OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.checked,"transparentFill")},
+            setVal:function(val){this.htmlElem.checked=val},
+            getInputFieldElem:function(){return this.htmlElem}
+            },
             stroke:{htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.stroke input"),
                 initEvent:function(){this.htmlElem.addEventListener("input",this.OnTriggered.bind(this))},
                 OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.value,"stroke")},
                 setVal:function(val){this.htmlElem.value=val},
                 getInputFieldElem:function(){return this.htmlElem},
-
+            },
+            transparentStroke:{
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.transparent-stroke input"),
+                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
+                OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.checked,"transparentStroke")},
+                setVal:function(val){this.htmlElem.checked=val},
+                getInputFieldElem:function(){return this.htmlElem}
             },
             startRenderingPoint:{
                 field:null,
@@ -284,6 +296,13 @@ var SectionStylingObject={
                 htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.inverted input"),
                 initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
                 OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.checked,"inverted")},
+                setVal:function(val){this.htmlElem.checked=val},
+                getInputFieldElem:function(){return this.htmlElem}
+            },
+            clipBorder:{
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.clip-border input"),
+                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
+                OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.checked,"clipBorder")},
                 setVal:function(val){this.htmlElem.checked=val},
                 getInputFieldElem:function(){return this.htmlElem}
             }

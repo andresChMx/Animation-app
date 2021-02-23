@@ -21,7 +21,7 @@
         }
     </style>
 
- <link rel="stylesheet" href="styles/font-icons.css">
+ <link rel="stylesheet" href="assets/styles/font-icons.css">
  <link rel="stylesheet" href="styles.css">
  <link rel="stylesheet" href="stylesPathsDesigner.css">
 </head>
@@ -338,8 +338,8 @@
                                 <div class="group-object-name">
                                 </div>
                                 <div class="group-box-actions">
-                                    <input type="checkbox" class="group-box-actions__block-object">
-                                    <input type="checkbox" class="group-box-actions__hidde-object">
+                                    <input type="checkbox" class="group-box-actions__lock-object">
+                                    <input type="checkbox" class="group-box-actions__visible-object">
                                     <button class="group-box-actions__btn-menu">[a]</button>
                                 </div>
                             </li>
@@ -427,14 +427,24 @@
                                     <label for="stroke-width-widget">Stroke Width </label>
                                     <div class="property-input"><button class="btn-decrease"></button><input id="stroke-width-widget" type="text" value="1.16" class="field-value"><button class="btn-increase"></button></div>
                                 </div>
-                                <div class="form-group styling-widget fill">
-                                    <label for="fill-widget">Fill Color</label>
-                                    <input id="fill-widget" type="color">
-                                </div>
-                                <div class="form-group styling-widget stroke">
-                                    <label for="stroke-widget">Stroke Color </label>
-                                    <input id="stroke-widget" type="color">
-                                </div>
+                                    <div class="form-group styling-widget fill">
+                                        <label for="fill-widget">Fill Color</label>
+                                        <input id="fill-widget" type="color">
+                                        <div class="form-group styling-widget transparent-fill">
+                                            <label for="transparent-fill-widget">transp.</label>
+                                            <input id="transparent-fill-widget" type="checkbox">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group styling-widget stroke">
+                                        <label for="stroke-widget">Stroke Color </label>
+                                        <input id="stroke-widget" type="color">
+                                        <div class="form-group styling-widget transparent-stroke">
+                                            <label for="transparent-stroke-widget">transp.</label>
+                                            <input id="transparent-stroke-widget" type="checkbox">
+                                        </div>
+                                    </div>
+
                                 <div class="form-group styling-widget start-point range-widget">
                                     <div class="row">
                                         <label class="styling-widget__start-rendering-point__title range-widget__title">Start Value: </label>
@@ -453,9 +463,14 @@
                                         <input type="range" min="0" max="100" value="100" step="1" class="styling-widget__end-rendering-point__slider range-widget__slider"/>
                                     </div>
                                 </div>
+                                <p class="subtitle">Masking properties</p>
                                 <div class="form-group styling-widget inverted">
-                                    <label for="inverted-widget">Invert Mask</label>
+                                    <label for="inverted-widget">Inverted ClipPath</label>
                                     <input id="inverted-widget" type="checkbox">
+                                </div>
+                                <div class="form-group styling-widget clip-border">
+                                    <label for="clip-border-widget">Clip Border</label>
+                                    <input id="clip-border-widget" type="checkbox">
                                 </div>
                             </div>
                             <div class="floating-panel" id="CameraAnimable-styling-panel">
@@ -655,16 +670,22 @@
 
     <script src="common/fontsLoading/FontsLoader.js"></script>
     <script src="common/fontsLoading/FontFaceObserver.js"></script>
-    <script src="common/SVGLoading/SVGFlattener.js"></script>
-    <script src="common/SVGLoading/SVGManager.js"></script>
-    <script src="common/SVGLoading/TextToSVGConverter.js"></script>
+    <script src="common/SVGManager.js"></script>
     <script src="common/AnimationRelated/Animation.js"></script>
     <script src="common/AnimationRelated/Animator.js"></script>
-    <script src="common/fabricRelated/PivotHandling.js"></script>
     <script src="common/DrawingHand.js"></script>
     <script src="common/PathIllustrator.js"></script>
     <script src="common/ControllerAnimator.js"></script>
-    <script src="common/ImageModelDrawingDataGenerator.js"></script>
+    <script src="common/DrawingDataGeneration.js"></script>
+    <script src="common/StaticResource.js"></script>
+
+    <script src="./entities/AnimableObjects/ImageAnimable.js"></script>
+    <script src="./entities/AnimableObjects/TextAnimable.js"></script>
+    <script src="./entities/AnimableObjects/SVGAnimable.js"></script>
+    <script src="./entities/AnimableObjects/ShapeAnimable.js"></script>
+    <script src="./entities/AnimableObjects/CameraAnimable.js"></script>
+    <script src="./entities/DrawableImage.js"></script>
+    <script src="./entities/PreviewerCanvas.js"></script>
 
     <script src="controllers/Mediators/MainMediator.js"></script>
 

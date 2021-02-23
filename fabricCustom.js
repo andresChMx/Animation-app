@@ -63,6 +63,11 @@ fabric.ActiveSelection.prototype.onDeselect=function(){
 }
 
 
+
+/*
+* ================================================================================================
+* */
+
 // sets properties in batch where the given properties are in world coordinates
 // Esta funcion existe para lograr manejar la seleccion multiple de objectos, es como un proxy entre coordenadas grupales y las absolutas. Consiste en que cuando el objecto se encuentra en un grupo,
 // primero obtenemos sus propiedades en coordenadas absolutas con calcTransformMatrix() para poder alterar esos valores con otros que estan en coordenadas aboslutas, de forma que
@@ -148,6 +153,10 @@ fabric.Object.prototype.getCustom=function(property){ // gets properties in worl
     }
 }
 
+
+/*
+* ================================================================================================
+* */
 fabric.Object.prototype.getGlobalPosition=function(){// POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
     let newPoint=fabric.util.transformPoint(new fabric.Point(this.aCoords.tl.x,this.aCoords.tl.y),this.canvas.viewportTransform);
     newPoint.x+=this.canvas._offset.left;
@@ -157,1049 +166,516 @@ fabric.Object.prototype.getGlobalPosition=function(){// POSITION OF THIS OBJECT 
 fabric.Object.prototype.name="ObjectC";
 
 
-var ImageAnimable=fabric.util.createClass(fabric.Image,{
-    applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
-
-    type:'ImageAnimable',
-    initialize:function(element, options){
-        this.callSuper('initialize', element,options);
-        this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask],
-        /*fabric.Object setting*/
-        this.padding=20;
-        this.transparentCorners= false;
-        this.cornerColor="rgb(0,0,0)";
-        this.name="ObjectX";
-        this.centeredRotation=false;
-        this.originX='custom';
-        this.originY='custom';
-        /*FIN -- fabric.Object setting*/
-
-        this.entranceMode=null;
-        this.entraceModesSettings={};
-        this.setupEntraceModesSettings();
-        this.imageAssetModel=options.imageAssetModel;
-        this.imageDrawingData=this.setupImageDrawingDTO(options.imgHighDefinition,
-                                                        options.imgLowDefinition);
-        this.animator=new Animator(this);
-        this.setEntranceMode(EntranceModes.drawn); //debe estar a drawn antes de generar la imagen final mascarada (la siguiente funcion invocada)
-        if(this.type==="ImageAnimable"){ // since the subclasse (CameraAnimable) are invoking this constructor ()
-            this.generateFinalMaskedImage();
-        }
-    },
-    setupEntraceModesSettings:function(){
-        this.entraceModesSettings[this.applicableEntrenceModes[0]]={
-
-        }
-        this.entraceModesSettings[this.applicableEntrenceModes[1]]={
-            showHand:true,
-            finalDrawingAppearance:'masked'  // masked || original
-        }
-        this.entraceModesSettings[this.applicableEntrenceModes[2]]={
-
-        }
-    },
-    setupImageDrawingDTO:function(imgHighDefinition,imgLowDefinition){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHigh
-        return {
-            imgHigh:imgHighDefinition,
-            imgLow:imgLowDefinition, /*for ui, when appears in lists*/
-            imgMasked:null,
-            points:[],
-            linesWidths:[],
-            pathsNames:[],
-            strokesTypes:[],
-            ctrlPoints:[],
-            type:ImageType.CREATED_NOPATH // BECAUSE YOU COULD HAVE DESIGNED THEIR PATHS OR NOT
-        }
-    },
-    generateFinalMaskedImage:function(){
-        let dataGenerator=new ImageAnimableDataGenerator();
-
-        let canvas=document.createElement("canvas");
-        let ctx=canvas.getContext("2d");
-        if(this.imageDrawingData.type===ImageType.CREATED_NOPATH){
-            canvas.width=this.imageDrawingData.imgHigh.naturalWidth;
-            canvas.height=this.imageDrawingData.imgHigh.naturalHeight;
-            ctx.drawImage(this.imageDrawingData.imgHigh,0,0);
-            this.imageDrawingData.imgMasked=new Image();
-            this.imageDrawingData.imgMasked.src=canvas.toDataURL();
-            canvas.remove();
-            return;
-        }else if(this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
-            // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
-            dataGenerator.generateCrtlPointsFromPointsMatrix(
-                this.imageDrawingData.points,
-                this.imageDrawingData /*OUT*/ //SE ESTAN LIMPIANDO los ctrlPoints DESPUES DE GENERAR LA IMAGEN
-            );
-        }
-        else if(this.imageDrawingData.type===ImageType.CREATED_PATHLOADED){
-            //NOTHING BECAUSE POINTS AND CTRLPOINTS ARE ALREADY CALCULATED
-        }
-
-        let illustratorDataAdapterCache=new IllustratorDataAdapterCache([this]);
-        let pathIllustrator=new PathIllustrator(canvas,ctx,illustratorDataAdapterCache,false);
-        pathIllustrator.generateFinalImage(function(dataUrl){
-            /*  DEBUGGIN PURPOSES
-            var link = document.createElement("a");
-            link.download = name;
-            link.href = dataUrl;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            delete link;
-            */
-            this.imageDrawingData.imgMasked=new Image();
-            this.imageDrawingData.imgMasked.src=dataUrl;
-
-            //CLEANING
-            canvas.remove();
-            this.imageDrawingData.ctrlPoints=[];
-        }.bind(this))
-    },
-    getWidthInDrawingCache:function(){
-        return this.imageDrawingData.imgHigh.naturalWidth;
-    },
-    getHeightInDrawingCache:function(){
-        return this.imageDrawingData.imgHigh.naturalHeight;
-    },
-    setEntranceMode:function(mode){
-        this.entranceMode=mode;
-    },
-    getEntranceMode:function(){
-        return this.entranceMode;
-    },
-    // getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
-    //     let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
-    //     newPoint.x+=this.canvas._offset.left;
-    //     newPoint.y+=this.canvas._offset.top;
-    //     return newPoint;
-    // },
-
-    applyClipping:function(animObject){
-        this.clipPath=animObject;
-        for(let i=0;i<this.applicableMenuOptions.length;i++){
-            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.addMask){
-                this.applicableMenuOptions[i]=AnimObjectOptionMenu.removeMask;
-                break;
-            }
-        }
-    },
-    removeClipping:function(){
-        this.clipPath=null;
-        for(let i=0;i<this.applicableMenuOptions.length;i++){
-            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.removeMask){
-                this.applicableMenuOptions[i]=AnimObjectOptionMenu.addMask;
-                break;
-            }
-        }
-    },
-    render:function(ctx){
-        /*se sobreescribio por que cuando un objeto sale de vista, no se renderizaba, es tamos oviando eso
-        esa parte del metodo render original*/
-        ctx.save();
-        this._setupCompositeOperation(ctx);
-        this.drawSelectionBackground(ctx);
-        this.transform(ctx);
-        this._setOpacity(ctx);
-        this._setShadow(ctx, this);
-        if (this.transformMatrix) {
-            ctx.transform.apply(ctx, this.transformMatrix);
-        }
-        this.clipTo && fabric.util.clipContext(this, ctx);
-        if (this.shouldCache()) {
-            this.renderCache();
-            this.drawCacheOnCanvas(ctx);
-        }
-        else {
-            this._removeCacheCanvas();
-            this.dirty = false;
-            this.drawObject(ctx);
-            if (this.objectCaching && this.statefullCache) {
-                this.saveState({ propertySet: 'cacheProperties' });
-            }
-        }
-        this.clipTo && ctx.restore();
-        ctx.restore();
-    },
-})
-var SVGAnimable=fabric.util.createClass(ImageAnimable,{
-    applicableEntrenceModes:[EntranceModes.none,EntranceModes.drawn,EntranceModes.dragged],//FOR UI (enable radios)
-    type:'SVGAnimable',
-    initialize:function(options,callback){
-        this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];
-
-        let self=this;
-        this.loadSVGFromURL(options.imageAssetModel.url_image,function(svgString,image){
-            options.imgHighDefinition=image;
-            options.imgLowDefinition=image;
-
-            self.callSuper('initialize', image, options);
-
-            self.svgString=svgString;
-
-            //FILL REVEAL MODE VARIABLES
-            this.indexFinalTruePath=0; //used for fill reveal mode "fill_drawn"
-
-
-            // vars used for fill reveal mode "fadein"
-            this.auxEntranceDuration=0; // stores entrance effect duration value temporarily
-            self.animator.addHiddenAnimationsLane("fadeInTransitionOpacity");
-
-            callback();
-        });
-
-    },
-    addFadeInAnimation:function(){
-        this.auxEntranceDuration=this.animator.entranceTimes.duration;
-        let fadeinDuration=this.animator.entranceTimes.duration*0.2;
-        let newEntranceDuration=this.animator.entranceTimes.duration-fadeinDuration;
-        this.animator.entranceTimes.duration=newEntranceDuration;
-        this.animator.entranceTimes.transitionDelay=fadeinDuration;
-        let startMoment=this.animator.entranceTimes.startTime+this.animator.entranceTimes.delay+newEntranceDuration;
-        let endMoment=startMoment+fadeinDuration;
-        if(this.animator.dictHiddenAnimations["fadeInTransitionOpacity"].length>0){alert("ERROR: SE INTENTO REGISTRAR ANIMMACION DE FADEIN CUANDO YA HABIA UNA");return;}
-        this.animator.addHiddenAnimation("fadeInTransitionOpacity",0,1,startMoment,endMoment,EnumAnimationEasingType.InOut,EnumAnimationTweenType.Sine);
-        console.log(this.animator.dictHiddenAnimations.fadeInTransitionOpacity[0]);
-        },
-    removeFadeInAnimation:function(){
-        this.animator.entranceTimes.transitionDelay=0;
-        this.animator.entranceTimes.duration=this.auxEntranceDuration;
-        this.animator.removeHiddenAnimation("fadeInTransitionOpacity",0);
-    },
-    setupImageDrawingDTO:function(imgHighDefinition,imgLowDefinition){ //no es del todo un entity lo que se recibe, puesto que ya se agrego el atributo imgHigh
-        let data=this.callSuper("setupImageDrawingDTO",imgHighDefinition,imgLowDefinition);
-        data.linesColors=[];
-        return data;
-    },
-
-    loadSVGFromURL: function(url,callback) {/*fabric modified method*/
-        url = url.replace(/^\n\s*/, '').trim();
-        new fabric.util.request(url, {
-            method: 'get',
-            onComplete: onComplete
-        });
-        let self=this;
-        function onComplete(r) {
-
-            var xml = r.responseXML;
-
-            // INICIO MODIFICACION
-            let svg = r.response;
-            let blob = new Blob([svg], {type: 'image/svg+xml'});
-            let url = URL.createObjectURL(blob);
-
-            let image=new Image();
-            image.src=url;
-            image.onload=function(){
-
-                let dimmension=self.applyViewboxTransform(xml.documentElement);
-                xml.documentElement.setAttribute("width",dimmension.width);
-                xml.documentElement.setAttribute("height",dimmension.height);
-
-                let newSvgString=(new XMLSerializer).serializeToString(xml.documentElement);
-                blob = new Blob([newSvgString], {type: 'image/svg+xml'});
-                url = URL.createObjectURL(blob);
-                image.src=url;
-                image.onload=function(){
-                    callback(newSvgString,image);
-                }
-            }
-            // FIN MODIFICACION
-
-        }
-    },
-    applyViewboxTransform:function(element){/*fabric modified method*/ /*obtener dimensiones reales de svg*/
-        var reViewBoxAttrValue = new RegExp(
-            '^' +
-            '\\s*(' + fabric.reNum + '+)\\s*,?' +
-            '\\s*(' + fabric.reNum + '+)\\s*,?' +
-            '\\s*(' + fabric.reNum + '+)\\s*,?' +
-            '\\s*(' + fabric.reNum + '+)\\s*' +
-            '$'
-        );
-        let parseUnit = fabric.util.parseUnit;
-        var viewBoxAttr = element.getAttribute('viewBox'),
-            scaleX = 1,
-            scaleY = 1,
-            minX = 0,
-            minY = 0,
-            viewBoxWidth, viewBoxHeight, matrix, el,
-            widthAttr = element.getAttribute('width'),
-            heightAttr = element.getAttribute('height'),
-            x = element.getAttribute('x') || 0,
-            y = element.getAttribute('y') || 0,
-            preserveAspectRatio = element.getAttribute('preserveAspectRatio') || '',
-            missingViewBox = (!viewBoxAttr || !fabric.svgViewBoxElementsRegEx.test(element.nodeName)
-                || !(viewBoxAttr = viewBoxAttr.match(reViewBoxAttrValue))),
-            missingDimAttr = (!widthAttr || !heightAttr || widthAttr === '100%' || heightAttr === '100%'),
-            toBeParsed = missingViewBox && missingDimAttr,
-            parsedDim = { }, translateMatrix = '', widthDiff = 0, heightDiff = 0;
-
-        parsedDim.width = 0;
-        parsedDim.height = 0;
-        parsedDim.toBeParsed = toBeParsed;
-
-        if (toBeParsed) {
-            return parsedDim;
-        }
-
-        if (missingViewBox) {
-            parsedDim.width = parseUnit(widthAttr);
-            parsedDim.height = parseUnit(heightAttr);
-            return parsedDim;
-        }
-        minX = -parseFloat(viewBoxAttr[1]);
-        minY = -parseFloat(viewBoxAttr[2]);
-        viewBoxWidth = parseFloat(viewBoxAttr[3]);
-        viewBoxHeight = parseFloat(viewBoxAttr[4]);
-        parsedDim.minX = minX;
-        parsedDim.minY = minY;
-        parsedDim.viewBoxWidth = viewBoxWidth;
-        parsedDim.viewBoxHeight = viewBoxHeight;
-        if (!missingDimAttr) {
-            parsedDim.width = parseUnit(widthAttr);
-            parsedDim.height = parseUnit(heightAttr);
-            scaleX = parsedDim.width / viewBoxWidth;
-            scaleY = parsedDim.height / viewBoxHeight;
-        }
-        else {
-            parsedDim.width = viewBoxWidth;
-            parsedDim.height = viewBoxHeight;
-        }
-        return parsedDim
-    },
-    setupEntraceModesSettings:function(){
-        this.entraceModesSettings[this.applicableEntrenceModes[0]]={
-
-        }
-        this.entraceModesSettings[this.applicableEntrenceModes[1]]={
-            showHand:true,
-            forceStrokeDrawing:true,
-            fillRevealMode:'fadein'  // fadein || drawn_fill || no-fill
-        }
-        this.entraceModesSettings[this.applicableEntrenceModes[2]]={
-
-        }
-    },
-});
-var TextAnimable=fabric.util.createClass(fabric.IText, {
-    //drawn y text_draw NO son lo mismo, ya que su logica es diferente
-    applicableEntrenceModes: [EntranceModes.none,EntranceModes.text_drawn,EntranceModes.dragged,EntranceModes.text_typed],//FOR UI
-    applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
-
-    type:"TextAnimable",
-    initialize:function(text,options){
-        /*exact copy of animable object*/
-        this.callSuper('initialize', text,options);
-        this.centeredRotation=false;
-        this.name=options.name;
-        this.fill="#000000";
-        this.entranceMode=null;
-        this.entraceModesSettings={};
-        this.setupEntraceModesSettings();
-        this.imageAssetModel={imgLow:""}
-        this.fontAssetModel={id:"",url_font:"",user_id:""}
-        this.imageDrawingData=this.setupImageDrawingDTO();
-        this.animator=new Animator(this);
-        this.setFontSize(72);
-        this.setFontFamily(options.fontFamily);
-        /*---------------------------*/
-    },//exitEditing
-    setupEntraceModesSettings:function(){
-        this.entraceModesSettings[this.applicableEntrenceModes[0]]={
-
-        }
-        this.entraceModesSettings[this.applicableEntrenceModes[1]]={
-            showHand:true,
-            finalDrawingAppearance:'masked'
-        }
-        this.entraceModesSettings[this.applicableEntrenceModes[2]]={
-
-        }
-    },
-    setupImageDrawingDTO:function(){
-        return {
-            imgMasked:null,
-            points:[],
-            linesWidths:[],
-            pathsNames:[],
-            strokesTypes:[],
-            ctrlPoints:[],
-            type:ImageType.CREATED_NOPATH
-        }
-
-    },
-    setFontFamily:function(fontname){ //Cargando Font Object y guardandolo, solo si aun no esta cargado
-        if(!FontsFileName[fontname]){fontname=Object.keys(FontsFileName)[0];} //validando que nombre sea uno valido
-
-        this.fontFamily=fontname;
-        OpenTypeFontManager.LoadOpenTypeFont(FontsFileName[fontname]);
-    },
-    setFontSize:function(size){
-        this.fontSize=size;
-        //this.exitEditing();
-        if(this.canvas){//en cuanto es inicializado aun no tiene asignado un canvas, hasta que se llame a add en su canvas padre
-            this.canvas.renderAll();
-        }
-    },
-    setEntranceMode:function(mode){
-        this.entranceMode=mode;
-    },
-    getEntranceMode:function(){
-        return this.entranceMode;
-    },
-    getWidthInDrawingCache:function(){
-        return this.width; // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
-    },
-    getHeightInDrawingCache:function(){
-        return this.height; // estas dimensiones son calculadas en base al fontSize, es decir , siempre que no sea escaldo el objeto la dimencion es correcta
-    },
-
-    // getGlobalPosition:function(){ // POSITION OF THIS OBJECT IN VIEWPORT COORDS (useful for positioning el floating menu)
-    //     let newPoint=fabric.util.transformPoint(new fabric.Point(this.left,this.top),this.canvas.viewportTransform);
-    //     newPoint.x+=this.canvas._offset.left;
-    //     newPoint.y+=this.canvas._offset.top;
-    //     return newPoint;
-    // },
-    render:function(ctx){
-        /*se sobreescribio por que cuando un objeto sale de vista, no se renderizaba, es tamos oviando eso
-        esa parte del metodo render original*/
-        ctx.save();
-        this._setupCompositeOperation(ctx);
-        this.drawSelectionBackground(ctx);
-        this.transform(ctx);
-        this._setOpacity(ctx);
-        this._setShadow(ctx, this);
-        if (this.transformMatrix) {
-            ctx.transform.apply(ctx, this.transformMatrix);
-        }
-        this.clipTo && fabric.util.clipContext(this, ctx);
-        if (this.shouldCache()) {
-            this.renderCache();
-            this.drawCacheOnCanvas(ctx);
-        }
-        else {
-            this._removeCacheCanvas();
-            this.dirty = false;
-            this.drawObject(ctx);
-            if (this.objectCaching && this.statefullCache) {
-                this.saveState({ propertySet: 'cacheProperties' });
-            }
-        }
-        this.clipTo && ctx.restore();
-        ctx.restore();
-    },
-});
-var ShapeAnimable=fabric.util.createClass(fabric.Path, {
-    applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
-    type:"ShapeAnimable",
-    initialize:function(pathList,options){
-        this.callSuper('initialize', pathList,options);
-        this.objectCaching=false;
-        this.absolutePositioned=true;
-        this.fill="rgba(0,0,0,.0)";
-        this.strokeWidth=1;
-        this.stroke="rgba(0,0,0,1)";
-
-        this.startRenderingPoint=0;
-        this.endRenderingPoint=100;
-        this.totalLength=PathLength.calculate(this.pathOffset.x,this.pathOffset.y,this.path)+10;
-        this.setEntranceMode(EntranceModes.none);
-        this.animator=new Animator(this);
-    },
-    setEntranceMode:function(mode){
-        this.entranceMode=mode;
-    },
-    getEntranceMode:function(){
-        return this.entranceMode;
-    },
-    _renderPathCommands: function(ctx) {
-        var current, // current instruction
-            previous = null,
-            subpathStartX = 0,
-            subpathStartY = 0,
-            x = 0, // current x
-            y = 0, // current y
-            controlX = 0, // current control point x
-            controlY = 0, // current control point y
-            tempX,
-            tempY,
-            l = -this.pathOffset.x,
-            t = -this.pathOffset.y;
-
-        let renderingPathNormalized=(this.endRenderingPoint/100);
-        let renderingPart=renderingPathNormalized*this.totalLength;
-        let negativeRenderingPart=(1-renderingPathNormalized)*this.totalLength;
-
-        let startPointNormalized=0;
-        let endPointNormalized=0;
-        if(this.startRenderingPoint<this.endRenderingPoint){
-            startPointNormalized=this.startRenderingPoint/100;
-            endPointNormalized=this.endRenderingPoint/100;
-        }else{
-            startPointNormalized=this.endRenderingPoint/100;
-            endPointNormalized=this.startRenderingPoint/100;
-        }
-
-        let pattern=[0,startPointNormalized*this.totalLength,(endPointNormalized-startPointNormalized)*this.totalLength,(1-endPointNormalized)*this.totalLength];
-        ctx.beginPath();
-
-        ctx.setLineDash(pattern);
-        for (var i = 0, len = this.path.length; i < len; ++i) {
-
-            current = this.path[i];
-
-            switch (current[0]) { // first letter
-
-                case 'l': // lineto, relative
-                    x += current[1];
-                    y += current[2];
-                    ctx.lineTo(x + l, y + t);
-                    break;
-
-                case 'L': // lineto, absolute
-                    x = current[1];
-                    y = current[2];
-                    ctx.lineTo(x + l, y + t);
-                    break;
-
-                case 'h': // horizontal lineto, relative
-                    x += current[1];
-                    ctx.lineTo(x + l, y + t);
-                    break;
-
-                case 'H': // horizontal lineto, absolute
-                    x = current[1];
-                    ctx.lineTo(x + l, y + t);
-                    break;
-
-                case 'v': // vertical lineto, relative
-                    y += current[1];
-                    ctx.lineTo(x + l, y + t);
-                    break;
-
-                case 'V': // verical lineto, absolute
-                    y = current[1];
-                    ctx.lineTo(x + l, y + t);
-                    break;
-
-                case 'm': // moveTo, relative
-                    x += current[1];
-                    y += current[2];
-                    subpathStartX = x;
-                    subpathStartY = y;
-                    ctx.moveTo(x + l, y + t);
-                    break;
-
-                case 'M': // moveTo, absolute
-                    x = current[1];
-                    y = current[2];
-                    subpathStartX = x;
-                    subpathStartY = y;
-                    ctx.moveTo(x + l, y + t);
-                    break;
-
-                case 'c': // bezierCurveTo, relative
-                    tempX = x + current[5];
-                    tempY = y + current[6];
-                    controlX = x + current[3];
-                    controlY = y + current[4];
-                    ctx.bezierCurveTo(
-                        x + current[1] + l, // x1
-                        y + current[2] + t, // y1
-                        controlX + l, // x2
-                        controlY + t, // y2
-                        tempX + l,
-                        tempY + t
-                    );
-                    x = tempX;
-                    y = tempY;
-                    break;
-
-                case 'C': // bezierCurveTo, absolute
-                    x = current[5];
-                    y = current[6];
-                    controlX = current[3];
-                    controlY = current[4];
-                    ctx.bezierCurveTo(
-                        current[1] + l,
-                        current[2] + t,
-                        controlX + l,
-                        controlY + t,
-                        x + l,
-                        y + t
-                    );
-                    break;
-
-                case 's': // shorthand cubic bezierCurveTo, relative
-
-                    // transform to absolute x,y
-                    tempX = x + current[3];
-                    tempY = y + current[4];
-
-                    if (previous[0].match(/[CcSs]/) === null) {
-                        // If there is no previous command or if the previous command was not a C, c, S, or s,
-                        // the control point is coincident with the current point
-                        controlX = x;
-                        controlY = y;
-                    }
-                    else {
-                        // calculate reflection of previous control points
-                        controlX = 2 * x - controlX;
-                        controlY = 2 * y - controlY;
-                    }
-
-                    ctx.bezierCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        x + current[1] + l,
-                        y + current[2] + t,
-                        tempX + l,
-                        tempY + t
-                    );
-                    // set control point to 2nd one of this command
-                    // "... the first control point is assumed to be
-                    // the reflection of the second control point on
-                    // the previous command relative to the current point."
-                    controlX = x + current[1];
-                    controlY = y + current[2];
-
-                    x = tempX;
-                    y = tempY;
-                    break;
-
-                case 'S': // shorthand cubic bezierCurveTo, absolute
-                    tempX = current[3];
-                    tempY = current[4];
-                    if (previous[0].match(/[CcSs]/) === null) {
-                        // If there is no previous command or if the previous command was not a C, c, S, or s,
-                        // the control point is coincident with the current point
-                        controlX = x;
-                        controlY = y;
-                    }
-                    else {
-                        // calculate reflection of previous control points
-                        controlX = 2 * x - controlX;
-                        controlY = 2 * y - controlY;
-                    }
-                    ctx.bezierCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        current[1] + l,
-                        current[2] + t,
-                        tempX + l,
-                        tempY + t
-                    );
-                    x = tempX;
-                    y = tempY;
-
-                    // set control point to 2nd one of this command
-                    // "... the first control point is assumed to be
-                    // the reflection of the second control point on
-                    // the previous command relative to the current point."
-                    controlX = current[1];
-                    controlY = current[2];
-
-                    break;
-
-                case 'q': // quadraticCurveTo, relative
-                    // transform to absolute x,y
-                    tempX = x + current[3];
-                    tempY = y + current[4];
-
-                    controlX = x + current[1];
-                    controlY = y + current[2];
-
-                    ctx.quadraticCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        tempX + l,
-                        tempY + t
-                    );
-                    x = tempX;
-                    y = tempY;
-                    break;
-
-                case 'Q': // quadraticCurveTo, absolute
-                    tempX = current[3];
-                    tempY = current[4];
-
-                    ctx.quadraticCurveTo(
-                        current[1] + l,
-                        current[2] + t,
-                        tempX + l,
-                        tempY + t
-                    );
-                    x = tempX;
-                    y = tempY;
-                    controlX = current[1];
-                    controlY = current[2];
-                    break;
-
-                case 't': // shorthand quadraticCurveTo, relative
-
-                    // transform to absolute x,y
-                    tempX = x + current[1];
-                    tempY = y + current[2];
-
-                    if (previous[0].match(/[QqTt]/) === null) {
-                        // If there is no previous command or if the previous command was not a Q, q, T or t,
-                        // assume the control point is coincident with the current point
-                        controlX = x;
-                        controlY = y;
-                    }
-                    else {
-                        // calculate reflection of previous control point
-                        controlX = 2 * x - controlX;
-                        controlY = 2 * y - controlY;
-                    }
-
-                    ctx.quadraticCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        tempX + l,
-                        tempY + t
-                    );
-                    x = tempX;
-                    y = tempY;
-
-                    break;
-
-                case 'T':
-                    tempX = current[1];
-                    tempY = current[2];
-
-                    if (previous[0].match(/[QqTt]/) === null) {
-                        // If there is no previous command or if the previous command was not a Q, q, T or t,
-                        // assume the control point is coincident with the current point
-                        controlX = x;
-                        controlY = y;
-                    }
-                    else {
-                        // calculate reflection of previous control point
-                        controlX = 2 * x - controlX;
-                        controlY = 2 * y - controlY;
-                    }
-                    ctx.quadraticCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        tempX + l,
-                        tempY + t
-                    );
-                    x = tempX;
-                    y = tempY;
-                    break;
-
-                case 'a':
-                    // TODO: optimize this
-                    drawArc(ctx, x + l, y + t, [
-                        current[1],
-                        current[2],
-                        current[3],
-                        current[4],
-                        current[5],
-                        current[6] + x + l,
-                        current[7] + y + t
-                    ]);
-                    x += current[6];
-                    y += current[7];
-                    break;
-
-                case 'A':
-                    // TODO: optimize this
-                    drawArc(ctx, x + l, y + t, [
-                        current[1],
-                        current[2],
-                        current[3],
-                        current[4],
-                        current[5],
-                        current[6] + l,
-                        current[7] + t
-                    ]);
-                    x = current[6];
-                    y = current[7];
-                    break;
-
-                case 'z':
-                case 'Z':
-                    x = subpathStartX;
-                    y = subpathStartY;
-                    ctx.closePath();
-                    break;
-            }
-            previous = current;
-        }
-    },
-
-});
-
-ImageAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(baseImage,0,0,canvas.width,canvas.height)
-    ctx.globalCompositeOperation="destination-in";
-    ctx.stroke();
-    ctx.globalCompositeOperation="source-over";
-    ctx.drawImage(prevPathSnapshot,0,0);
-}
-TextAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(baseImage,0,0,canvas.width,canvas.height);
-    ctx.globalCompositeOperation="source-in";
-    ctx.fill();
-    ctx.globalCompositeOperation="source-over";
-    ctx.drawImage(prevPathSnapshot,0,0);
-}
-SVGAnimable.prototype.illustrationFunction=function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){
-    if(this.imageDrawingData.type===ImageType.CREATED_PATHDESIGNED){
-        ImageAnimable.prototype.illustrationFunction(canvas,ctx,baseImage,prevPathSnapshot);
-    }else if(indexLayer<=this.indexFinalTruePath){
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.stroke();
-        ctx.drawImage(prevPathSnapshot,0,0);
+/*
+* ================================================================================================
+* */
+
+// EXTENDING FABRIC BEHAVIOUR TO SUPPORT A DINAMIC PIVOT
+fabric.Object.prototype.originX="custom";
+fabric.Object.prototype.originY="custom";
+fabric.Object.prototype.centeredRotation=false;
+fabric.Object.prototype.centeredScaling=false;
+fabric.Object.prototype.pivotX=0;
+fabric.Object.prototype.pivotY=0;
+fabric.Object.prototype.pivotCornerX=0;//visual corner pos X, (while dragging)
+fabric.Object.prototype.pivotCornerY=0;//visual corner pos y, (while dragging)
+fabric.Object.prototype.mouseStickRange=10;
+fabric.Object.prototype.movePivotCornerPos=function(x,y){
+    let stickyCorners={}; //will store world key point's positions
+    for(let i in this.aCoords){
+        stickyCorners[i]={x:this.aCoords[i].x, y:this.aCoords[i].y};
     }
-    else if(this.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="drawn_fill"){
-        ctx.strokeStyle="red";
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.drawImage(baseImage,0,0,canvas.width,canvas.height);
-        ctx.globalCompositeOperation="destination-in";
-        ctx.stroke();
-        ctx.globalCompositeOperation="source-over";
-        ctx.drawImage(prevPathSnapshot,0,0);
-    }else{
+    let center=this.getCenterPoint();
+    let dim = this._getTransformedDimensions();
 
-
-    }
-}
-
-var CameraAnimable=fabric.util.createClass(ImageAnimable,{
-    applicableEntrenceModes:[EntranceModes.none],//FOR UI
-    type:"CameraAnimable",
-    initialize:function(element,options){
-        this.callSuper("initialize",element,options);
-        this.applicableMenuOptions=[]; //ya que estamos heredando de ImageAnimable, el cual al tene la opcion addMask, el menu es dinamico para el, por en se debe declara en su contructor para evitar que al
-        //alterar el menu se altere en todas las instancias, y como esta su contructor lo sobreescribira para todos sus subclases
-        this.name="Camera";
-        this.isCamera=true;
-        this.started=false;
-        this.lockUniScaling=true;
-        this.canvasCamera=null;
-        this.entranceMode=EntranceModes.none;
-        this.setControlsVisibility({"pivot":false});
-        this.cornerStyle="rect";
-        this.cornerColor="rgba(200,100,0,0.9)"
-        this.cornerSize=20;
-        this.animator=new AnimatorCamera(this,this.canvasCamera);
-    },
-})
-fabric.util.object.extend(fabric.Image,{
-    fromURLCustom:function(url, callback, imgOptions){
-      fabric.util.loadImage(url, function(img) {
-        callback && callback(new CameraAnimable(img, imgOptions));
-      }, null, imgOptions && imgOptions.crossOrigin);
-    }
-})
-/*Hacemos que al cargar el svg string pase por el flatenner */
-fabric.loadSVGFromURLCustom= function(url, callback, reviver, options) {
-
-    url = url.replace(/^\n\s*/, '').trim();
-    new fabric.util.request(url, {
-        method: 'get',
-        onComplete: onComplete
-    });
-
-    function onComplete(r) {
-
-        var xml = r.responseXML;
-        if (xml && !xml.documentElement && fabric.window.ActiveXObject && r.responseText) {
-            xml = new ActiveXObject('Microsoft.XMLDOM');
-            xml.async = 'false';
-            //IE chokes on DOCTYPE
-            xml.loadXML(r.responseText.replace(/<!DOCTYPE[\s\S]*?(\[[\s\S]*\])*?>/i, ''));
+    stickyCorners.mm={x:center.x,y:center.y};
+    /*looping through corners to check if mouse is in sticky range*/
+    for(let i in stickyCorners){
+        if( x>stickyCorners[i].x-this.mouseStickRange &&
+            x<stickyCorners[i].x+this.mouseStickRange &&
+            y>stickyCorners[i].y-this.mouseStickRange &&
+            y<stickyCorners[i].y+this.mouseStickRange){
+            let stickyCornerRotated=fabric.util.rotatePoint(new fabric.Point(stickyCorners[i].x,stickyCorners[i].y), center, fabric.util.degreesToRadians(-this.angle));
+            let tmppivotX=stickyCornerRotated.x-center.x;
+            let tmppivotY=stickyCornerRotated.y-center.y;
+            tmppivotX/=dim.x;
+            tmppivotY/=dim.y;
+            this.pivotCornerX=tmppivotX;
+            this.pivotCornerY=tmppivotY;
+            return true;
         }
-        if (!xml || !xml.documentElement) {
-            callback && callback(null);
-            return false;
-        }
-        /*------------------*/
-        let cacheSVG=document.createElement("div");
-        cacheSVG.style.visibility="hidden";
-        document.body.appendChild(cacheSVG);
+    }
+    let newPointer={x:x,y:y};
+    let rotatedPointer=fabric.util.rotatePoint(new fabric.Point(x,y), center, fabric.util.degreesToRadians(-this.angle));
 
-        cacheSVG.appendChild(
-            xml.documentElement
-        )
+    let dx=rotatedPointer.x-center.x;
+    let dy=rotatedPointer.y-center.y;
+    dx/=(dim.x);
+    dy/=(dim.y);
 
-        flatten(cacheSVG);
-
-        let s = new XMLSerializer();
-        let str = s.serializeToString(cacheSVG);
-
-        fabric.loadSVGFromString(str,callback)
-        /*------------------- */
-        /**
-        fabric.parseSVGDocument(str, function (results, _options, elements, allElements) {
-            callback && callback(results, _options, elements, allElements);
-        }, reviver, options);
-         **/
+    // if(newPointer.x>stickyCorners.tl.x - this.mouseStickRange && newPointer.x<stickyCorners.tl.x+this.mouseStickRange){
+    //     dx=-0.5;
+    // }
+    // else if(newPointer.x>stickyCorners.tr.x - this.mouseStickRange && newPointer.x<stickyCorners.tr.x+this.mouseStickRange){
+    //     dx=0.5;
+    // }
+    // else if(newPointer.y>stickyCorners.tl.y - this.mouseStickRange && newPointer.y<stickyCorners.tl.y+this.mouseStickRange){
+    //     dy=-0.5;
+    // }
+    // else if(newPointer.y>stickyCorners.br.y - this.mouseStickRange && newPointer.y<stickyCorners.br.y+this.mouseStickRange){
+    //     dy=0.5;
+    // }
+    this.pivotCornerX=dx;
+    this.pivotCornerY=dy;
+    return true;
+};
+fabric.Object.prototype.originXToValue=function(originX){
+    switch (originX){
+        case "left": return -0.5;
+        case "center": return 0;
+        case "right": return 0.5;
+        case "custom": return this.pivotX;
     }
 };
-var DrawableImage = fabric.util.createClass(fabric.Object, {
-
-    type: 'DrawableImage',
-    // initialize can be of type function(options) or function(property, options), like for text.
-    // no other signatures allowed.
-    //
-    initialize: function(options) {
-        options || (options = { });
-        this.callSuper('initialize',options);
-        this.set('label', options.label || '');
-        this.objectCaching=false;                   // SOLUCIION BUG, ahora con solo sobreescribir _render funciona, antes se quedaba en blanco
-        this.cacheCanvas=options.cacheCanvas;
-
-        this.myTurn=false;
-        this.lastSnapShot=new Image();
-        this.lastSnapShot.src=this.cacheCanvas.toDataURL();
-        this.width=options.width;
-        this.height=options.height;
-
-        this.animator=new Animator(this);
-        this.animator.dictAnimations=options.animations;
-        this.animator.dictHiddenAnimations=options.hiddenAnimations;
-        this.animator.entranceTimes=options.entranceTimes;
-
-        this.entranceModesSettings=options.entraceModesSettings;
-    },
-    setTurn:function(is,finalImageMask){
-        if(!is){
-            this.lastSnapShot=finalImageMask
-        }
-        this.myTurn=is;
-    },
-    toObject: function() {
-      return fabric.util.object.extend(this.callSuper('toObject'), {
-        label: this.get('label')
-      });
-    },
-    _render:function(ctx){
-        if(this.myTurn){
-            ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
-        }else{
-            ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);
-        }
+fabric.Object.prototype.originYToValue=function(originY){
+    switch (originY){
+        case "top": return -0.5;
+        case "center": return 0;
+        case "bottom": return 0.5;
+        case "custom": return this.pivotY;
     }
-  });
+};
 
-var DrawableSVGImage=fabric.util.createClass(DrawableImage, {
-    initialize:function(options,imageHigh){
-        this.callSuper('initialize',options);
-        this.imageToBeFadeIn=imageHigh;
+fabric.Object.prototype.translateToGivenOrigin=function(point,fromOriginX,fromOriginY,toOriginX,toOriginY){
+    var x = point.x,
+        y = point.y,
+        offsetX, offsetY, dim;
+    if (typeof fromOriginX === 'string') {
+        fromOriginX = this.originXToValue(fromOriginX); //MODIFICED : FUNCTION CALL
+    }
+    else {
+        fromOriginX -= 0.5;
+    }
 
-        this.fadeInTransitionOpacity=0; /*animated property*/
-    },
-    _render:function(ctx){
-        if(this.myTurn){
-            if(this.fadeInTransitionOpacity!==0){
-                let currentGlobalAlpha=ctx.globalAlpha;
-                ctx.globalAlpha=currentGlobalAlpha*this.fadeInTransitionOpacity;
-                ctx.drawImage(this.imageToBeFadeIn,-this.width/2,-this.height/2)
+    if (typeof toOriginX === 'string') {
+        toOriginX = this.originXToValue(toOriginX);  //MODIFICED : FUNCTION CALL
+    }
+    else {
+        toOriginX -= 0.5;
+    }
 
-                let negativeAlpha=1-this.fadeInTransitionOpacity;
+    offsetX = toOriginX - fromOriginX;
 
-                ctx.globalAlpha=currentGlobalAlpha*negativeAlpha;
-                ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
-                ctx.globalAlpha=currentGlobalAlpha;
-            }else{
-                ctx.drawImage(this.cacheCanvas,-this.width/2,-this.height/2);
+    if (typeof fromOriginY === 'string') {
+        fromOriginY = this.originYToValue(fromOriginY);  //MODIFICED : FUNCTION CALL
+    }
+    else {
+        fromOriginY -= 0.5;
+    }
 
-            }
-        }else{
-            ctx.drawImage(this.lastSnapShot,-this.width/2,-this.height/2);
-        }
-    },
-});
-var FactoryDrawableImages={
-    create:function(object,cacheCanvas){
-        let options={
-            cacheCanvas:cacheCanvas,
-            left:object.get("left"), top:object.get("top"),
-            width:object.get("width"), height:object.get("height"), angle:object.get("angle"),
-            scaleX:object.get("scaleX"), scaleY:object.get("scaleY"), opacity:object.get("opacity"),
+    if (typeof toOriginY === 'string') {
+        toOriginY = this.originYToValue(toOriginY);   //MODIFICED : FUNCTION CALL
+    }
+    else {
+        toOriginY -= 0.5;
+    }
 
-            pivotX:object.get("pivotX"), pivotY:object.get("pivotY"),
-            pivotCornerX:object.get("pivotCornerX"), pivotCornerY:object.get("pivotCornerY"),
-            originX: 'custom', originY: 'custom',
+    offsetY = toOriginY - fromOriginY;
 
-            clipPath:object.clipPath,
+    if (offsetX || offsetY) {
+        dim = this._getTransformedDimensions();
+        x = point.x + offsetX * dim.x;
+        y = point.y + offsetY * dim.y;
+    }
 
-            animations:object.animator.dictAnimations,
-            hiddenAnimations:object.animator.dictHiddenAnimations,
-            entranceTimes:object.animator.entranceTimes,
+    return new fabric.Point(x, y);
+};
+// RENDERING OF NEW CONTROL POINT
+fabric.Object.prototype.drawControls= function(ctx, styleOverride) {
+    styleOverride = styleOverride || {};
+    var wh = this._calculateCurrentDimensions(),
+        width = wh.x,
+        height = wh.y,
+        scaleOffset = styleOverride.cornerSize || this.cornerSize,
+        left = -(width + scaleOffset) / 2,
+        top = -(height + scaleOffset) / 2,
+        transparentCorners = typeof styleOverride.transparentCorners !== 'undefined' ?
+            styleOverride.transparentCorners : this.transparentCorners,
+        hasRotatingPoint = typeof styleOverride.hasRotatingPoint !== 'undefined' ?
+            styleOverride.hasRotatingPoint : this.hasRotatingPoint,
+        methodName = transparentCorners ? 'stroke' : 'fill';
 
-            entraceModesSettings:object.entraceModesSettings
+    ctx.save();
+    ctx.strokeStyle = ctx.fillStyle = styleOverride.cornerColor || this.cornerColor;
+    if (!this.transparentCorners) {
+        ctx.strokeStyle = styleOverride.cornerStrokeColor || this.cornerStrokeColor;
+    }
+    this._setLineDash(ctx, styleOverride.cornerDashArray || this.cornerDashArray, null);
+
+    // top-left
+    this._drawControl('tl', ctx, methodName,
+        left,
+        top, styleOverride);
+
+    // top-right
+    this._drawControl('tr', ctx, methodName,
+        left + width,
+        top, styleOverride);
+
+    // bottom-left
+    this._drawControl('bl', ctx, methodName,
+        left,
+        top + height, styleOverride);
+
+    // bottom-right
+    this._drawControl('br', ctx, methodName,
+        left + width,
+        top + height, styleOverride);
+
+    if (!this.get('lockUniScaling')) {
+
+        // middle-top
+        this._drawControl('mt', ctx, methodName,
+            left + width / 2,
+            top, styleOverride);
+
+        // middle-bottom
+        this._drawControl('mb', ctx, methodName,
+            left + width / 2,
+            top + height, styleOverride);
+
+        // middle-right
+        this._drawControl('mr', ctx, methodName,
+            left + width,
+            top + height / 2, styleOverride);
+
+        // middle-left
+        this._drawControl('ml', ctx, methodName,
+            left,
+            top + height / 2, styleOverride);
+    }
+    /////MODIFICACION//////
+    if (this.isControlVisible("pivot")) {
+        var size = this.cornerSize, stroke = !this.transparentCorners && this.cornerStrokeColor;
+        let pivotLeft=(width-this.padding*2)*this.pivotCornerX;
+        let pivotTop=(height-this.padding*2)*this.pivotCornerY;
+        ctx.moveTo(pivotLeft,pivotTop);
+        ctx.arc(pivotLeft,pivotTop, size/2,0,Math.PI*2,false);
+        ctx.lineTo(pivotLeft-size/2,pivotTop);
+        ctx.moveTo(pivotLeft,pivotTop-size/2);
+        ctx.lineTo(pivotLeft,pivotTop+size/2);
+        ctx.stroke();
+    }
+
+    //////////
+
+    // middle-top-rotate
+    if (hasRotatingPoint) {
+        this._drawControl('mtr', ctx, methodName,
+            left + width / 2,
+            top - this.rotatingPointOffset, styleOverride);
+    }
+    ctx.restore();
+    return this;
+}
+fabric.Object.prototype._getControlsVisibility=function() {
+    if (!this._controlsVisibility) {
+        this._controlsVisibility = {
+            tl: true,
+            tr: true,
+            br: true,
+            bl: true,
+            ml: true,
+            mt: true,
+            mr: true,
+            mb: true,
+            mtr: true,
+            pivot:true,   //ADDED
         };
-        if(object.type==="SVGAnimable" && object.entraceModesSettings["drawn"].fillRevealMode==="fadein"){
-            return new DrawableSVGImage(options,object.imageDrawingData.imgHigh);
-        }else if(object.type==="ImageAnimable"){
-            return new DrawableImage(options);
-        }else if(object.type==="TextAnimable"){
-            return new DrawableImage(options);
-        }else{
-            return new DrawableImage(options);
+    }
+    return this._controlsVisibility;
+};
+fabric.Object.prototype.calcCoords=function(absolute){
+    var rotateMatrix = this._calcRotateMatrix(),
+        translateMatrix = this._calcTranslateMatrix(),
+        startMatrix = fabric.util.multiplyTransformMatrices(translateMatrix, rotateMatrix),
+        vpt = this.getViewportTransform(),
+        finalMatrix = absolute ? startMatrix : fabric.util.multiplyTransformMatrices(vpt, startMatrix),
+        dim = this._getTransformedDimensions(),
+        w = dim.x / 2, h = dim.y / 2,
+        tl = fabric.util.transformPoint({ x: -w, y: -h }, finalMatrix),
+        tr = fabric.util.transformPoint({ x: w, y: -h }, finalMatrix),
+        bl = fabric.util.transformPoint({ x: -w, y: h }, finalMatrix),
+        br = fabric.util.transformPoint({ x: w, y: h }, finalMatrix),
+        pivot=fabric.util.transformPoint({x:this.pivotX*dim.x,y:this.pivotY*dim.y},finalMatrix);                //ADDED
+    if (!absolute) {
+        var padding = this.padding, angle = fabric.util.degreesToRadians(this.angle),
+            cos = fabric.util.cos(angle), sin = fabric.util.sin(angle),
+            cosP = cos * padding, sinP = sin * padding, cosPSinP = cosP + sinP,
+            cosPMinusSinP = cosP - sinP;
+        if (padding) {
+            tl.x -= cosPMinusSinP;
+            tl.y -= cosPSinP;
+            tr.x += cosPSinP;
+            tr.y -= cosPMinusSinP;
+            bl.x -= cosPSinP;
+            bl.y += cosPMinusSinP;
+            br.x += cosPMinusSinP;
+            br.y += cosPSinP;
         }
+        var ml  = new fabric.Point((tl.x + bl.x) / 2, (tl.y + bl.y) / 2),
+            mt  = new fabric.Point((tr.x + tl.x) / 2, (tr.y + tl.y) / 2),
+            mr  = new fabric.Point((br.x + tr.x) / 2, (br.y + tr.y) / 2),
+            mb  = new fabric.Point((br.x + bl.x) / 2, (br.y + bl.y) / 2),
+            mtr = new fabric.Point(mt.x + sin * this.rotatingPointOffset, mt.y - cos * this.rotatingPointOffset);
+    }
+    var coords = {
+        // corners
+        tl: tl, tr: tr, br: br, bl: bl
+        ,pivot:pivot                                                                                               //ADDED
+    };
+    if (!absolute) {
+        // middle
+        coords.ml = ml;
+        coords.mt = mt;
+        coords.mr = mr;
+        coords.mb = mb;
+        // rotating point
+        coords.mtr = mtr;
+    }
+    return coords;
+}
+fabric.Canvas.prototype._getActionFromCorner=function(alreadySelected, corner, e /* target */){
+    if (!corner || !alreadySelected) {
+        return 'drag';
+    }
+    switch (corner) {
+        case 'mtr':
+            return 'rotate';
+        case 'ml':
+        case 'mr':
+            return e[this.altActionKey] ? 'skewY' : 'scaleX';
+        case 'mt':
+        case 'mb':
+            return e[this.altActionKey] ? 'skewX' : 'scaleY';
+        case 'pivot':                                              //ADDED
+            return 'pivotmove';                                    //ADDED
+        default:
+            return 'scale';
     }
 }
-/*
-* Canvas en el que se toma en cuenta la opacidad, la cual es aplicar a todos los objetos. Usado para el canvas previewer
-* */
-var CustomStaticCanvas = fabric.util.createClass(fabric.StaticCanvas, {
-    initialize:function(id,options){
-        this.callSuper('initialize', id,options);
-        this.opacity=1;
-    },
-    getZoom:function(){
-        return Math.sqrt(this.viewportTransform[0]*this.viewportTransform[0] + this.viewportTransform[1]*this.viewportTransform[1]);
-    },
-    renderCanvas:function(ctx, objects){
-        var v = this.viewportTransform, path = this.clipPath;
-        this.cancelRequestedRender();
-        this.calcViewportBoundaries();
-        this.clearContext(ctx);
-        this.fire('before:render', { ctx: ctx, });
-        if (this.clipTo) {
-            fabric.util.clipContext(this, ctx);
-        }
-        this._renderBackground(ctx);
+fabric.Canvas.prototype._performTransformAction=function(e, transform, pointer) {
+    var x = pointer.x,
+        y = pointer.y,
+        action = transform.action,
+        actionPerformed = false,
+        options = {
+            target: transform.target,
+            e: e,
+            transform: transform,
+            pointer: pointer
+        };
 
-        ctx.save();
-        ctx.globalAlpha=this.opacity;
-        //apply viewport transform once for all rendering process
-        ctx.transform(v[0], v[1], v[2], v[3], v[4], v[5]);
-        this._renderObjects(ctx, objects);
-        ctx.restore();
-        if (!this.controlsAboveOverlay && this.interactive) {
-            this.drawControls(ctx);
+    if (action === 'rotate') {
+        (actionPerformed = this._rotateObject(x, y)) && this._fire('rotating', options);
+    } else if (action === 'scale') {
+        (actionPerformed = this._onScale(e, transform, x, y)) && this._fire('scaling', options);
+    } else if (action === 'scaleX') {
+        (actionPerformed = this._scaleObject(x, y, 'x')) && this._fire('scaling', options);
+    } else if (action === 'scaleY') {
+        (actionPerformed = this._scaleObject(x, y, 'y')) && this._fire('scaling', options);
+    } else if (action === 'skewX') {
+        (actionPerformed = this._skewObject(x, y, 'x')) && this._fire('skewing', options);
+    } else if (action === 'skewY') {
+        (actionPerformed = this._skewObject(x, y, 'y')) && this._fire('skewing', options);
+    } else if (action === "pivotmove") {                                                                                //  ADDED
+        (actionPerformed = transform.target.movePivotCornerPos(x,y))      //  ADDED
+    } else {
+        actionPerformed = this._translateObject(x, y);
+        if (actionPerformed) {
+            this._fire('moving', options);
+            this.setCursor(options.target.moveCursor || this.moveCursor);
         }
-        if (this.clipTo) {
-            ctx.restore();
-        }
-        if (path) {
-            path.canvas = this;
-            // needed to setup a couple of variables
-            path.shouldCache();
-            path._transformDone = true;
-            path.renderCache({ forClipping: true });
-            this.drawClipPathOnCanvas(ctx);
-        }
-        this._renderOverlay(ctx);
-        if (this.controlsAboveOverlay && this.interactive) {
-            this.drawControls(ctx);
-        }
-        this.fire('after:render', { ctx: ctx, });
     }
-});
+    transform.actionPerformed = transform.actionPerformed || actionPerformed;
+}
+fabric.Canvas.prototype._finalizeCurrentTransform=function(e){ //ON MOUSE UP
+    var transform = this._currentTransform,
+        target = transform.target,
+        eventName,
+        options = {
+            e: e,
+            target: target,
+            transform: transform,
+        };
+
+    if (target._scaling) {
+        target._scaling = false;
+    }
+    //////////////MODIFICACOIN//////////////////
+    let center=transform.target.getCenterPoint();
+    let worldPivotPos=target.translateToOriginPoint(center,'custom','custom');
+
+    //prestado de calcCoords() de Object
+    var rotateMatrix = transform.target._calcRotateMatrix(),
+        translateMatrix = transform.target._calcTranslateMatrix(),
+        startMatrix = fabric.util.multiplyTransformMatrices(translateMatrix, rotateMatrix),
+        dim = transform.target._getTransformedDimensions(),
+        w = dim.x, h = dim.y,
+        woldNewPivotPos = fabric.util.transformPoint({ x: w*transform.target.pivotCornerX, y: h*transform.target.pivotCornerY }, startMatrix);
+    //fin prestado
+    if(transform.action==="pivotmove"){
+        let offsetX=woldNewPivotPos.x-worldPivotPos.x;
+        let offsetY=woldNewPivotPos.y-worldPivotPos.y;
+        target.left+=offsetX;
+        target.top+=offsetY;
+    }
+    target.pivotX=target.pivotCornerX;
+    target.pivotY=target.pivotCornerY;
+    target.setCoords();
+
+    ////////////M//////////////////////////////
+    if (transform.actionPerformed || (this.stateful && target.hasStateChanged())) {
+        if (transform.actionPerformed) {
+            eventName = this._addEventOptions(options, transform);
+            this._fire(eventName, options);
+        }
+        this._fire('modified', options);
+    }
+}
+
+/*
+* ================================================================================================
+* */
+
+// CUSTOM RENDER FUNCTION FOR ANIMABLES
+/*
+* soluciono problema sobre que los objetos no se renderizaban tras ser animados estando fuera del canvas hacia dentro del canvas.
+* El problema se debia a que la funcion render no renderiza al objeto si este se encuentra offscreen, para esto usa las coordenadas del objecto oCoords,
+* pero estas coordenadas solo son actualizadas al llamar a setCoords().
+*
+* En esta modificacion, el objeto sera renderizado aun estando offscreen, y para contrarestar el bajo rendimiento que esto
+* puede provocar ante muchos objetos en escena, se podria usar un cache canvas adicional, donde solo una vez se dibuje la imagen original,
+* y al renderizar el objeto simplemente se copie el contenido de ese cache canvas
+* */
+
+fabric.Object.prototype.customRenderOffScreen=function(ctx){ //SOBREESCRITO DE RENDER()
+    if (this.isNotVisible()) {
+        return;
+    }
+    // Se elimino esta linea que era la que omitia el renderizaje ante objeto offscreen
+    ctx.save();
+    this._setupCompositeOperation(ctx);
+    this.drawSelectionBackground(ctx);
+    this.transform(ctx);
+    this._setOpacity(ctx);
+    this._setShadow(ctx, this);
+    if (this.transformMatrix) {
+        ctx.transform.apply(ctx, this.transformMatrix);
+    }
+    this.clipTo && fabric.util.clipContext(this, ctx);
+
+    if (this.shouldCache()) {
+        //ImageAnimables usan siempre el cache, pero en caso esta tenga aplicado un clipping se refrescara cada frame el cache , ya que usan composite operation
+        //lo cual de ser aplicado en el main canvas, al aplicarse el cliping, se aplicara a todos los objetos dl canvas
+        //
+        // ImageAnimables que no tengan clipping practicamente omiten la funcion renderCache() y pasan de fente a drawCacheOnCanvas()
+        // donde solo se dibuja directamente el cacheCanvas
+
+        //SVGAnimable, al igual que imageAnimable no refresca cache nunca,solo ante clipping
+
+        // Shape Animables tambien usan siempre esta seccion, ya que se dejo objectCaching a true.
+        // sin embargo siempre refrescan el cache, cada frame, ya que los shapeanimables sambian constantenmente su estructura(no solo transformaciones
+        // , sino propiedades como strokewidth, stroke,fill, startRenderingPoint, endrenderingPoint,)
 
 
 
+        //TextAnimable, al igual que shape animable refresca cache cada frame, ya que sus estilos pueden ser
+        //animados, al igual que shapeAnimable, ademas que puede ser usado como clippath, por ende tras cada renderizacion,
+        // tambien se establece dirty a true
+        //Camera Animable nunca actualiza cache, ya que al ser solo una imagen que no puede ser clippeada, solo se trnsforma
+        this.renderCache();
+        this.drawCacheOnCanvas(ctx);
+    }
+    else {
+        //Los Drawables son los unicos que tienen objectCaching false, ya que casi siempre ira cambiando lo
+        //que renderiza, que es a otro canvas donde se proyecta una animacion, entonce en lugar de reflescar un
+        //cache y luego pasarlo al canvas principal, derectamente hacemos que se renderize dirtamente en el canvas principal
+        this._removeCacheCanvas();
+        this.dirty = false;
+        this.drawObject(ctx);             //TODO: better performance with an extra cacheCanvas where the image is drawn and in the main canvas only the cache is copied rather than drawin the image again and again
+        if (this.objectCaching && this.statefullCache) {
+            this.saveState({ propertySet: 'cacheProperties' });
+        }
+    }
+    this.clipTo && ctx.restore();
+    ctx.restore();
+}
 
+var applyViewboxTransform=function(element){/*modificado de: applyViewboxTransform() */ /*obtener dimensiones reales de svg, ya que las dimenciones dadas por el tag html <img> son muy diferentes a las dadas por fabric,
+por lo que conclui que las dimenciones reales las halla fabric, es asi que de esta funcion se conservo solo lo que permite calcular las dimenciones reales del svg, esto es usado por
+NetworkManager.loadSVG , la cual fue a su vez modificada de fabric.util.loadSVGFromURL, para que una vez cargada la iamgen,
+se modifique el codigo svg para pasar las dimenciones como atributos, y de esta forma el tag <img> usa esas dimenciones, las cuale son las reales.
+En conclusion, esta funcion calcula las dimenciones reales de la imagen svg*/
+    var reViewBoxAttrValue = new RegExp(
+        '^' +
+        '\\s*(' + fabric.reNum + '+)\\s*,?' +
+        '\\s*(' + fabric.reNum + '+)\\s*,?' +
+        '\\s*(' + fabric.reNum + '+)\\s*,?' +
+        '\\s*(' + fabric.reNum + '+)\\s*' +
+        '$'
+    );
+    let parseUnit = fabric.util.parseUnit;
+    var viewBoxAttr = element.getAttribute('viewBox'),
+        scaleX = 1,
+        scaleY = 1,
+        minX = 0,
+        minY = 0,
+        viewBoxWidth, viewBoxHeight, matrix, el,
+        widthAttr = element.getAttribute('width'),
+        heightAttr = element.getAttribute('height'),
+        x = element.getAttribute('x') || 0,
+        y = element.getAttribute('y') || 0,
+        preserveAspectRatio = element.getAttribute('preserveAspectRatio') || '',
+        missingViewBox = (!viewBoxAttr || !fabric.svgViewBoxElementsRegEx.test(element.nodeName)
+            || !(viewBoxAttr = viewBoxAttr.match(reViewBoxAttrValue))),
+        missingDimAttr = (!widthAttr || !heightAttr || widthAttr === '100%' || heightAttr === '100%'),
+        toBeParsed = missingViewBox && missingDimAttr,
+        parsedDim = { }, translateMatrix = '', widthDiff = 0, heightDiff = 0;
+
+    parsedDim.width = 0;
+    parsedDim.height = 0;
+    parsedDim.toBeParsed = toBeParsed;
+
+    if (toBeParsed) {
+        return parsedDim;
+    }
+
+    if (missingViewBox) {
+        parsedDim.width = parseUnit(widthAttr);
+        parsedDim.height = parseUnit(heightAttr);
+        return parsedDim;
+    }
+    minX = -parseFloat(viewBoxAttr[1]);
+    minY = -parseFloat(viewBoxAttr[2]);
+    viewBoxWidth = parseFloat(viewBoxAttr[3]);
+    viewBoxHeight = parseFloat(viewBoxAttr[4]);
+    parsedDim.minX = minX;
+    parsedDim.minY = minY;
+    parsedDim.viewBoxWidth = viewBoxWidth;
+    parsedDim.viewBoxHeight = viewBoxHeight;
+    if (!missingDimAttr) {
+        parsedDim.width = parseUnit(widthAttr);
+        parsedDim.height = parseUnit(heightAttr);
+        scaleX = parsedDim.width / viewBoxWidth;
+        scaleY = parsedDim.height / viewBoxHeight;
+    }
+    else {
+        parsedDim.width = viewBoxWidth;
+        parsedDim.height = viewBoxHeight;
+    }
+    return parsedDim
+};
 
 
 

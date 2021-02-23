@@ -18,7 +18,7 @@ var CanvasManager={
     canvas:null,
     listAnimableObjects:[],//(SII QUE LA TIENE)NO TIENE UNA RAZON DE SER CLARA PERO SE ESPERA QUE CUANDO DENGAMOS QUE HACER ALGO EN LOS ELEMENTOS ANIMABLES, NO TENGMOS QUE RECORRER TODOS LOS ELEMENTOS DEL CANVAS, sino solo lso animables, ademas son los que se muestran en el objects editor
     listAnimableObjectsWithEntrance:[],// este es un subconjunto de la lista de arriba
-    listShapeAnimableObjects:[],
+    listClipableAnimableObjects:[],
     camera:null,
 
     SectionFloatingMenu:null,
@@ -32,13 +32,17 @@ var CanvasManager={
 
         this.HTMLElement=document.querySelector(".canvas-animator");
         this.boundingClientRect=this.HTMLElement.getBoundingClientRect();
-        this.initCanvas();
 
-        this.initCamera();
+        MainMediator.registerObserver(WindowManager.name,WindowManager.events.OnUILoaded,this);
+
+        this.initCanvas();
 
         this.panningAndZoomBehaviour();
 
         this.initEvents();
+    },
+    notificationWindowManagerOnUILoaded:function(){//PARA EMISION DE EVENTOS DEBEMOS ESPERAR QUE TODOS ESTEN LISTOS
+        this.initCamera();
     },
     initCanvas:function(resolutionWidth,resolutionHeight){
         let aspectRatio=0.6;
@@ -72,18 +76,19 @@ var CanvasManager={
         WindowManager.registerOnKeyDeletePressed(this);
         },
     initCamera:function(){
-        fabric.Image.fromURLCustom("https://res.cloudinary.com/djtqhafqe/image/upload/v1612398280/ooatfbhhb8is66s3d9i0.svg",function(animCamera){
-            this.camera=animCamera;
-            this.listAnimableObjects.push(animCamera);
-            this.canvas.add(animCamera);
-            this.notifyOnAnimableObjectAdded.bind(this)(animCamera);
-        }.bind(this),{
-            left:0,
-            top:0,
-            width:1400,
-            height:800,
-            imageDrawingData:{url_thumbnail:'http..',id:"",userid:"",imgHigh:""}
-        });
+        let cameraImage=new Image();
+        cameraImage.src=RUTES.assets_images + "camera.svg";
+        cameraImage.onload=function(){
+            this.camera=new CameraAnimable(cameraImage,{
+                left:0,
+                top:0,
+                width:1400,
+                height:800,
+            });
+            this.listAnimableObjects.push(this.camera);
+            this.canvas.add(this.camera);
+            this.notifyOnAnimableObjectAdded.bind(this)(this.camera);
+        }.bind(this);
 
     },
     panningAndZoomBehaviour:function(){
@@ -175,52 +180,23 @@ var CanvasManager={
         // }
 
     },
-    createAnimableObject:function(model,type="ImageAnimable"){
+    createAnimableObject:function(model,type="ImageAnimable",thumbnail=null){
         let self=this;
 
-        /*
-                fabric.loadSVGFromURL('http://localhost:3000/svg.svg', function(objects, options) {
-                console.log(objects);
-                    var obj = fabric.util.groupSVGElements(objects, options);
-                    obj.set({left:WindowManager.mouse.x});
-                    obj.set({top:WindowManager.mouse.y});
-                    self.canvas.add(obj).renderAll();
-                  });
-                */
-        
-        //console.log(model);
         if(type==="ImageAnimable"){
-            let lowImage=new Image();
-            let highImage=new Image();
-            lowImage.crossOrigin="anonymous";
-            highImage.crossOrigin="anonymous";
-            let tmpCount=0;
-            if(model.url_thumbnail===model.url_image){
-                highImage.onload=function(){lowImage=highImage;imgsReady();}
-                highImage.src=model.url_image;
-            }else{
-                lowImage.onload=function(){tmpCount++;if(tmpCount===2){imgsReady()}}
-                highImage.onload=function(){tmpCount++;if(tmpCount===2){imgsReady()}}
 
-                lowImage.src=model.url_thumbnail;
-                highImage.src=model.url_image;
-            }
-            function imgsReady(){
-                let animObj=new ImageAnimable(highImage,{
+                let animObj=new ImageAnimable({
                     "left":WindowManager.mouse.x-self.canvas._offset.left,
                     "top":WindowManager.mouse.y-self.canvas._offset.top,
                     "imageAssetModel":model,
-                    "imgHighDefinition":highImage,
-                    "imgLowDefinition":lowImage,
+                    "thumbnailImage":thumbnail
                 })
                 animObj.setCoords();
-                self.listAnimableObjects.push(animObj);
-                self.listAnimableObjectsWithEntrance.push(animObj);
-                self.canvas.add(animObj);
-                self.notifyOnObjAddedToListObjectsWithEntrance.bind(self)(animObj);
-                self.notifyOnAnimableObjectAdded.bind(self)(animObj);
-            }
-
+                this.listAnimableObjects.push(animObj);
+                this.listAnimableObjectsWithEntrance.push(animObj);
+                this.canvas.add(animObj);
+                this.notifyOnObjAddedToListObjectsWithEntrance.bind(self)(animObj);
+                this.notifyOnAnimableObjectAdded.bind(self)(animObj);
 
              // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea
         }else if(type==="SVGAnimable"){
@@ -228,14 +204,14 @@ var CanvasManager={
                 "left":WindowManager.mouse.x-self.canvas._offset.left,
                 "top":WindowManager.mouse.y-self.canvas._offset.top,
                 "imageAssetModel":model,
-            },function (){
-                animObj.setCoords();
-                self.listAnimableObjects.push(animObj);
-                self.listAnimableObjectsWithEntrance.push(animObj);
-                self.canvas.add(animObj);
-                self.notifyOnObjAddedToListObjectsWithEntrance.bind(self)(animObj);
-                self.notifyOnAnimableObjectAdded.bind(self)(animObj);
+                "thumbnailImage":StaticResource.images.loading
             });
+            animObj.setCoords();
+            this.listAnimableObjects.push(animObj);
+            this.listAnimableObjectsWithEntrance.push(animObj);
+            this.canvas.add(animObj);
+            this.notifyOnObjAddedToListObjectsWithEntrance.bind(self)(animObj);
+            this.notifyOnAnimableObjectAdded.bind(self)(animObj);
 
         }else if(type==="ShapeAnimable"){
             fabric.loadSVGFromURL(model.vectorUrl,function(objects, options){
@@ -247,7 +223,7 @@ var CanvasManager={
                 })
                 shapeAnimable.setCoords();
                 self.listAnimableObjects.push(shapeAnimable);
-                self.listShapeAnimableObjects.push(shapeAnimable);
+                self.listClipableAnimableObjects.push(shapeAnimable);
                 self.canvas.add(shapeAnimable);
                 self.notifyOnShapeAnimableObjectAdded.bind(self)(shapeAnimable);
                 self.notifyOnAnimableObjectAdded.bind(self)(shapeAnimable);
@@ -257,13 +233,10 @@ var CanvasManager={
             let animObj=new TextAnimable("asdfasdfasdf",{
                 "left":WindowManager.mouse.x-self.canvas._offset.left,
                 "top":WindowManager.mouse.y-self.canvas._offset.top,
-                "originX":"custom",
-                "originY":"custom",
-                //"imageDrawingData":model,
                 "fontFamily":model.fontFamily,
-                "name":"Object X",
+                "thumbnailImage":StaticResource.images.textThumbnail
             })
-            animObj.setEntranceMode(EntranceModes.text_drawn); //textos tambien tendran entrada siendo dibujados
+            //textos tambien tendran entrada siendo dibujados
 
             animObj.setCoords();
             self.listAnimableObjects.push(animObj);
@@ -302,7 +275,7 @@ var CanvasManager={
 
                 let indexInMainList=this.listAnimableObjects.indexOf(object);
                 let indexInObjsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(object);
-                let indexInShapeObjsList=this.listShapeAnimableObjects.indexOf(object);
+                let indexInShapeObjsList=this.listClipableAnimableObjects.indexOf(object);
                 if(indexInMainList!==-1){
                     this.listAnimableObjects.splice(indexInMainList,1);
                 }
@@ -311,7 +284,7 @@ var CanvasManager={
                     this.notifyOnObjDeletedFromListWithEntrance(indexInObjsWithEntrance);
                 }
                 if(indexInShapeObjsList!==-1){
-                    this.listShapeAnimableObjects.splice(indexInShapeObjsList,1);
+                    this.listClipableAnimableObjects.splice(indexInShapeObjsList,1);
                     this.notifyOnShapeAnimableDeleted(indexInShapeObjsList);
                 }
                 this.canvas.remove(object);
@@ -369,7 +342,8 @@ var CanvasManager={
     },
     notificationPanelAssetsOnImageAssetDummyDraggingEnded:function(args){
         let model=args[0];
-        this.createAnimableObject(model);
+        let thumbnail=args[1]
+        this.createAnimableObject(model,"ImageAnimable",thumbnail);
     },
     notificationPanelAssetsOnTextAssetDraggableDropped:function(args){
         let fontFamily=args[0];
@@ -688,10 +662,11 @@ var SectionEntranceObjectConfiguration={
 
     initEventsWidgetsEntranceModes:function(animableObject){
         this.widgetsEntraceMode["modeSelector"].initEvent();
-        for(let i=0;i<animableObject.applicableEntrenceModes.length;i++){
-            let unnormalizedMode=animableObject.applicableEntrenceModes[i]
-            let normalizedMode=this.normalizeObjectEntraceMode(animableObject.applicableEntrenceModes[i]);
-            for(let key in animableObject.entraceModesSettings[unnormalizedMode]){
+        for(let i=0;i<animableObject.applicableEntranceModes.length;i++){
+            let unnormalizedMode=animableObject.applicableEntranceModes[i]
+            let normalizedMode=this.normalizeObjectEntraceMode(animableObject.applicableEntranceModes[i]);
+            let entranceModeConfig=animableObject.entranceBehaviour.getEntranceModeConfigByName(unnormalizedMode);
+            for(let key in entranceModeConfig){
                 this.widgetsEntraceMode[normalizedMode + "_"+ key].initEvent();
             }
         }
@@ -718,13 +693,14 @@ var SectionEntranceObjectConfiguration={
         this.HTMLElement.style.display="none";
     },
     fillWidgetsEntranceMode:function(animableObject){
-        this.widgetsEntraceMode.modeSelector.setVal(this.normalizeObjectEntraceMode(animableObject.getEntranceMode()));
+        this.widgetsEntraceMode.modeSelector.setVal(this.normalizeObjectEntraceMode(animableObject.entranceBehaviour.getCurrentEntranceModeName()));
         //todo fill widgets by entrance mode
-        for(let i=0;i<animableObject.applicableEntrenceModes.length;i++){
-            let unnormalizedMode=animableObject.applicableEntrenceModes[i]
-            let normalizedMode=this.normalizeObjectEntraceMode(animableObject.applicableEntrenceModes[i]);
-            for(let key in animableObject.entraceModesSettings[unnormalizedMode]){
-                let val=animableObject.entraceModesSettings[unnormalizedMode][key];
+        for(let i=0;i<animableObject.applicableEntranceModes.length;i++){
+            let unnormalizedMode=animableObject.applicableEntranceModes[i]
+            let normalizedMode=this.normalizeObjectEntraceMode(animableObject.applicableEntranceModes[i]);
+            let entranceModeConfig=animableObject.entranceBehaviour.getEntranceModeConfigByName(unnormalizedMode);
+            for(let key in entranceModeConfig){
+                let val=entranceModeConfig[key];
                 this.widgetsEntraceMode[normalizedMode + "_"+ key].setVal(val);
             }
         }
@@ -733,8 +709,9 @@ var SectionEntranceObjectConfiguration={
         for(let i=0;i<this.HTMLCollectionEntranceButtons.length;i++) {
             this.HTMLCollectionEntranceButtons[i].style.display="none";
         }
-        for(let i=0;i<animableObject.applicableEntrenceModes.length;i++){
-            let applicableEntraceMode=this.normalizeObjectEntraceMode(animableObject.applicableEntrenceModes[i]);
+        for(let i=0;i<animableObject.applicableEntranceModes.length;i++){
+            let applicableEntraceMode=this.normalizeObjectEntraceMode(animableObject.applicableEntranceModes[i]);
+            console.log(applicableEntraceMode);
             this.HTMLAreaEntranceSettings.querySelector("#" + applicableEntraceMode ).style.display="inline";
         }
     },
@@ -748,22 +725,25 @@ var SectionEntranceObjectConfiguration={
         if(this.currentAnimableObject){
             // entrace mode widgets processing
             let entranceModeChoosen= this.unnormalizeUIEntraceMode(this.widgetsEntraceMode.modeSelector.getVal());
-            if(this.currentAnimableObject.getEntranceMode() !==entranceModeChoosen){
-                if(entranceModeChoosen===EntranceModes.none && this.currentAnimableObject.entranceMode!==EntranceModes.none){
+            let entranceModeBefore=this.currentAnimableObject.entranceBehaviour.getCurrentEntranceModeName();
+            if(entranceModeBefore !==entranceModeChoosen){
+                if(entranceModeChoosen===EntranceName.none && entranceModeBefore!==EntranceName.none){
                     CanvasManager.removeFromListObjectsWithEntrance(this.currentAnimableObject);
                 }
-                else if(this.currentAnimableObject.entranceMode===EntranceModes.none && entranceModeChoosen!==EntranceModes.none){
+                else if(entranceModeBefore===EntranceName.none && entranceModeChoosen!==EntranceName.none){
                     CanvasManager.addItemToListObjectsWithEntrance(this.currentAnimableObject);
                 }
-                this.currentAnimableObject.setEntranceMode(entranceModeChoosen);
+                this.currentAnimableObject.entranceBehaviour.setEntranceModeName(entranceModeChoosen);
             }
 
-            for(let i=0;i<this.currentAnimableObject.applicableEntrenceModes.length;i++){
-                let unnormalizedApplicapleMode=this.currentAnimableObject.applicableEntrenceModes[i]
-                let normalizedApplicableMode=this.normalizeObjectEntraceMode(this.currentAnimableObject.applicableEntrenceModes[i]);
-                for(let key in this.currentAnimableObject.entraceModesSettings[unnormalizedApplicapleMode]){
+            for(let i=0;i<this.currentAnimableObject.applicableEntranceModes.length;i++){
+                let unnormalizedApplicapleMode=this.currentAnimableObject.applicableEntranceModes[i]
+                let normalizedApplicableMode=this.normalizeObjectEntraceMode(this.currentAnimableObject.applicableEntranceModes[i]);
+                let entranceModeConfig=this.currentAnimableObject.entranceBehaviour.getEntranceModeConfigByName(unnormalizedApplicapleMode);
+
+                for(let key in entranceModeConfig){
                     let val=this.widgetsEntraceMode[normalizedApplicableMode + "_"+ key].getVal();
-                    this.currentAnimableObject.entraceModesSettings[unnormalizedApplicapleMode][key]=val;
+                    entranceModeConfig[key]=val;
                 }
             }
 
@@ -774,17 +754,23 @@ var SectionEntranceObjectConfiguration={
         this.hiddeModel();
     },
     normalizeObjectEntraceMode:function(objectEntraceModeName){
-        if(objectEntraceModeName===EntranceModes.text_drawn){return EntranceModes.drawn}
-        else if(objectEntraceModeName===EntranceModes.text_typed){return 'typed'}
-        else{return objectEntraceModeName;}
+        if(objectEntraceModeName===EntranceName.text_drawn ||
+            objectEntraceModeName===EntranceName.image_drawn ||
+            objectEntraceModeName===EntranceName.svg_drawn){return "drawn"}
+
+        else if(objectEntraceModeName===EntranceName.text_typed){return 'typed'}
+        else{return objectEntraceModeName.toLowerCase();}
     },
     unnormalizeUIEntraceMode:function(UIentraceModeName){
-        if(UIentraceModeName===EntranceModes.drawn){
-            if(this.currentAnimableObject.type==="TextAnimable"){return EntranceModes.text_drawn}
+        if(UIentraceModeName==="drawn"){
+            if(this.currentAnimableObject.type==="TextAnimable"){return EntranceName.text_drawn}
+            else if(this.currentAnimableObject.type==="ImageAnimable"){return EntranceName.image_drawn}
+            else if(this.currentAnimableObject.type==="SVGAnimable"){return EntranceName.svg_drawn}
+
         }else if(UIentraceModeName==='typed'){
-            return EntranceModes.text_typed;
+            return EntranceName.text_typed;
         }
-        return UIentraceModeName;
+        return Utils.capitalize(UIentraceModeName);
 
     }
 };
