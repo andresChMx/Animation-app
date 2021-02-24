@@ -21,47 +21,30 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
     },
     /*state images loading methods*/
     loadImages:function(){
-        let tmpCount=0;
-        let largeImageSuccessfulLoading=false;
 
         NetworkManager.loadSVG(this.imageAssetModel.url_image,function(svgString,image,error){
-            if(error){
+            if(!error){
+                this.largeImage=image;
+                this.svgString=svgString;
+                this._setImageLoadingState(EnumAnimableLoadingState.ready);
+            }else{
                 this.largeImage=StaticResource.images.loadingError.cloneNode();
                 this.svgString="";
-            }else{
-                this.largeImage=image;
-                this.thumbnailImage=image
-                this.svgString=svgString;
-                largeImageSuccessfulLoading=true;
+                this._setImageLoadingState(EnumAnimableLoadingState.error);
             }
-            tmpCount++;
-            if(tmpCount===1){ready()}
+            this.setElement(this.largeImage);
+            this.setCoords();
+            this.canvas.renderAll();
         }.bind(this))
 
-        // NetworkManager.loadImage(this.imageAssetModel.url_thumbnail).then(function(img){
-        //     this.thumbnailImage=img;
-        //     tmpCount++;
-        //     if(tmpCount===2){ready()}
-        // }.bind(this)).catch(function(){
-        //     this.thumbnailImage=StaticResource.images.loadingError.cloneNode();
-        //     tmpCount++;
-        //     if(tmpCount===2){ready()}
-        // }.bind(this))
-        let self=this;
-        function ready(){
-            if(largeImageSuccessfulLoading){
-                self._setImageLoadingState(EnumAnimableLoadingState.ready);
-            }else{
-                self._setImageLoadingState(EnumAnimableLoadingState.error);
-            }
-
-            self.setElement(self.largeImage);
-            self.setCoords();
-            self.canvas.renderAll();
-        }
+        NetworkManager.loadImage(this.imageAssetModel.url_thumbnail).then(function(img){
+            this.thumbnailImage=img;
+            this._setThumbnailLoadingState(EnumAnimableLoadingState.ready);
+        }.bind(this)).catch(function(){
+            this.thumbnailImage=StaticResource.images.loadingError;
+            this._setThumbnailLoadingState(EnumAnimableLoadingState.error);
+        }.bind(this))
     },
-
-
 });
 
 

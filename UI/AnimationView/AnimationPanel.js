@@ -371,8 +371,6 @@ let SectionTimeLine={
         this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".action-editor__timeline-area");
         this.timeLineComponent=new TimeLineProxy(WindowManager,"#cTimeLine",Object.keys(this.MODELLanesProperties),this);
-
-
     },
     generateKeyFramesForNewObject:function(){
         let tmplistDictsPropertyLanes=[];
@@ -562,6 +560,10 @@ let SectionTimeLine={
     notificationOnBtnResetTimeline:function(){
         this.timeLineComponent.setMarkerTime(0);
     },
+    notificationOnWindowResize:function(propertiesAreaWidth){
+        let newTimelineWidth=window.innerWidth-propertiesAreaWidth;
+        this.timeLineComponent.onWindowResize(newTimelineWidth);
+    },
     /*notificaciones de componentes HIJOS*/
     notificationOnKeyFrameDragging:function(laneName){
 
@@ -604,7 +606,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
         OnDurationInput:'OnDurationInput',
         OnMarkerDragStarted:'OnMarkerDragStarted',
         OnMarkerDragged:'OnMarkerDragged',
-        OnMarkerDragEnded:'OnMarkerDragEnded'
+        OnMarkerDragEnded:'OnMarkerDragEnded',
     },
     HTMLElement:null,
     HTMLtimeline:null,
@@ -657,7 +659,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
         MainMediator.notify(this.name,this.events.OnMarkerDragEnded);
     },
     notificationOnResize:function(){
-        this._UIupdateSizes_timelineComponents();
+        this.SectionTimeLine.notificationOnWindowResize(this.SectionLanes.HTMLElement.offsetWidth);
     },
     /*
     notificationOnOptionClicked:function(property){//del menu keyframes
@@ -722,14 +724,39 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
 }
 
 var PanelAnimation={//LA VENTANA COMPLETA
+    name:'PanelAnimation',
+    events:{
+        OnPanelToggle:"OnPanelToggle"
+    },
     HTMLElement:null,
     PanelActionEditor:PanelActionEditor,
     timelineController:null,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-animation");
-        this.HTMLElement.style.width=window.innerWidth + "px";
+        this.HTMLBtnToggle=this.HTMLElement.querySelector(".btn-toggle-panel-bottom");
+
+        // this.HTMLElement.style.width=window.innerWidth + "px";
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
+        this.initEvents();
+        },
+    initEvents:function(){
+        this.HTMLBtnToggle.addEventListener("click",this.toggle.bind(this))
+    },
+    toggle:function(){
+        let opened;
+        if(this.HTMLElement.classList.contains("closed")){
+            //this.HTMLBtnToggle.children[0].className=""
+            this.HTMLElement.classList.remove("closed");
+            this.HTMLElement.style.bottom=0;
+            opened=true;
+        }else{
+            //this.HTMLBtnToggle.children[0].className=""
+            this.HTMLElement.classList.add("closed");
+            this.HTMLElement.style.bottom=-this.HTMLElement.offsetHeight + "px";
+            opened=false;
+        }
+        MainMediator.notify(this.name,this.events.OnPanelToggle,[opened])
     },
     setController:function(obj){
         this.timelineController=obj;

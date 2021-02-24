@@ -23,7 +23,7 @@ var CanvasManager={
 
     SectionFloatingMenu:null,
 
-
+    listNotReadyAnimableObjects:[], //holds images and svgs that are loading or failed loading
     init:function(){
         this.SectionFloatingMenu=SectionFloatingMenu;
         this.SectionEntranceObjectConfiguration=SectionEntranceObjectConfiguration;
@@ -45,15 +45,20 @@ var CanvasManager={
         this.initCamera();
     },
     initCanvas:function(resolutionWidth,resolutionHeight){
+        this.canvas=new fabric.Canvas('c',{backgroundColor: 'rgb(240,240,240)'});
+        this.canvas.preserveObjectStacking=true;
+        this._setCanvasDimensions();
+
+    },
+    _setCanvasDimensions:function(){
         let aspectRatio=0.6;
         let windowWidth=window.innerWidth;
-        let trueWidth=windowWidth*0.65;
+        let trueWidth=windowWidth*0.7;
         let trueHeight=trueWidth*aspectRatio;
-        this.canvas=new fabric.Canvas('c',{ width: trueWidth, height:trueHeight,backgroundColor: 'rgb(240,240,240)'});
+        this.canvas.setWidth(trueWidth);
+        this.canvas.setHeight(trueHeight);
         document.querySelector(".canvas-outterContainer").style.width=trueWidth + "px";
-        this.canvas.preserveObjectStacking=true;
-
-
+        document.querySelector(".canvas-outterContainer").style.height=trueHeight + "px";
     },
     initEvents:function(){
         this.canvas.on('selection:updated',this.notifyOnObjSelectionUpdated.bind(this));
@@ -73,6 +78,7 @@ var CanvasManager={
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnTextAssetDraggableDropped,this);
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnShapeAssetDraggableDropped,this);
         MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageURLLoaded,this);
+        WindowManager.registerObserverOnResize(this);
         WindowManager.registerOnKeyDeletePressed(this);
         },
     initCamera:function(){
@@ -122,32 +128,43 @@ var CanvasManager={
             isDragging = false;
             this.canvas.selection = true;
         }.bind(this));
-        this.canvas.on('mouse:wheel', function(opt) {
-            var delta = opt.e.deltaY;
-            var zoom = this.canvas.getZoom();
-            zoom *= 0.999 ** delta;
-            if (zoom > 20) zoom = 20;
-            if (zoom < 0.01) zoom = 0.01;
-            this.canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
-            opt.e.preventDefault();
-            opt.e.stopPropagation();
-            // var vpt = this.canvas.viewportTransform;
-            // if (zoom < 400 / 1000) {
-            //     vpt[4] = 200 - 1000 * zoom / 2;
-            //     vpt[5] = 200 - 1000 * zoom / 2;
-            // } else {
-            //     if (vpt[4] >= 0) {
-            //         vpt[4] = 0;
-            //     } else if (vpt[4] < this.canvas.getWidth() - 1000 * zoom) {
-            //         vpt[4] = this.canvas.getWidth() - 1000 * zoom;
-            //     }
-            //     if (vpt[5] >= 0) {
-            //         vpt[5] = 0;
-            //     } else if (vpt[5] < this.canvas.getHeight() - 1000 * zoom) {
-            //         vpt[5] = this.canvas.getHeight() - 1000 * zoom;
-            //     }
-            // }
-        }.bind(this))
+
+        if(Utils.mobileAndTabletCheck()){
+            UserEventsHandler.addListener("scroll",function(e){
+                let canvasLocalCoordX=WindowManager.mouse.x;
+                let canvasLocalCoordY=WindowManager.mouse.y;
+                this._zoomCanvas(e.deltaY,canvasLocalCoordX,canvasLocalCoordY);
+            }.bind(this))
+        }else{
+            this.canvas.on('mouse:wheel', function(opt) {
+                opt.e.preventDefault();
+                opt.e.stopPropagation();
+                this._zoomCanvas(opt.e.deltaY,opt.e.offsetX,opt.e.offsetY);
+            }.bind(this))
+        }
+    },
+    _zoomCanvas:function(delta,canvasMouseCoordX,canvasMouseCoordY){
+        var zoom = this.canvas.getZoom();
+        zoom *= 0.999 ** delta;
+        if (zoom > 20) zoom = 20;
+        if (zoom < 0.01) zoom = 0.01;
+        this.canvas.zoomToPoint({ x: canvasMouseCoordX, y:canvasMouseCoordY }, zoom);
+        // var vpt = this.canvas.viewportTransform;
+        // if (zoom < 400 / 1000) {
+        //     vpt[4] = 200 - 1000 * zoom / 2;
+        //     vpt[5] = 200 - 1000 * zoom / 2;
+        // } else {
+        //     if (vpt[4] >= 0) {
+        //         vpt[4] = 0;
+        //     } else if (vpt[4] < this.canvas.getWidth() - 1000 * zoom) {
+        //         vpt[4] = this.canvas.getWidth() - 1000 * zoom;
+        //     }
+        //     if (vpt[5] >= 0) {
+        //         vpt[5] = 0;
+        //     } else if (vpt[5] < this.canvas.getHeight() - 1000 * zoom) {
+        //         vpt[5] = this.canvas.getHeight() - 1000 * zoom;
+        //     }
+        // }
     },
     /*METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTOS DE ENTRADA (DRAWN Y DRAGGED)*/
     getListIndexObjectWithEntrance:function(obj){
@@ -184,14 +201,17 @@ var CanvasManager={
         let self=this;
 
         if(type==="ImageAnimable"){
-
                 let animObj=new ImageAnimable({
                     "left":WindowManager.mouse.x-self.canvas._offset.left,
                     "top":WindowManager.mouse.y-self.canvas._offset.top,
                     "imageAssetModel":model,
-                    "thumbnailImage":thumbnail
+                    //"thumbnailImage":thumbnail
                 })
                 animObj.setCoords();
+
+                this.listNotReadyAnimableObjects.push(animObj);
+                animObj.registerOnImageStateChanged(this);
+
                 this.listAnimableObjects.push(animObj);
                 this.listAnimableObjectsWithEntrance.push(animObj);
                 this.canvas.add(animObj);
@@ -204,9 +224,13 @@ var CanvasManager={
                 "left":WindowManager.mouse.x-self.canvas._offset.left,
                 "top":WindowManager.mouse.y-self.canvas._offset.top,
                 "imageAssetModel":model,
-                "thumbnailImage":StaticResource.images.loading
+                //"thumbnailImage":StaticResource.images.loading
             });
             animObj.setCoords();
+
+            this.listNotReadyAnimableObjects.push(animObj);
+            animObj.registerOnImageStateChanged(this);
+
             this.listAnimableObjects.push(animObj);
             this.listAnimableObjectsWithEntrance.push(animObj);
             this.canvas.add(animObj);
@@ -214,8 +238,9 @@ var CanvasManager={
             this.notifyOnAnimableObjectAdded.bind(self)(animObj);
 
         }else if(type==="ShapeAnimable"){
-            fabric.loadSVGFromURL(model.vectorUrl,function(objects, options){
+            fabric.loadSVGFromString(model.data,function(objects, options){
                 var groupObj = fabric.util.groupSVGElements(objects, options);
+                console.log(groupObj9);
                 let path=groupObj;// TODO: if more than 1 path fuse them into one
                 let shapeAnimable=new ShapeAnimable(path.path,{
                     left:WindowManager.mouse.x-self.canvas._offset.left,
@@ -234,10 +259,9 @@ var CanvasManager={
                 "left":WindowManager.mouse.x-self.canvas._offset.left,
                 "top":WindowManager.mouse.y-self.canvas._offset.top,
                 "fontFamily":model.fontFamily,
-                "thumbnailImage":StaticResource.images.textThumbnail
+                //"thumbnailImage":StaticResource.images.textThumbnail
             })
             //textos tambien tendran entrada siendo dibujados
-
             animObj.setCoords();
             self.listAnimableObjects.push(animObj);
             self.listAnimableObjectsWithEntrance.push(animObj);
@@ -272,26 +296,36 @@ var CanvasManager={
             this.canvas.discardActiveObject();
             for(let i=0;i<listObjects.length;i++){
                 let object=listObjects[i];
-
-                let indexInMainList=this.listAnimableObjects.indexOf(object);
-                let indexInObjsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(object);
-                let indexInShapeObjsList=this.listClipableAnimableObjects.indexOf(object);
-                if(indexInMainList!==-1){
-                    this.listAnimableObjects.splice(indexInMainList,1);
-                }
-                if(indexInObjsWithEntrance!==-1){
-                    this.listAnimableObjectsWithEntrance.splice(indexInObjsWithEntrance,1);
-                    this.notifyOnObjDeletedFromListWithEntrance(indexInObjsWithEntrance);
-                }
-                if(indexInShapeObjsList!==-1){
-                    this.listClipableAnimableObjects.splice(indexInShapeObjsList,1);
-                    this.notifyOnShapeAnimableDeleted(indexInShapeObjsList);
-                }
-                this.canvas.remove(object);
-                this.notifyOnAnimableObjectDeleted(indexInMainList);
+                this._removeAnimableObject(object);
             }
-
         }
+    },
+    _removeAnimableObject:function(object){
+        let indexInMainList=this.listAnimableObjects.indexOf(object);
+        let indexInObjsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(object);
+        let indexInShapeObjsList=this.listClipableAnimableObjects.indexOf(object);
+        let indexInNotReadyList=this.listNotReadyAnimableObjects.indexOf(object);
+
+        if(indexInNotReadyList!==-1){
+            this.listNotReadyAnimableObjects.splice(indexInNotReadyList,1);
+        }
+
+        if(indexInMainList!==-1){
+            this.listAnimableObjects.splice(indexInMainList,1);
+        }
+        if(indexInObjsWithEntrance!==-1){
+            this.listAnimableObjectsWithEntrance.splice(indexInObjsWithEntrance,1);
+            this.notifyOnObjDeletedFromListWithEntrance(indexInObjsWithEntrance);
+        }
+        if(indexInShapeObjsList!==-1){
+            this.listClipableAnimableObjects.splice(indexInShapeObjsList,1);
+            this.notifyOnShapeAnimableDeleted(indexInShapeObjsList);
+        }
+        this.canvas.remove(object);
+        this.notifyOnAnimableObjectDeleted(indexInMainList);
+    },
+    AreAllImagesReady:function(){
+        return this.listNotReadyAnimableObjects.length===0;
     },
     setCanvasOnAnimableObjects:function(){
         for(let i=0;i<this.listAnimableObjects.length;i++){
@@ -329,9 +363,21 @@ var CanvasManager={
     notificationOnKeyDeleteUp:function(){
         this.removeActiveAnimableObject()
     },
+    notificationOnResize:function(){//window resize
+        this._setCanvasDimensions();
+    },
     childNotificationOnDesignPathOptionClicked:function(currentSelectedObject){
         MainMediator.notify(this.name,this.events.OnDesignPathOptionClicked,[currentSelectedObject])
     },
+    /*child*/notificationOnImageStateChanged:function(imageAnimable){/*naming convention exception, this could be considered as called by children, since it is being called by imageAnimables and svgAniambles*/
+        if(imageAnimable.imageLoadingState===EnumAnimableLoadingState.ready){
+            let index=this.listNotReadyAnimableObjects.indexOf(imageAnimable);
+            if(index!==-1){
+                this.listNotReadyAnimableObjects.splice(index,1);
+            }
+        }
+    },
+
     notificationPanelInspectorOnBtnMoveDownObjectEntranceOrder:function(args){
         let index=args[0];
         this.moveDownObjectInEntranceList(index);
@@ -415,7 +461,12 @@ var SectionFloatingMenu={
             icon:"icon-edit",
             description:"design path for this object",
             action:function(animableObject){
-                CanvasManager.childNotificationOnDesignPathOptionClicked(animableObject);
+                if(CanvasManager.AreAllImagesReady()){
+                    CanvasManager.childNotificationOnDesignPathOptionClicked(animableObject);
+                }else{
+                    alert("cannot perform this action while there are not ready images, please delete those images");
+                    //TODO Show notification "cannot preview while images are not ready, please delete those images"
+                }
             },
             HTMLElement:null
         }

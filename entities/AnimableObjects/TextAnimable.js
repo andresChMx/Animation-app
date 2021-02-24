@@ -1,12 +1,13 @@
 var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de imageAnimable porque solo podemos heredar de una clase
     //drawn y text_draw NO son lo mismo, ya que su logica es diferente
     applicableEntranceModes: [EntranceName.text_drawn,EntranceName.none/*,EntranceName.dragged,EntranceName.text_typed**/],//FOR UI
-    applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
 
     type:"TextAnimable",
     initialize:function(text,options){
         /*exact copy of animable object*/
-        this.name="Text";
+        this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];
+
+            this.name="Text";
         this.originX="custom";
         this.originY="custom";
         this.fontFamily=options.fontFamily;
@@ -14,7 +15,9 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
         this.centeredRotation=false;
         this.fill="#000000";
 
-        this.thumbnailImage=options.thumbnailImage;
+        this.cbOnThumbnailStateChanged=function(){};
+        this.thumbnailImage=StaticResource.images.textThumbnail;
+        this.thumbnailLoadingState=EnumAnimableLoadingState.ready;
         // this.largeImage=null;
 
         this.entranceBehaviour=new EntranceEffectBehaviour(this,this.applicableEntranceModes);
@@ -62,9 +65,32 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
     getVisibilityState:function(){
         return this.visible;
     },
-
+    applyClipping:function(animObject){
+        this.clipPath=animObject;
+        for(let i=0;i<this.applicableMenuOptions.length;i++){
+            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.addMask){
+                this.applicableMenuOptions[i]=AnimObjectOptionMenu.removeMask;
+                break;
+            }
+        }
+    },
+    removeClipping:function(){
+        this.clipPath=null;
+        for(let i=0;i<this.applicableMenuOptions.length;i++){
+            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.removeMask){
+                this.applicableMenuOptions[i]=AnimObjectOptionMenu.addMask;
+                break;
+            }
+        }
+    },
     /*observer pattern*/
     registerOnImageStateChanged:function(obj){
 
+    },
+    listenOnThumbnailStateChanged:function(callback){
+        this.cbOnThumbnailStateChanged=callback;
+        if(this.thumbnailLoadingState!==EnumAnimableLoadingState.loading){
+            this.cbOnThumbnailStateChanged(this.thumbnailLoadingState,this.thumbnailImage);
+        }
     }
 });

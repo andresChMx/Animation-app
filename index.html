@@ -16,9 +16,7 @@
             margin:0;
             padding:0;
         }
-        body{
-            background:#2b2b2b;
-        }
+
     </style>
 
  <link rel="stylesheet" href="assets/styles/font-icons.css">
@@ -153,6 +151,7 @@
     ==========ASSETS PANEL=========
     ===============================-->
     <section class="panel-assets">
+        <div class="btn-toggle-panel-left"><i class="icon-cursor"></i></div>
         <nav class="panel-assets__menu-sections">
             <div class="panel-assets__menu-sections__item">Images</div>
             <div class="panel-assets__menu-sections__item">Videos</div>
@@ -286,6 +285,7 @@
     ==========INSPECTOR PANEL=========
     ===============================-->
     <section class="panel-inspector">
+        <div class="btn-toggle-panel-right"><i class="icon-cursor"></i></div>
         <div class="panel-inspector__toolbox">
 <!--            <div class="panel-inspector__toolbox__item-text">-->
 <!--                <p class="toolbox__item-text__title">Text:</p>-->
@@ -299,197 +299,198 @@
                 <li>Object Properties</li>
             </ul>
         </div>
-        <div class="container-areas-viewport">
-            <div class="panel-inspector__container-areas">
-                <div class="panel-inspector__area-scene-objects area">
-                    <div class="panel-inspector__area-scene-objects__listing-objects-entrance">
-                        <p class="area-scene-objects__listing-objects-entrance__title">Objects with Effects</p>
-                        <div class="area-scene-objects__listing-objects-entrance__box-items ">
-                            <div class="area-scene-objects__listing-objects-entrance__box-items__item clearfix" style="display:none;">
-                                <div class="icon">
-                                    <div class="image"><img src="" alt="" class=""></div>
-
-                                </div>
-                                <div class="fields-container">
-                                    <div class="input-field-box delay">
-                                        <label for="">Delay</label>
-                                        <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
-                                        <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+        <div class="container-areas-scrollable">
+            <div class="container-areas-viewport">
+                <div class="panel-inspector__container-areas">
+                    <div class="panel-inspector__area-scene-objects area">
+                        <div class="panel-inspector__area-scene-objects__listing-objects-entrance">
+                            <p class="area-scene-objects__listing-objects-entrance__title">Objects with Effects</p>
+                            <div class="area-scene-objects__listing-objects-entrance__box-items ">
+                                <div class="area-scene-objects__listing-objects-entrance__box-items__item clearfix" style="display:none;">
+                                    <div class="icon">
+                                        <div class="image"><img src="" alt="" class=""></div>
                                     </div>
-                                    <div class="input-field-box duration">
-                                        <label for="">Duration</label>
-                                        <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
-                                        <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
-                                    </div>
-                                </div>
-                                <div class="arrangement-controls-container">
-                                    <div class="button-control btn-move-up button-solid-behaviour"><i class="icon-pencil"></i></div>
-<!--                                    <div class="button-control btn-free-movement button-solid-behaviour"><i class="icon-pencil"></i></div>-->
-                                    <div class="button-control btn-move-down button-solid-behaviour"><i class="icon-pencil"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-inspector__area-scene-objects__listing-objects-all">
-                        <p class="area-scene-objects__listing-objects-all__title">Objects with</p>
-                        <ul class="area-scene-objects__listing-objects-all__box-items ">
-                            <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" style="display:none;">
-                                <img src="" alt="" class="icon">
-                                <div class="group-object-name">
-                                </div>
-                                <div class="group-box-actions">
-                                    <input type="checkbox" class="group-box-actions__lock-object">
-                                    <input type="checkbox" class="group-box-actions__visible-object">
-                                    <button class="group-box-actions__btn-menu">[a]</button>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="panel-inspector__area-object-properties area">
-                    <div class="area-objects-properties__zone-transformations">
-                        <p class="area-objects-properties__zone__title">Transformations</p>
-                        <div class="box-related-widgets clearfix">
-                            <div class="widget-property-left widget">
-                                <label>Left</label>
-                                <div class="property-input"><button class="btn-decrease"></button><input type="text" property="left" class="field-value"/><button class="btn-increase"></button></div>
-                            </div>
-                        </div>
-                        <div class="box-related-widgets clearfix">
-                            <div class="widget-property-top widget">
-                                <label>Top</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="top" class="field-value"/><button class="btn-increase"></button></div>
-                            </div>
-                        </div>
-                        <div class="box-related-widgets clearfix">
-                            <div class="widget-property-scaleX widget">
-                                <label>scale X</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
-                            </div>
-                        </div>
-                        <div class="box-related-widgets clearfix">
-                            <div class="widget-property-scaleY widget">
-                                <label>scale Y</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleY" class="field-value"/><button class="btn-increase"></button></div>
-                            </div>
-                        </div>
-                        <div class="box-related-widgets clearfix">
-                            <div class="widget-property-angle widget">
-                                <label>Angle</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="angle" class="field-value"/><button class="btn-increase"></button></div>
-                            </div>
-                        </div>
-                        <div class="box-related-widgets clearfix">
-                            <div class="widget-property-opacity widget">
-                                <label>Opacity</label><div class="property-input"><input step="10"  type="range" property="opacity" class="range-value"/><input type="text" property="opacity" class="field-value"/></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="area-objects-properties__zone-styles">
-                        <p class="area-objects-properties__zone__title">Styling</p>
-                        <div class="area-objects-properties__zone-styles__box-floating-panels container-floating-panels">
-                            <div class="floating-panel" id="ImageAnimable-styling-panel">
-                                styling widgets for imageAnimables
-                            </div>
-                            <div class="floating-panel-textanimable floating-panel" id="TextAnimable-styling-panel">
-
-                                <div class="form-group styling-widget font-family">
-                                    <label for="font-family">Font Family </label>
-                                    <select id="font-family" class="">
-                                        <option value="bauhs 93">Bauhs 93</option>
-                                        <option value="arial">Arial</option>
-                                        <option value="Verdana">Verdana</option>
-                                    </select>
-                                </div>
-                                <div class="form-group styling-widget font-size ">
-                                    <label for="text-size-widget">Text Size </label>
-                                    <div class="property-input"><button class="btn-decrease"></button><input id="text-size-widget" type="text" value="16" class="field-value"><button class="btn-increase"></button></div>
-                                </div>
-                                <div class="form-group styling-widget line-height ">
-                                    <label for="line-height-widget">Line Height </label>
-                                    <div class="property-input"><button class="btn-decrease"></button><input id="line-height-widget" type="text" value="1.16" class="field-value"><button class="btn-increase"></button></div>
-                                </div>
-                                <div class="form-group styling-widget text-alignment ">
-                                    <label for="">Text Alignment </label>
-                                    <div class="text-alignment__options">
-                                        <span id="left" class="icon-paragraph-left"></span>
-                                        <span id="center" class="icon-paragraph-center"></span>
-                                        <span id="right" class="icon-paragraph-right"></span>
-                                    </div>
-                                </div>
-                                <div class="form-group styling-widget fill-color">
-                                    <label for="fill-color">Color </label>
-                                    <input id="fill-color" type="color">
-                                </div>
-
-                            </div>
-                            <div class="floating-panel" id="SVGAnimable-styling-panel">
-                                styling widgets for SVGAnimable
-                            </div>
-                            <div class="floating-panel" id="ShapeAnimable-styling-panel">
-                                <div class="form-group styling-widget stroke-width">
-                                    <label for="stroke-width-widget">Stroke Width </label>
-                                    <div class="property-input"><button class="btn-decrease"></button><input id="stroke-width-widget" type="text" value="1.16" class="field-value"><button class="btn-increase"></button></div>
-                                </div>
-                                    <div class="form-group styling-widget fill">
-                                        <label for="fill-widget">Fill Color</label>
-                                        <input id="fill-widget" type="color">
-                                        <div class="form-group styling-widget transparent-fill">
-                                            <label for="transparent-fill-widget">transp.</label>
-                                            <input id="transparent-fill-widget" type="checkbox">
+                                    <div class="fields-container">
+                                        <div class="input-field-box delay">
+                                            <label for="">Delay</label>
+                                            <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                                            <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+                                        </div>
+                                        <div class="input-field-box duration">
+                                            <label for="">Duration</label>
+                                            <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
+                                            <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
                                         </div>
                                     </div>
-
-                                    <div class="form-group styling-widget stroke">
-                                        <label for="stroke-widget">Stroke Color </label>
-                                        <input id="stroke-widget" type="color">
-                                        <div class="form-group styling-widget transparent-stroke">
-                                            <label for="transparent-stroke-widget">transp.</label>
-                                            <input id="transparent-stroke-widget" type="checkbox">
-                                        </div>
-                                    </div>
-
-                                <div class="form-group styling-widget start-point range-widget">
-                                    <div class="row">
-                                        <label class="styling-widget__start-rendering-point__title range-widget__title">Start Value: </label>
-                                        <input type="text" class="styling-widget__start-rendering-point__field range-widget__field">
-                                    </div>
-                                    <div>
-                                        <input type="range" min="0" max="100" value="0" step="1" class="styling-widget__start-rendering-point__slider range-widget__slider"/>
+                                    <div class="arrangement-controls-container">
+                                        <div class="button-control btn-move-up button-solid-behaviour"><i class="icon-pencil"></i></div>
+    <!--                                    <div class="button-control btn-free-movement button-solid-behaviour"><i class="icon-pencil"></i></div>-->
+                                        <div class="button-control btn-move-down button-solid-behaviour"><i class="icon-pencil"></i></div>
                                     </div>
                                 </div>
-                                <div class="form-group styling-widget end-point range-widget">
-                                    <div class="row">
-                                        <label class="styling-widget__end-rendering-point__title range-widget__title">End Value: </label>
-                                        <input type="text" class="styling-widget__end-rendering-point__field range-widget__field">
-                                    </div>
-                                    <div class="row">
-                                        <input type="range" min="0" max="100" value="100" step="1" class="styling-widget__end-rendering-point__slider range-widget__slider"/>
-                                    </div>
-                                </div>
-                                <p class="subtitle">Masking properties</p>
-                                <div class="form-group styling-widget inverted">
-                                    <label for="inverted-widget">Inverted ClipPath</label>
-                                    <input id="inverted-widget" type="checkbox">
-                                </div>
-                                <div class="form-group styling-widget clip-border">
-                                    <label for="clip-border-widget">Clip Border</label>
-                                    <input id="clip-border-widget" type="checkbox">
-                                </div>
-                            </div>
-                            <div class="floating-panel" id="CameraAnimable-styling-panel">
-                                styling widgets for cameraAnimables
                             </div>
                         </div>
+                        <div class="panel-inspector__area-scene-objects__listing-objects-all">
+                            <p class="area-scene-objects__listing-objects-all__title">Objects with</p>
+                            <ul class="area-scene-objects__listing-objects-all__box-items ">
+                                <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" style="display:none;">
+                                    <img src="" alt="" class="icon">
+                                    <div class="group-object-name">
+                                    </div>
+                                    <div class="group-box-actions">
+                                        <input type="checkbox" class="group-box-actions__lock-object">
+                                        <input type="checkbox" class="group-box-actions__visible-object">
+                                        <button class="group-box-actions__btn-menu">[a]</button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="panel-inspector__area-object-properties area">
+                        <div class="area-objects-properties__zone-transformations">
+                            <p class="area-objects-properties__zone__title">Transformations</p>
+                            <div class="box-related-widgets clearfix">
+                                <div class="widget-property-left widget">
+                                    <label>Left</label>
+                                    <div class="property-input"><button class="btn-decrease"></button><input type="text" property="left" class="field-value"/><button class="btn-increase"></button></div>
+                                </div>
+                            </div>
+                            <div class="box-related-widgets clearfix">
+                                <div class="widget-property-top widget">
+                                    <label>Top</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="top" class="field-value"/><button class="btn-increase"></button></div>
+                                </div>
+                            </div>
+                            <div class="box-related-widgets clearfix">
+                                <div class="widget-property-scaleX widget">
+                                    <label>scale X</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+                                </div>
+                            </div>
+                            <div class="box-related-widgets clearfix">
+                                <div class="widget-property-scaleY widget">
+                                    <label>scale Y</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleY" class="field-value"/><button class="btn-increase"></button></div>
+                                </div>
+                            </div>
+                            <div class="box-related-widgets clearfix">
+                                <div class="widget-property-angle widget">
+                                    <label>Angle</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="angle" class="field-value"/><button class="btn-increase"></button></div>
+                                </div>
+                            </div>
+                            <div class="box-related-widgets clearfix">
+                                <div class="widget-property-opacity widget">
+                                    <label>Opacity</label><div class="property-input"><input step="10"  type="range" property="opacity" class="range-value"/><input type="text" property="opacity" class="field-value"/></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="area-objects-properties__zone-styles">
+                            <p class="area-objects-properties__zone__title">Styling</p>
+                            <div class="area-objects-properties__zone-styles__box-floating-panels container-floating-panels">
+                                <div class="floating-panel" id="ImageAnimable-styling-panel">
+                                    styling widgets for imageAnimables
+                                </div>
+                                <div class="floating-panel-textanimable floating-panel" id="TextAnimable-styling-panel">
+
+                                    <div class="form-group styling-widget font-family">
+                                        <label for="font-family">Font Family </label>
+                                        <select id="font-family" class="">
+                                            <option value="bauhs 93">Bauhs 93</option>
+                                            <option value="arial">Arial</option>
+                                            <option value="Verdana">Verdana</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group styling-widget font-size ">
+                                        <label for="text-size-widget">Text Size </label>
+                                        <div class="property-input"><button class="btn-decrease"></button><input id="text-size-widget" type="text" value="16" class="field-value"><button class="btn-increase"></button></div>
+                                    </div>
+                                    <div class="form-group styling-widget line-height ">
+                                        <label for="line-height-widget">Line Height </label>
+                                        <div class="property-input"><button class="btn-decrease"></button><input id="line-height-widget" type="text" value="1.16" class="field-value"><button class="btn-increase"></button></div>
+                                    </div>
+                                    <div class="form-group styling-widget text-alignment ">
+                                        <label for="">Text Alignment </label>
+                                        <div class="text-alignment__options">
+                                            <span id="left" class="icon-paragraph-left"></span>
+                                            <span id="center" class="icon-paragraph-center"></span>
+                                            <span id="right" class="icon-paragraph-right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group styling-widget fill-color">
+                                        <label for="fill-color">Color </label>
+                                        <input id="fill-color" type="color">
+                                    </div>
+
+                                </div>
+                                <div class="floating-panel" id="SVGAnimable-styling-panel">
+                                    styling widgets for SVGAnimable
+                                </div>
+                                <div class="floating-panel" id="ShapeAnimable-styling-panel">
+                                    <div class="form-group styling-widget stroke-width">
+                                        <label for="stroke-width-widget">Stroke Width </label>
+                                        <div class="property-input"><button class="btn-decrease"></button><input id="stroke-width-widget" type="text" value="1.16" class="field-value"><button class="btn-increase"></button></div>
+                                    </div>
+                                        <div class="form-group styling-widget fill">
+                                            <label for="fill-widget">Fill Color</label>
+                                            <input id="fill-widget" type="color">
+                                            <div class="form-group styling-widget transparent-fill">
+                                                <label for="transparent-fill-widget">transp.</label>
+                                                <input id="transparent-fill-widget" type="checkbox">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group styling-widget stroke">
+                                            <label for="stroke-widget">Stroke Color </label>
+                                            <input id="stroke-widget" type="color">
+                                            <div class="form-group styling-widget transparent-stroke">
+                                                <label for="transparent-stroke-widget">transp.</label>
+                                                <input id="transparent-stroke-widget" type="checkbox">
+                                            </div>
+                                        </div>
+
+                                    <div class="form-group styling-widget start-point range-widget">
+                                        <div class="row">
+                                            <label class="styling-widget__start-rendering-point__title range-widget__title">Start Value: </label>
+                                            <input type="text" class="styling-widget__start-rendering-point__field range-widget__field">
+                                        </div>
+                                        <div>
+                                            <input type="range" min="0" max="100" value="0" step="1" class="styling-widget__start-rendering-point__slider range-widget__slider"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group styling-widget end-point range-widget">
+                                        <div class="row">
+                                            <label class="styling-widget__end-rendering-point__title range-widget__title">End Value: </label>
+                                            <input type="text" class="styling-widget__end-rendering-point__field range-widget__field">
+                                        </div>
+                                        <div class="row">
+                                            <input type="range" min="0" max="100" value="100" step="1" class="styling-widget__end-rendering-point__slider range-widget__slider"/>
+                                        </div>
+                                    </div>
+                                    <p class="subtitle">Masking properties</p>
+                                    <div class="form-group styling-widget inverted">
+                                        <label for="inverted-widget">Inverted ClipPath</label>
+                                        <input id="inverted-widget" type="checkbox">
+                                    </div>
+                                    <div class="form-group styling-widget clip-border">
+                                        <label for="clip-border-widget">Clip Border</label>
+                                        <input id="clip-border-widget" type="checkbox">
+                                    </div>
+                                </div>
+                                <div class="floating-panel" id="CameraAnimable-styling-panel">
+                                    styling widgets for cameraAnimables
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
-
             </div>
         </div>
-
     </section>
 
     <!--==============================
     ==========TIMELINE================
     ===============================-->
     <section class="panel-animation">
+        <div class="btn-toggle-panel-bottom"><i class="icon-cursor"></i></div>
         <div class="panel-animation__top-bar">
              <ul class="panel-animation__top-bar__top-menu">
                  <li class="panel-animation__top-bar__top-menu__item">Action</li>
@@ -660,6 +661,7 @@
     <script src="Globals/Variables.js"></script>
     <script src="Globals/NetworkManager.js"></script>
     <script src="Globals/OpenTypeFontManager.js"></script>
+    <script src="Globals/UserEventsHandler.js"></script>
     <script src="./variables/globales.js"></script>
     <script src="./util.js"></script>
     <script src="fabric.js"></script>
@@ -684,7 +686,13 @@
     <script src="./entities/AnimableObjects/SVGAnimable.js"></script>
     <script src="./entities/AnimableObjects/ShapeAnimable.js"></script>
     <script src="./entities/AnimableObjects/CameraAnimable.js"></script>
-    <script src="./entities/DrawableImage.js"></script>
+    <script src="./entities/EntranceBehaviour.js"></script>
+    <script src="./entities/EntranceModes/EntranceMode.js"></script>
+    <script src="./entities/EntranceModes/NoneEntranceMode.js"></script>
+    <script src="./entities/EntranceModes/DrawnEntranceMode/DrawnEntranceMode.js"></script>
+    <script src="./entities/EntranceModes/DrawnEntranceMode/ImageDrawnEntranceMode.js"></script>
+    <script src="./entities/EntranceModes/DrawnEntranceMode/SVGDrawnEntranceMode.js"></script>
+    <script src="./entities/EntranceModes/DrawnEntranceMode/TextDrawnEntranceMode.js"></script>
     <script src="./entities/PreviewerCanvas.js"></script>
 
     <script src="controllers/Mediators/MainMediator.js"></script>
@@ -717,3 +725,4 @@
     <script src="main.js"></script>
 </body>
 </html>
+

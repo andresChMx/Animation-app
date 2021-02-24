@@ -10,6 +10,8 @@ var PanelPreviewer={
 
     resolutionWidth:1400,
     resolutionHeight:800,
+    scalerFactorX:0, // to support responsive canvas previwer, stores the scalar factor(elementWidth/resolution)
+    scalerFactorY:0,
 
     canvas:null,
     init:function(){
@@ -54,9 +56,23 @@ var PanelPreviewer={
         let controlsHeight=controlsContentHeight+controlsPadding*2;
 
         let aspectRatio=resolutionHeight/resolutionWidth;
-        let actualWidth=1400;
-        //let actualWidth=(window.innerWidth*0.7);
-        let actualHeight=actualWidth*aspectRatio;
+
+        let actualWidth;
+        let actualHeight;
+        let deltaX=resolutionWidth-window.innerWidth;
+        let deltaY=resolutionHeight-window.innerHeight;
+
+        if(deltaY>deltaX){//el offset de la resolucion en Y sobre el alto de la pantalla es mayor que la del eje X
+            actualHeight=(window.innerHeight*0.9);
+            actualWidth=actualHeight/aspectRatio;
+        }else{
+            actualWidth=(window.innerWidth*0.7);
+            actualHeight=actualWidth*aspectRatio;
+
+        }
+
+        this.scalerFactorX=actualWidth/resolutionWidth;
+        this.scalerFactorY=actualHeight/resolutionHeight;
 
         this.canvas.setWidth(actualWidth);
         this.canvas.setHeight(actualHeight);

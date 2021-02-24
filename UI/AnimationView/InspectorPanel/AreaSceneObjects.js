@@ -26,7 +26,9 @@ var SectionObjectsEntraceEditor={
         let newItem=this.HTMLBoxItem.cloneNode(true);
         let icon=newItem.querySelector(".icon img");
         icon.replaceWith(animObjWithEntrance.thumbnailImage.cloneNode());
-
+        animObjWithEntrance.listenOnThumbnailStateChanged(function(state,img){
+            newItem.querySelector(".icon img").replaceWith(img);
+        })
         let moveUp=newItem.querySelector(".btn-move-up");
         let moveDown=newItem.querySelector(".btn-move-down");
         moveUp.addEventListener("click",this.OnBtnMoveUpPressed.bind(this));

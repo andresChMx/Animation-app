@@ -43,12 +43,12 @@ var WindowManager={
 
     init:function(){
         window.addEventListener("load",this.initUI.bind(this));
-        window.addEventListener("resize",this.onWindowResize);
-        window.addEventListener("mouseup",this.onWindowMouseUp);
-        window.addEventListener("mousemove",this.onWindowMouseMove);
-        window.addEventListener("mousedown",this.onWindowMouseDown);
-
+        window.addEventListener("resize",this.onWindowResize.bind(this));
         window.addEventListener("keyup",this.onKeyUp.bind(this))
+        UserEventsHandler.addListener("mouseup",this.onWindowMouseUp.bind(this));
+        UserEventsHandler.addListener("mousemove",this.onWindowMouseMove.bind(this));
+        UserEventsHandler.addListener("mousedown",this.onWindowMouseDown.bind(this));
+
 
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
 
@@ -94,48 +94,41 @@ var WindowManager={
         if(index!==-1){this.listObservers[obsType].onKeyEnterUp.splice(index,1);}
     },
     onWindowResize:function(){
-        let self=WindowManager;
-        for(var i=0;i<self.listObservers[self.activeObserverType].onResize.length;i++){
-            //self.listObserversOnResize[i].notificationOnResize();
+        for(var i=0;i<this.listObservers[this.activeObserverType].onResize.length;i++){
+            this.listObservers[this.activeObserverType].onResize[i].notificationOnResize();
         }
-        //PanelActionEditor.onWindowResize();
     },
     onWindowMouseUp:function(e){
-        let self=WindowManager;
-        for(let i=0;i<self.listObservers[self.activeObserverType].onMouseUp.length;i++){
-            self.listObservers[self.activeObserverType].onMouseUp[i].notificationOnMouseUp(e);
+        for(let i=0;i<this.listObservers[this.activeObserverType].onMouseUp.length;i++){
+            this.listObservers[this.activeObserverType].onMouseUp[i].notificationOnMouseUp(e);
         }
     },
     onWindowMouseMove:function(e){
-        let self=WindowManager;
-        self.mouse.x=e.clientX;
-        self.mouse.y=e.clientY;
-
-        for(let i=0;i<self.listObservers[self.activeObserverType].onMouseMove.length;i++){
-            self.listObservers[self.activeObserverType].onMouseMove[i].notificationOnMouseMove(e);
+        this.mouse.x=e.clientX;
+        this.mouse.y=e.clientY;
+        for(let i=0;i<this.listObservers[this.activeObserverType].onMouseMove.length;i++){
+            this.listObservers[this.activeObserverType].onMouseMove[i].notificationOnMouseMove(e);
         }
     },
     onWindowMouseDown:function(e){
-        let self=WindowManager;
-        for(let i=0;i<self.listObservers[self.activeObserverType].onMouseDown.length;i++){
-            self.listObservers[self.activeObserverType].onMouseDown[i].notificationOnMouseDown(e);
+        for(let i=0;i<this.listObservers[this.activeObserverType].onMouseDown.length;i++){
+            this.listObservers[this.activeObserverType].onMouseDown[i].notificationOnMouseDown(e);
         }
     },
     onKeyUp:function(e){
-        let self=WindowManager;
-        if(e.keyCode==46){
-            for(let i=0;i<self.listObservers[self.activeObserverType].onKeyDeleteUp.length;i++){
-                self.listObservers[self.activeObserverType].onKeyDeleteUp[i].notificationOnKeyDeleteUp();
+        if(e.keyCode===46){
+            for(let i=0;i<this.listObservers[this.activeObserverType].onKeyDeleteUp.length;i++){
+                this.listObservers[this.activeObserverType].onKeyDeleteUp[i].notificationOnKeyDeleteUp();
             }
         }else if (e.keyCode===13){
-            for(let i=0;i<self.listObservers[self.activeObserverType].onKeyEnterUp.length;i++){
-                self.listObservers[self.activeObserverType].onKeyEnterUp[i].notificationOnKeyEnterUp();
+            for(let i=0;i<this.listObservers[this.activeObserverType].onKeyEnterUp.length;i++){
+                this.listObservers[this.activeObserverType].onKeyEnterUp[i].notificationOnKeyEnterUp();
             }
         }
     },
     initUI:function(){
-        document.body.style.width=window.innerWidth + "px";
-        document.body.style.height=window.innerHeight + "px";
+        // document.body.style.width=window.innerWidth + "px";
+        // document.body.style.height=window.innerHeight + "px";
 
         CanvasManager.init();
         /*AUTHENTICATION*/

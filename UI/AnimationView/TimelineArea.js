@@ -379,41 +379,62 @@ let ScrollBarComponent = fabric.util.createClass(Component, {
     },
     notificationOnButtonDragged: function (who) {
         if (who.name === "buttonA") {
-            let buttonACoords = this.buttonA.localState.coords;
-            let buttonBCoords = this.buttonB.localState.coords;
-            if (buttonACoords.left < this.globalState.coords.left) {
-                buttonACoords.left = this.globalState.coords.left
-            }
-            if (buttonACoords.left > buttonBCoords.left + buttonBCoords.width - this.minWidth) {
-                buttonACoords.left = buttonBCoords.left + buttonBCoords.width - this.minWidth
-            }
-
-            let newWidth = (buttonBCoords.left + buttonBCoords.width) - buttonACoords.left;
-            this.localState.coords.width = newWidth;
-            this.localState.coords.left = buttonACoords.left;
-
+            this._constraintButtonAAfterDragging()
         } else if (who.name === "buttonB") {
-            let buttonACoords = this.buttonA.localState.coords;
-            let buttonBCoords = this.buttonB.localState.coords;
-            if (buttonBCoords.left + buttonBCoords.width > this.globalState.coords.width) {
-                buttonBCoords.left = this.globalState.coords.width - buttonBCoords.width
-            }
-            if (buttonBCoords.left < buttonACoords.left+buttonACoords.width + this.minWidth) {
-                buttonBCoords.left = buttonACoords.left+buttonACoords.width + this.minWidth;
-            }
-
-            let newWidth = (this.buttonB.localState.coords.left + this.buttonB.localState.coords.width) - this.buttonA.localState.coords.left;
-            this.localState.coords.width = newWidth;
+            this._constraintButtonBAfterDragging();
         }
         this.notifyOnScrollBarResize(this.localState.coords.width);
         this.notifyOnScroll(this._leftCoordToScrollLeft());
         this.canvas.requestRenderAll();
     },
+            _constraintButtonAAfterDragging:function(){
+                let buttonACoords = this.buttonA.localState.coords;
+                let buttonBCoords = this.buttonB.localState.coords;
+                if (buttonACoords.left < this.globalState.coords.left) {
+                    buttonACoords.left = this.globalState.coords.left
+                }
+                if (buttonACoords.left > buttonBCoords.left + buttonBCoords.width-buttonACoords.width - this.minWidth) {
+                    buttonACoords.left = buttonBCoords.left + buttonBCoords.width-buttonACoords.width - this.minWidth
+                }
+
+                let newWidth = (buttonBCoords.left + buttonBCoords.width) - buttonACoords.left;
+                this.localState.coords.width = newWidth;
+                this.localState.coords.left = buttonACoords.left;
+            },
+            _constraintButtonBAfterDragging:function(){
+                let buttonACoords = this.buttonA.localState.coords;
+                let buttonBCoords = this.buttonB.localState.coords;
+                if (buttonBCoords.left + buttonBCoords.width > this.globalState.coords.width) {
+                    buttonBCoords.left = this.globalState.coords.width - buttonBCoords.width
+                }
+                if (buttonBCoords.left < buttonACoords.left + this.minWidth) {
+                    buttonBCoords.left = buttonACoords.left + this.minWidth;
+                }
+
+                let newWidth = (this.buttonB.localState.coords.left + this.buttonB.localState.coords.width) - this.buttonA.localState.coords.left;
+                this.localState.coords.width = newWidth;
+            },
     registerOnScroll: function (obj) {
         this.listObserversOnScroll.push(obj);
     },
     registerOnScrollBarResize: function (obj) {
         this.listObserversOnScrollBarResize.push(obj);
+    },
+    onWindowResize:function(){/*Called by ancestor*/
+        //calculating width with then given new with and scrollWidth
+        this.calcWidth();
+        //constraining movement after altering width
+        this.constraintMovement();
+
+        //altering buttons and constraining their movements
+        this.setComponentsCoords();
+        this._constraintButtonAAfterDragging();
+        this._constraintButtonBAfterDragging()
+
+        //notifing about the scroll values change
+        this.notifyOnScrollBarResize(this.localState.coords.width);
+        this.notifyOnScroll(this._leftCoordToScrollLeft());
+
     }
 
 })
@@ -489,6 +510,27 @@ let TimeLineProxy=fabric.util.createClass({
     /*setters*/
     setMarkerTime:function(time){
         this.timeLineComponent.markerComponent.setTime(time);
+    },
+    onWindowResize:function(newWidth){
+        //These two properties are used to find the mouse position relative to the canvas, since at window resizing those values can be changed we update them.
+        let boundingRect = this.timeLineComponent.HTMLElement.getBoundingClientRect();
+        this.timeLineComponent.htmlElementLeft = boundingRect.left;
+        this.timeLineComponent.htmlElementTop = boundingRect.top;
+        // alteramos el ancho del elemento html canvas
+        this.timeLineComponent.HTMLElement.width = newWidth;
+
+        // establecemos el nuevo ancho, que es lo que en si esta cambiando al hacer resize al window
+        this.timeLineComponent.globalState.coords.width=newWidth;
+        // El "width" normal, nunca puede ser mas grande que el scrollwidth, que es el ancho real(partes ocultas), Por ello, si se da el caso, automaticamente debemos establecer el scrollwidth a la misma dimencion que el width y dejar que el componente scroll haga sus calculos
+        if(newWidth>this.timeLineComponent.globalState.timingDistances.scrollWidth){
+            this.timeLineComponent.globalState.timingDistances.usableScrollWidth=newWidth-this.timeLineComponent.globalState.padding.width*2;
+        }
+
+        //Updating the scroll bar
+        this.timeLineComponent.scrollBarComponent.onWindowResize();
+        this.timeLineComponent.requestRenderAll();
+
+
     }
 
 })
@@ -659,6 +701,7 @@ let TimeLineActions = fabric.util.createClass({
             this.components[i].notificationOnMouseUp(e);
         }
     },
+
     notificationOnScroll: function (scrollLeft) {
         this.globalState.timingDistances.scrollLeft = scrollLeft;
         this.ctx.setTransform(1, 0, 0, 1, -scrollLeft, 0);

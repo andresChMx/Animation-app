@@ -41,30 +41,6 @@ var ScenePreviewController=fabric.util.createClass({
         this.animator.canvasToDisplay=this.UIPanelPreviewerCanvas;
     },
     loadObjectsForAnimation:function(listForAnimator,listAnimableObjectDrawnEntrance){
-        /*
-        * Tenemos 3 tipos de objetos (ImageAnimable, TextAnimable, CameraAnimable ) que reciden en el canvas principal
-        *   * Llevan la palabra Animable porque son animables por el ControllerAnimator, es decir por la linea de tiempo
-        * Tenemos 1 objeto especial DrawableImage, que reemplaza a los objetos ImageAnimable en el canvas de previsualizacion, que tienen un modo de entrada drawn
-        * es decir se creara un DrawableImage por cada ImageAnimable que tenga activo un modo de entrada drawn, es decir que entrara dibujandose
-        * Los modos de entrdada en total son (none,drawn,dragged,text_drawn, text_typed)
-        * Los ImageAnimables que tienen de modo de entrada none, simplemente son agregados directamente al canvas de previsualizacion
-        *
-        * Los ImageAnimable estan asociados a un imageModel que tambien pertenecen a categorias o tipos, que son : PROVIDED, CREATED_NOPATH, CREATED_PATHDESIGNED, CREATED_PATHSVGLOADED
-        * las ImageModel que nosotros daremos a los usuarios son PROVIDED, y sus dados de dibujado seran objetidos de la nube de su data svg
-        * Las ImageModel que son creadas por los usuarios cuaya data de dibujado  no han diseñado un paht son CREATED_NOPATH
-        * Las ImageModel que son creadas por los usuarios cuya data de dibujado han sido diseñados son CREATED_PATHDESIGNED
-        * las ImageModel que son cradas por los usuarios  cuya data de dibujado  han sido cargados de su data svg son CREATED_PATHSVGLOADED
-        *    Estos tipos nos ayudan a la hora de saber de donde sacamos la data de dibujado de los objetos: los creamos nosotros todo (pintado default), solo calculamos los ctrlpoints, o no calculamos nada
-        *       En cualquiera de los casos puede ser que los imageModel no tienen ninguna data, pero ya sabremos que pedir del servidor y que no
-        *
-        * Todos los objetos son agregados al Canvas de previsualizacion a excepcion de la AnimableCamara
-        * Con un caso particular, y es que los objetos que tengan un efecto de entrada tendran que ser reemplazados por otros objetos que nos permitan aplicar jsutamente el efecto, estos nuevos objetos seran compuestos por un animator para que el ControllerAnimator los pueda animar.
-        * Todos los objetos son agregamos a la lista del animator del canvas de previsualizacion, ya que todos son animables (por la linea de tiempo)(incluido la Animable Camera)
-        * */
-
-        /*
-        * recorremos todos los objetos del canvas, porque queremos el orden el que estan. Ademas calculamos sus momentos de entrada
-        * */
         let startTimeCounter=0;
         for(let i=0;i<CanvasManager.listAnimableObjectsWithEntrance.length;i++){
             let animableObjWithEntrance=CanvasManager.listAnimableObjectsWithEntrance[i];
@@ -80,42 +56,7 @@ var ScenePreviewController=fabric.util.createClass({
         }
         let canvasObjects=CanvasManager.canvas.getObjects();
         for(let i=0;i<canvasObjects.length;i++){
-            // let objectToBeAnimated=null;
-            //
-            //
-            // if(object.getEntranceMode()===EntranceModes.drawn){
-            //     this.generateDrawingDataOnDrawableObject(object);
-            //
-            //     objectToBeAnimated=FactoryDrawableImages.create(object,this.drawingCacheManager.canvas);
-            //
-            //     listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
-            //     listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
-            // }else if(object.getEntranceMode()===EntranceModes.dragged){
-            //     objectToBeAnimated=object;
-            // }else if(object.getEntranceMode()===EntranceModes.text_drawn){
-            //     let pathOpenTypeObjects=[] //for each line we need the path to generate the image
-            //     let result=this.textAnimDataGenerator.generateTextDrawingData(object,object.getWidthInDrawingCache(),object.getHeightInDrawingCache(),pathOpenTypeObjects);
-            //     object.imageDrawingData = result;
-            //     object.imageDrawingData.type=TextType.PROVIDED;
-            //
-            //     this.counterCallbacksOnImageTextLoading++;
-            //     this.textAnimDataGenerator.generateTextBaseImage(object,pathOpenTypeObjects,function(image){
-            //         object.largeImage=image;
-            //         object.maskedImage=image;
-            //         this.counterCallbacksOnImageTextLoading--;
-            //     }.bind(this));
-            //
-            //     objectToBeAnimated=FactoryDrawableImages.create(object,this.drawingCacheManager.canvas);
-            //
-            //     listDrawableObjects[object.tmpIndexStartOrder]=objectToBeAnimated;
-            //     listAnimableObjectDrawnEntrance[object.tmpIndexStartOrder]=object;
-            // }else if(object.getEntranceMode()===EntranceModes.text_typed){
-            //     objectToBeAnimated=object;
-            // }else if(object.getEntranceMode()===EntranceModes.none){
-            //     objectToBeAnimated=object;
-            // }else{
-            //     alert("hay objectos que tienen entrance mode diferentes a los contemplados scenePreviewController.js");
-            // }
+
             let object=canvasObjects[i];
 
             if(object.type!=="CameraAnimable"){
@@ -124,93 +65,6 @@ var ScenePreviewController=fabric.util.createClass({
             listForAnimator.push(object);
         }
     },
-    // generateDrawingDataOnDrawableObject:function(animableObj){
-    //     if(animableObj.imageDrawingData.type===DrawingDataType.CREATED_NOPATH){
-    //         if(animableObj.type==="SVGAnimable"){
-    //             this.listSVGAnimablesWithNoPath.push(animableObj);
-    //             this.counterCallbacksOnSVGAnimableLoading++;
-    //             this.svgManager=new SVGManager();
-    //             this.svgAnimDataGenerator.generateDrawingData(
-    //                 animableObj.svgString,
-    //                 animableObj.width,
-    //                 animableObj.height,
-    //                 animableObj.entraceModesSettings[EntranceModes.drawn].forceStrokeDrawing,
-    //                 function(svgDrawingData,indexFinalTrueLayer){
-    //                     animableObj.indexFinalTruePath=indexFinalTrueLayer;
-    //
-    //                     if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="drawn_fill"){
-    //                         if(indexFinalTrueLayer===svgDrawingData.points.length-1){
-    //                             this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(
-    //                                 animableObj.largeImage.naturalWidth,
-    //                                 animableObj.largeImage.naturalHeight,
-    //                                 svgDrawingData,//OUT
-    //                                 35);
-    //                             this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
-    //                                 svgDrawingData.points,
-    //                                 svgDrawingData /*OUT*/
-    //                             );
-    //                             this.imageAnimDataGenerator.generateStrokesTypesFromPoints(
-    //                                 svgDrawingData.points,
-    //                                 svgDrawingData /*OUT*/
-    //                             );
-    //                             this.imageAnimDataGenerator.generateMissingLinesColors(
-    //                                 indexFinalTrueLayer,
-    //                                 svgDrawingData/*OUT*/
-    //                             );
-    //                         }
-    //                     }else{// in case fillRevealMode !== drawn_fill we do not need revealing paths
-    //                         if(indexFinalTrueLayer!==svgDrawingData.points.length-1){
-    //                             for(let i=indexFinalTrueLayer;i<svgDrawingData.points.length;i++){
-    //                                 for(let j in svgDrawingData){
-    //                                     svgDrawingData[j].splice(i,1);
-    //                                 }
-    //                                 i--;
-    //                             }
-    //                         }
-    //
-    //                         if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="fadein"){
-    //                             animableObj.addFadeInAnimation();
-    //                         }
-    //                         if(animableObj.entraceModesSettings[EntranceModes.drawn].fillRevealMode==="no-fill"){
-    //
-    //                         }
-    //                     }
-    //
-    //                     svgDrawingData.type=animableObj.imageDrawingData.type;
-    //
-    //                     animableObj.imageDrawingData=svgDrawingData;
-    //
-    //
-    //                     this.counterCallbacksOnSVGAnimableLoading--;
-    //                 }.bind(this)
-    //             );
-    //             return;
-    //         }
-    //
-    //         //calculate points and ctrlPoints and strokestyes (para el pathillustrator)
-    //         this.imageAnimDataGenerator.generateDefaultDrawingPointsAndLineWidth(
-    //             animableObj.largeImage.naturalWidth,
-    //             animableObj.largeImage.naturalHeight,
-    //             animableObj.imageDrawingData,//OUT
-    //             35);
-    //
-    //         this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
-    //             animableObj.imageDrawingData.points,
-    //             animableObj.imageDrawingData /*OUT*/
-    //         );
-    //         this.imageAnimDataGenerator.generateStrokesTypesFromPoints(
-    //             animableObj.imageDrawingData.points,
-    //             animableObj.imageDrawingData /*OUT*/
-    //         );
-    //         //animableObj.imageDrawingData.pathsNames=this.imageAnimDataGenerator.generateLayerNames(animableObj.imageDrawingData.points)
-    //     }else if(animableObj.imageDrawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
-    //         // solo cargamos ctrlpoints porque los strokestypes y points estan guardados en el objeto
-    //         this.imageAnimDataGenerator.generateCrtlPointsFromPointsMatrix(
-    //             animableObj.imageDrawingData.points,
-    //             animableObj.imageDrawingData /*OUT*/
-    //         );
-    //     }
-    // },
     clearEntranceDataFromAnimableObjects:function(){
         for(let i=0;i<CanvasManager.listAnimableObjects.length;i++) {//omitiendo el primer porque es la camara
             let animableObj = CanvasManager.listAnimableObjects[i];

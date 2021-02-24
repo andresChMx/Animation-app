@@ -187,7 +187,10 @@ var AnimatorCamera=fabric.util.createClass(Animator,{
         newReferenceMatrix=this.invertTransform(newReferenceMatrix);
         newReferenceMatrix[4]+=this.animableObject.width/2;
         newReferenceMatrix[5]+=this.animableObject.height/2;
+        newReferenceMatrix=fabric.util.multiplyTransformMatrices([PanelPreviewer.scalerFactorX,0,0,PanelPreviewer.scalerFactorX,0,0],newReferenceMatrix,false)
         this.canvasCamera.setViewportTransform(newReferenceMatrix);
+        
+        this.canvasCamera.opacity=this.animableObject.opacity;
     },
     invertTransform: function(t) {
         var a = 1 / (t[0] * t[3] - t[1] * t[2]),

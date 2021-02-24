@@ -144,8 +144,90 @@ var NetworkManager={
 
     fetchShapeAssets:function(category,pageNumber){
         //{vectorURL:"url...svg",category:"arrows"}
-        let dummyData=[{vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1612833730/oficial/vg9xszhe1ztxwyuez02n.svg",thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1612833730/oficial/vg9xszhe1ztxwyuez02n.svg",category:"arrow"},
-            {vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1613355595/jb12u4diyhq5ydqgrk6z.svg",thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1613355595/jb12u4diyhq5ydqgrk6z.svg",category:"bubble"}];
+        let dummyData=[{vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/y63j3k3b7qtavvpsi0om.svg",thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/y63j3k3b7qtavvpsi0om.svg",category:"arrow", data:"<svg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' width='2480px' height='3508px' version='1.1' shape-rendering='geometricPrecision' text-rendering='geometricPrecision' image-rendering='optimizeQuality' fill-rule='evenodd' clip-rule='evenodd'\n" +
+                "     viewBox='0 0 2480 3507'\n" +
+                "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n" +
+                " <g id='Capa_x0020_1'>\n" +
+                "  <path fill='none' stroke='#373435' stroke-width='31' stroke-linecap='round' stroke-linejoin='round' stroke-miterlimit='22.9256' d='M496 2126l744 0 0 372 744 -744 -744 -744 0 372 -744 0 0 744zm372 0m372 187m372 -187m0 -744m-372 -187m-372 187m-372 372'/>\n" +
+                " </g>\n" +
+                "</svg>\n"},
+
+            {vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/qc0r0ngshysmncu9nnhm.svg",thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/qc0r0ngshysmncu9nnhm.svg",category:"arrow", data:"<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" width=\"2480px\" height=\"3508px\" version=\"1.1\" shape-rendering=\"geometricPrecision\" text-rendering=\"geometricPrecision\" image-rendering=\"optimizeQuality\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"\n" +
+                    "viewBox=\"0 0 2480 3507\"\n" +
+                    " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
+                    " <g id=\"Capa_x0020_1\">\n" +
+                    "  <circle fill=\"none\" stroke=\"#373435\" stroke-width=\"31\" stroke-miterlimit=\"22.9256\" cx=\"1240\" cy=\"1754\" r=\"737\"/>\n" +
+                    " </g>\n" +
+                    "</svg>"},
+            {
+                vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/rdeodwyju03y6pnfyrsp.svg",
+                thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/rdeodwyju03y6pnfyrsp.svg",
+                data:"<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" width=\"2480px\" height=\"3508px\" version=\"1.1\" shape-rendering=\"geometricPrecision\" text-rendering=\"geometricPrecision\" image-rendering=\"optimizeQuality\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"\n" +
+                    "viewBox=\"0 0 2480 3507\"\n" +
+                    " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
+                    " <g id=\"Capa_x0020_1\">\n" +
+                    "  <path fill=\"none\" stroke=\"#373435\" stroke-width=\"25\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-miterlimit=\"22.9256\" d=\"M1078 2476l325 0 0 -559 559 0 0 -325 -559 0 0 -559 -325 0 0 559 -559 0 0 325 559 0 0 559zm162 0m162 -278m278 -278m278 -162m-278 -162m-278 -278m-162 -278m-162 278m-278 278m-278 162m278 162m278 278\"/>\n" +
+                    " </g>\n" +
+                    "</svg>\n"
+            },
+            {
+                vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/ipxmeqzcjylvawchvl8d.svg",
+                thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/ipxmeqzcjylvawchvl8d.svg",
+                data:"<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" width=\"2480px\" height=\"3508px\" version=\"1.1\" shape-rendering=\"geometricPrecision\" text-rendering=\"geometricPrecision\" image-rendering=\"optimizeQuality\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"\n" +
+                    "viewBox=\"0 0 2480 3507\"\n" +
+                    " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
+                    " <g id=\"Capa_x0020_1\">\n" +
+                    "  <path fill=\"none\" stroke=\"#373435\" stroke-width=\"31\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-miterlimit=\"22.9256\" d=\"M503 1016c491,1106 984,-737 1475,369 0,369 0,737 0,1106 -491,-1106 -984,737 -1475,-369 0,-369 0,-737 0,-1106z\"/>\n" +
+                    " </g>\n" +
+                    "</svg>"
+            },
+            {
+                vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/rssoit8z66k6njf1huoo.svg",
+                thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/rssoit8z66k6njf1huoo.svg",
+                data:"\n" +
+                    "<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" width=\"2480px\" height=\"3508px\" version=\"1.1\" shape-rendering=\"geometricPrecision\" text-rendering=\"geometricPrecision\" image-rendering=\"optimizeQuality\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"\n" +
+                    "viewBox=\"0 0 2480 3507\"\n" +
+                    " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
+                    " <g id=\"Capa_x0020_1\">\n" +
+                    "  <path fill=\"none\" stroke=\"#373435\" stroke-width=\"31\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-miterlimit=\"22.9256\" d=\"M1240 1704c0,-53 -41,-97 -91,-97 -50,0 -91,44 -91,97 0,106 81,194 181,194 100,0 181,-87 181,-194 0,-159 -122,-291 -272,-291 -150,0 -272,131 -272,291 0,216 162,387 366,387 200,0 366,-175 366,-387 0,-269 -203,-484 -456,-484 -250,0 -456,219 -456,484 0,322 244,581 547,581 303,0 547,-259 547,-581 0,-375 -284,-678 -637,-678 -353,0 -637,303 -637,678 0,428 325,778 728,778 403,0 728,-347 728,-778\"/>\n" +
+                    " </g>\n" +
+                    "</svg>\n"
+            },
+            {
+                vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/itfjwriuqwkcljmet8sy.svg",
+                thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066453/shapeThumbnails/itfjwriuqwkcljmet8sy.svg",
+                data:"<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" width=\"2480px\" height=\"3508px\" version=\"1.1\" shape-rendering=\"geometricPrecision\" text-rendering=\"geometricPrecision\" image-rendering=\"optimizeQuality\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"\n" +
+                    "viewBox=\"0 0 2480 3507\"\n" +
+                    " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
+                    " <g id=\"Capa_x0020_1\">\n" +
+                    "  <rect fill=\"none\" stroke=\"#373435\" stroke-width=\"31\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-miterlimit=\"22.9256\" x=\"493\" y=\"1007\" width=\"1494\" height=\"1494\"/>\n" +
+                    " </g>\n" +
+                    "</svg>\n"
+            },
+            {
+                vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066455/shapeThumbnails/cj10kbiay6si0p8snrj7.svg",
+                thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066455/shapeThumbnails/cj10kbiay6si0p8snrj7.svg",
+                data:"<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" width=\"2480px\" height=\"3508px\" version=\"1.1\" shape-rendering=\"geometricPrecision\" text-rendering=\"geometricPrecision\" image-rendering=\"optimizeQuality\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"\n" +
+                    "viewBox=\"0 0 2480 3507\"\n" +
+                    " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
+                    " <g id=\"Capa_x0020_1\">\n" +
+                    "  <polygon fill=\"none\" stroke=\"#373435\" stroke-width=\"31\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-miterlimit=\"22.9256\" points=\"1240,1069 1409,1594 1959,1591 1515,1916 1684,2438 1240,2113 796,2438 965,1916 521,1591 1071,1594 \"/>\n" +
+                    " </g>\n" +
+                    "</svg>\n"
+            },
+            {
+                vectorUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066455/shapeThumbnails/vn0ytqf7cjtjq6w5bobi.svg",
+                thumbnailUrl:"https://res.cloudinary.com/dfr41axmh/image/upload/v1614066455/shapeThumbnails/vn0ytqf7cjtjq6w5bobi.svg",
+                data:"\n" +
+                    "<svg xmlns=\"http://www.w3.org/2000/svg\" xml:space=\"preserve\" width=\"2480px\" height=\"3508px\" version=\"1.1\" shape-rendering=\"geometricPrecision\" text-rendering=\"geometricPrecision\" image-rendering=\"optimizeQuality\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"\n" +
+                    "viewBox=\"0 0 2480 3507\"\n" +
+                    " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
+                    " <g id=\"Capa_x0020_1\">\n" +
+                    "  <path fill=\"none\" stroke=\"#373435\" stroke-width=\"31\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-miterlimit=\"22.9256\" d=\"M515 1029l1453 1453 -1453 0 0 -1453zm728 728m0 728m-728 -728\"/>\n" +
+                    " </g>\n" +
+                    "</svg>\n"
+            }
+        ];
         return new Promise(function(resolutionFunc,rejectionFunc){
             resolutionFunc(dummyData);
         });

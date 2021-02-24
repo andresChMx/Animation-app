@@ -18,7 +18,12 @@ let SectionToolBox={
                 icon:"icon-preview",
                 label:"Preview",
                 action:function(){
-                    me.parentClass.childNotificationOnToolPreviewClicked();
+                    if(CanvasManager.AreAllImagesReady()){
+                        me.parentClass.childNotificationOnToolPreviewClicked();
+                    }else{
+                        alert("cannot preview while images are not ready, please delete those images");
+                        //TODO Show notification "cannot preview while images are not ready, please delete those images"
+                    }
                 }
             },
             {
@@ -109,6 +114,8 @@ var PanelInspector={
 
     init:function(){
         this.HTMLElement=document.querySelector(".panel-inspector");
+        this.HTMLBtnToggle=this.HTMLElement.querySelector(".btn-toggle-panel-right");
+
         this.htmlElementNormalHeight=this.HTMLElement.offsetHeight;
 
 
@@ -132,9 +139,27 @@ var PanelInspector={
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnShapeAnimableAdded,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnShapeAnimableDeleted,this);
 
+        MainMediator.registerObserver(PanelAnimation.name,PanelAnimation.events.OnPanelToggle,this);
+
         WindowManager.unregisterOnKeyEnterPressed()
         WindowManager.registerOnMouseDown(this);
+        WindowManager.registerObserverOnResize(this);
+        this.initEvents();
         },
+    initEvents:function(){
+        this.HTMLBtnToggle.addEventListener("click",this.toggle.bind(this))
+    },
+    toggle:function(){
+        if(this.HTMLElement.classList.contains("closed")){
+            //this.HTMLBtnToggle.children[0].className=""
+            this.HTMLElement.classList.remove("closed");
+            this.HTMLElement.style.right=0;
+        }else{
+            //this.HTMLBtnToggle.children[0].className=""
+            this.HTMLElement.classList.add("closed");
+            this.HTMLElement.style.right=-this.HTMLElement.offsetWidth + "px";
+        }
+    },
     notificationCanvasManagerOnDesignPathOptionClicked:function(args){
         this.HTMLElement.style.display="none";
     },
@@ -173,11 +198,22 @@ var PanelInspector={
     notificationCanvasManagerOnObjModified:function(args){
         this.AreaObjectProperties.notificationCanvasManagerOnObjModified();
     },
+    notificationPanelAnimationOnPanelToggle:function(args){
+        let opened=args[0];
+        if(opened){
+            this.HTMLElement.style.height=this.htmlElementNormalHeight + "px";
+        }else{
+            this.HTMLElement.style.height=100 + "vh";
+        }
+    },
     notificationOnKeyEnterUp:function(){
 
     },
     notificationOnMouseDown:function(e){
         this.AreaSceneObjects.notificationOnMouseDown(e);
+    },
+    notificationOnResize:function(){
+        this.htmlElementNormalHeight=window.innerHeight- CSS_VARIABLE.PanelAnimationHeight;
     },
     childNotificationOnBtnMoveUpEntranceOrderPressed:function(index){
         MainMediator.notify(this.name,this.events.OnBtnMoveUpObjectEntranceOrder,[index]);

@@ -669,11 +669,14 @@ var PanelAssets={
     SectionShapeAssets:SectionShapeAssets,
     init:function(){
         this.HTMLElement=document.querySelector(".panel-assets");
+        this.HTMLBtnToggle=this.HTMLElement.querySelector(".btn-toggle-panel-left");
         this.HTMLCollMenuOptions=document.querySelector(".panel-assets__menu-sections").children;
         this.HTMLCollSectionsAssets=document.querySelector(".panel-assets__sections-container").children;
         this.htmlElementNormalHeight=this.HTMLElement.offsetHeight;
         MainMediator.registerObserver(PanelDesignerOptions.name,PanelDesignerOptions.events.OnActionClicked,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnDesignPathOptionClicked,this);
+        MainMediator.registerObserver(PanelAnimation.name,PanelAnimation.events.OnPanelToggle,this);
+        WindowManager.registerObserverOnResize(this);
         this.SectionImageAssets.init(this);
         this.SectionTextAssets.init(this);
         this.SectionShapeAssets.init(this);
@@ -686,6 +689,7 @@ var PanelAssets={
         for (let i = 0; i <this.HTMLCollMenuOptions.length; i++) {
             this.HTMLCollMenuOptions[i].addEventListener("click",this.OnMenuOptionClicked.bind(this));
         }
+        this.HTMLBtnToggle.addEventListener("click",this.toggle.bind(this))
     },
     OnMenuOptionClicked:function(e){
         let index=[].slice.call(this.HTMLCollMenuOptions).indexOf(e.target);
@@ -713,11 +717,33 @@ var PanelAssets={
     hide:function(){
         this.HTMLElement.style.display="none";
     },
+    toggle:function(){
+        if(this.HTMLElement.classList.contains("closed")){
+            //this.HTMLBtnToggle.children[0].className=""
+            this.HTMLElement.classList.remove("closed");
+            this.HTMLElement.style.left=0;
+        }else{
+            //this.HTMLBtnToggle.children[0].className=""
+            this.HTMLElement.classList.add("closed");
+            this.HTMLElement.style.left=-this.HTMLElement.offsetWidth + "px";
+        }
+    },
     notificationPanelDesignerOptionsOnActionClicked:function(){
         this.display();
     },
     notificationCanvasManagerOnDesignPathOptionClicked:function(){
         this.hide();
+    },
+    notificationPanelAnimationOnPanelToggle:function(args){
+        let opened=args[0];
+        if(opened){
+            this.HTMLElement.style.height=this.htmlElementNormalHeight + "px";
+        }else{
+            this.HTMLElement.style.height=100 + "vh";
+        }
+    },
+    notificationOnResize:function(){
+        this.htmlElementNormalHeight=window.innerHeight- CSS_VARIABLE.PanelAnimationHeight;
     },
     childNotificationOnImageAssetDummyDraggingEnded:function(lastModelOnItemDragged,lastThumbnailOnItemDragged){
         MainMediator.notify(this.name,this.events.OnImageAssetDummyDraggingEnded,[lastModelOnItemDragged,lastThumbnailOnItemDragged]);

@@ -101,7 +101,7 @@
     --item-object:#292828;
     --ligth-color:#2D88FF;
 
-    --panel-animation-height:200px;
+    --panel-animation-height:225px;
     --panel-animation__top-menu_height:35px;
     --action-editor__timeline-area-width:80%;
     --keyframes-bar__property-lane-height:20px;
@@ -113,8 +113,12 @@ html{
   body{
       /*overflow: hidden;*/
       color:rgba(255,255,255,.9);
+      background:rgba(0,0,0,1);
       position:relative;
       font-family:Verdana, Geneva, Tahoma, sans-serif;
+      overflow:hidden;
+      height:100vh;
+      width:100%;
   }
 
 /*================================*/
@@ -235,6 +239,37 @@ button{
     width:100%;
     height:100%;
     cursor:pointer;
+}
+[class*="btn-toggle-panel"]{
+    background:var(--fields-color);
+    color:rgba(255,255,255,0.6);
+    border-radius: 15px 0 0 15px;
+    position:absolute;
+    height:50px;
+    width:20px;
+    transform: translateY(-50%);
+
+    text-align: center;
+    line-height: 50px;
+
+}
+.btn-toggle-panel-right{
+    left:-20px;
+    top:50%;
+}
+.btn-toggle-panel-left{
+    border-radius: 0 15px 15px 0;
+    right:-20px;
+    top:50%;
+}
+.btn-toggle-panel-bottom{
+    transform: translate(-50%, 0);
+    border-radius: 15px 15px 0 0;
+    height:20px;
+    width:60px;
+    left:50%;
+    top:-20px;
+    line-height: 20px;
 }
 .canvas-animator__object-entrance-configuration .tooltip{
     display: none;
@@ -367,6 +402,7 @@ button{
     left:0;
     z-index: 1000;
     font-size: 1.15rem;
+    transition:bottom .3s;
 }
 .panel-animation__top-bar{
     position: relative;
@@ -436,14 +472,14 @@ button{
     height:100%;
     flex-grow: 1;
     background:rgb(115, 187, 32);
-    overflow-x: auto;
+    overflow-x: hidden;
     overflow-y:hidden;
     position:relative;
 
 }
 .action-editor__properties-area{
     height:100%;
-    width:300px;
+    width:200px;
     background:var(--primary-color);
 }
 .action-editor__properties-area__list{
@@ -576,8 +612,13 @@ button{
     top:0;
     height:calc(100vh - var(--panel-animation-height));
     width:300px;
-    overflow-x: hidden;
     padding:8px;
+    transition-property: right, height;
+    transition-duration: .3s;
+
+    display: flex;
+    flex-direction: column;
+
 }
 
 /*menu principal*/
@@ -649,8 +690,12 @@ button{
     color:var(--ligth-color);
 }
 /*areas*/
+.container-areas-scrollable{
+    overflow: auto;
+    height: auto;
+}
 .panel-inspector .container-areas-viewport{
-    overflow: hidden;
+    overflow-x: hidden;
 }
 .panel-inspector__container-areas{
     width:200%;
@@ -690,13 +735,20 @@ button{
     box-sizing: border-box;
 }
 .area-scene-objects__listing-objects-entrance__box-items__item .icon .image{
+    background: #d0d0d0;
+    margin:auto;
     width:100%;
     height:100%;
     overflow: hidden;
     border-radius:4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .area-scene-objects__listing-objects-entrance__box-items__item .icon .image img{
     width: 100%;
+    height:auto;
+
 }
 
 .area-scene-objects__listing-objects-entrance__box-items__item .fields-container{
@@ -904,9 +956,10 @@ button{
     height:calc(100vh - var(--panel-animation-height));
     width:300px;
     z-index: 900;
-    background:red;
     display:flex;
     flex-direction: column !important;
+    transition-property: left, height;
+    transition-duration: .3s;
 }
 .panel-assets__menu-sections{
     background: var(--secondary-color);
@@ -1308,19 +1361,21 @@ button{
 ==== canvas-animator==
 =======================*/
 .canvas-outterContainer{
-    position:relative;
-    display: block;
-    margin:auto;
-    overflow: hidden;
-    white-space: nowrap;
-}
-.canvas-container{
     position:absolute;
     left:0 !important;
     right:0 !important;
     top:0 !important;
     bottom:0 !important;
     margin:auto !important;
+}
+
+@media only screen and (min-width: 1000px) {
+    .canvas-outterContainer{
+        bottom:auto !important;
+    }
+}
+.canvas-container{
+
 }
 .canvas-animator__object__menu-options{
     background:black;
