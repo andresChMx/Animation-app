@@ -337,6 +337,7 @@ let SectionImageAssets={
     },
     OnMenuCategoriesControlButtonsPressed:function(e){
         if(e.target.id==="control-left"){
+            this.HTMLMenuCategories.style.left
             this.HTMLMenuCategories.parentNode.scrollLeft-=70;
         }else if(e.target.id==="control-right"){
             this.HTMLMenuCategories.parentNode.scrollLeft+=70;
@@ -418,6 +419,9 @@ let SectionImageAssets={
         self.lastModelOnItemDragged=model;
         self.lastThumbnailOnItemDragged=thumbnailImg;
         self.isItemPressed=true;
+        let placeholder=thumbnailImg.cloneNode();
+        placeholder.setAttribute("draggable",false);
+        self.HTMLDummyAssetDrag.children[0].replaceWith(placeholder);
         self.HTMLDummyAssetDrag.style.display="block";
     },
     childNotificationOnAssetMenuPressed:function(model){
@@ -488,7 +492,8 @@ var SectionTextAssets={
     OnAssetDragStarted:function(e){
         this.assetDragStarted=true;
         this.HTMLAssetBeenDragged=e.target;
-        this.HTMLDraggableElement.style.display="block";
+        this.HTMLDraggableElement.style.fontFamily=getComputedStyle(this.HTMLAssetBeenDragged).getPropertyValue("font-family");
+        this.HTMLDraggableElement.style.display="flex";
     },
 
     notificationOnMouseMove:function(){
@@ -500,6 +505,7 @@ var SectionTextAssets={
         if(this.assetDragStarted){
             let fontFamily=getComputedStyle(this.HTMLAssetBeenDragged).getPropertyValue("font-family");
             this.HTMLDraggableElement.style.display="none";
+            this._moveDraggableTo(-200,-200)
             this.parentClass.childNotificationOnTextAssetDraggableDropped(fontFamily);
             this.assetDragStarted=false;
         }
@@ -510,9 +516,7 @@ var SectionShapeAssets={
 
     listAssets:ko.observableArray([]),
     MODELAssets:[
-        {icon:"icon-start",category:"Arrows",path:[{x:0,y:0}]},
-        {icon:"icon-start",category:"bubles",path:[{x:0,y:0}]},
-        {icon:"icon-start",category:"",path:[{x:0,y:0}]},
+
     ],
     listAssetsPerPageCant:10,
 
@@ -529,24 +533,24 @@ var SectionShapeAssets={
         this.HTMLBtnCreateShape=document.querySelector(".section-assets.shape .section-assets__box-options__first-row .btn-create-shape");
         // this.HTMLFieldSearch=document.querySelector("");
 
-        this.HTMLMenuCategories=document.querySelector(".section-assets.shape .section-assets__box-options__second-row__menu-categories");
-        this.HTMLMenuCategoriesControlButtons=this.HTMLMenuCategories.querySelectorAll("button");
-        this.HTMLMenuCategoriesListCategories=this.HTMLMenuCategories.querySelectorAll("li");
+        // this.HTMLMenuCategories=document.querySelector(".section-assets.shape .section-assets__box-options__second-row__menu-categories");
+        // this.HTMLMenuCategoriesControlButtons=this.HTMLMenuCategories.querySelectorAll("button");
+        // this.HTMLMenuCategoriesListCategories=this.HTMLMenuCategories.querySelectorAll("li");
 
-        this.HTMLMenuCategoriesSelectedOption=null;
+        // this.HTMLMenuCategoriesSelectedOption=null;
 
-        this.HTMLBtnLoadMore=document.querySelector(".section-assets.shape .section-assets__btn-load-more");
-        this.initEvents();
+        // this.HTMLBtnLoadMore=document.querySelector(".section-assets.shape .section-assets__btn-load-more");
+        // this.initEvents();
 
         /*setting up DOM elemes*/
-        this.HTMLMenuCategories.style.paddingLeft=this.HTMLMenuCategoriesControlButtons[0].offsetWidth +"px";
+        // this.HTMLMenuCategories.style.paddingLeft=this.HTMLMenuCategoriesControlButtons[0].offsetWidth +"px";
 
 
         WindowManager.registerOnMouseUp(this);
         WindowManager.registerOnMouseMove(this);
 
         // simulating clicking in first category (all)
-        this.selectMenuCategoriesOption(this.HTMLMenuCategoriesListCategories[0]);
+        // this.selectMenuCategoriesOption(this.HTMLMenuCategoriesListCategories[0]);
         this.lastCategory="";
         NetworkManager.fetchShapeAssets(this.lastCategory,this.listAssetsPageNumber).then(function(data){
             this.MODELItemAssets=data;
@@ -639,10 +643,16 @@ var SectionShapeAssets={
             this.setPositionHTMLDummyAsset(WindowManager.mouse.x,WindowManager.mouse.y);
         }
     },
-    childNotificationOnAssetDraggingStarted:function(model){
+    childNotificationOnAssetDraggingStarted:function(model,thumbnailImg){
         this.lastModelOnItemDragged=model;
         this.isItemPressed=true;
         this.HTMLDummyAssetDrag.style.display="block";
+
+        let placeholder=thumbnailImg.cloneNode();
+        placeholder.setAttribute("draggable",false);
+        this.HTMLDummyAssetDrag.children[0].replaceWith(placeholder);
+
+        this.HTMLDummyAssetDrag.style.display="flex";
     },
     notifyOnDummyDraggingEnded:function(){
         this.parentClass.childNotificationOnShapeAssetDraggableDropped(this.lastModelOnItemDragged);
@@ -777,7 +787,7 @@ var AssetShape=function(model,parentClass){
         this.notifyOnDraggingStarted();
     }
     this.notifyOnDraggingStarted=function(){
-        this.parentClass.childNotificationOnAssetDraggingStarted(this.model);
+        this.parentClass.childNotificationOnAssetDraggingStarted(this.model,this.HTMLElement.children[0]);
     }
     this.constructor();
 }

@@ -180,23 +180,33 @@ var SectionTransformObject={
 
 var AdapterSetValue={
     set:function(object,property,value){
+        object[property]=value;
+
         if(object.type==="TextAnimable") {
             if(property==="fontFamily"){
                 object.setFontFamily(value);
-            }else{
-                object[property]=value;
-            }
-        }else{
-            object[property]=value;
-        }
-
-
-        if(object.type==="TextAnimable"){
-            if(property==="fill"){
+            }else if(property==="fill"){
                 object.dirty=true;
             }else{
                 object.exitEditing();
             }
+        }
+
+        if(object.type==="ShapeAnimable"){
+            /*for rectShapes*/
+            if(property==="width" || property==="height"){
+                object.calcStrokeLength();
+            }
+            if(property==="borderRadius"){
+                object.rx=value;
+                object.ry=value;
+                object.calcStrokeLength();
+            }
+            /*for Circleshapes*/
+            if(property==="radius"){
+                object.set("radius",value);
+            }
+
         }
         CanvasManager.canvas.renderAll();
     }
@@ -212,12 +222,15 @@ var SectionStylingObject={
         let me=this;
         this.widgetsShapeAnimable={
             strokeWidth:{
-                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.stroke-width .property-input"),
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.stroke-width"),
                 field:null,
                 initEvent:function(){
-                    this.field=new ButtonedField(this.htmlElem,"",1,1000,4)
+                    let fieldHTML=this.htmlElem.querySelector(".property-input");
+                    this.field=new ButtonedField(fieldHTML,"",1,1000,4)
                     this.field.addListenerOnNewValue(this.OnTriggered.bind(this));
                 },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
                 OnTriggered:function(value,e){
                     me.OnWidgetChanged(value,"strokeWidth")
                 },
@@ -226,33 +239,59 @@ var SectionStylingObject={
                 },
                 getInputFieldElem:function(){return this.field.htmlInput},
             },
-            fill:{htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.fill input"),
-                initEvent:function(){this.htmlElem.addEventListener("input",this.OnTriggered.bind(this))},
-                OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.value,"fill")},
-                setVal:function(val){this.htmlElem.value=val},
-                getInputFieldElem:function(){return this.htmlElem},
+            fill:{htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.fill"),
+                htmlInput:null,
+                initEvent:function(){
+                    this.htmlInput=this.htmlElem.querySelector("input");
+                    this.htmlInput.addEventListener("input",this.OnTriggered.bind(this))
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(e){me.OnWidgetChanged(this.htmlInput.value,"fill")},
+                setVal:function(val){this.htmlInput.value=val},
+                getInputFieldElem:function(){return this.htmlInput},
             },
             transparentFill:{
-            htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.transparent-fill input"),
-                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
-            OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.checked,"transparentFill")},
-            setVal:function(val){this.htmlElem.checked=val},
-            getInputFieldElem:function(){return this.htmlElem}
+            htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.transparent-fill"),
+                htmlInput:null,
+                initEvent:function(){
+                    this.htmlInput=this.htmlElem.querySelector("input");
+                    this.htmlInput.addEventListener("change",this.OnTriggered.bind(this))
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(e){me.OnWidgetChanged(this.htmlInput.checked,"transparentFill")},
+                setVal:function(val){this.htmlInput.checked=val},
+                getInputFieldElem:function(){return this.htmlInput}
             },
-            stroke:{htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.stroke input"),
-                initEvent:function(){this.htmlElem.addEventListener("input",this.OnTriggered.bind(this))},
-                OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.value,"stroke")},
-                setVal:function(val){this.htmlElem.value=val},
-                getInputFieldElem:function(){return this.htmlElem},
+            stroke:{
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.stroke"),
+                htmlInput:null,
+                initEvent:function(){
+                    this.htmlInput=this.htmlElem.querySelector("input");
+                    this.htmlInput.addEventListener("input",this.OnTriggered.bind(this))
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(e){me.OnWidgetChanged(this.htmlInput.value,"stroke")},
+                setVal:function(val){this.htmlInput.value=val},
+                getInputFieldElem:function(){return this.htmlInput},
             },
             transparentStroke:{
-                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.transparent-stroke input"),
-                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
-                OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.checked,"transparentStroke")},
-                setVal:function(val){this.htmlElem.checked=val},
-                getInputFieldElem:function(){return this.htmlElem}
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.transparent-stroke"),
+                htmlInput:null,
+                initEvent:function(){
+                    this.htmlInput=this.htmlElem.querySelector("input");
+                    this.htmlInput.addEventListener("change",this.OnTriggered.bind(this))
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(e){me.OnWidgetChanged(this.htmlInput.checked,"transparentStroke")},
+                setVal:function(val){this.htmlInput.checked=val},
+                getInputFieldElem:function(){return this.htmlInput}
             },
             startRenderingPoint:{
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.start-point"),
                 field:null,
                 slider:null,
                 initEvent:function(){
@@ -261,6 +300,8 @@ var SectionStylingObject={
                     this.slider=document.querySelector(".styling-widget__start-rendering-point__slider");
                     this.slider.addEventListener("change",this.OnSliderChanged.bind(this));
                     },
+                activate:function(){this.htmlElem.style.display="block"},
+                deactivate:function(){this.htmlElem.style.display="none"},
                 OnFieldNewValue:function(value,e){
                     this.slider.value=value;
                     me.OnWidgetChanged(value,"startRenderingPoint");
@@ -273,6 +314,7 @@ var SectionStylingObject={
 
             },
             endRenderingPoint:{
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.end-point"),
                 field:null,
                 slider:null,
                 initEvent:function(){
@@ -281,6 +323,8 @@ var SectionStylingObject={
                     this.slider=document.querySelector(".styling-widget__end-rendering-point__slider");
                     this.slider.addEventListener("change",this.OnSliderChanged.bind(this));
                 },
+                activate:function(){this.htmlElem.style.display="block"},
+                deactivate:function(){this.htmlElem.style.display="none"},
                 OnFieldNewValue:function(value,e){
                     this.slider.value=value;
                     me.OnWidgetChanged(value,"endRenderingPoint");
@@ -292,19 +336,106 @@ var SectionStylingObject={
                 getInputFieldElem:function(){return this.field.htmlElement},
 
             },
+            /*properties of rectanimables*/
+            width:{
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.width"),
+                field:null,
+                initEvent:function(){
+                    let fieldHTML=this.htmlElem.querySelector(".property-input");
+                    this.field=new ButtonedField(fieldHTML,"",1,1000,10)
+                    this.field.addListenerOnNewValue(this.OnTriggered.bind(this));
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(value,e){
+                    me.OnWidgetChanged(value,"width")
+                },
+                setVal:function(val,triggering=false){
+                    this.field.setValue(val,triggering);
+                },
+                getInputFieldElem:function(){return this.field.htmlInput},
+            },
+            height:{
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.height"),
+                field:null,
+                initEvent:function(){
+                    let fieldHTML=this.htmlElem.querySelector(".property-input");
+                    this.field=new ButtonedField(fieldHTML,"",1,1000,10)
+                    this.field.addListenerOnNewValue(this.OnTriggered.bind(this));
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(value,e){
+                    me.OnWidgetChanged(value,"height")
+                },
+                setVal:function(val,triggering=false){
+                    this.field.setValue(val,triggering);
+                },
+                getInputFieldElem:function(){return this.field.htmlInput},
+            },
+            borderRadius:{
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.borderRadius"),
+                field:null,
+                initEvent:function(){
+                    let fieldHTML=this.htmlElem.querySelector(".property-input");
+                    this.field=new ButtonedField(fieldHTML,"",1,1000,10)
+                    this.field.addListenerOnNewValue(this.OnTriggered.bind(this));
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(value,e){
+                    me.OnWidgetChanged(value,"borderRadius")
+                },
+                setVal:function(val,triggering=false){
+                    this.field.setValue(val,triggering);
+                },
+                getInputFieldElem:function(){return this.field.htmlInput},
+            },
+            /*properties of circleShapes*/
+            radius:{
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.radius"),
+                field:null,
+                initEvent:function(){
+                    let fieldHTML=this.htmlElem.querySelector(".property-input");
+                    this.field=new ButtonedField(fieldHTML,"",1,1000,10)
+                    this.field.addListenerOnNewValue(this.OnTriggered.bind(this));
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(value,e){
+                    me.OnWidgetChanged(value,"radius")
+                },
+                setVal:function(val,triggering=false){
+                    this.field.setValue(val,triggering);
+                },
+                getInputFieldElem:function(){return this.field.htmlInput},
+            },
+            /*masking properties (general to all shapes)*/
             inverted:{
-                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.inverted input"),
-                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
-                OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.checked,"inverted")},
-                setVal:function(val){this.htmlElem.checked=val},
-                getInputFieldElem:function(){return this.htmlElem}
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.inverted"),
+                htmlInput:null,
+                initEvent:function(){
+                    this.htmlInput=this.htmlElem.querySelector("input");
+                    this.htmlInput.addEventListener("change",this.OnTriggered.bind(this))
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(e){me.OnWidgetChanged(this.htmlInput.checked,"inverted")},
+                setVal:function(val){this.htmlInput.checked=val},
+                getInputFieldElem:function(){return this.htmlInput}
             },
             clipBorder:{
-                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.clip-border input"),
-                initEvent:function(){this.htmlElem.addEventListener("change",this.OnTriggered.bind(this))},
-                OnTriggered:function(e){me.OnWidgetChanged(this.htmlElem.checked,"clipBorder")},
-                setVal:function(val){this.htmlElem.checked=val},
-                getInputFieldElem:function(){return this.htmlElem}
+                htmlElem:document.querySelector("#ShapeAnimable-styling-panel .styling-widget.clip-border"),
+                htmlInput:null,
+                initEvent:function(){
+                    this.htmlInput=this.htmlElem.querySelector("input");
+                    this.htmlInput.addEventListener("change",this.OnTriggered.bind(this))
+                },
+                activate:function(){this.htmlElem.style.display="flex"},
+                deactivate:function(){this.htmlElem.style.display="none"},
+                OnTriggered:function(e){me.OnWidgetChanged(this.htmlInput.checked,"clipBorder")},
+                setVal:function(val){this.htmlInput.checked=val},
+                getInputFieldElem:function(){return this.htmlInput}
             }
         };
         this.widgetsTextAnimable={
@@ -424,6 +555,19 @@ var SectionStylingObject={
         }
 
     },
+    /*widgets activation/deactivation*/
+    deactivateAllObjectWidgets:function(animableObj){
+        for(let key in this["widgets" + animableObj.type]){
+            this["widgets" + animableObj.type][key].deactivate();
+        }
+    },
+    activateObjectWidgets:function(animableObj){
+        for(let i=0;i<animableObj.listEditableStylingProperties.length;i++){
+            let property=animableObj.listEditableStylingProperties[i];
+            this["widgets" + animableObj.type][property].activate();
+        }
+    },
+    /*activated widgets population*/
     populateTextAnimableFloatingPanelData:function (animableObj){
         for(let key in this.widgetsTextAnimable){
             this.widgetsTextAnimable[key].setVal(animableObj[key]);
@@ -433,8 +577,9 @@ var SectionStylingObject={
 
     },
     populateShapeAnimableFloatingPanelData:function(animableObj){
-        for(let key in this.widgetsShapeAnimable){
-            this.widgetsShapeAnimable[key].setVal(animableObj[key]);
+        for(let i=0;i<animableObj.listEditableStylingProperties.length;i++){
+            let property=animableObj.listEditableStylingProperties[i];
+            this["widgets" + animableObj.type][property].setVal(animableObj[property])
         }
     },
     notificationCanvasManagerOnSelectionUpdated:function(){
@@ -453,6 +598,8 @@ var SectionStylingObject={
             }else if(currentAnimableObject.type==="ImageAnimable"){
                 this.populateImageAnimableFloatingPanelData(currentAnimableObject);
             }else if(currentAnimableObject.type==="ShapeAnimable"){
+                this.deactivateAllObjectWidgets(currentAnimableObject);
+                this.activateObjectWidgets(currentAnimableObject);
                 this.populateShapeAnimableFloatingPanelData(currentAnimableObject);
             }
         }else{

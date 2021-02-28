@@ -356,7 +356,9 @@ var PathLength={
                 case 'Z':
                     x = subpathStartX;
                     y = subpathStartY;
-
+                    // length+=this._calcLineLength(previousPoint.x,previousPoint.y, subpathStartX,subpathStartY);
+                    // previousPoint.x=subpathStartX;
+                    // previousPoint.y=subpathStartY;
                     break;
             }
             previous = current;

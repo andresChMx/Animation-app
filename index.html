@@ -205,35 +205,35 @@
             </div>
             <div class="section-assets shape">
                 <div class="section-assets__box-options">
-                    <div class="section-assets__box-options__first-row">
-                        <button class="btn-create-shape btn-action">Create Shape</button>
-                    </div>
-                    <div class="section-assets__box-options__second-row">
-                        <div class="section-assets__box-options__second-row__menu-categories">
-                            <button id="shape__control-left" class="icon-double-left"></button>
-                            <ul class="section-assets__box-options__menu-categories__list-categories">
-                                <li value="" >All</li>
-                                <li value="business" >Business</li>
-                                <li value="people" >people</li>
-                                <li value="background" >Backgrounds</li>
-                                <li value="technology" >Technology</li>
-                                <li value="nature" >Nature</li>
-                                <li value="health" >Health</li>
-                                <li value="animal" >Animals</li>
-                                <li value="vector" >Vectors</li>
-                            </ul>
-                            <button id="shape__control-right" class="icon-double-right"></button>
-                        </div>
-                    </div>
+<!--                    <div class="section-assets__box-options__first-row">-->
+<!--                        <button class="btn-create-shape btn-action">Create Shape</button>-->
+<!--                    </div>-->
+<!--                    <div class="section-assets__box-options__second-row">-->
+<!--                        <div class="section-assets__box-options__second-row__menu-categories">-->
+<!--                            <button id="shape__control-left" class="icon-double-left"></button>-->
+<!--                            <ul class="section-assets__box-options__menu-categories__list-categories">-->
+<!--                                <li value="" >All</li>-->
+<!--                                <li value="business" >Business</li>-->
+<!--                                <li value="people" >people</li>-->
+<!--                                <li value="background" >Backgrounds</li>-->
+<!--                                <li value="technology" >Technology</li>-->
+<!--                                <li value="nature" >Nature</li>-->
+<!--                                <li value="health" >Health</li>-->
+<!--                                <li value="animal" >Animals</li>-->
+<!--                                <li value="vector" >Vectors</li>-->
+<!--                            </ul>-->
+<!--                            <button id="shape__control-right" class="icon-double-right"></button>-->
+<!--                        </div>-->
+<!--                    </div>-->
                 </div>
                 <div class="section-assets__box-assets" data-bind="foreach: SectionShapeAssets.listAssets">
                     <div class="shape-asset button-solid-behaviour" data-bind="setupEvents: koBindingSetupHTML($element)" >
                         <img data-bind="attr:{src:model.thumbnailUrl}" />
                     </div>
                 </div>
-                <div class="section-assets__btn-load-more">
-                    Load More...
-                </div>
+<!--                <div class="section-assets__btn-load-more">-->
+<!--                    Load More...-->
+<!--                </div>-->
             </div>
 
             <div class="section-assets text">
@@ -463,6 +463,25 @@
                                             <input type="range" min="0" max="100" value="100" step="1" class="styling-widget__end-rendering-point__slider range-widget__slider"/>
                                         </div>
                                     </div>
+<!--                                    propiedades de RectShapeAnimable-->
+                                    <div class="form-group styling-widget width">
+                                        <label for="width-widget">Width </label>
+                                        <div class="property-input"><button class="btn-decrease"></button><input id="width-widget" type="text" value="300" class="field-value"><button class="btn-increase"></button></div>
+                                    </div>
+                                    <div class="form-group styling-widget height">
+                                        <label for="height-widget">Width </label>
+                                        <div class="property-input"><button class="btn-decrease"></button><input id="height-widget" type="text" value="300" class="field-value"><button class="btn-increase"></button></div>
+                                    </div>
+                                    <div class="form-group styling-widget borderRadius">
+                                        <label for="borderRadius-widget">Hor. border radius </label>
+                                        <div class="property-input"><button class="btn-decrease"></button><input id="borderRadius-widget" type="text" value="300" class="field-value"><button class="btn-increase"></button></div>
+                                    </div>
+<!--                                    propiedades para CircleShapeAnimable-->
+                                    <div class="form-group styling-widget radius">
+                                        <label for="radius-widget">Radius </label>
+                                        <div class="property-input"><button class="btn-decrease"></button><input id="radius-widget" type="text" value="300" class="field-value"><button class="btn-increase"></button></div>
+                                    </div>
+<!--                                    propiedades de masking (generales a tdodos shapes)-->
                                     <p class="subtitle">Masking properties</p>
                                     <div class="form-group styling-widget inverted">
                                         <label for="inverted-widget">Inverted ClipPath</label>
@@ -635,9 +654,15 @@
     ==========FLOATING ELEMENTS======
     ==============================-->
 
-    <div class="section-image-assets__floating-draggable image-asset"></div>
-    <div class="section-image-assets__floating-draggable text-asset"></div>
-    <div class="section-image-assets__floating-draggable shape-asset"></div>
+    <div class="section-image-assets__floating-draggable image-asset">
+        <img src="" alt="">
+    </div>
+    <div class="section-image-assets__floating-draggable text-asset">
+        Sample Text
+    </div>
+    <div class="section-image-assets__floating-draggable shape-asset">
+        <img src="" alt="">
+    </div>
 
     <div class="section-image-assets__item__menu-options">
     </div>

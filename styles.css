@@ -8,7 +8,7 @@
               -ms-user-select: none; /* Internet Explorer/Edge */
                   user-select: none; /* Non-prefixed version, currently
                                         supported by Chrome, Edge, Opera and Firefox */
-      
+
 }
 @font-face {
     font-family: 'AlegreyaSans';
@@ -696,6 +696,7 @@ button{
 }
 .panel-inspector .container-areas-viewport{
     overflow-x: hidden;
+    height:100%;
 }
 .panel-inspector__container-areas{
     width:200%;
@@ -923,7 +924,6 @@ button{
 }
 .area-objects-properties__zone-styles__box-floating-panels .floating-panel#ShapeAnimable-styling-panel .styling-widget.stroke{
     position:relative;
-
 }
 .area-objects-properties__zone-styles__box-floating-panels .floating-panel#ShapeAnimable-styling-panel .styling-widget.transparent-stroke{
     position:absolute;
@@ -1092,7 +1092,7 @@ button{
     display:inline-block;
     width:50%;
 
-    height:80px !important;
+    height:90px !important;
     padding:5px;
 }
 .section-assets .section-assets__btn-load-more{
@@ -1109,12 +1109,20 @@ button{
 .section-image-assets__floating-draggable{
     position:absolute;
     z-index: 1000;
+    left:330px;
+    top:330px;
     display: none;
-    left:-200px;
-    top:-200px;
-    background:red;
+    justify-content: center;
+    align-items: center;
 }
+.section-image-assets__floating-draggable.shape-asset img{
+    /*importante establecer ancho y alto explicitamente, ya que
+    son svgs, y si no se especifican es como que no tienen una dimencion definida
+    y no se centra la imagen*/
+    height:100%;
+    width:100%;
 
+}
 /*specific for image assets*/
 .section-assets__box-assets .image-asset__inner-container{
     width:100%;
@@ -1123,12 +1131,14 @@ button{
     position:relative;
     display: flex;
     align-items: center;
+    justify-content: center;
     border-radius: 6px;
     overflow: hidden;
     border:1px solid rgba(255,255,255,.7);
 }
 .section-assets__box-assets .image-asset__inner-container__image{
-    width:100%;
+    width:auto;
+    height:100%;
     display:inline-block;
     max-height: 100%;
     line-height: 0;

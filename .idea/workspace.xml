@@ -20,34 +20,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Globals/UserEventsHandler.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/entities/EntranceBehaviour.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/DrawnEntranceMode.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/ImageDrawnEntranceMode.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/SVGDrawnEntranceMode.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/TextDrawnEntranceMode.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/entities/EntranceModes/EntranceMode.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/entities/EntranceModes/NoneEntranceMode.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Globals/NetworkManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/NetworkManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Globals/Variables.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/Variables.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaSceneObjects.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaSceneObjects.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/InspectorPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaObjectProperties.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaObjectProperties.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PreviewerView/PreviewerPanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/WindowManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/StaticResource.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/StaticResource.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/ImageAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/ImageAnimable.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/SVGAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/SVGAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/ShapeAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/ShapeAnimable.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/TextAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/TextAnimable.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/entities/DrawableImage.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/util.js" afterDir="false" />
     </list>
@@ -260,6 +242,9 @@
       <workItem from="1614018065568" duration="36258000" />
       <workItem from="1614090444768" duration="16410000" />
       <workItem from="1614114642961" duration="26471000" />
+      <workItem from="1614349038602" duration="26228000" />
+      <workItem from="1614387613722" duration="14117000" />
+      <workItem from="1614430227982" duration="37467000" />
     </task>
     <servers />
   </component>
@@ -315,14 +300,14 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="569" y="201" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1050@0.0.1920.1050" timestamp="1608214205489" />
-    <state x="664" y="206" width="878" height="801" key="find.popup" timestamp="1614136294912">
+    <state x="664" y="206" width="878" height="801" key="find.popup" timestamp="1614490465377">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="664" y="206" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1614136294912" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1613966230181">
+    <state x="664" y="206" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1614490465377" />
+    <state x="616" y="237" key="run.anything.popup" timestamp="1614294161602">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1613966230181" />
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1614294161602" />
     <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1614097635511">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

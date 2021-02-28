@@ -71,7 +71,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
             this.thumbnailImage=img;
             this._setThumbnailLoadingState(EnumAnimableLoadingState.ready);
         }.bind(this)).catch(function(){
-            this.thumbnailImage=StaticResource.images.loadingError;
+            this.thumbnailImage=StaticResource.images.loadingError.cloneNode();
             this._setThumbnailLoadingState(EnumAnimableLoadingState.error);
         }.bind(this))
     },

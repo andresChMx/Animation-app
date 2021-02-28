@@ -240,12 +240,48 @@ var CanvasManager={
         }else if(type==="ShapeAnimable"){
             fabric.loadSVGFromString(model.data,function(objects, options){
                 var groupObj = fabric.util.groupSVGElements(objects, options);
-                console.log(groupObj9);
-                let path=groupObj;// TODO: if more than 1 path fuse them into one
-                let shapeAnimable=new ShapeAnimable(path.path,{
-                    left:WindowManager.mouse.x-self.canvas._offset.left,
-                    top:WindowManager.mouse.y-self.canvas._offset.top,
-                })
+                //let path=groupObj;// TODO: if more than 1 path fuse them into one
+                let shapeAnimable=null;
+                if(groupObj.type==="path"){
+                    shapeAnimable=new ShapeAnimable(groupObj.path,{
+                        left:WindowManager.mouse.x-self.canvas._offset.left,
+                        top:WindowManager.mouse.y-self.canvas._offset.top,
+                    })
+                }else if(groupObj.type==="circle"){
+                    shapeAnimable=new CircleShapeAnimable({
+                        left:WindowManager.mouse.x-self.canvas._offset.left,
+                        top:WindowManager.mouse.y-self.canvas._offset.top,
+                    });
+                }else if(groupObj.type==="rect"){
+                    shapeAnimable=new RectShapeAnimable({
+                        left:WindowManager.mouse.x-self.canvas._offset.left,
+                        top:WindowManager.mouse.y-self.canvas._offset.top,
+                    })
+                }else if(groupObj.type==="polygon"){
+                    let pathStr="";
+                    let x=0;
+                    let y=0;
+                    for(let j=0;j<groupObj.points.length;j++){
+                        x=groupObj.points[j].x;
+                        y=groupObj.points[j].y;
+                        if(j===0){
+                            pathStr+="M " +x + " " + y + " ";
+                        }else{
+                            pathStr+="L " +x + " " + y + " ";
+                        }
+                    }
+                    //solucion bug con estrella, al parecer la longitud de la recta generada por comando "z" no es contada como longitud total de stroke de un shape
+                    x=groupObj.points[0].x;
+                    y=groupObj.points[0].y;
+                    pathStr+="L " +x + " " + y + " ";
+
+                    shapeAnimable=new ShapeAnimable(pathStr,{
+                        left:WindowManager.mouse.x-self.canvas._offset.left,
+                        top:WindowManager.mouse.y-self.canvas._offset.top,
+                    })
+                    shapeAnimable.pathOffset={x:groupObj.pathOffset.x,y:groupObj.pathOffset.y}
+                }
+
                 shapeAnimable.setCoords();
                 self.listAnimableObjects.push(shapeAnimable);
                 self.listClipableAnimableObjects.push(shapeAnimable);
@@ -557,6 +593,12 @@ var SectionFloatingMenu={
             let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
             this.desableOptions([1,1,1,1,1]);
             this.showMenu(positionInViewportCoords.x, positionInViewportCoords.y);
+        }else if(activeAnimableObject.type==="ShapeAnimable"){
+            this.lastAnimableObjectActive=activeAnimableObject;
+            let positionInViewportCoords=this.lastAnimableObjectActive.getGlobalPosition();
+            this.desableOptions([1,1,1,0,0]);
+            this.showMenu(positionInViewportCoords.x, positionInViewportCoords.y);
+
         }
         else if(activeAnimableObject.type==="CameraAnimable"){
             this.hiddeMenu();

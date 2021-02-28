@@ -16,7 +16,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
         this.fill="#000000";
 
         this.cbOnThumbnailStateChanged=function(){};
-        this.thumbnailImage=StaticResource.images.textThumbnail;
+        this.thumbnailImage=StaticResource.images.textThumbnail.cloneNode();
         this.thumbnailLoadingState=EnumAnimableLoadingState.ready;
         // this.largeImage=null;
 
@@ -76,6 +76,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
     },
     removeClipping:function(){
         this.clipPath=null;
+        this.dirty=true;
         for(let i=0;i<this.applicableMenuOptions.length;i++){
             if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.removeMask){
                 this.applicableMenuOptions[i]=AnimObjectOptionMenu.addMask;

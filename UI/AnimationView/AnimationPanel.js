@@ -699,6 +699,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
         },
     notificationAnimationControllerOnAnimatorTick:function(args){
         let progress=args[0];
+        console.log(progress);
         this.SectionTimeLine.notificationControllerOnAnimatorTick(progress);
         this.SectionActionEditorMenu.notificationControllerOnAnimatorTick(progress);
     },
