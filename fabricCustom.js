@@ -84,7 +84,7 @@ fabric.Object.prototype.setBatch=function(dictNewProperties){
         let optionsInWorld=fabric.util.qrDecompose(absoluteMatrix);
 
         // El siguiente bloque se debe a que EN CASO EL ANIMATOR NO ESTABLESCA LAS PROPIEDADES de left y top, no lo sobrescriba al objecto con las propiedaes del centro sino de su origen
-        this.set(optionsInWorld);//porque la sigueinte funcion accedera a cosas como escala y angulo.
+        this.set(optionsInWorld);//porque la funcions setPositionbyorigin accedera a cosas como escala y angulo.
         this.setPositionByOrigin({x:optionsInWorld.translateX,y:optionsInWorld.translateY},"center","center");
         optionsInWorld.translateX=this.left;
         optionsInWorld.translateY=this.top;
@@ -103,7 +103,9 @@ fabric.Object.prototype.setBatch=function(dictNewProperties){
         let groupInverseMatrix=fabric.util.invertTransform(this.group.calcTransformMatrix());// matrix to convert world coordinates to group coordinates
         let finalMatrix=fabric.util.multiplyTransformMatrices(groupInverseMatrix,newMat); //converting object new world coordinates to group coordinates
         let optionsFinal=fabric.util.qrDecompose(finalMatrix);
-        //setting new values
+        //Setting all properties comming from the animator, this will set wronly the transformations properties
+        this.set(optionsInWorld);
+        //Overwritting wrong transformation properterties setted by above instruction
         this.set(optionsFinal);
         //this conditional enables de use of the variable angleInWorld by the getCustom function. This way the animator can get the angle value setted
         // by the inspector, which is in world coordinates and is not "normalized" by fabricjs. And will return the true angle value as soon as the Active selection is rotated
@@ -111,7 +113,7 @@ fabric.Object.prototype.setBatch=function(dictNewProperties){
             this.angleInWorld=dictNewProperties.angle;
         }
 
-        this.opacity=dictNewProperties.opacity===undefined?this.opacity:dictNewProperties.opacity;
+        //this.opacity=dictNewProperties.opacity===undefined?this.opacity:dictNewProperties.opacity;
         //left y top se pasan directamente, sin considerar el origin, ya que los valores pasados por el animator de left y top ya estan en relacion al origin (ger getCustom)
         this.left=optionsFinal.translateX;
         this.top=optionsFinal.translateY;

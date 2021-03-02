@@ -335,6 +335,7 @@ button{
     height:100%;
 }
 .box-text input{
+    color:white;
     outline:none;
     border:none;
     background:transparent;
@@ -472,8 +473,6 @@ button{
     height:100%;
     flex-grow: 1;
     background:rgb(115, 187, 32);
-    overflow-x: hidden;
-    overflow-y:hidden;
     position:relative;
 
 }
@@ -482,15 +481,25 @@ button{
     width:200px;
     background:var(--primary-color);
 }
+/*para poder realizar scroll por js y que no se muestre la barra scroll
+debes haber un elemento padre, al cual aplicaras el scroll (parent.scrollTop=N)
+y un hijo, el cual contendra todo el contenido, este hijo no debe terner algo en particular.
+Pero el padre debe tener overflow hidden y un hegith establecido (mas pequeño que el tamaño del
+hijo por supuesto)                              */
+.action-editor__properties-area .parent-list{
+    overflow: hidden;
+    height: 100%;
+}
 .action-editor__properties-area__list{
     line-height: var(--keyframes-bar__property-lane-height);
     text-align:center;
     list-style:none;
     font-size:1.15rem;
+    padding-bottom:500px; /*solo funciona el scroll con un padding bottom, sin uno no funciona*/
 }
 .action-editor__properties-area__list__item{
     /*outline:1px #4B4B4D solid;*/
-    height:24px;
+    height:25px;
     opacity:1;
 }
 .action-editor__properties-area__list__item.desabled{
@@ -601,7 +610,39 @@ button{
 .action-editor__properties-area__toolbar .menu-functions__dropdown__tween-list .item-tween-list.active:before{
     display:block;
 }
+/*menu add-animation-lane*/
+.action-editor__properties-area__toolbar .menu-add-animation-lane.tool{
+    position:relative;
+}
+.action-editor__properties-area__toolbar .menu-add-animation-lane__trigger{
+    width:20px;
+    height:100%;
+}
+.action-editor__properties-area__toolbar .menu-add-animation-lane__trigger:before{
+    font-family: 'icomoon' !important;
+    content: "\e907";
+}
+.action-editor__properties-area__toolbar .menu-add-animation-lane__dropdown{
+    border-radius: 8px;
+    border:2px solid rgba(255,255,255,.1);
+    display:none;
+    position:absolute;
+    bottom:25px;
+    background:var(--fields-color);
+    width:200px;
+    padding:10px 20px;
+}
+.action-editor__properties-area__toolbar .menu-add-animation-lane__dropdown.active{
+    display:block;
+}
+.action-editor__properties-area__toolbar .menu-add-animation-lane__dropdown__list-lane-names{
 
+}
+.action-editor__properties-area__toolbar .menu-add-animation-lane__dropdown__list-lane-names .item-easing-list{
+    padding:5px 0;
+    text-align: left;
+    position: relative;
+}
 /*===================
 ==== inspector panel
 ====================*/

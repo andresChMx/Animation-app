@@ -68,3 +68,42 @@ var RUTES={
 let CSS_VARIABLE={
     PanelAnimationHeight:225
 }
+
+/*Animations*/
+
+/*LANENAME: se refiere los lanes pero de la parte UI
+* PROPERTY: se refiere a los lanes pero del animator(al diccionario)
+* UINAME: nombre que veran los usuarios
+* */
+let LANENAME_TO_UINAME={
+    "position":"Position",
+    "scale":"Scale",
+    "rotation":"Rotation",
+    "opacity":"Opacity",
+    "border_width":"Border Width",
+    "radius":"Radius",
+    "border_start":"Border Start",
+    "border_end":"Border End",
+}
+let PROPERTY_TO_LANENAME={
+    "left":"position",
+    "top":"position",
+    "scaleX":"scale",
+    "scaleY":"scale",
+    "angle":"rotation",
+    "opacity":"opacity",
+    "strokeWidth":"border_width",
+    "radius":"radius",
+    "startRenderingPoint":"border_start",
+    "endRenderingPoint":"border_end"
+}
+let LANENAME_TO_PROPERTYS={
+    "position":["left","top"],
+    "scale":["scaleX","scaleY"],
+    "rotation":["angle"],
+    "opacity":["opacity"],
+    "border_width":["strokeWidth"],
+    "radius":["radius"],
+    "border_start":["startRenderingPoint"],
+    "border_end":["endRenderingPoint"]
+};

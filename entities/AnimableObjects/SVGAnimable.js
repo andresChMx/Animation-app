@@ -1,5 +1,7 @@
 var SVGAnimable=fabric.util.createClass(ImageAnimable,{
     applicableEntranceModes:[EntranceName.svg_drawn,EntranceName.none],
+    applicableAnimationProperties:["position","scale","rotation","opacity"],
+
     type:'SVGAnimable',
     initialize:function(options){
         this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];

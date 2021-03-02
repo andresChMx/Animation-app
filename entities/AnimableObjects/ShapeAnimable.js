@@ -1,7 +1,10 @@
+var CommonShapeAnimableStylingProperties=["strokeWidth", "fill", "transparentFill", "stroke", "transparentStroke", "startRenderingPoint", "endRenderingPoint", "clipBorder", "inverted"]
 var ShapeAnimable=fabric.util.createClass(fabric.Path, {
     applicableEntranceModes:[EntranceName.none],
     applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
+    applicableAnimationProperties:["position","scale","rotation","opacity","border_width","border_start","border_end"],
     type:"ShapeAnimable",
+    subtype:"PathAnimable",
     initialize:function(pathList,options){
         this.callSuper('initialize', pathList,options);
         /*fabric object properties setup*/
@@ -154,6 +157,7 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
 var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
     applicableEntranceModes:[EntranceName.none],
     applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
+    applicableAnimationProperties:["position","scale","rotation","opacity","border_width","border_start","border_end"],
     type:"ShapeAnimable",
     subtype:"CircleShapeAnimable",
     initialize:function(options){
@@ -286,6 +290,7 @@ var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
 let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
     applicableEntranceModes:[EntranceName.none],
     applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
+    applicableAnimationProperties:["position","scale","rotation","opacity","border_width","border_start","border_end"],
     type:"ShapeAnimable",
     initialize:function(options){
         this.callSuper('initialize',options);

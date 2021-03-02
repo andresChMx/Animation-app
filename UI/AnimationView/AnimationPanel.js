@@ -12,18 +12,20 @@ var Lane=function(parentClass,name){
         this.btnAddKey=document.createElement("span");
         this.element.appendChild(this.label);
         this.element.appendChild(this.btnAddKey);
-        this.parentClass.HTMLElement.children[1].appendChild(this.element);
+        this.parentClass.HTMLElement.querySelector(".action-editor__properties-area__list").appendChild(this.element);
 
         this.element.classList.add("action-editor__properties-area__list__item");
         this.label.classList.add("action-editor__properties-area__list__item__label");
         this.btnAddKey.classList.add("btn-add-keyframe");
 
-        this.label.textContent=name;
+        this.label.textContent=LANENAME_TO_UINAME[name];
         this.btnAddKey.textContent="+";
 
         this.btnAddKey.addEventListener("click",this.OnBtnAddKeyClicked.bind(this))
     }
-    this.enable=function(){
+    this.enable=function(laneName){
+        this.name=laneName;
+        this.label.textContent=LANENAME_TO_UINAME[laneName];
         this.element.style.display="block";
     };
     this.disable=function(){
@@ -38,44 +40,45 @@ var SectionLanes={
     HTMLElement:null,
     listObserversOnBtnAddKey:[],
     listObserversOnFieldInput:[],
-    MODELLanesNames:["position","scale","rotation","opacity"],
     init:function(parentClass){
         this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".action-editor__properties-area");
 
         this.lanes=[];
-
-        this.initLanes();
+        this.counterActiveLanes=0;
     },
-    initLanes:function(){
-        for(let i in this.MODELLanesNames){
-            this.lanes.push(new Lane(this,this.MODELLanesNames[i]));
-        }
-    },
-    desableLanes:function(){
-        for(let i in this.lanes){
+    desableActiveLanes:function(){
+        for(let i=0;i<this.counterActiveLanes;i++){
             this.lanes[i].disable();
         }
+        this.counterActiveLanes=0;
     },
-    enableFields:function(){
-        for(let i in this.lanes){
-            this.lanes[i].enable();
+    enableLane:function(laneName){
+        if(this.counterActiveLanes>=this.lanes.length){
+            this.lanes.push(new Lane(this,laneName));
+        }else{
+            this.lanes[this.counterActiveLanes].enable(laneName);
         }
+        this.counterActiveLanes++;
     },
     OnBtnAddKeyClicked:function(propertyName){
         this.notifyOnBtnAddKey(propertyName);
     },
-    notificationOnSelectionUpdated:function(){
-        let selectedAnimObj=CanvasManager.getSelectedAnimableObj();
-        if(selectedAnimObj){
-            for(let i in this.lanes){
-                this.lanes[i].enable();
-            }
-        }else{
-            for(let i in this.lanes){
-                this.lanes[i].disable();
-            }
+    /*
+    * @Param: list of common (to all selected objects) lane names with corresponding properties {"position":["left","top"],...}
+    * */
+    notificationAnimationPropertiesFound:function(selectionAnimationsPropertiesModel){//basically OnSelectionUpdated, but this comes from SectionTimeLine, since it has to send the properties finded based on the selected objects
+        this.desableActiveLanes();
+        let laneNames=Object.keys(selectionAnimationsPropertiesModel);
+        for(let i in laneNames){
+            this.enableLane(laneNames[i]);
         }
+    },
+    notificationOnItemAddLaneClicked:function(laneName){
+        this.enableLane(laneName);
+    },
+    notificationOnKeyBarInnerScroll:function(scrollTop){//from SectionTimeLine
+        this.HTMLElement.children[1].scrollTop=scrollTop;
     },
     notifyOnBtnAddKey:function(propName){
         this.parentClass.childNotificationOnBtnKeyAddKey(propName);
@@ -233,6 +236,111 @@ var SectionActionEditorMenu={
 
                 }
             },
+
+
+            menuListAddPropertyAnimation:{
+                htmlElem:document.querySelector(".action-editor__properties-area__toolbar .menu-add-animation-lane"),
+                htmlList:null,
+                auxBtnOpenMouseDown:false,
+                auxMouseOverMenu:false,
+                val:{listObjectsAnimablesProperties:[]},
+                enable:function(){this.htmlElem.classList.remove("disabled");},
+                desable:function(){this.htmlElem.classList.add("disabled")},
+                initEvents:function(){
+                    this.htmlElem.addEventListener("mouseover",function(){this.auxMouseOverMenu=true;}.bind(this))
+                    this.htmlElem.addEventListener("mouseout",function(){this.auxMouseOverMenu=false;}.bind(this))
+
+                    this.htmlElem.children[0].addEventListener("click",this.OnTrigger.bind(this));
+                    this.htmlElem.children[0].addEventListener("mousedown",function(){this.auxBtnOpenMouseDown=true;}.bind(this));
+
+                    this.htmlList=this.htmlElem.querySelector(".menu-add-animation-lane__dropdown__list-lane-names");
+                    let allLaneNames=Object.keys(LANENAME_TO_PROPERTYS);
+                    for(let i=0;i<allLaneNames.length;i++){
+                        let li=document.createElement("li");
+                        li.textContent=LANENAME_TO_UINAME[allLaneNames[i]];
+                        li.className="item-menu-add-animation-lane";
+                        li.id=allLaneNames[i];
+                        this.htmlList.appendChild(li);
+                    }
+                    for(let i=0;i<this.htmlList.children.length;i++){
+                        this.htmlList.children[i].addEventListener("click",this.OnTrigger.bind(this));
+                    }
+                },
+                OnTrigger:function(e){
+                    if(this.auxlistAnimableObjects.length===0){return;}
+                    if(e.target.className==="menu-add-animation-lane__trigger"){
+                        this.deactivateAllItems();
+
+                        let listCommonLaneNames=this._findCommonObjectsAnimableLaneNames();
+                        for(let i=0;i<listCommonLaneNames.length;i++){
+                            this.activateItem(listCommonLaneNames[i]);
+                        }
+
+                        this.htmlElem.children[1].classList.toggle("active");
+                        this.auxBtnOpenMouseDown=false;
+                    }else if(e.target.className==="item-menu-add-animation-lane"){
+                        let itemIndex=[].slice.call(this.htmlList.children).indexOf(e.target);
+                        let propertiesToAdd=Object.values(LANENAME_TO_PROPERTYS)[itemIndex];//propertiesToAdd is of length 1 or 2
+                        let countObjsAlreadyWithProp=0;
+                        for(let i=0;i<this.auxlistAnimableObjects.length;i++){
+                            if(this.auxlistAnimableObjects[i].animator.hasPropertyLane(propertiesToAdd[0])){
+                                countObjsAlreadyWithProp++;
+                                continue;
+                            }
+                            for(let j=0;j<propertiesToAdd.length;j++){
+                                this.auxlistAnimableObjects[i].animator.addPropertyLane(propertiesToAdd[j]);
+                            }
+                        }
+                        if(countObjsAlreadyWithProp===this.auxlistAnimableObjects.length){
+                            //All objects already have the lane in their animator, so we do nothing.
+                        }else{
+                            let laneName=Object.keys(LANENAME_TO_PROPERTYS)[itemIndex];
+                            me.OnWidgetChanged("add-property-to-animator",laneName);
+                        }
+                            this.htmlElem.children[1].classList.remove("active");
+                    }
+                },
+                activateItem:function(laneName){
+                    let item=this.htmlList.querySelector("#" + laneName);
+                    item.style.display="block";
+                },
+                deactivateAllItems:function(){
+                    for(let i=0;i<this.htmlList.children.length;i++){
+                        this.htmlList.children[i].style.display="none";
+                    }
+                },
+
+                notificationOnWindowMouseDown:function(){
+                    setTimeout(function(){
+                        if(this.auxBtnOpenMouseDown || this.auxMouseOverMenu){return;}
+                        this.htmlElem.children[1].classList.remove("active");
+                    }.bind(this),10);
+                },
+                _findCommonObjectsAnimableLaneNames:function(){
+                    let dictCounter={};
+                    for(let i=0;i<this.auxlistAnimableObjects.length;i++){
+                        for(let j=0;j<this.auxlistAnimableObjects[i].applicableAnimationProperties.length;j++){
+                            let laneName=this.auxlistAnimableObjects[i].applicableAnimationProperties[j];
+                            let tmp=dictCounter[laneName];
+                            dictCounter[laneName]=tmp===undefined?1:tmp+1;
+                        }
+                    }
+
+                    let objectsCommonLaneNames=[];
+                    for(let key in dictCounter){
+                        if(dictCounter[key]===this.auxlistAnimableObjects.length){
+                            objectsCommonLaneNames.push(key);
+                        }
+                    }
+                    return objectsCommonLaneNames;
+                },
+                setVal:function(listAnimableObjects){
+                    this.auxlistAnimableObjects=listAnimableObjects;
+                }
+            },
+
+
+
             displayProgress:{
                 htmlElem:document.querySelector(".panel-animation__top-bar__area-editors-menus__action-editor-menu .display-timeline-progress"),
                 initEvents:function(){
@@ -323,6 +431,8 @@ var SectionActionEditorMenu={
             case "pause-timeline":
                 this.notifyOnBtnPauseTimeline();
                 break;
+            case "add-property-to-animator":
+                this.notifyOnItemAddPropertyLaneClicked(value);
         }
     },
     notifyOnDurationInput:function(durationBefore,newDuration){
@@ -340,14 +450,32 @@ var SectionActionEditorMenu={
     notifyOnBtnPauseTimeline:function(){
         this.parentClass.childNotificationOnBtnPauseTimeline();
     },
+    notifyOnItemAddPropertyLaneClicked:function (laneNameToAdd){
+        this.parentClass.childNotificationOnItemAddLaneClicked(laneNameToAdd);
+    },
     notificationOnKeyBarSelectionUpdated:function (listAnimations,listSelectedKeyFrames){
         this.widgetsKeyframeTools.menuFunctions.setVal(listAnimations,listSelectedKeyFrames);
     },
     notificationOnKeyframeDragEnded:function(listAnimations,listSelectedKeyFrames){
         this.widgetsKeyframeTools.menuFunctions.setVal(listAnimations,listSelectedKeyFrames);
     },
+    notificationCanvasManagerOnSelectionUpdated:function(){
+        let newSelectedObject=CanvasManager.getSelectedAnimableObj();
+        if(newSelectedObject!=null){
+            if(newSelectedObject.type==="activeSelection"){
+                this.widgetsTimelineTools.menuListAddPropertyAnimation.setVal(newSelectedObject.getObjects());
+            }
+            else{
+                this.widgetsTimelineTools.menuListAddPropertyAnimation.setVal([newSelectedObject]);
+            }
+        }else{
+            this.widgetsTimelineTools.menuListAddPropertyAnimation.setVal([]);
+        }
+    },
+
     notificationOnWindowMouseDown:function(){
         this.widgetsKeyframeTools.menuFunctions.notificationOnWindowMouseDown();
+        this.widgetsTimelineTools.menuListAddPropertyAnimation.notificationOnWindowMouseDown();
     },
     notificationControllerOnAnimatorStateChanged:function(state){
         this.widgetsTimelineTools.btnPlay.notificationControllerOnAnimatorStateChanged(state);
@@ -363,7 +491,7 @@ let SectionTimeLine={
     HTMLElement:null,
 
     timeLineComponent:null,
-    MODELLanesProperties:{"position":["left","top"],"scale":["scaleX","scaleY"],"rotation":["angle"],"opacity":["opacity"]},
+    MODELLanesProperties:{"position":["left","top"],"scale":["scaleX","scaleY"],"rotation":["angle"],"opacity":["opacity"],"startRenderingPoint":["startRenderingPoint"],"endRenderingPoint":["endRenderingPoint"]},
     currentSelectedAnimableObjects:null,
 
     parentClass:null,
@@ -423,7 +551,7 @@ let SectionTimeLine={
                 }
             }
         }
-
+        this.timeLineComponent.generateLanes(Object.keys(this.MODELLanesProperties));
         this.timeLineComponent.addKeyFramesInBatch(tmplistDictsPropertyLanes);
     },
     generateObjectPropertiesAnimationsFromKeyFrames:function(laneName){
@@ -494,6 +622,25 @@ let SectionTimeLine={
         }
         return listAnimations;
     },
+    /*helper(not strongly related to this class)*/
+    findObjectsCommonAnimationsProperties:function(listObjectAnimables){
+        let dictPropertiesCounter={};
+        for(let i=0;i<listObjectAnimables.length;i++){
+            let properties=Object.keys(listObjectAnimables[i].animator.dictAnimations);
+            for(let i=0;i<properties.length;i++){
+                let aux=dictPropertiesCounter[properties[i]];
+                dictPropertiesCounter[properties[i]]=aux===undefined?1:aux+1;
+            }
+        }
+        let dictModelLaneProperties={};
+        for(let key in dictPropertiesCounter){
+            if(dictPropertiesCounter[key]===listObjectAnimables.length){
+                let laneName=PROPERTY_TO_LANENAME[key];
+                dictModelLaneProperties[laneName]=LANENAME_TO_PROPERTYS[laneName];
+            }
+        }
+        this.MODELLanesProperties=dictModelLaneProperties;
+    },
     notificationOnBtnKeyAddKey:function(laneName){
         if(this.currentSelectedAnimableObjects){
             let listListpropertiesValues=[];
@@ -524,24 +671,39 @@ let SectionTimeLine={
         }
 
     },
+    notificationOnItemAddLaneClicked:function(laneNameToAdd){
+        this.MODELLanesProperties[laneNameToAdd]=LANENAME_TO_PROPERTYS[laneNameToAdd];
+        this.timeLineComponent.discardAllLanes();
+        this.generateKeyFramesForNewObject();
+    },
     notificationOnDurationChange:function(durationBefore,durationAfter){
         this.timeLineComponent.setDuration(durationBefore,durationAfter);
     },
     notificationOnSelectionUpdated:function(obj){
         let newSelectedObject=CanvasManager.getSelectedAnimableObj();
+        if(this.currentSelectedAnimableObjects===newSelectedObject){
+            return;
+        }
         if(newSelectedObject!=null){
             if(newSelectedObject.type==="activeSelection"){
                 this.currentSelectedAnimableObjects=newSelectedObject.getObjects();
             }
-            else if(this.currentSelectedAnimableObjects===newSelectedObject){
-                return;
-            }else{
+            else{
                 this.currentSelectedAnimableObjects=[newSelectedObject];
             }
-            this.timeLineComponent.discartAllKeyFrames();
+            this.findObjectsCommonAnimationsProperties(this.currentSelectedAnimableObjects);
+            this.parentClass.childNotificationAnimationPropertiesFound(this.MODELLanesProperties);
+
+
+            this.timeLineComponent.discardAllLanes();
             this.generateKeyFramesForNewObject();
         }else{
-            this.timeLineComponent.discartAllKeyFrames();
+            /*finding and sending Model Lanes Properties Names*/
+            this.findObjectsCommonAnimationsProperties([]);
+            this.parentClass.childNotificationAnimationPropertiesFound(this.MODELLanesProperties);
+
+
+            this.timeLineComponent.discardAllLanes();
             this.currentSelectedAnimableObjects=null;
         }
     },
@@ -560,11 +722,17 @@ let SectionTimeLine={
     notificationOnBtnResetTimeline:function(){
         this.timeLineComponent.setMarkerTime(0);
     },
+    notificationPanelAnimationOnPanelToggle:function(opened){
+        this.timeLineComponent.notificationPanelAnimationOnPanelToggle(opened);
+    },
     notificationOnWindowResize:function(propertiesAreaWidth){
         let newTimelineWidth=window.innerWidth-propertiesAreaWidth;
         this.timeLineComponent.onWindowResize(newTimelineWidth);
     },
     /*notificaciones de componentes HIJOS*/
+    notificationOnKeyBarInnerScroll:function(scrollTop){
+        this.parentClass.childNotificationOnKeyBarInnerScroll(scrollTop);
+    },
     notificationOnKeyFrameDragging:function(laneName){
 
     },
@@ -682,6 +850,10 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
     childNotificationOnBtnKeyAddKey:function(btnNameAttr){
         this.SectionTimeLine.notificationOnBtnKeyAddKey(btnNameAttr)
     },
+    childNotificationOnItemAddLaneClicked:function(laneNameToAdd){
+        this.SectionLanes.notificationOnItemAddLaneClicked(laneNameToAdd);
+        this.SectionTimeLine.notificationOnItemAddLaneClicked(laneNameToAdd);
+    },
     childNotificationOnDurationInput:function(durationBefore,newDuration){
         this.SectionTimeLine.notificationOnDurationChange(durationBefore,newDuration);
         this.timelineController.animator.setTotalDuration(newDuration); // se notifica directamente a este elemento porque es su controller, los componentes se pueden comunicar con libertar directamente con sus controllers
@@ -695,8 +867,13 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
     },
     childNotificationOnKeyframeDragEnded:function(listAnimations,listSelectedKeyFrames){
         this.SectionActionEditorMenu.notificationOnKeyframeDragEnded(listAnimations,listSelectedKeyFrames);
-
-        },
+    },
+    childNotificationOnKeyBarInnerScroll:function(scrollTop){
+        this.SectionLanes.notificationOnKeyBarInnerScroll(scrollTop);
+    },
+    childNotificationAnimationPropertiesFound:function(selectionAnimationProperties){//basically fired when selection updated
+        this.SectionLanes.notificationAnimationPropertiesFound(selectionAnimationProperties);
+    },
     notificationAnimationControllerOnAnimatorTick:function(args){
         let progress=args[0];
         console.log(progress);
@@ -712,14 +889,19 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
         this.SectionActionEditorMenu.notificationControllerOnAnimatorStateChanged(state);
     },
     notificationCanvasManagerOnSelectionUpdated:function(){
-        this.SectionLanes.notificationOnSelectionUpdated();
+        // this.SectionLanes.notificationOnSelectionUpdated();//SectionTimeLine will notify SectionLanes, since it has to send the list of properties
         this.SectionTimeLine.notificationOnSelectionUpdated();
+        this.SectionActionEditorMenu.notificationCanvasManagerOnSelectionUpdated();
     },
+
     notificationCanvasManagerOnObjModified:function(){
 
     },
     notificationOnMouseDown:function(){
         this.SectionActionEditorMenu.notificationOnWindowMouseDown();
+    },
+    notificationPanelAnimationOnPanelToggle:function(opened){
+        this.SectionTimeLine.notificationPanelAnimationOnPanelToggle(opened);
     }
 
 }
@@ -757,11 +939,15 @@ var PanelAnimation={//LA VENTANA COMPLETA
             this.HTMLElement.style.bottom=-this.HTMLElement.offsetHeight + "px";
             opened=false;
         }
-        MainMediator.notify(this.name,this.events.OnPanelToggle,[opened])
+        this.nofityOnPanelToggle(opened);
     },
     setController:function(obj){
         this.timelineController=obj;
         this.PanelActionEditor.setController(obj);
+    },
+    nofityOnPanelToggle:function(opened){
+        MainMediator.notify(this.name,this.events.OnPanelToggle,[opened])
+        this.PanelActionEditor.notificationPanelAnimationOnPanelToggle(opened);
     },
     notificationPanelDesignerOptionsOnActionClicked:function(){
         let self=PanelAnimation;

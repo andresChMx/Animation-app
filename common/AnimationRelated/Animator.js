@@ -2,12 +2,6 @@
 var Animator=fabric.util.createClass({
     initialize:function(animableObject){
         this.dictAnimations={
-            "left":[],
-            "top":[],
-            "scaleX":[],
-            "scaleY":[],
-            "angle":[],
-            "opacity":[],
         };
         this.dictHiddenAnimations={};
 
@@ -52,6 +46,7 @@ var Animator=fabric.util.createClass({
                 }
             }
         }
+        /*For now only been used by fadein effect of svg imges in fillRevelaMode="fadein"*/
         for(const prop in this.dictHiddenAnimations){
             let anims=this.dictHiddenAnimations[prop]
             for(let i=0;i<anims.length;i++){
@@ -130,6 +125,13 @@ var Animator=fabric.util.createClass({
     },
     removeHiddenAnimation:function(property,index){
         this.dictHiddenAnimations[property].splice(index,1);
+    },
+
+    addPropertyLane:function(propertyName){
+        this.dictAnimations[propertyName]=[];
+    },
+    hasPropertyLane:function(propertyName){
+        return this.dictAnimations[propertyName]!==undefined;
     },
 
     hasPropertyAnimations:function(prop){

@@ -1,6 +1,7 @@
 var CameraAnimable=fabric.util.createClass(fabric.Image,{
     applicableEntranceModes:[EntranceName.none],//FOR UI
     applicableMenuOptions:[],
+    applicableAnimationProperties:["position","scale","rotation","opacity"],
     type:"CameraAnimable",
     initialize:function(element,options){
         this.name="Camera";

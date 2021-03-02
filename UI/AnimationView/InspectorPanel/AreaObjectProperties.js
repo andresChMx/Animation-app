@@ -218,7 +218,7 @@ var SectionStylingObject={
 
         this.HTMLCollectionFloatingPanels=document.querySelectorAll(".area-objects-properties__zone-styles__box-floating-panels .floating-panel");
 
-        this.currentSelectedAnimableObject=null;
+        this.currentSelectedAnimableObjects=null; // list containing objects of the same type
         let me=this;
         this.widgetsShapeAnimable={
             strokeWidth:{
@@ -534,12 +534,15 @@ var SectionStylingObject={
         }
     },
     OnWidgetChanged:function(value,property){
-        AdapterSetValue.set(this.currentSelectedAnimableObject,property,value);
+        for(let i=0;i<this.currentSelectedAnimableObjects.length;i++){
+            AdapterSetValue.set(this.currentSelectedAnimableObjects[i],property,value);
+        }
     },
-    activateFloatingPanelForObject:function(animableObj){
-        if(animableObj){
+    activateFloatingPanelForObjects:function(){
+        if(this.currentSelectedAnimableObjects){
+            console.log(this.currentSelectedAnimableObjects[0]);
             for(let i=0;i<this.HTMLCollectionFloatingPanels.length;i++){
-                let idName=animableObj.type + "-styling-panel";
+                let idName=this.currentSelectedAnimableObjects[0].type + "-styling-panel";
                 if(this.HTMLCollectionFloatingPanels[i].id===idName) {
                     this.HTMLCollectionFloatingPanels[i].style.display="block";
                 }
@@ -568,12 +571,12 @@ var SectionStylingObject={
         }
     },
     /*activated widgets population*/
-    populateTextAnimableFloatingPanelData:function (animableObj){
+    populateTextAnimableFloatingPanelData:function (){
         for(let key in this.widgetsTextAnimable){
-            this.widgetsTextAnimable[key].setVal(animableObj[key]);
+            this.widgetsTextAnimable[key].setVal(this.currentSelectedAnimableObjects[0][key]);
         }
     },
-    populateImageAnimableFloatingPanelData:function(animableObj){
+    populateImageAnimableFloatingPanelData:function(){
 
     },
     populateShapeAnimableFloatingPanelData:function(animableObj){
@@ -583,45 +586,78 @@ var SectionStylingObject={
         }
     },
     notificationCanvasManagerOnSelectionUpdated:function(){
-        if(this.currentSelectedAnimableObject){
+        if(this.currentSelectedAnimableObjects){
             this.performWidgetChangeOnSelectionUpdate();
         }
-        let currentAnimableObject=CanvasManager.getSelectedAnimableObj();
-        if(currentAnimableObject!==undefined){
-            if(currentAnimableObject.type==="activeSelection"){
-                currentAnimableObject=currentAnimableObject.getObjects()[0];
+        let currentSelectedObject=CanvasManager.getSelectedAnimableObj();
+        if(currentSelectedObject){
+            if(currentSelectedObject.type==="activeSelection"){
+                currentSelectedObject=currentSelectedObject.getObjects();
+            }else{
+                currentSelectedObject=[currentSelectedObject];
             }
-            this.activateFloatingPanelForObject(currentAnimableObject);
+            if(this.isMoreThanOneObjectTypeInList(currentSelectedObject)){
+                this.currentSelectedAnimableObjects=[currentSelectedObject[0]];
+            }else{
+                this.currentSelectedAnimableObjects=currentSelectedObject;
+            }
+            this.activateFloatingPanelForObjects();
 
-            if(currentAnimableObject.type==="TextAnimable"){
-                this.populateTextAnimableFloatingPanelData(currentAnimableObject);
-            }else if(currentAnimableObject.type==="ImageAnimable"){
-                this.populateImageAnimableFloatingPanelData(currentAnimableObject);
-            }else if(currentAnimableObject.type==="ShapeAnimable"){
-                this.deactivateAllObjectWidgets(currentAnimableObject);
-                this.activateObjectWidgets(currentAnimableObject);
-                this.populateShapeAnimableFloatingPanelData(currentAnimableObject);
+            if(this.currentSelectedAnimableObjects[0].type==="TextAnimable"){
+                this.populateTextAnimableFloatingPanelData();
+            }else if(this.currentSelectedAnimableObjects[0].type==="ImageAnimable"){
+                this.populateImageAnimableFloatingPanelData();
+            }else if(this.currentSelectedAnimableObjects[0].type==="ShapeAnimable"){
+                this.deactivateAllObjectWidgets(this.currentSelectedAnimableObjects[0]);
+                if(this.isMoreThanOneObjectSubTypeInList(this.currentSelectedAnimableObjects)){
+                    this.activateObjectWidgets({type:"ShapeAnimable",listEditableStylingProperties:CommonShapeAnimableStylingProperties});
+                }else{
+                    this.activateObjectWidgets(this.currentSelectedAnimableObjects[0]);//Podrian popularese widgets que no fueron activados, pero eso no causa error
+                }
+                this.populateShapeAnimableFloatingPanelData(this.currentSelectedAnimableObjects[0]);
             }
         }else{
 
             this.deactivateFloatingPanel();
         }
-        this.currentSelectedAnimableObject=currentAnimableObject;
+        this.currentSelectedAnimableObjects=currentSelectedObject;
 
+    },
+    isMoreThanOneObjectTypeInList:function(listAnimableObjects){
+        let firstObjectType=listAnimableObjects[0].type;
+        let moreThanOneObjectType=false;
+        for(let i=0;i<listAnimableObjects.length;i++){
+            if(firstObjectType!==listAnimableObjects[i].type){
+                moreThanOneObjectType=true;
+                break
+            }
+        }
+        return moreThanOneObjectType;
+    },
+    isMoreThanOneObjectSubTypeInList:function(listAnimableObjects){
+        let firstObjectSubtype=listAnimableObjects[0].subtype;
+        let moreThanOneObjectSubtype=false;
+        for(let i=0;i<listAnimableObjects.length;i++){
+            if(firstObjectSubtype!==listAnimableObjects[i].subtype){
+                moreThanOneObjectSubtype=true;
+                break
+            }
+        }
+        return moreThanOneObjectSubtype;
     },
     performWidgetChangeOnSelectionUpdate:function(){
         let documentActiveElement=document.activeElement;
         if(documentActiveElement){if(documentActiveElement.getAttribute("tag")!=="NumericField"){return;}}
-        if(this.currentSelectedAnimableObject.type==="ImageAnimable"){
+        if(this.currentSelectedAnimableObjects[0].type==="ImageAnimable"){
 
-        }else if(this.currentSelectedAnimableObject.type==="TextAnimable"){
+        }else if(this.currentSelectedAnimableObjects[0].type==="TextAnimable"){
             for(let i in this.widgetsTextAnimable){
                 if(documentActiveElement===this.widgetsTextAnimable[i].getInputFieldElem()){
                     documentActiveElement.blur();
                     this.widgetsTextAnimable[i].setVal(documentActiveElement.value,true);
                 }
             }
-        }else if(this.currentSelectedAnimableObject.type==="ShapeAnimable"){
+        }else if(this.currentSelectedAnimableObjects[0].type==="ShapeAnimable"){
             for(let i in this.widgetsShapeAnimable){
                 if(documentActiveElement===this.widgetsShapeAnimable[i].getInputFieldElem()){
                     documentActiveElement.blur();

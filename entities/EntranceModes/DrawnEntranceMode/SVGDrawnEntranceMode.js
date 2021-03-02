@@ -8,13 +8,34 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         //auxiliary variables (not storing)
         this.auxEntranceDuration=0; // stores entrance effect duration value temporarily
         this.lastIndexTruePath=0;   //  used for fill reveal mode "fill_drawn"
-        //
+        this.finalImageBitmap=null; // TEMPORAL SOLUTION TO ABRUPT CHANGE FROM BITMAP TO VECTOS AT THE END OF SVG AUTOMATIC DRAWING. stores the bitmap version of the base vector image. Used when drawing and no paths were crated
         // /*configuration parameters*/
         this.config={
             showHand:true,
             forceStrokeDrawing:true,
             fillRevealMode:'fadein',  // // fadein || drawn_fill || no-fill
         }
+    },
+    /*overwritten methods*/
+    notificationOnImageStateChanged:function(){
+        this.baseImage=this.parentObject.largeImage;
+        if(this.parentObject.imageLoadingState===EnumAnimableLoadingState.ready){
+            //the finalMasked iamge will be generated if paths are created. But now the need
+            //to have a pixels version of the image to avoid grows behavious al the end of drawing
+            //in no-paths version of the drawing(pasaba de pixeles a vectores)
+            this.generateBitmapSVGFinalImage();
+        }
+    },
+    generateBitmapSVGFinalImage:function(){ //
+        let canvas=document.createElement("canvas");
+        let ctx=canvas.getContext("2d");
+
+        canvas.width=this.baseImage.naturalWidth;
+        canvas.height=this.baseImage.naturalHeight;
+        ctx.drawImage(this.baseImage,0,0);
+        this.finalImageBitmap=new Image();
+        this.finalImageBitmap.src=canvas.toDataURL();
+        canvas.remove();
     },
     /*Implementing inherited abstract methods*/
     generateEntranceData:function(callback){
@@ -127,6 +148,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
             return this.maskedImage;
         }else if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
             return this.baseImage;
+            // return this.finalImageBitmap;
         }
     },
     illustrationFunctionOnCache:function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){

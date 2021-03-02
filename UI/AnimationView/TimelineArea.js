@@ -496,12 +496,19 @@ let TimeLineProxy=fabric.util.createClass({
         this.timeLineComponent.markerComponent.registerOnDragging(classParent);
         this.timeLineComponent.markerComponent.registerOnDragEnded(classParent);
         this.timeLineComponent.keysBarComponent.registerOnSelectionUpdated(classParent);
+        this.timeLineComponent.keysBarComponent.registerOnInnerScroll(classParent);
     },
     setDuration:function(durationBefore,durationAfter){
         this.timeLineComponent.notificationOnDurationChange(durationBefore,durationAfter);
     },
     addKeyFrameOnMarker:function(laneName,listListValues){
         this.timeLineComponent.keysBarComponent.addKeyFrame(laneName,this.timeLineComponent.markerComponent.timeLineTime,listListValues);
+    },
+    generateLanes:function(listLanesNames){
+        this.timeLineComponent.keysBarComponent.generateLanes(listLanesNames);
+    },
+    discardAllLanes:function(){
+        this.timeLineComponent.keysBarComponent.discardAllLanes();
     },
     addKeyFramesInBatch:function(listDictsKeyFramesByProperties){
         this.timeLineComponent.keysBarComponent.addKeyFramesInBatch(listDictsKeyFramesByProperties);
@@ -538,6 +545,9 @@ let TimeLineProxy=fabric.util.createClass({
     onWindowResize:function(newWidth){
         this.timeLineComponent.notificationOnWindowResize(newWidth);
 
+    },
+    notificationPanelAnimationOnPanelToggle:function(opened){
+        this.timeLineComponent.notificationPanelAnimationOnPanelToggle(opened);
     }
 
 })
@@ -661,11 +671,11 @@ let TimeLineActions = fabric.util.createClass({
         this.localState.scrollParams.scrollWidth=newUsableScrollWidth + PADDING_WITH*2;
         },
     initComponents: function (MODELPropertyLanes) {
+        this.keysBarComponent = new TimeLineKeysBar(this,this.localMouseState, this.localState.labelingParams,this.localState.coords,this.localState.scrollParams, MODELPropertyLanes,this.globalState);
         this.timeBarComponent = new TimeLineTimeBar(this,this.localMouseState, this.localState.labelingParams,this.localState.scrollParams);
-        this.keysBarComponent = new TimeLineKeysBar(this,this.localMouseState, this.localState.labelingParams,this.localState.scrollParams, MODELPropertyLanes,this.globalState);
         this.markerComponent = new Marker(this, this.localMouseState,this.localState.labelingParams,this.localState.scrollParams,this.globalState);
         this.paddingLeft = new Padding(this, this.localMouseState, this.localState.scrollParams, "paddingLeft");
-        this.paddingRight = new Padding(this, this.localMouseState,this.localState.scrollParams, "paddingRight");
+        //this.paddingRight = new Padding(this, this.localMouseState,this.localState.scrollParams, "paddingRight");
         this.scrollBarComponent = new ScrollBarComponent(this,this.localMouseState, this.localState.coords,this.localState.scrollParams);
     },
     setupComponentsCoords: function () {
@@ -677,7 +687,7 @@ let TimeLineActions = fabric.util.createClass({
         this.scrollBarComponent.setLocalCoords(0, this.localState.coords.height - scrollBarHeight, 100, scrollBarHeight);//estas coords seran sobreescritas al inicnio
 
         this.paddingLeft.setLocalCoords(0, timeBarHeight, PADDING_WITH, this.localState.coords.height-timeBarHeight);
-        this.paddingRight.setLocalCoords(this.localState.scrollParams.scrollWidth - PADDING_WITH, timeBarHeight, PADDING_WITH, this.localState.coords.height-timeBarHeight);
+        // this.paddingRight.setLocalCoords(this.localState.scrollParams.scrollWidth - PADDING_WITH, timeBarHeight, PADDING_WITH, this.localState.coords.height-timeBarHeight);
     },
     initEvents:function(){
         this.scrollBarComponent.registerOnScroll(this);
@@ -686,7 +696,9 @@ let TimeLineActions = fabric.util.createClass({
         this.scrollBarComponent.registerOnScrollBarResize(this.markerComponent);
         this.scrollBarComponent.registerOnScrollBarResize(this.timeBarComponent);
         this.scrollBarComponent.registerOnScrollBarResize(this.keysBarComponent);
-        this.scrollBarComponent.registerOnScrollBarResize(this.paddingRight);
+        this.scrollBarComponent.registerOnScroll(this.keysBarComponent);
+
+        //this.scrollBarComponent.registerOnScrollBarResize(this.paddingRight);
 
         this.windowEventsManager.registerOnMouseDown(this);
         this.windowEventsManager.registerOnMouseUp(this);
@@ -772,12 +784,20 @@ let TimeLineActions = fabric.util.createClass({
         this.localState.coords.width=newWidth;
         // El "width" normal, nunca puede ser mas grande que el scrollwidth, que es el ancho real(partes ocultas), Por ello, si se da el caso, automaticamente debemos establecer el scrollwidth a la misma dimencion que el width y dejar que el componente scroll haga sus calculos
         if(newWidth>this.localState.scrollParams.scrollWidth){
+            //Aqui solo modificamos esto ya que lo que necesita el scrollbar, quien ya mediante sus notifcaiones cambia los demas valroes necesarios
             this.localState.scrollParams.usableScrollWidth=newWidth-PADDING_WITH*2;
         }
-
         //Updating the scroll bar
         this.scrollBarComponent.onWindowResize();
+        this.keysBarComponent.notificationOnWindowResize();//para el inner scroll
         this.requestRenderAll();
+    },
+    notificationPanelAnimationOnPanelToggle:function(opened){
+        setTimeout(function(){
+            let boundingRect = this.HTMLElement.getBoundingClientRect();
+            this.localState.coords.left = boundingRect.left;
+            this.localState.coords.top = boundingRect.top;
+        }.bind(this),700); //this time has to be geater than the toggle tansition duration
     }
 
 });
@@ -857,6 +877,7 @@ let TimeLineTimeBar = fabric.util.createClass(Component, {
     updateLogic: function () {
     },
     render: function (ctx) {
+        ctx.beginPath();
         ctx.lineWidth=1;
         ctx.strokeStyle=this.localState.colors.text;
         this._drawContainer(ctx);
@@ -882,7 +903,108 @@ let TimeLineTimeBar = fabric.util.createClass(Component, {
         this.localState.coords.width = this.parentState.scrollParams.scrollWidth;
     }
 });
+var YScrollBarComponent=fabric.util.createClass(Component,{
+    initialize:function(canvas,mouseState,coords,scrollParams){
+        this.callSuper('initialize', mouseState);
+        this.parentState={
+            coords:coords,
+            scrollParams:scrollParams
+        };
 
+        this.canvas = canvas;//in a subcomponent we only need this to invoke renderAll() to refresh in case something happend here
+
+        this.localState = {colors: {idle: "#3B3A39"}};
+
+        this.offsetMouseX = 0;
+        this.offsetMouseY = 0;
+
+        this.fixedLeftCoord=0;
+        this.maxHeightCoord=0;
+
+        this.listObserversOnScroll = [];
+    },
+    _topCoordToScrollTop:function(){
+        return (this.localState.coords.top / this.maxHeightCoord) * (this.parentState.scrollParams.scrollHeight)
+    },
+    constraintMovement:function(){
+        if (this.localState.coords.top < 0) {
+            this.localState.coords.top = 0
+        }
+        if (this.localState.coords.top > this.maxHeightCoord - this.localState.coords.height) {
+            this.localState.coords.top = this.maxHeightCoord - this.localState.coords.height;
+        }
+    },
+    _mouseInBoundingBox: function () {
+        return this.mouseState.x > this.localState.coords.left &&
+            this.mouseState.x < this.localState.coords.left + this.localState.coords.width &&
+            this.mouseState.y > this.localState.coords.top &&
+            this.mouseState.y < this.localState.coords.top + this.localState.coords.height;
+    },
+    onLocalCoordsSettled:function(){
+        this.fixedLeftCoord=this.localState.coords.left;
+        this.maxHeightCoord=this.localState.coords.height;
+        this.calcHeight();
+    },
+    calcHeight: function () {
+        let percentInViewport = (this.parentState.coords.height) /
+            (this.parentState.scrollParams.scrollHeight);
+        this.localState.coords.height = this.maxHeightCoord * percentInViewport;
+    },
+    render: function (ctx) {
+        if(this.localState.coords.height===this.maxHeightCoord){return};
+        ctx.save();
+        ctx.beginPath();
+        //Impliando el translate de los scrolls del padre, mas no de las posiciones del componente padre
+        ctx.transform(1,0,0,1,this.parentState.scrollParams.scrollLeft,this.parentState.scrollParams.scrollTop);
+        ctx.fillStyle = this.localState.colors.idle;
+        ctx.fillRect(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height);
+        ctx.restore();
+    },
+    onMouseDragStarted: function () {
+        this.offsetMouseX = this.mouseState.x - this.localState.coords.left;
+        this.offsetMouseY = this.mouseState.y - this.localState.coords.top;
+    },
+    onMouseDragging: function () {
+        this.localState.coords.top = this.mouseState.y - this.offsetMouseY;
+        this.constraintMovement();
+
+        this.notifyOnScroll(this._topCoordToScrollTop());
+        this.canvas.requestRenderAll();
+    },
+    onMouseClick: function () {
+    },
+    onMouseDragEnded: function () {
+
+    },
+    notifyOnScroll: function (scrollTop) {
+        for (let i = 0; i < this.listObserversOnScroll.length; i++) {
+            this.listObserversOnScroll[i].notificationOnInnerScroll(scrollTop);
+        }
+    },
+    registerOnScroll: function (obj) {
+        this.listObserversOnScroll.push(obj);
+    },
+    onWindowResize:function(){/*Called by ancestor*/
+        //calculating width with then given new with and scrollWidth
+        this.calcWidth();
+        //constraining movement after altering width
+        this.constraintMovement();
+
+
+        //notifing about the scroll values change
+        this.notifyOnScrollBarResize(this.localState.coords.width);
+        this.notifyOnScroll(this._leftCoordToScrollLeft());
+
+    },
+    notificationOnScroll:function(scrollLeft){
+        this.localState.coords.left=this.fixedLeftCoord+scrollLeft;
+    },
+    notificationOnWindowResize:function(newFixedLeft){
+        console.log("asdf");
+        this.fixedLeftCoord=newFixedLeft;
+        this.localState.coords.left=this.fixedLeftCoord;
+    }
+})
 var TimeLineKeysBar = fabric.util.createClass(Component, {
     type: "keys-bar_component",
     localState: {
@@ -890,11 +1012,12 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         colors: {idle: "#1A161D", selection: "yellow", onMouseClick: "green", text: "white",guidelines:"rgba(255,255,255,0.1)"},
         scrollParams:{}
         },
-    initialize: function (canvas, mouseState,labelingParams, scrollParams, listLanesName,globalState) {
+    initialize: function (canvas, mouseState,labelingParams,coords, scrollParams, listLanesName,globalState) {
         this.callSuper('initialize', mouseState);
         this.globalState=globalState;
         this.parentState={
-            scrollParams:scrollParams
+            coords:coords,
+            scrollParams:scrollParams,
         }
         this.localMouseState={
             x:0,y:0,inWorldX:0,inWorldY:0
@@ -908,39 +1031,71 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         this.selectionHeight = 0;
         this.selecting = false;
 
+        this.scrollBarComponent;
+
         this.dictKeyFramesBySeconds={};
         this.dictPropertiesLanes = {};
         this.listLanesName = listLanesName;
+        this.listPoolLanes=[];
+        this.counterActiveLanes=0;
 
         this.selectedKeyframes = [];
 
         this.listObserversOnKeyFrameDragging=[];
         this.listObserversOnKeyFrameDragEnded=[];
         this.observerOnSelectionUpdated=[];
+        this.observerOnInnerScroll=null;
         this.canvas.addComponent(this);
 
-        this.initComponents();
     },
-    initComponents: function () {/*{"position":[],"scale":[],"rotation":[]}*/
-        for (let i=0;i<this.listLanesName.length;i++) {
-            let lane = new KeyBarPropertyLane(this.canvas,this.localMouseState,this.localState.scrollParams, this.labelingParams, this.listLanesName[i],this.globalState);
-            lane.registerOnKeyframeFixedClick(this);
-            lane.registerOnKeyframeMouseDown(this);
-            lane.registerOnKeyframeDragStarted(this);
-            lane.registerOnKeyframeDragging(this);
-            lane.registerOnKeyframeDragEnded(this);
-            this.dictPropertiesLanes[this.listLanesName[i]] = lane;
+    initScrollBarComponent:function(){
+        this.scrollBarComponent = new YScrollBarComponent(this.canvas,this.localMouseState, this.localState.coords,this.localState.scrollParams);
+        this.scrollBarComponent.registerOnScroll(this);
+    },
+    setupComponentsCoords:function(){
+        this.scrollBarComponent.setLocalCoords(this.localState.coords.width-12-3,0,12,this.localState.coords.height*0.85);
+    },
+    generateLanes:function(listLanesNames){
+        this.listLanesName=listLanesNames;
+        let i=0;
+        for (i=0;i<this.listLanesName.length;i++) {
+            this._retrieveLane(listLanesNames[i],i);
+        }
+        let newScrollHeight=i*25;
+        this.updateScrollParamsScrollHeight(newScrollHeight);
+    },
+        _retrieveLane:function(laneName,topPositionFactor){
+            if(this.counterActiveLanes>=Object.keys(this.dictPropertiesLanes).length){
+                let lane = new KeyBarPropertyLane(this.canvas,this.localMouseState,this.localState.scrollParams, this.labelingParams,this.globalState);
+                lane.registerOnKeyframeFixedClick(this);
+                lane.registerOnKeyframeMouseDown(this);
+                lane.registerOnKeyframeDragStarted(this);
+                lane.registerOnKeyframeDragging(this);
+                lane.registerOnKeyframeDragEnded(this);
 
+                lane.setLocalCoords(0,topPositionFactor*25,this.localState.coords.width,25);//lane height=24;
+                lane.name=laneName;
+                this.dictPropertiesLanes[laneName] = lane;
+                this.listPoolLanes.push(lane);
+            }else{
+                let lane=this.listPoolLanes[this.counterActiveLanes];
+                lane.setLocalCoords(0,topPositionFactor*25,this.localState.coords.width,25);
+                this.dictPropertiesLanes[laneName]=lane;
+            }
+            this.counterActiveLanes++;
+        },
+    updateScrollParamsScrollHeight:function(scrollHeight){
+        if(scrollHeight<this.localState.coords.height){
+            scrollHeight=this.localState.coords.height;
+        }else{
+            scrollHeight+=25; // padding bottom of 30px
         }
-    },
-    setupComponentsCoords: function () {
-        let laneHeight = 24;
-        let i = 0;
-        for (let key in this.dictPropertiesLanes) {
-            let top = laneHeight * i ;
-            this.dictPropertiesLanes[key].setLocalCoords(0, top, this.localState.coords.width, laneHeight);
-            i++;
-        }
+        this.localState.scrollParams.scrollHeight=scrollHeight;
+        this.scrollBarComponent.calcHeight();
+
+        this.localState.scrollParams.scrollTop=0;
+        this.scrollBarComponent.localState.coords.top=0;
+        this.canvas.requestRenderAll();
     },
     deselectCurrentSelection: function () {
         if (this.selectedKeyframes.length > 0) {
@@ -1001,6 +1156,14 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         this.canvas.requestRenderAll();
         this.notifyOnKeyframeSelectionUpdated();
     },
+    discardAllLanes:function(){
+        this.discartAllKeyFrames();
+        for(let key in this.dictPropertiesLanes){
+            delete this.dictPropertiesLanes[key]
+        }
+        this.counterActiveLanes=0;
+        this.updateScrollParamsScrollHeight(0);
+    },
     /*
     Updates keyframes by lane, and by object, given that in uno lane there could be keyframes for more than one object
      */
@@ -1059,7 +1222,8 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         this.localState.scrollParams.scrollLeft=0;
         this.localState.scrollParams.scrollTop=0;
 
-        this.setupComponentsCoords();
+        this.initScrollBarComponent();
+        this.setupComponentsCoords(); //el scrollbar, ya que los lanes se establecen al vuelo, cuando cambia la seleccion de objetos
     },
     onMouseDragStarted: function (e) {
         this.selecting = true;
@@ -1089,11 +1253,11 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         ctx.beginPath();
         ctx.strokeStyle=this.localState.colors.guidelines;
         ctx.fillStyle = this.localState.colors.idle;
-        ctx.fillRect(0, 0, this.localState.coords.width, this.localState.coords.height);
+        ctx.fillRect(0, 0, this.localState.coords.width, this.localState.scrollParams.scrollHeight);
         for(let i=0;i<this.labelingParams.cantSegments;i++){
             let leftPos=i*this.labelingParams.segmentWidth + PADDING_WITH;
             ctx.moveTo(leftPos,0);
-            ctx.lineTo(leftPos,this.localState.coords.height);
+            ctx.lineTo(leftPos,this.localState.scrollParams.scrollHeight);
         }
         ctx.stroke();
     },
@@ -1116,6 +1280,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             this.dictPropertiesLanes[key].render(ctx);
         }
         this._drawSelection(ctx);
+        this.scrollBarComponent.render(ctx);
         //this.snapshotLastState = ctx.getImageData(this.localState.coords.left, this.localState.coords.top, this.localState.coords.width, this.localState.coords.height)
         ctx.restore();
     },
@@ -1137,6 +1302,9 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         for(let i=0;i<this.listObserversOnKeyFrameDragEnded.length;i++){
             this.listObserversOnKeyFrameDragEnded[i].notificationOnKeyFrameDragEnded(laneName);
         }
+    },
+    notifyOnInnerScroll:function(){
+        this.observerOnInnerScroll.notificationOnKeyBarInnerScroll(this.localState.scrollParams.scrollTop);
     },
     notificationOnDurationChange:function(durationBefore,durationAfter){
         if(durationBefore>durationAfter){
@@ -1167,6 +1335,10 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     notificationOnGlobalStateChange: function (args) {
         //this.render();
     },
+    notificationOnWindowResize:function(){
+        let newFixedLeft=this.parentState.coords.width-12-3;
+        this.scrollBarComponent.notificationOnWindowResize(newFixedLeft);
+    },
     notificationOnScrollBarResize: function (scrollWidth) {
         this.localState.coords.width = this.parentState.scrollParams.scrollWidth;
         this.localState.scrollParams.scrollWidth=this.parentState.scrollParams.scrollWidth;
@@ -1175,6 +1347,9 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         for (let key in this.dictPropertiesLanes) {
             this.dictPropertiesLanes[key].notificationOnScrollBarResize(scrollWidth);
         }
+    },
+    notificationOnScroll:function(scrollLeft){
+        this.scrollBarComponent.notificationOnScroll(scrollLeft);
     },
     notificationOnKeyframeMouseDown: function (keyframe) {
         // si el target es parte de la seleccion, no se hace nada en este metodo, solo se renderiza todo.
@@ -1250,17 +1425,26 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
             this.canvas.requestRenderAll();
         }
     },
+    notificationOnInnerScroll:function(scrollTop){
+        this.localState.scrollParams.scrollTop=scrollTop;
+        this.notifyOnInnerScroll();
+    },
     notificationOnMouseMove: function (e) {
         this.localMouseState.x=this.mouseState.inWorldX-this.localState.coords.left;
         this.localMouseState.y=this.mouseState.inWorldY-this.localState.coords.top;
         this.localMouseState.inWorldX=this.localMouseState.x+this.localState.scrollParams.scrollLeft;
         this.localMouseState.inWorldY=this.localMouseState.y+this.localState.scrollParams.scrollTop;
+
+        this.scrollBarComponent.notificationOnMouseMove(e);
         for (let key in this.dictPropertiesLanes) {
             this.dictPropertiesLanes[key].notificationOnMouseMove(e);
         }
         this.callSuper("notificationOnMouseMove", e);
     },
     notificationOnMouseDown: function (e) {
+        let pressed=this.scrollBarComponent.notificationOnMouseDown(e);
+        if(pressed){return true}
+
         for (let key in this.dictPropertiesLanes) {
             let pressed = this.dictPropertiesLanes[key].notificationOnMouseDown(e);
             if (pressed) {
@@ -1271,6 +1455,7 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
         return this.callSuper("notificationOnMouseDown", e);
     },
     notificationOnMouseUp: function (e) {
+        this.scrollBarComponent.notificationOnMouseUp(e);
         for (let key in this.dictPropertiesLanes) {
             this.dictPropertiesLanes[key].notificationOnMouseUp(e);
         }
@@ -1284,10 +1469,13 @@ var TimeLineKeysBar = fabric.util.createClass(Component, {
     },
     registerOnSelectionUpdated:function(obj){
         this.observerOnSelectionUpdated=obj;
+    },
+    registerOnInnerScroll:function(obj){
+        this.observerOnInnerScroll=obj;
     }
 });
 var KeyBarPropertyLane = fabric.util.createClass(Component, {
-    initialize: function (canvas,mouseState, scrollParams, labelingParams, name,globalState) {
+    initialize: function (canvas,mouseState, scrollParams, labelingParams,globalState) {
         this.callSuper("initialize", mouseState);
         this.globalState=globalState;
         this.parentState={
@@ -1296,9 +1484,9 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
         this.localMouseState={
             x:0,y:0,inWorldX:0,inWorldY:0,
         };
-        this.labelingParams=labelingParams;
         this.localState = {colors: {idle: "orange", stroke: "yellow", guidelines:"rgb(230,230,230)"}}
-        this.name = name;
+        this.labelingParams=labelingParams;
+        this.name = "";
         this.canvas = canvas;
 
         // Estas variables tienen que ver con el manejo de keyframes activos en escena. Los primeros dos, son para el el pooling, y el ultmo clasifica los keyframes por identifier
@@ -1322,6 +1510,10 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
             scrollTop:0,
         };
     },
+    activate:function(name,index){
+        this.name=name;
+        this.localState.coords.top=index*this.localState.coords.height;
+    },
     retrieveKeyFrame: function (markerTimeLineTime,data,keyframeIdentifier) {
         let retrievedKey=null;
         if (this.counterActiveKeyFrames >= this.keyFrames.length) {
@@ -1337,7 +1529,7 @@ var KeyBarPropertyLane = fabric.util.createClass(Component, {
 
         } else {
             retrievedKey=this.keyFrames[this.counterActiveKeyFrames];
-            retrievedKey.activate(markerTimeLineTime,data,keyframeIdentifier)
+            retrievedKey.activate(markerTimeLineTime,data,keyframeIdentifier,this.name)
         }
 
         if(this.listListActiveKeyFramesByIds[retrievedKey.identifier]===undefined)
@@ -1578,11 +1770,12 @@ var KeyFrame = fabric.util.createClass(Component, {
         this.indexInParentList=-1; //solo se actualiza cuando se actualizo la seleccion en el KeyBar component, se actualiza al index que ocupa en la lista del PropertyLane al que pertenece, teniendo en cuenta el objeto al que pertenece. Esto con el fin de hacer match con la animacion a la que corresponde modificar.
 
     },
-    activate: function (timeLineTime,data,identifier) {
+    activate: function (timeLineTime,data,identifier,laneName) {
         this.identifier=identifier;
         this.isActive = true;
         this.timeLineTime = timeLineTime;
         this.data=data;
+        this.laneName=laneName
         this.calcTimelineLocationFromTime(this.timeLineTime);
     },
     deactivate: function () {

@@ -2,13 +2,14 @@ let EnumAnimableLoadingState={
     "loading":"loading",
     "error":"error",
     "ready":"ready"
-}
+};
 var ImageAnimable=fabric.util.createClass(fabric.Image,{
     applicableEntranceModes:[EntranceName.image_drawn,EntranceName.none],
+    applicableAnimationProperties:["position","scale","rotation","opacity"],
     type:'ImageAnimable',
     initialize:function(options){
         this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];
-            /*fabric.Object setting*/
+        /*fabric.Object setting*/
         this.left=options.left;
         this.top=options.top;
         this.padding=20;                   //

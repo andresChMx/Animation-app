@@ -1,13 +1,14 @@
 var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de imageAnimable porque solo podemos heredar de una clase
     //drawn y text_draw NO son lo mismo, ya que su logica es diferente
     applicableEntranceModes: [EntranceName.text_drawn,EntranceName.none/*,EntranceName.dragged,EntranceName.text_typed**/],//FOR UI
+    applicableAnimationProperties:["position","scale","rotation","opacity"],
 
     type:"TextAnimable",
     initialize:function(text,options){
         /*exact copy of animable object*/
         this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];
 
-            this.name="Text";
+        this.name="Text";
         this.originX="custom";
         this.originY="custom";
         this.fontFamily=options.fontFamily;
