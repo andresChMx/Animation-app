@@ -361,11 +361,14 @@ fabric.Object.prototype.drawControls= function(ctx, styleOverride) {
         var size = this.cornerSize, stroke = !this.transparentCorners && this.cornerStrokeColor;
         let pivotLeft=(width-this.padding*2)*this.pivotCornerX;
         let pivotTop=(height-this.padding*2)*this.pivotCornerY;
+        ctx.beginPath();
+        ctx.fillStyle="black";
+        ctx.strokeStyle="white";
         ctx.moveTo(pivotLeft,pivotTop);
+        ctx.arc(pivotLeft,pivotTop, size/2+3,0,Math.PI*2,false);
         ctx.arc(pivotLeft,pivotTop, size/2,0,Math.PI*2,false);
-        ctx.lineTo(pivotLeft-size/2,pivotTop);
-        ctx.moveTo(pivotLeft,pivotTop-size/2);
-        ctx.lineTo(pivotLeft,pivotTop+size/2);
+        ctx.arc(pivotLeft,pivotTop, size/4,0,Math.PI*2,false);
+        ctx.fill();
         ctx.stroke();
     }
 
@@ -565,6 +568,7 @@ fabric.Object.prototype.customRenderOffScreen=function(ctx){ //SOBREESCRITO DE R
     if (this.isNotVisible()) {
         return;
     }
+
     // Se elimino esta linea que era la que omitia el renderizaje ante objeto offscreen
     ctx.save();
     this._setupCompositeOperation(ctx);

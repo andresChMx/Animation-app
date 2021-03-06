@@ -12,7 +12,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         /*fabric.Object setting*/
         this.left=options.left;
         this.top=options.top;
-        this.padding=20;                   //
+        this.padding=10;                   //
         this.transparentCorners= false;    //
         this.cornerColor="rgb(0,0,0)";     //
         this.name="ObjectX";               //New fabric property (fabricCustom.js)

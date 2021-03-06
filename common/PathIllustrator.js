@@ -145,8 +145,6 @@ var PathIllustrator=fabric.util.createClass({
         if(this.flagCompleted || this.data.getObjectsToDrawLength()<=0){return null;}
         let finalSegmentPoint={x:null,y:null}; //for the animation hand which belongs to a DrawingCacheManager
         if(nowTime>=this.animFinishTime || this.flagFirstTime){ // siguiente imagen o primera vez
-            console.log(nowTime);
-            console.log(this.animFinishTime);
             this._setupOnNewImage(nowTime);
             this.flagFirstTime=false;
         }else{
@@ -217,7 +215,7 @@ var PathIllustrator=fabric.util.createClass({
 
         this._setupCanvasOnNewLayer();
 
-        this.prevPathSnapshot.drawImage(this.canvas,0,0,this.data.getWidthCanvasCacheOf(this.k),this.data.getHeightCanvasCacheOf(this.k));
+        this.prevPathSnapshot.drawImage(this.canvas,0,0);
         // pintara un texto o una imagen
 
         this.functionDrawingMode=this.data.getIllustrationFunction(this.k);
@@ -610,6 +608,18 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
     },
     getHeightCanvasCacheOf:function(k){//usado por el drawinCacheManger
         return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInDrawingCache();
+    },
+    getWidthMainCanvasOf:function(k){
+        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getWidthInMainCanvas();
+    },
+    convertPathLeftCoordToHandCoordOf:function(k,coordX){
+        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.convertPathLeftCoordToHandCoord(coordX);
+    },
+    convertPathTopCoordToHandCoordOf:function(k,coordY){
+        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.convertPathTopCoordToHandCoord(coordY);
+    },
+    getHeightMainCanvasOf:function(k){
+        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInMainCanvas();
     },
     getObjectsToDrawLength:function(){
       return this.listAnimableObjectsWithDrawnEntrances.length;

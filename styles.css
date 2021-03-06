@@ -1360,29 +1360,34 @@ hijo por supuesto)                              */
 }
 .panel-previewer{
     padding:10px;
-    background:white;
+    background: white;
     left:0;
     right:0;
     top:0;
     bottom:0;
     margin:auto;
     position:absolute;
-    z-index:2000;   
+    z-index:2000;
+    border-radius: 4px;
 }
 .panel-previewer__btn-close{
-    background:red;
-    width:10px; 
-    height:10px;
-    position: absolute;
-    right:0;
-    top:0;
+    color:rgba(255,255,255,.7);
+    text-align: center;
+    line-height: 20px;
+    font-size:0.9em;
+    width:20px;
+    height:20px;
+    right:-9px;
+    top:-9px;
+    background: #e22929;
+    border-radius: 50%;
 }
-.panel-previewer__canvas-container{
 
+.panel-previewer__canvas-container{
 }
 #panel-previewer__canvas{
+    border:1px solid rgba(0,0,0,.7);
     background:white;
-    outline:1px solid black;
     margin:0 !important;
     padding:0 !important;
 }

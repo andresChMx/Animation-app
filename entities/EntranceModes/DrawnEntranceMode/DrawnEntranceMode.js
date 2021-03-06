@@ -21,10 +21,17 @@ var DrawnEntranceMode=fabric.util.createClass(EntranceMode,{
     },
     /*fin*/
     getWidthInDrawingCache:function(){
-        return this.baseImage.naturalWidth;
     },
     getHeightInDrawingCache:function(){
-        return this.baseImage.naturalHeight;
+    },
+    getWidthInMainCanvas:function(){
+    },
+    getHeightInMainCanvas:function(){
+    },
+    convertPathLeftCoordToHandCoord:function(coordX){
+    },
+    convertPathTopCoordToHandCoord:function(coordY){
+
     },
     generateInitialImageDrawingData:function(){
         return {

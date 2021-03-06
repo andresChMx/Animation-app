@@ -87,13 +87,19 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
             this._createCacheCanvas();
         }
         let originalOpacity=this.opacity;   //MODIFIED
+        let originalScaleX=this.scaleX;
+        let originalScaleY=this.scaleY;
         this.opacity=1;                     //MODIFIED
+        if(this.scaleX===0){this.scaleX=0.001}
+        if(this.scaleY===0){this.scaleY=0.001}
         if (this.isCacheDirty()) {
             this.statefullCache && this.saveState({ propertySet: 'cacheProperties' });
             this.drawObject(this._cacheContext, options.forClipping);
             //this.dirty = false;           //MODIFIED
         }
         this.opacity=originalOpacity;      //MODIFIED
+        this.scaleX=originalScaleX;
+        this.scaleY=originalScaleY;
     },
     // Para soportar la funcionalidad de border cliping (clipBorder)
     drawObject: function(ctx, forClipping) {

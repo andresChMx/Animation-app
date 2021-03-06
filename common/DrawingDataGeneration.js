@@ -113,15 +113,14 @@ var TextDrawingDataGenerator=fabric.util.createClass({
     initialize: function () {
         this.auxCanvasForTexts=document.createElement("canvas");
         this.auxCanvasForTextsContext=this.auxCanvasForTexts.getContext("2d");
-
     },
 
     // text related
-    generateTextDrawingData:function(animableText,imgWidth,imgHeight,pathOpenTypeObjects){
+    generateTextDrawingData:function(animableText,imgWidth,imgHeight,extraDisplacementX,extraDisplacementY,pathOpenTypeObjects){
         let coords=this.getLeftTopLines(animableText);
         let commandsPath=[];
         for(let i=0;i<animableText.textLines.length;i++){
-            let openTypePath=OpenTypeFontManager.GeneratePath(FontsFileName[animableText.fontFamily],animableText.fontSize,coords[i].left,coords[i].top,animableText.textLines[i]);
+            let openTypePath=OpenTypeFontManager.GeneratePath(FontsFileName[animableText.fontFamily],animableText.fontSize,coords[i].left+extraDisplacementX,coords[i].top+extraDisplacementY,animableText.textLines[i]);
             commandsPath.push(openTypePath.commands);
             pathOpenTypeObjects.push(openTypePath);
         }
@@ -239,6 +238,7 @@ var TextDrawingDataGenerator=fabric.util.createClass({
         //     originY:"top",
         // });
         // this.auxCanvasForTexts.add(tmpText);
+
         for(let i=0;i<openTypePaths.length;i++){
             openTypePaths[i].draw(this.auxCanvasForTextsContext);
 

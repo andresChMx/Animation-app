@@ -303,8 +303,24 @@
             <div class="container-areas-viewport">
                 <div class="panel-inspector__container-areas">
                     <div class="panel-inspector__area-scene-objects area">
+                        <div class="panel-inspector__area-scene-objects__listing-objects-all">
+                            <p class="area-scene-objects__listing-objects-all__title">Scene Objects</p>
+                            <ul class="area-scene-objects__listing-objects-all__box-items ">
+                                <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" style="display:none;">
+                                    <img src="" alt="" class="icon">
+                                    <div class="group-object-name">
+                                    </div>
+                                    <div class="group-box-actions">
+                                        <input type="checkbox" class="group-box-actions__lock-object">
+                                        <input type="checkbox" class="group-box-actions__visible-object">
+                                        <button class="group-box-actions__btn-menu">[a]</button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
                         <div class="panel-inspector__area-scene-objects__listing-objects-entrance">
-                            <p class="area-scene-objects__listing-objects-entrance__title">Objects with Effects</p>
+                            <p class="area-scene-objects__listing-objects-entrance__title">Objects With Entrance Effects</p>
                             <div class="area-scene-objects__listing-objects-entrance__box-items ">
                                 <div class="area-scene-objects__listing-objects-entrance__box-items__item clearfix" style="display:none;">
                                     <div class="icon">
@@ -330,21 +346,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="panel-inspector__area-scene-objects__listing-objects-all">
-                            <p class="area-scene-objects__listing-objects-all__title">Objects with</p>
-                            <ul class="area-scene-objects__listing-objects-all__box-items ">
-                                <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" style="display:none;">
-                                    <img src="" alt="" class="icon">
-                                    <div class="group-object-name">
-                                    </div>
-                                    <div class="group-box-actions">
-                                        <input type="checkbox" class="group-box-actions__lock-object">
-                                        <input type="checkbox" class="group-box-actions__visible-object">
-                                        <button class="group-box-actions__btn-menu">[a]</button>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
+
                     </div>
                     <div class="panel-inspector__area-object-properties area">
                         <div class="area-objects-properties__zone-transformations">
@@ -385,7 +387,7 @@
                             <p class="area-objects-properties__zone__title">Styling</p>
                             <div class="area-objects-properties__zone-styles__box-floating-panels container-floating-panels">
                                 <div class="floating-panel" id="ImageAnimable-styling-panel">
-                                    styling widgets for imageAnimables
+                                    styling widgets for bit images
                                 </div>
                                 <div class="floating-panel-textanimable floating-panel" id="TextAnimable-styling-panel">
 
@@ -420,7 +422,7 @@
 
                                 </div>
                                 <div class="floating-panel" id="SVGAnimable-styling-panel">
-                                    styling widgets for SVGAnimable
+                                    styling widgets for svg images
                                 </div>
                                 <div class="floating-panel" id="ShapeAnimable-styling-panel">
                                     <div class="form-group styling-widget stroke-width">
@@ -493,7 +495,7 @@
                                     </div>
                                 </div>
                                 <div class="floating-panel" id="CameraAnimable-styling-panel">
-                                    styling widgets for cameraAnimables
+                                    styling widgets for cameras
                                 </div>
                             </div>
                         </div>
@@ -647,9 +649,9 @@
     <div class="modal-effect">
         <section class="panel-previewer">
             <div class="panel-previewer__inner-container">
-                <div class="panel-previewer__btn-close"></div>
+                <div class="panel-previewer__btn-close icon-cross modal__header__btn-close-modal"></div>
                 <div class="panel-previewer__canvas-container">
-                    <canvas id="panel-previewer__canvas" style="border:1px solid black"></canvas>
+                    <canvas id="panel-previewer__canvas"></canvas>
                 </div>
                 <div class="panel-previewer__controls">
                     <div class="panel-previewer__controls__play-btn">></div>

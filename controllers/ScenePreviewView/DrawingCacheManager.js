@@ -5,16 +5,20 @@ var DrawingCacheManager=fabric.util.createClass({
         this.ctx=this.canvas.getContext("2d");
         this.canvas.style.display="none";
         // this.canvas.style.position="absolute";
+        // this.canvas.style.left=100 + "px";
+        // this.canvas.style.top=20 + "px";
+        //
         // this.canvas.style.zIndex=10000;
-        // this.canvas.style.background="white";
+        // this.canvas.style.background="gray";
         this.listAnimableWithDrawnEntrance=[];
-        //this.canvas=new OffscreenCanvas(100,1);
+        // this.canvas=new OffscreenCanvas(100,1);
         // document.body.append(this.canvas);
 
         this.pathIllustrator=null;
         this.drawingHand=drawingHand;
         this.UIScenePreviewerCanvas=null;
         this.indexDrawableTurn=-1;
+
         let self=this;
         this.animator={
             executeAnimations:this._executeAnimations.bind(self)
@@ -66,8 +70,11 @@ var DrawingCacheManager=fabric.util.createClass({
         else {
             if(finalSegmentPoint.x!==null && finalSegmentPoint.y!==null){
                 let objMatrix = this.listAnimableWithDrawnEntrance[this.indexDrawableTurn].calcOwnMatrix();
-                finalSegmentPoint.x=finalSegmentPoint.x-this.listAnimableWithDrawnEntrance[this.indexDrawableTurn].width/2;
-                finalSegmentPoint.y=finalSegmentPoint.y-this.listAnimableWithDrawnEntrance[this.indexDrawableTurn].height/2;
+                //finalp=originalp*scaledwidth
+                // normalp=orginalp*mainWidth
+                // normalp=finalp/scaledwidth*mainwidth
+                finalSegmentPoint.x=this.pathIllustrator.data.convertPathLeftCoordToHandCoordOf(this.indexDrawableTurn,finalSegmentPoint.x);
+                finalSegmentPoint.y=this.pathIllustrator.data.convertPathTopCoordToHandCoordOf(this.indexDrawableTurn,finalSegmentPoint.y);
 
                 finalSegmentPoint=fabric.util.transformPoint(new fabric.Point(finalSegmentPoint.x,finalSegmentPoint.y),objMatrix);
                 finalSegmentPoint=fabric.util.transformPoint(finalSegmentPoint,this.UIScenePreviewerCanvas.viewportTransform);
@@ -95,6 +102,7 @@ var DrawingCacheManager=fabric.util.createClass({
         this.setCanvasDimentions(this.pathIllustrator.data.getWidthCanvasCacheOf(newObjIndex),
                                 this.pathIllustrator.data.getHeightCanvasCacheOf(newObjIndex))
         this.indexDrawableTurn=newObjIndex;
+
         this.listAnimableWithDrawnEntrance[lastObjIndex].entranceBehaviour.entranceMode.setTurnToCopyCache(false,finalObjectImage);
         this.listAnimableWithDrawnEntrance[newObjIndex].entranceBehaviour.entranceMode.setTurnToCopyCache(true,finalObjectImage);
         },

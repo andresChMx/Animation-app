@@ -291,7 +291,7 @@ var CanvasManager={
             })
         }
         else{ //(type==="TextAnimable")
-            let animObj=new TextAnimable("asdfasdfasdf",{
+            let animObj=new TextAnimable("Sample Text",{
                 "left":WindowManager.mouse.x-self.canvas._offset.left,
                 "top":WindowManager.mouse.y-self.canvas._offset.top,
                 "fontFamily":model.fontFamily,
@@ -299,6 +299,7 @@ var CanvasManager={
             })
             //textos tambien tendran entrada siendo dibujados
             animObj.setCoords();
+            animObj.exitEditing();
             self.listAnimableObjects.push(animObj);
             self.listAnimableObjectsWithEntrance.push(animObj);
             self.canvas.add(animObj);

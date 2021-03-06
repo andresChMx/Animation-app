@@ -9,6 +9,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         this.auxEntranceDuration=0; // stores entrance effect duration value temporarily
         this.lastIndexTruePath=0;   //  used for fill reveal mode "fill_drawn"
         this.finalImageBitmap=null; // TEMPORAL SOLUTION TO ABRUPT CHANGE FROM BITMAP TO VECTOS AT THE END OF SVG AUTOMATIC DRAWING. stores the bitmap version of the base vector image. Used when drawing and no paths were crated
+        this.cachesScalerFactor=2.5; // solution for pixeled svg images,
         // /*configuration parameters*/
         this.config={
             showHand:true,
@@ -30,12 +31,30 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         let canvas=document.createElement("canvas");
         let ctx=canvas.getContext("2d");
 
-        canvas.width=this.baseImage.naturalWidth;
-        canvas.height=this.baseImage.naturalHeight;
-        ctx.drawImage(this.baseImage,0,0);
+        canvas.width=this.getWidthInDrawingCache();
+        canvas.height=this.getHeightInDrawingCache();
+        ctx.drawImage(this.baseImage,0,0,this.getWidthInDrawingCache(),this.getHeightInDrawingCache());
         this.finalImageBitmap=new Image();
         this.finalImageBitmap.src=canvas.toDataURL();
         canvas.remove();
+    },
+    getWidthInDrawingCache:function(){
+        return this.baseImage.naturalWidth*3;
+    },
+    getHeightInDrawingCache:function(){
+        return this.baseImage.naturalHeight*3;
+    },
+    getWidthInMainCanvas:function(){
+        return this.baseImage.naturalWidth;
+    },
+    getHeightInMainCanvas:function(){
+        return this.baseImage.naturalHeight;
+    },
+    convertPathLeftCoordToHandCoord:function(coordX){
+        return (coordX/(this.getWidthInDrawingCache()/this.getWidthInMainCanvas()))-this.getWidthInMainCanvas()/2;
+    },
+    convertPathTopCoordToHandCoord:function(coordY){
+        return (coordY/(this.getHeightInDrawingCache()/this.getHeightInMainCanvas()))-this.getHeightInMainCanvas()/2;
     },
     /*Implementing inherited abstract methods*/
     generateEntranceData:function(callback){
@@ -47,8 +66,8 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
             this.dataGeneratorForSVG.generateDrawingData(
                 this.parentObject.svgString,
-                this.parentObject.width,
-                this.parentObject.height,
+                this.getWidthInMainCanvas(),
+                this.getHeightInMainCanvas(),
                 this.config.forceStrokeDrawing,
                 function(svgDrawingData,indexFinalTrueLayer){
                     //indexFinalTruelayer sera -1 si no hubo ningun true path, es decir todos son reveal paths. O si estubo en modo no-force y no encontro true paths
@@ -57,8 +76,8 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
                     if(this.config.fillRevealMode==="drawn_fill"){
                         if(this.lastIndexTruePath===svgDrawingData.points.length-1){
                             this.dataGenerator.generateDefaultDrawingPointsAndLineWidth(
-                                this.baseImage.naturalWidth,
-                                this.baseImage.naturalHeight,
+                                this.getWidthInDrawingCache(),
+                                this.getHeightInDrawingCache(),
                                 svgDrawingData,//OUT
                                 35);
                             this.dataGenerator.generateCrtlPointsFromPointsMatrix(
@@ -129,26 +148,26 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
             if(this.parentObject.fadeInTransitionOpacity!==0){
                 let currentGlobalAlpha=ctx.globalAlpha;
                 ctx.globalAlpha=currentGlobalAlpha*this.parentObject.fadeInTransitionOpacity;
-                ctx.drawImage(this.baseImage,-this.parentObject.width/2,-this.parentObject.height/2)
+                ctx.drawImage(this.getDrawingFinalImage(),-this.parentObject.width/2,-this.parentObject.height/2,this.parentObject.width,this.parentObject.height);
 
                 let negativeAlpha=1-this.parentObject.fadeInTransitionOpacity;
 
                 ctx.globalAlpha=currentGlobalAlpha*negativeAlpha;
-                ctx.drawImage(this.cacheManager.canvas,-this.parentObject.width/2,-this.parentObject.height/2);
+                ctx.drawImage(this.cacheManager.canvas,-this.parentObject.width/2,-this.parentObject.height/2,this.parentObject.width,this.parentObject.height);
                 ctx.globalAlpha=currentGlobalAlpha;
             }else{
-                ctx.drawImage(this.cacheManager.canvas,-this.parentObject.width/2,-this.parentObject.height/2);
+                ctx.drawImage(this.cacheManager.canvas,-this.parentObject.width/2,-this.parentObject.height/2,this.parentObject.width,this.parentObject.height);
             }
         }else{
-            ctx.drawImage(this.meanWhileImage,-this.parentObject.width/2,-this.parentObject.height/2);
+            ctx.drawImage(this.meanWhileImage,-this.parentObject.width/2,-this.parentObject.height/2,this.parentObject.width,this.parentObject.height);
         }
     },
     getDrawingFinalImage:function(){/*insted of returning one or the other regarding one configuration varible, now it is done regarding the image has a path designed or not*/
         if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
             return this.maskedImage;
         }else if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
-            return this.baseImage;
-            // return this.finalImageBitmap;
+            // return this.baseImage;
+            return this.finalImageBitmap;
         }
     },
     illustrationFunctionOnCache:function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){

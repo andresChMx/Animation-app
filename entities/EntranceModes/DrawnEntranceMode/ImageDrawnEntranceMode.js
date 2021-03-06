@@ -88,7 +88,26 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         }
 
     },
+    getWidthInDrawingCache:function(){
+        return this.baseImage.naturalWidth;
+    },
+    getHeightInDrawingCache:function(){
+        return this.baseImage.naturalHeight;
+    },
+    getWidthInMainCanvas:function(){
+        return this.baseImage.naturalWidth;
+    },
+    getHeightInMainCanvas:function(){
+        return this.baseImage.naturalHeight;
 
+    },
+    convertPathLeftCoordToHandCoord:function(coordX){
+        return coordX-this.getWidthInMainCanvas()/2;
+    },
+    convertPathTopCoordToHandCoord:function(coordY){
+        return coordY-this.getHeightInMainCanvas()/2;
+
+    },
     /* new custom methods*/
     generateFinalMaskedImage:function(){
 
