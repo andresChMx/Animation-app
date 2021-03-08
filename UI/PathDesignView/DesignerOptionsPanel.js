@@ -100,7 +100,6 @@ var SectionSettings={
     },
 
     notificationOnToolChanged:function(currentTool){
-        console.log(currentTool);
         this.htmlBtnToolAdd.classList.remove("active");
         this.htmlBtnToolSelection.classList.remove("active");
         if(this.htmlBtnToolAdd.id===currentTool){this.htmlBtnToolAdd.classList.add("active")}
@@ -110,7 +109,6 @@ var SectionSettings={
         this.numericFieldDuration.setValue(controllerIllustratorDuration/1000);
     },
     notificationOnPathIndexChanged:function(lineWidth){
-        console.log(lineWidth);
         this.numericFieldLineWidth.setValue(lineWidth);
     }
 
@@ -152,7 +150,11 @@ let SectionPaths={
 
         let btnDelete=document.createElement("button");
         btnDelete.classList.add("path__inner-container__btn-delete");
+        btnDelete.classList.add("button-solid-behaviour");
         btnDelete.setAttribute("name",pathModel.index);
+        let icon=document.createElement("i");
+        icon.className="icon-cross";
+        btnDelete.appendChild(icon)
 
         let pathSpaceEffect=document.createElement("div");
         pathSpaceEffect.classList.add("path__space-effect");

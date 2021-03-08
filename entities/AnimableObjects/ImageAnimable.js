@@ -17,8 +17,6 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.cornerColor="rgb(0,0,0)";     //
         this.name="ObjectX";               //New fabric property (fabricCustom.js)
         this.centeredRotation=false;       //
-        this.originX='custom';             //New fabric property (fabricCustom.js)
-        this.originY='custom';             //New fabric property (fabricCustom.js)
         /*FIN -- fabric.Object setting*/
 
 

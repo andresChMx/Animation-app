@@ -8,7 +8,7 @@ let SectionToolBox={
         let me=this;
         this.MODELTools=[
             {
-                icon:"icon-floppy-disk",
+                icon:"icon-save",
                 label:"Save",
                 action:function(){
 

@@ -108,8 +108,9 @@ var PathIllustrator=fabric.util.createClass({
         let totalCantPathStrokes=this.getTotalStrokesInImage(this.k);
         let oldValI=this.i;
         let p=0;
-        this.canvas.width=this.data.getBaseImageOf(this.k).naturalWidth;
-        this.canvas.height=this.data.getBaseImageOf(this.k).naturalHeight;
+        this.canvas.width=this.data.getWidthMainCanvasOf(this.k);
+        this.canvas.height=this.data.getHeightMainCanvasOf(this.k);
+
         this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
 
         this.prevPathCanvas.width=this.canvas.width;
@@ -517,8 +518,14 @@ var IllustratorDataAdapterPreview=fabric.util.createClass({
     },
     getHeightCanvasCacheOf:function(k){
         return this.previewManager.canvas.height;
-
     },
+    getWidthMainCanvasOf:function(k){
+        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getWidthInMainCanvas();
+    },
+    getHeightMainCanvasOf:function(k){
+        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInMainCanvas();
+    },
+
     getTypeOf:function(k){
         return "ImageAnimable";
     },
@@ -612,15 +619,16 @@ var IllustratorDataAdapterCache=fabric.util.createClass({
     getWidthMainCanvasOf:function(k){
         return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getWidthInMainCanvas();
     },
+    getHeightMainCanvasOf:function(k){
+        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInMainCanvas();
+    },
     convertPathLeftCoordToHandCoordOf:function(k,coordX){
         return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.convertPathLeftCoordToHandCoord(coordX);
     },
     convertPathTopCoordToHandCoordOf:function(k,coordY){
         return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.convertPathTopCoordToHandCoord(coordY);
     },
-    getHeightMainCanvasOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInMainCanvas();
-    },
+
     getObjectsToDrawLength:function(){
       return this.listAnimableObjectsWithDrawnEntrances.length;
     },

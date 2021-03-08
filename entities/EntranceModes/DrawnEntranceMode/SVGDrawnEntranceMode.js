@@ -10,12 +10,17 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         this.lastIndexTruePath=0;   //  used for fill reveal mode "fill_drawn"
         this.finalImageBitmap=null; // TEMPORAL SOLUTION TO ABRUPT CHANGE FROM BITMAP TO VECTOS AT THE END OF SVG AUTOMATIC DRAWING. stores the bitmap version of the base vector image. Used when drawing and no paths were crated
         this.cachesScalerFactor=2.5; // solution for pixeled svg images,
+
+        this.cacheWidth=0;
+        this.cacheHeight=0;
         // /*configuration parameters*/
         this.config={
             showHand:true,
             forceStrokeDrawing:true,
             fillRevealMode:'fadein',  // // fadein || drawn_fill || no-fill
         }
+
+
     },
     /*overwritten methods*/
     notificationOnImageStateChanged:function(){
@@ -24,6 +29,8 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
             //the finalMasked iamge will be generated if paths are created. But now the need
             //to have a pixels version of the image to avoid grows behavious al the end of drawing
             //in no-paths version of the drawing(pasaba de pixeles a vectores)
+            this._calcCacheWidth();
+            this._calcCacheHeight()
             this.generateBitmapSVGFinalImage();
         }
     },
@@ -39,11 +46,29 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         canvas.remove();
     },
     getWidthInDrawingCache:function(){
-        return this.baseImage.naturalWidth*3;
+        return this.cacheWidth;
     },
+        _calcCacheWidth:function(){
+            if(this.baseImage.naturalWidth<1000){
+                this.cacheWidth=this.baseImage.naturalWidth*3;
+            }else if(this.baseImage.naturalWidth<2000){
+                this.cacheWidth=this.baseImage.naturalWidth*2;
+            }else{
+                this.cacheWidth=this.baseImage.naturalWidth;
+            }
+        },
     getHeightInDrawingCache:function(){
-        return this.baseImage.naturalHeight*3;
+        return this.cacheHeight;
     },
+        _calcCacheHeight:function(){
+            if(this.baseImage.naturalWidth<1000){
+                this.cacheHeight=this.baseImage.naturalHeight*3;
+            }else if(this.baseImage.naturalWidth<2000){
+                this.cacheHeight=this.baseImage.naturalHeight*2;
+            }else{
+                this.cacheHeight=this.baseImage.naturalHeight;
+            }
+        },
     getWidthInMainCanvas:function(){
         return this.baseImage.naturalWidth;
     },
@@ -123,6 +148,13 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
             );
             callback();
         }
+    },
+    generateFinalMaskedImage:function(){
+        this.cacheWidth=this.parentObject.largeImage.naturalWidth;
+        this.cacheHeight=this.parentObject.largeImage.naturalHeight;
+        this.callSuper("generateFinalMaskedImage");
+        this._calcCacheWidth();
+        this._calcCacheHeight();
     },
     clearEntranceData:function(){/*in addition */
         if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){

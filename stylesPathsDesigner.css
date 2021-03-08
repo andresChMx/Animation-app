@@ -95,8 +95,11 @@
     align-items: center;
 }
 .panel-designer-options__section-paths__paths-box .path__inner-container__btn-delete{
-    background:red;
-    padding:5px;
+    font-size: 0.9rem;
+    padding:6px;
+}
+.panel-designer-options__section-paths__paths-box .path__inner-container__btn-delete .icon-cross{
+    display: block;
 }
 .panel-designer-options__section-paths__paths-box .path__space-effect{
     height:20px;

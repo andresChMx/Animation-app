@@ -7,13 +7,15 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
     initialize:function(text,options){
         /*exact copy of animable object*/
         this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];
+        /*selection,transforming styling*/
+        this.padding=10;
+        this.transparentCorners= false;    //
+        this.cornerColor="rgb(0,0,0)";     //
+        this.name="Text";               //New fabric property (fabricCustom.js)
+        this.centeredRotation=false;       //
 
-        this.name="Text";
-        this.originX="custom";
-        this.originY="custom";
         this.fontFamily=options.fontFamily;
         this.callSuper('initialize', text,options);
-        this.centeredRotation=false;
         this.fill="#000000";
 
         this.cbOnThumbnailStateChanged=function(){};

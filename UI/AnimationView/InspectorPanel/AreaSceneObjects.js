@@ -100,7 +100,6 @@ var SectionObjectsEntraceEditor={
 
     },
     onHTMLItemClicked:function(e){
-        console.log("CLICKEADKLFJASDJFAKDSJFLK");
         let HTMLElem=e.target;
         while(HTMLElem.className!=="area-scene-objects__listing-objects-entrance__box-items__item clearfix"){
             HTMLElem=HTMLElem.parentNode;
@@ -155,7 +154,7 @@ var SectionAnimableObjectsEditor={
 
                 },
                 "delete":function(){
-
+                    CanvasManager.removeActiveAnimableObject();
                 },
                 "removeMask":function(currentSelectedObject){
                     currentSelectedObject.removeClipping();
@@ -271,7 +270,7 @@ var SectionAnimableObjectsEditor={
         let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
         CanvasManager.canvas.setActiveObject(CanvasManager.listAnimableObjects[trueIndex]);
 
-        if(e.target.className==="group-box-actions__btn-menu"){
+        if(e.target.className==="group-box-actions__btn-menu button-solid-behaviour"){
             this.objectMenu.enableOptions(CanvasManager.getSelectedAnimableObj().applicableMenuOptions);
             this.showObjectMenu();
         }else if(e.target.className==="group-box-actions__lock-object"){

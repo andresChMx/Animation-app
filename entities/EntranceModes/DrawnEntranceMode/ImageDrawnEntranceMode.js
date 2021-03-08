@@ -110,7 +110,6 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
     },
     /* new custom methods*/
     generateFinalMaskedImage:function(){
-
         let canvas=document.createElement("canvas");
         let ctx=canvas.getContext("2d");
         // Generating drawing data if necessary, se estan limpiando los ctrlPoints al final, en caso fueron generados

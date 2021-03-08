@@ -199,11 +199,11 @@ var CanvasManager={
     },
     createAnimableObject:function(model,type="ImageAnimable",thumbnail=null){
         let self=this;
-
+        let initPoint=this.objectInitializationPosition();
         if(type==="ImageAnimable"){
                 let animObj=new ImageAnimable({
-                    "left":WindowManager.mouse.x-self.canvas._offset.left,
-                    "top":WindowManager.mouse.y-self.canvas._offset.top,
+                    "left":initPoint.x,
+                    "top":initPoint.y,
                     "imageAssetModel":model,
                     //"thumbnailImage":thumbnail
                 })
@@ -221,8 +221,8 @@ var CanvasManager={
              // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea
         }else if(type==="SVGAnimable"){
             let animObj=new SVGAnimable({
-                "left":WindowManager.mouse.x-self.canvas._offset.left,
-                "top":WindowManager.mouse.y-self.canvas._offset.top,
+                "left":initPoint.x,
+                "top":initPoint.y,
                 "imageAssetModel":model,
                 //"thumbnailImage":StaticResource.images.loading
             });
@@ -244,18 +244,18 @@ var CanvasManager={
                 let shapeAnimable=null;
                 if(groupObj.type==="path"){
                     shapeAnimable=new ShapeAnimable(groupObj.path,{
-                        left:WindowManager.mouse.x-self.canvas._offset.left,
-                        top:WindowManager.mouse.y-self.canvas._offset.top,
+                        "left":initPoint.x,
+                        "top":initPoint.y,
                     })
                 }else if(groupObj.type==="circle"){
                     shapeAnimable=new CircleShapeAnimable({
-                        left:WindowManager.mouse.x-self.canvas._offset.left,
-                        top:WindowManager.mouse.y-self.canvas._offset.top,
+                        "left":initPoint.x,
+                        "top":initPoint.y,
                     });
                 }else if(groupObj.type==="rect"){
                     shapeAnimable=new RectShapeAnimable({
-                        left:WindowManager.mouse.x-self.canvas._offset.left,
-                        top:WindowManager.mouse.y-self.canvas._offset.top,
+                        "left":initPoint.x,
+                        "top":initPoint.y,
                     })
                 }else if(groupObj.type==="polygon"){
                     let pathStr="";
@@ -276,8 +276,8 @@ var CanvasManager={
                     pathStr+="L " +x + " " + y + " ";
 
                     shapeAnimable=new ShapeAnimable(pathStr,{
-                        left:WindowManager.mouse.x-self.canvas._offset.left,
-                        top:WindowManager.mouse.y-self.canvas._offset.top,
+                        "left":initPoint.x,
+                        "top":initPoint.y,
                     })
                     shapeAnimable.pathOffset={x:groupObj.pathOffset.x,y:groupObj.pathOffset.y}
                 }
@@ -292,8 +292,8 @@ var CanvasManager={
         }
         else{ //(type==="TextAnimable")
             let animObj=new TextAnimable("Sample Text",{
-                "left":WindowManager.mouse.x-self.canvas._offset.left,
-                "top":WindowManager.mouse.y-self.canvas._offset.top,
+                "left":initPoint.x,
+                "top":initPoint.y,
                 "fontFamily":model.fontFamily,
                 //"thumbnailImage":StaticResource.images.textThumbnail
             })
@@ -306,6 +306,17 @@ var CanvasManager={
             self.notifyOnObjAddedToListObjectsWithEntrance.bind(this)(animObj);
             self.notifyOnAnimableObjectAdded.bind(self)(animObj);
         }
+    },
+    objectInitializationPosition:function(){
+        let self=this;
+
+        let canvasRelativePosition={
+            x:WindowManager.mouse.x-self.canvas._offset.left,
+            y:WindowManager.mouse.y-self.canvas._offset.top
+        }
+        let invertMat=fabric.util.invertTransform(self.canvas.viewportTransform);
+
+        return fabric.util.transformPoint(canvasRelativePosition,invertMat);
     },
     moveUpObjectInEntranceList:function(index){
         if(index>0){
@@ -638,7 +649,7 @@ var SectionEntranceObjectConfiguration={
                 removeEvent:function(){
                     for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].removeEventListener("click",this.OnTriggered.bind(this));}
                 },
-                OnTriggered:function(e){console.log(e.target);this.setVal(e.target.id);},
+                OnTriggered:function(e){this.setVal(e.target.id);},
                 setVal:function(normalizedEntranceModeName){
                     for(let i=0;i<this.htmlElem.children.length;i++){this.htmlElem.children[i].classList.remove("active");}
                     let HTMLCollectionEntraceModesAreas=document.querySelectorAll(".canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings .mode-settings");
@@ -655,7 +666,7 @@ var SectionEntranceObjectConfiguration={
             drawn_showHand:{
                 htmlElem:document.querySelector(".drawn-mode-widget__hand"),
                 initEvent:function(){
-                    this.htmlElem.style.display="block";
+                    this.htmlElem.style.display="flex";
                     this.htmlElem.querySelector("#checkbox-show-hand").addEventListener("change",this.OnTriggered.bind(this))},
                 removeEvent:function(){
                     this.htmlElem.style.display="none";
@@ -669,7 +680,7 @@ var SectionEntranceObjectConfiguration={
                 htmlElem:document.querySelector(".drawn-mode-widget__resulting-drawing"),
                 htmlOptions:document.querySelectorAll(".drawn-mode-widget__resulting-drawing .resulting-drawing-button"),
                 initEvent:function(){
-                    this.htmlElem.style.display="block";
+                    this.htmlElem.style.display="flex";
                     for(let i=0;i<this.htmlOptions.length;i++){this.htmlOptions[i].addEventListener("click",this.OnTriggered.bind(this));}
                 },
                 removeEvent:function(){
@@ -697,7 +708,7 @@ var SectionEntranceObjectConfiguration={
                 htmlElem:document.querySelector(".drawn-mode-widget__fill-reveal"),
                 htmlOptions:document.querySelectorAll(".drawn-mode-widget__fill-reveal .fill-reveal-button"),
                 initEvent:function(){
-                    this.htmlElem.style.display="block";
+                    this.htmlElem.style.display="flex";
                     for(let i=0;i<this.htmlOptions.length;i++){this.htmlOptions[i].addEventListener("click",this.OnTriggered.bind(this));}
                 },
                 removeEvent:function(){
@@ -724,7 +735,7 @@ var SectionEntranceObjectConfiguration={
             drawn_forceStrokeDrawing:{
                 htmlElem:document.querySelector(".drawn-mode-widget__force-stroke-drawing"),
                 initEvent:function(){
-                    this.htmlElem.style.display="block";
+                    this.htmlElem.style.display="flex";
                     this.htmlElem.querySelector("#checkbox-force-stroke-drawing").addEventListener("change",this.OnTriggered.bind(this))},
                 removeEvent:function(){
                     this.htmlElem.style.display="none";

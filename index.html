@@ -85,11 +85,11 @@
                     <p class="canvas-animator__object-entrance-configuration__entrance-settings__title title">Entrace Modes</p>
                     <div class="canvas-animator__object-entrance-configuration__entrance-settings__box-buttons">
                         <div class="form-group entrance-button button-solid-behaviour" id="none"><!--el radio box debe ser segundo hijo-->
-                            <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
+                            <img class="entrance-button__icon" src="assets/images/entrance-mode-none.png" alt="">
                             <p class="entrance-button__label" >None</p>
                         </div>
                         <div class="form-group entrance-button button-solid-behaviour" id="drawn">
-                            <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
+                            <img class="entrance-button__icon" src="assets/images/entrance-mode-drawn.png" alt="">
                             <p class="entrance-button__label" >Drawn</p>
                         </div>
                         <div class="form-group entrance-button button-solid-behaviour" id="dragged">
@@ -107,26 +107,26 @@
                         </div>
                         <div class="drawn-mode-settings mode-settings">
                             <div class="form-group drawn-mode-widget__hand drawn-mode-widged">
-                                <label for="checkbox-show-hand" class="widget-label">Show Hand </label>
+                                <p class="">Show Drawing Hand </p>
                                 <input id="checkbox-show-hand" type="checkbox">
                             </div>
                             <div class="form-group drawn-mode-widget__resulting-drawing drawn-mode-widged multiselection-widget" >
                                 <p class="multiselection-widget__title">Resulting Drawing </p>
                                 <div class="box-resulting-drawing-buttons multiselection-widget__box-options">
-                                    <div class="resulting-drawing-button multiselection-widget__option " id="original"><img src="" alt=""><span class="tooltip">Original Image</span></div>
-                                    <div class="resulting-drawing-button multiselection-widget__option " id="masked"><img src="" alt=""><span class="tooltip">Resulting Image</span></div>
+                                    <div class="resulting-drawing-button multiselection-widget__option " id="original"><img src="assets/images/drawn-entrace-mode_original.png" alt=""><span class="tooltip">Original Image</span></div>
+                                    <div class="resulting-drawing-button multiselection-widget__option " id="masked"><img src="assets/images/drawn-entrace-mode_masked.png" alt=""><span class="tooltip">Resulting Image</span></div>
                                 </div>
                             </div>
                             <div class="form-group drawn-mode-widget__fill-reveal drawn-mode-widged multiselection-widget">
                                 <p class="multiselection-widget__title">Fill Reveal Mode </p>
                                 <div class="box-fill-reveal-buttons multiselection-widget__box-options">
-                                    <div class="fill-reveal-button multiselection-widget__option" id="fadein"><img src="" alt=""><span class="tooltip">Fill appears with fade in effect</span></div>
-                                    <div class="fill-reveal-button multiselection-widget__option" id="drawn_fill"><img src="" alt=""><span class="tooltip">Fill appears with drawing effect</span></div>
-                                    <div class="fill-reveal-button multiselection-widget__option" id="no-fill"><img src="" alt=""><span class="tooltip">No Fill</span></div>
+                                    <div class="fill-reveal-button multiselection-widget__option" id="fadein"><img src="assets/images/svg_fill-reveal-mode_fadein.png" alt=""><span class="tooltip">Fill appears with fade in effect</span></div>
+                                    <div class="fill-reveal-button multiselection-widget__option" id="drawn_fill"><img src="assets/images/svg_fill-reveal-mode_drawn.png" alt=""><span class="tooltip">Fill appears with drawing effect</span></div>
+                                    <div class="fill-reveal-button multiselection-widget__option" id="no-fill"><img src="assets/images/svg_fill-reveal-mode_no-reveal.png" alt=""><span class="tooltip">No Fill</span></div>
                                 </div>
                             </div>
                             <div class="form-group drawn-mode-widget__force-stroke-drawing drawn-mode-widged multiselection-widget">
-                                <label for="checkbox-force-stroke-drawing" class="widget-label">Force Stroke Drawing </label>
+                                <p class="widget-label">Force Stroke Drawing </p>
                                 <input id="checkbox-force-stroke-drawing" type="checkbox">
                             </div>
                         </div>
@@ -151,7 +151,7 @@
     ==========ASSETS PANEL=========
     ===============================-->
     <section class="panel-assets">
-        <div class="btn-toggle-panel-left"><i class="icon-cursor"></i></div>
+        <div class="btn-toggle-panel-left"><i class="icon-eject"></i></div>
         <nav class="panel-assets__menu-sections">
             <div class="panel-assets__menu-sections__item">Images</div>
             <div class="panel-assets__menu-sections__item">Videos</div>
@@ -285,7 +285,7 @@
     ==========INSPECTOR PANEL=========
     ===============================-->
     <section class="panel-inspector">
-        <div class="btn-toggle-panel-right"><i class="icon-cursor"></i></div>
+        <div class="btn-toggle-panel-right"><i class="icon-eject"></i></div>
         <div class="panel-inspector__toolbox">
 <!--            <div class="panel-inspector__toolbox__item-text">-->
 <!--                <p class="toolbox__item-text__title">Text:</p>-->
@@ -313,7 +313,7 @@
                                     <div class="group-box-actions">
                                         <input type="checkbox" class="group-box-actions__lock-object">
                                         <input type="checkbox" class="group-box-actions__visible-object">
-                                        <button class="group-box-actions__btn-menu">[a]</button>
+                                        <div class="group-box-actions__btn-menu button-solid-behaviour"><i class="icon-icon-more-options"></i></div>
                                     </div>
                                 </li>
                             </ul>
@@ -339,9 +339,9 @@
                                         </div>
                                     </div>
                                     <div class="arrangement-controls-container">
-                                        <div class="button-control btn-move-up button-solid-behaviour"><i class="icon-pencil"></i></div>
+                                        <div class="button-control btn-move-up button-solid-behaviour"><i class="icon-move-up"></i></div>
     <!--                                    <div class="button-control btn-free-movement button-solid-behaviour"><i class="icon-pencil"></i></div>-->
-                                        <div class="button-control btn-move-down button-solid-behaviour"><i class="icon-pencil"></i></div>
+                                        <div class="button-control btn-move-down button-solid-behaviour"><i class="icon-move-down"></i></div>
                                     </div>
                                 </div>
                             </div>
@@ -394,9 +394,6 @@
                                     <div class="form-group styling-widget font-family">
                                         <label for="font-family">Font Family </label>
                                         <select id="font-family" class="">
-                                            <option value="bauhs 93">Bauhs 93</option>
-                                            <option value="arial">Arial</option>
-                                            <option value="Verdana">Verdana</option>
                                         </select>
                                     </div>
                                     <div class="form-group styling-widget font-size ">
@@ -511,7 +508,7 @@
     ==========TIMELINE================
     ===============================-->
     <section class="panel-animation">
-        <div class="btn-toggle-panel-bottom"><i class="icon-cursor"></i></div>
+        <div class="btn-toggle-panel-bottom"><i class="icon-eject"></i></div>
         <div class="panel-animation__top-bar">
              <ul class="panel-animation__top-bar__top-menu">
                  <li class="panel-animation__top-bar__top-menu__item">Action</li>
@@ -535,8 +532,8 @@
                         <div class="action-editor__properties-area__toolbar">
                             <div class="btn-reset-timeline tool"><span class="icon-previous"></span></div>
                             <div class="btn-play-timeline tool"></div>
-                            <div class="btn-delete-keyframe tool"> <span class="icon-bin"></span></div>
-                            <nav class="menu-functions tool">
+                            <div class="btn-delete-keyframe tool disabled"> <span class="icon-bin"></span></div>
+                            <nav class="menu-functions tool disabled">
                                 <div class="menu-functions__trigger"></div>
                                 <div class="menu-functions__dropdown dropdown">
                                     <div class="menu-functions__dropdown__easing-list">
@@ -545,8 +542,8 @@
                                     </div>
                                 </div>
                             </nav>
-                            <nav class="menu-add-animation-lane tool">
-                                <div class="menu-add-animation-lane__trigger">A</div>
+                            <nav class="menu-add-animation-lane tool disabled">
+                                <div class="menu-add-animation-lane__trigger"></div>
                                 <div class="menu-add-animation-lane__dropdown dropdown">
                                     <div class="menu-add-animation-lane__dropdown__list-lane-names">
 
@@ -594,8 +591,8 @@
                 </div>
                 <div class="section-settings__setting-zoom">
                     <label class="setting-zoom__title">Zoom: </label>
-                    <button class="setting-zoom__btn-zoom-out button-solid-behaviour"><i class="icon-search"></i></button>
-                    <button class="setting-zoom__btn-zoom-in button-solid-behaviour"><i class="icon-search"></i></button>
+                    <button class="setting-zoom__btn-zoom-out button-solid-behaviour"><i class="icon-zoom-in"></i></button>
+                    <button class="setting-zoom__btn-zoom-in button-solid-behaviour"><i class="icon-zoom-out"></i></button>
                 </div>
             </div>
             <div class="section-settings__setting-line-width range-widget">
@@ -654,7 +651,7 @@
                     <canvas id="panel-previewer__canvas"></canvas>
                 </div>
                 <div class="panel-previewer__controls">
-                    <div class="panel-previewer__controls__play-btn">></div>
+                    <div class="panel-previewer__controls__play-btn"></div>
                     <div class="panel-previewer__controls__progress-bar"></div>
                 </div>
             </div>

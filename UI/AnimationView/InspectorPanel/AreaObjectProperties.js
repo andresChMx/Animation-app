@@ -185,6 +185,7 @@ var AdapterSetValue={
         if(object.type==="TextAnimable") {
             if(property==="fontFamily"){
                 object.setFontFamily(value);
+                object.exitEditing();
             }else if(property==="fill"){
                 object.dirty=true;
             }else{

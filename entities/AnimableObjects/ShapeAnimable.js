@@ -7,6 +7,13 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
     subtype:"PathAnimable",
     initialize:function(pathList,options){
         this.callSuper('initialize', pathList,options);
+        /*selection,transforming styling*/
+        this.padding=10;
+        this.transparentCorners= false;    //
+        this.cornerColor="rgb(0,0,0)";     //
+        this.name="ObjectX";               //New fabric property (fabricCustom.js)
+        this.centeredRotation=false;       //
+
         /*fabric object properties setup*/
         //this.objectCaching=false;        // Propiedad de FABRIC Se que deberiamos hacer que este objecto siempre se dibuje en el main canvas(no cache), ya que constantemente alteramos los estilos del objeto. Pero
         //el problema surge cuando el shape usa usado como clippath, en este modo se requiere hacer ciempre uso del cache
@@ -168,6 +175,13 @@ var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
     subtype:"CircleShapeAnimable",
     initialize:function(options){
         this.callSuper('initialize',options);
+        /*selection,transforming styling*/
+        this.padding=10;
+        this.transparentCorners= false;    //
+        this.cornerColor="rgb(0,0,0)";     //
+        this.name="ObjectX";               //New fabric property (fabricCustom.js)
+        this.centeredRotation=false;       //
+
         this.absolutePositioned=true;    // Propiedad de FABRIC util para cuando el objecto es usado como clipPath, hace que la posicion del enmascaramiento sea se forma absoluta
 
         this.entranceMode=EntranceName.none; // Siempre sera none, por ende ni se permitira abrir el panel de configuraciones para ShapeAnimable
@@ -300,6 +314,13 @@ let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
     type:"ShapeAnimable",
     initialize:function(options){
         this.callSuper('initialize',options);
+        /*selection,transforming styling*/
+        this.padding=10;
+        this.transparentCorners= false;    //
+        this.cornerColor="rgb(0,0,0)";     //
+        this.name="ObjectX";               //New fabric property (fabricCustom.js)
+        this.centeredRotation=false;       //
+
         this.absolutePositioned=true;    // Propiedad de FABRIC util para cuando el objecto es usado como clipPath, hace que la posicion del enmascaramiento sea se forma absoluta
 
         this.entranceMode=EntranceName.none; // Siempre sera none, por ende ni se permitira abrir el panel de configuraciones para ShapeAnimable

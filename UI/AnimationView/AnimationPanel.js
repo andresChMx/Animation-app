@@ -102,7 +102,8 @@ var SectionActionEditorMenu={
                 enable:function(){this.htmlElem.classList.remove("disabled");},
                 desable:function(){this.htmlElem.classList.add("disabled")},
                 initEvents:function (){this.htmlElem.addEventListener("click",this.OnTrigger.bind(this))},
-                OnTrigger:function(){me.OnWidgetChanged("delete-keyframe");}
+                OnTrigger:function(){me.OnWidgetChanged("delete-keyframe");},
+                setVal:function(listKeyFrames){if(listKeyFrames.length>0){this.enable()}else{this.desable()}} /*just ui purposes*/
             },
             menuFunctions:{
                 htmlElem:document.querySelector(".action-editor__properties-area__toolbar .menu-functions"),
@@ -179,6 +180,7 @@ var SectionActionEditorMenu={
                     this.val.listAnimations=listAnimations;
 
                     if(this.val.listAnimations.length>0){
+                        this.enable();
                         let firstAnimationFunction=this.val.listAnimations[0].tweenType;
                         let firstAnimationTween=this.val.listAnimations[0].easingType;
                         let flagMoreThanOneType=false;
@@ -194,6 +196,7 @@ var SectionActionEditorMenu={
                     }else{
                         this.activateMenuTweensOption('');
                         this.activateMenuEasingOption('');
+                        this.desable();
                     }
                 }
             }
@@ -336,6 +339,11 @@ var SectionActionEditorMenu={
                 },
                 setVal:function(listAnimableObjects){
                     this.auxlistAnimableObjects=listAnimableObjects;
+                    if(this.auxlistAnimableObjects.length>0){
+                        this.enable();
+                    }else{
+                        this.desable();
+                    }
                 }
             },
 
@@ -455,6 +463,7 @@ var SectionActionEditorMenu={
     },
     notificationOnKeyBarSelectionUpdated:function (listAnimations,listSelectedKeyFrames){
         this.widgetsKeyframeTools.menuFunctions.setVal(listAnimations,listSelectedKeyFrames);
+        this.widgetsKeyframeTools.deleteKeyframe.setVal(listSelectedKeyFrames);/*just to show icon desabled or enabled mode*/
     },
     notificationOnKeyframeDragEnded:function(listAnimations,listSelectedKeyFrames){
         this.widgetsKeyframeTools.menuFunctions.setVal(listAnimations,listSelectedKeyFrames);
