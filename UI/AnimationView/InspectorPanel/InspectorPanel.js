@@ -8,6 +8,7 @@ let SectionToolBox={
         let me=this;
         this.MODELTools=[
             {
+                available:false,/*temporary*/
                 icon:"icon-save",
                 label:"Save",
                 action:function(){
@@ -15,6 +16,7 @@ let SectionToolBox={
                 }
             },
             {
+                available:true,/*temporary*/
                 icon:"icon-preview",
                 label:"Preview",
                 action:function(){
@@ -27,6 +29,7 @@ let SectionToolBox={
                 }
             },
             {
+                available:false,/*temporary*/
                 icon:"icon-publish",
                 label:"Publish",
                 action:function(){
@@ -38,10 +41,10 @@ let SectionToolBox={
     },
     initHTML:function(){
         for(let i in this.MODELTools){
-            this.createHTMLTool(this.MODELTools[i].icon,this.MODELTools[i].label, i);
+            this.createHTMLTool(this.MODELTools[i].icon,this.MODELTools[i].label, i,this.MODELTools[i].available);
         }
     },
-    createHTMLTool:function(iconClassName,labelName,index){
+    createHTMLTool:function(iconClassName,labelName,index,available){
         let container=document.createElement("div");
         let icon=document.createElement("span");
         let label=document.createElement("span");
@@ -50,6 +53,11 @@ let SectionToolBox={
         container.className="panel-inspector__toolbox__tool-item";
         icon.classList.add("icon");
         label.className="label";
+
+        if(!available){
+            container.classList.add("available-soon");
+        }
+
         container.setAttribute("index",index)
         container.appendChild(icon);
         container.appendChild(label);
