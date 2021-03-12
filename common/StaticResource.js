@@ -18,14 +18,14 @@ let StaticResource={
                 }
             }.bind(this)
         }
-        // this.images.loadingError.src=RUTES.assets_images + "loading-error.png";
-        // this.images.loading.src=RUTES.assets_images + "loading-image.png";
-        // this.images.textThumbnail.src=RUTES.assets_images + "text-thumbnail.png";
-        // this.images.camera.src=RUTES.assets_images + "camera.svg";
-        this.images.loadingError.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/s3pxo5idinbk5bzle09m.png";
-        this.images.loading.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/ttqignry6zg48tvsvved.png";
-        this.images.textThumbnail.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/pm6xunopcwgojwnmy8mm.png";
-        this.images.camera.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/gtye4hcshe2qcofikt4o.svg";
+        this.images.loadingError.src=RUTES.assets_images + "loading-error.png";
+        this.images.loading.src=RUTES.assets_images + "loading-image.png";
+        this.images.textThumbnail.src=RUTES.assets_images + "text-thumbnail.png";
+        this.images.camera.src=RUTES.assets_images + "camera.svg";
+        // this.images.loadingError.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/s3pxo5idinbk5bzle09m.png";
+        // this.images.loading.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/ttqignry6zg48tvsvved.png";
+        // this.images.textThumbnail.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/pm6xunopcwgojwnmy8mm.png";
+        // this.images.camera.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/gtye4hcshe2qcofikt4o.svg";
 
     },
     addListenerOnImagesReady:function(callback){

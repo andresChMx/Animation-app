@@ -61,7 +61,7 @@ var AnimObjectOptionMenu={
 }
 /*RUTES*/
 var RUTES={
-    assets_images:"assets/images/"
+    assets_images:"/assets/images/"
 }
 
 /*Styling variables*/
