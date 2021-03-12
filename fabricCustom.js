@@ -182,6 +182,9 @@ fabric.Object.prototype.pivotY=0;
 fabric.Object.prototype.pivotCornerX=0;//visual corner pos X, (while dragging)
 fabric.Object.prototype.pivotCornerY=0;//visual corner pos y, (while dragging)
 fabric.Object.prototype.mouseStickRange=10;
+//SUPER TEMPORAL VARIABLE, used at loading time
+fabric.Object.indexUnresolvedClipPath=-1;//used only when animable is loaded from json and has clippath. As a temporal clippath index storage until CanvasManager animObjsClippers collection is populated
+
 fabric.Object.prototype.movePivotCornerPos=function(x,y){
     let stickyCorners={}; //will store world key point's positions
     for(let i in this.aCoords){
@@ -683,9 +686,48 @@ En conclusion, esta funcion calcula las dimenciones reales de la imagen svg*/
     return parsedDim
 };
 
+/*========================================*/
+/*storing/loading project*/
+/*========================================*/
+
+/*serializetion*/
 
 
+/*deserialization*/
 
+fabric.StaticCanvas.prototype._enlivenObjects=function (objects, callback, reviver) {
+    if (!objects || objects.length === 0) {
+        callback && callback([]);
+        return;
+    }
+
+    fabric.util.enlivenObjects(objects, function(enlivenedObjects) {
+        callback && callback(enlivenedObjects);
+    }, "window", reviver);
+};
+
+fabric.StaticCanvas.prototype.__setupCanvas=function(serialized, enlivenedObjects, renderOnAddRemove, callback) {
+    var _this = this;
+    enlivenedObjects.forEach(function(obj, index) {
+        // we splice the array just in case some custom classes restored from JSON
+        // will add more object to canvas at canvas init.
+        _this.insertAt(obj, index);
+    });
+    this.renderOnAddRemove = renderOnAddRemove;
+    // remove parts i cannot set as options
+    delete serialized.objects;
+    delete serialized.backgroundImage;
+    delete serialized.overlayImage;
+    delete serialized.background;
+    delete serialized.overlay;
+    // this._initOptions does too many things to just
+    // call it. Normally loading an Object from JSON
+    // create the Object instance. Here the Canvas is
+    // already an instance and we are just loading things over it
+    this._setOptions(serialized);
+    //this.renderAll();
+    callback && callback();
+};
 
 
 

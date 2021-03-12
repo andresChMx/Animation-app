@@ -11,7 +11,6 @@ var AnimationController=fabric.util.createClass({
         this.animator.onTick(this.callbackOnAnimatorTick.bind(this));
         this.animator.onStateChanged(this.callbackOnAnimatorStateChanged.bind(this));
         this.animator.onNewProgress(this.callbackOnAnimatorNewProgress.bind(this))
-        this.animator.setListObjectsToAnimate(CanvasManager.listAnimableObjects);
         MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragged,this);
         MainMediator.registerObserver(WindowManager.name,WindowManager.events.OnUILoaded,this);
         },
@@ -25,6 +24,7 @@ var AnimationController=fabric.util.createClass({
         MainMediator.notify(this.name,this.events.OnAnimatorStateChanged,[state]);
     },
     notificationWindowManagerOnUILoaded:function(){
+        this.animator.setListObjectsToAnimate(CanvasManager.collections.animObjs.list);
         this.animator.canvasToDisplay=CanvasManager.canvas;
     },
     notificationPanelActionEditorOnMarkerDragged:function(args){

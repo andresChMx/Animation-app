@@ -1,6 +1,7 @@
 MainMediator.registerSubjects([WindowManager,PanelActionEditor,PanelAssets,CanvasManager,PanelInspector,PanelDesignerOptions,  PanelPreviewer, PanelAnimation]);
 
-  //var fontsLoader=new FontsLoader();
+/*Loading fonts for general use*/
+var fontsLoader=new FontsLoader();
 
 
 

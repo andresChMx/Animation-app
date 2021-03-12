@@ -24,7 +24,78 @@ var CanvasManager={
     SectionFloatingMenu:null,
 
     listNotReadyAnimableObjects:[], //holds images and svgs that are loading or failed loading
+
     init:function(){
+        let me=this;
+
+        this.collections={
+            renderingObjs:{
+                add:function(obj){
+                    me.canvas.add(obj);
+                },
+                remove:function(obj){
+                    me.canvas.remove(obj);
+                }
+            },
+            animObjs:{
+                list:[],
+                add:function(obj){
+                    this.list.push(obj);
+                    me.notifyOnAnimableObjectAdded.bind(me)(obj);
+                },
+                remove:function(obj){
+                    let indexInList=this.list.indexOf(obj);
+                    if(indexInList!==-1){
+                        this.list.splice(indexInList,1);
+                        me.notifyOnAnimableObjectDeleted.bind(me)(indexInList);
+                    }
+                }
+            },
+            animObjsWithEntrance:{
+                list:[],
+                add:function(obj){
+                    if(obj.entranceBehaviour.entranceModeName!==EntranceName.none) {
+                        this.list.push(obj);
+                        me.notifyOnObjAddedToListObjectsWithEntrance.bind(me)(obj);
+                    }
+                },
+                remove:function(obj){
+                    let indexInList=this.list.indexOf(obj);
+                    if(indexInList!==-1){
+                        this.list.splice(indexInList,1);
+                        me.notifyOnObjDeletedFromListWithEntrance.bind(me)(indexInList);
+                    }
+                }
+            },
+            animObjsClippers:{
+                list:[],
+                add:function(obj){
+                    this.list.push(obj);
+                    me.notifyOnShapeAnimableObjectAdded.bind(me)(obj);
+                },
+                remove:function(obj){
+                    let indexInList=this.list.indexOf(obj);
+                    if(indexInList!==-1){
+                        let deletedItems=this.list.splice(indexInList,1);
+                        me.notifyOnShapeAnimableDeleted.bind(me)(indexInList,deletedItems[0]);
+                    }
+                }
+            },
+            animObjsNotReady:{
+                list:[],
+                add:function(obj){
+                    this.list.push(obj);
+                    obj.registerOnImageStateChanged(me);
+                },
+                remove:function(obj){
+                    let indexInList=this.list.indexOf(obj);
+                    if(indexInList!==-1){
+                        this.list.splice(indexInList,1);
+                    }
+                }
+            }
+        };
+
         this.SectionFloatingMenu=SectionFloatingMenu;
         this.SectionEntranceObjectConfiguration=SectionEntranceObjectConfiguration;
         this.SectionFloatingMenu.init();
@@ -82,20 +153,8 @@ var CanvasManager={
         WindowManager.registerOnKeyDeletePressed(this);
         },
     initCamera:function(){
-        let cameraImage=new Image();
-        cameraImage.src=RUTES.assets_images + "camera.svg";
-        cameraImage.onload=function(){
-            this.camera=new CameraAnimable(cameraImage,{
-                left:0,
-                top:0,
-                width:1400,
-                height:800,
-            });
-            this.listAnimableObjects.push(this.camera);
-            this.canvas.add(this.camera);
-            this.notifyOnAnimableObjectAdded.bind(this)(this.camera);
-        }.bind(this);
-
+        this.camera=CameraAnimable.createInstance(0,0);
+        this.setupNewObject(this.camera);
     },
     panningAndZoomBehaviour:function(){
         let isDragging=false;
@@ -168,21 +227,13 @@ var CanvasManager={
     },
     /*METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTOS DE ENTRADA (DRAWN Y DRAGGED)*/
     getListIndexObjectWithEntrance:function(obj){
-        return this.listAnimableObjectsWithEntrance.indexOf(obj);
+        return this.collections.animObjsWithEntrance.list.indexOf(obj);
     },
     getListIndexAnimableObjects:function(obj){
-        return this.listAnimableObjects.indexOf(obj);
+        return this.collections.animObjs.list.indexOf(obj);
     },
-    addItemToListObjectsWithEntrance:function(obj){
-        this.listAnimableObjectsWithEntrance.push(obj);
-        this.notifyOnObjAddedToListObjectsWithEntrance.bind(this)(obj)
-    },
-    removeFromListObjectsWithEntrance:function(object){
-        let indexInListObjectsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(object);
-        if(indexInListObjectsWithEntrance!==-1){
-            this.listAnimableObjectsWithEntrance.splice(indexInListObjectsWithEntrance,1);
-            this.notifyOnObjDeletedFromListWithEntrance(indexInListObjectsWithEntrance);
-        }
+    getListIndexClipperObjects:function(obj){
+        return this.collections.animObjsClippers.list.indexOf(obj);
     },
     /*FIN-METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTSO DE ENTRADA (DRAWN Y DRAGGED)*/
     getSelectedAnimableObj:function(){
@@ -197,144 +248,32 @@ var CanvasManager={
         // }
 
     },
+    /*objects creating and deleting*/
     createAnimableObject:function(model,type="ImageAnimable",thumbnail=null){
-        let self=this;
-        let initPoint=this.objectInitializationPosition();
-        if(type==="ImageAnimable"){
-                let animObj=new ImageAnimable({
-                    "left":initPoint.x,
-                    "top":initPoint.y,
-                    "imageAssetModel":model,
-                    //"thumbnailImage":thumbnail
-                })
-                animObj.setCoords();
-
-                this.listNotReadyAnimableObjects.push(animObj);
-                animObj.registerOnImageStateChanged(this);
-
-                this.listAnimableObjects.push(animObj);
-                this.listAnimableObjectsWithEntrance.push(animObj);
-                this.canvas.add(animObj);
-                this.notifyOnObjAddedToListObjectsWithEntrance.bind(self)(animObj);
-                this.notifyOnAnimableObjectAdded.bind(self)(animObj);
-
-             // por defecto las imagenes tendran entrada siendo dibujadas, por eso tambien lo agregamos al arreglo del a siguiente linea
-        }else if(type==="SVGAnimable"){
-            let animObj=new SVGAnimable({
-                "left":initPoint.x,
-                "top":initPoint.y,
-                "imageAssetModel":model,
-                //"thumbnailImage":StaticResource.images.loading
-            });
-            animObj.setCoords();
-
-            this.listNotReadyAnimableObjects.push(animObj);
-            animObj.registerOnImageStateChanged(this);
-
-            this.listAnimableObjects.push(animObj);
-            this.listAnimableObjectsWithEntrance.push(animObj);
-            this.canvas.add(animObj);
-            this.notifyOnObjAddedToListObjectsWithEntrance.bind(self)(animObj);
-            this.notifyOnAnimableObjectAdded.bind(self)(animObj);
-
-        }else if(type==="ShapeAnimable"){
-            fabric.loadSVGFromString(model.data,function(objects, options){
-                var groupObj = fabric.util.groupSVGElements(objects, options);
-                //let path=groupObj;// TODO: if more than 1 path fuse them into one
-                let shapeAnimable=null;
-                if(groupObj.type==="path"){
-                    shapeAnimable=new ShapeAnimable(groupObj.path,{
-                        "left":initPoint.x,
-                        "top":initPoint.y,
-                    })
-                }else if(groupObj.type==="circle"){
-                    shapeAnimable=new CircleShapeAnimable({
-                        "left":initPoint.x,
-                        "top":initPoint.y,
-                    });
-                }else if(groupObj.type==="rect"){
-                    shapeAnimable=new RectShapeAnimable({
-                        "left":initPoint.x,
-                        "top":initPoint.y,
-                    })
-                }else if(groupObj.type==="polygon"){
-                    let pathStr="";
-                    let x=0;
-                    let y=0;
-                    for(let j=0;j<groupObj.points.length;j++){
-                        x=groupObj.points[j].x;
-                        y=groupObj.points[j].y;
-                        if(j===0){
-                            pathStr+="M " +x + " " + y + " ";
-                        }else{
-                            pathStr+="L " +x + " " + y + " ";
-                        }
-                    }
-                    //solucion bug con estrella, al parecer la longitud de la recta generada por comando "z" no es contada como longitud total de stroke de un shape
-                    x=groupObj.points[0].x;
-                    y=groupObj.points[0].y;
-                    pathStr+="L " +x + " " + y + " ";
-
-                    shapeAnimable=new ShapeAnimable(pathStr,{
-                        "left":initPoint.x,
-                        "top":initPoint.y,
-                    })
-                    shapeAnimable.pathOffset={x:groupObj.pathOffset.x,y:groupObj.pathOffset.y}
-                }
-
-                shapeAnimable.setCoords();
-                self.listAnimableObjects.push(shapeAnimable);
-                self.listClipableAnimableObjects.push(shapeAnimable);
-                self.canvas.add(shapeAnimable);
-                self.notifyOnShapeAnimableObjectAdded.bind(self)(shapeAnimable);
-                self.notifyOnAnimableObjectAdded.bind(self)(shapeAnimable);
+        let initPosition=this.objectInitializationPosition();
+        if(type==="ShapeAnimable"){
+            window[type].createInstance(initPosition.x,initPosition.y,model,function(newInstance){
+                this.setupNewObject(newInstance);
+            }.bind(this));
+        }
+        else{
+            let newInstance=null;
+            newInstance=window[type].createInstance(initPosition.x,initPosition.y,model);
+            this.setupNewObject(newInstance);
+        }
+    },
+    setupNewObject:function(newObject,listCollNamesToBeSettedup=null/*optional: if null, all needed lists are used*/){
+        if(!listCollNamesToBeSettedup){
+            for(let key in EnumCollectionsNames){
+                window[newObject.type].instanceSetupInCanvasManager(newObject,key);
+            }
+        }else{
+            listCollNamesToBeSettedup.forEach(function(elem){
+                window[newObject.type].instanceSetupInCanvasManager(newObject,elem);
             })
         }
-        else{ //(type==="TextAnimable")
-            let animObj=new TextAnimable("Sample Text",{
-                "left":initPoint.x,
-                "top":initPoint.y,
-                "fontFamily":model.fontFamily,
-                //"thumbnailImage":StaticResource.images.textThumbnail
-            })
-            //textos tambien tendran entrada siendo dibujados
-            animObj.setCoords();
-            animObj.exitEditing();
-            self.listAnimableObjects.push(animObj);
-            self.listAnimableObjectsWithEntrance.push(animObj);
-            self.canvas.add(animObj);
-            self.notifyOnObjAddedToListObjectsWithEntrance.bind(this)(animObj);
-            self.notifyOnAnimableObjectAdded.bind(self)(animObj);
-        }
     },
-    objectInitializationPosition:function(){
-        let self=this;
 
-        let canvasRelativePosition={
-            x:WindowManager.mouse.x-self.canvas._offset.left,
-            y:WindowManager.mouse.y-self.canvas._offset.top
-        }
-        let invertMat=fabric.util.invertTransform(self.canvas.viewportTransform);
-
-        return fabric.util.transformPoint(canvasRelativePosition,invertMat);
-    },
-    moveUpObjectInEntranceList:function(index){
-        if(index>0){
-            let tmp=this.listAnimableObjectsWithEntrance[index];
-            this.listAnimableObjectsWithEntrance[index]=this.listAnimableObjectsWithEntrance[index-1];
-            this.listAnimableObjectsWithEntrance[index-1]=tmp;
-        }
-    },
-    moveDownObjectInEntranceList:function(index){
-        if(index<this.listAnimableObjectsWithEntrance.length-1){
-            let tmp=this.listAnimableObjectsWithEntrance[index];
-            this.listAnimableObjectsWithEntrance[index]=this.listAnimableObjectsWithEntrance[index+1];
-            this.listAnimableObjectsWithEntrance[index+1]=tmp;
-        }
-    },
-    createAnimableText:function(){
-
-    },
     removeActiveAnimableObject:function(){
         let activeAnimableObject=this.getSelectedAnimableObj();
         if(activeAnimableObject){
@@ -349,38 +288,138 @@ var CanvasManager={
         }
     },
     _removeAnimableObject:function(object){
-        let indexInMainList=this.listAnimableObjects.indexOf(object);
-        let indexInObjsWithEntrance=this.listAnimableObjectsWithEntrance.indexOf(object);
-        let indexInShapeObjsList=this.listClipableAnimableObjects.indexOf(object);
-        let indexInNotReadyList=this.listNotReadyAnimableObjects.indexOf(object);
-
-        if(indexInNotReadyList!==-1){
-            this.listNotReadyAnimableObjects.splice(indexInNotReadyList,1);
-        }
-
-        if(indexInMainList!==-1){
-            this.listAnimableObjects.splice(indexInMainList,1);
-        }
-        if(indexInObjsWithEntrance!==-1){
-            this.listAnimableObjectsWithEntrance.splice(indexInObjsWithEntrance,1);
-            this.notifyOnObjDeletedFromListWithEntrance(indexInObjsWithEntrance);
-        }
-        if(indexInShapeObjsList!==-1){
-            this.listClipableAnimableObjects.splice(indexInShapeObjsList,1);
-            this.notifyOnShapeAnimableDeleted(indexInShapeObjsList);
-        }
-        this.canvas.remove(object);
-        this.notifyOnAnimableObjectDeleted(indexInMainList);
+        window[object.type].removeInstance(object);
     },
+    objectInitializationPosition:function(){
+        let self=this;
+        let canvasRelativePosition={
+            x:WindowManager.mouse.x-self.canvas._offset.left,
+            y:WindowManager.mouse.y-self.canvas._offset.top
+        }
+        let invertMat=fabric.util.invertTransform(self.canvas.viewportTransform);
+
+        return fabric.util.transformPoint(canvasRelativePosition,invertMat);
+    },
+
+    moveUpObjectInEntranceList:function(index){
+        if(index>0){
+            let tmp=this.collections.animObjsWithEntrance.list[index];
+            this.collections.animObjsWithEntrance.list[index]=this.collections.animObjsWithEntrance.list[index-1];
+            this.collections.animObjsWithEntrance.list[index-1]=tmp;
+        }
+    },
+    moveDownObjectInEntranceList:function(index){
+        if(index<this.collections.animObjsWithEntrance.list.length-1){
+            let tmp=this.collections.animObjsWithEntrance.list[index];
+            this.collections.animObjsWithEntrance.list[index]=this.collections.animObjsWithEntrance.list[index+1];
+            this.collections.animObjsWithEntrance.list[index+1]=tmp;
+        }
+    },
+
     AreAllImagesReady:function(){
-        return this.listNotReadyAnimableObjects.length===0;
+        return this.collections.animObjsNotReady.list.length===0;
     },
+
     setCanvasOnAnimableObjects:function(){
-        for(let i=0;i<this.listAnimableObjects.length;i++){
-            this.listAnimableObjects[i]._set('canvas', this.canvas);
-            this.listAnimableObjects[i].setCoords();
+        for(let i=0;i<this.collections.animObjs.list.length;i++){
+            this.collections.animObjs.list[i]._set('canvas', this.canvas);
+            this.collections.animObjs.list[i].setCoords();
         }
         this.canvas.renderAll();
+    },
+
+    /*used when loading project*/
+    clear:function(){
+        for(let i=0;i<this.collections.animObjs.list.length;i++){
+            this._removeAnimableObject(this.collections.animObjs.list[i]);
+            i--;
+        }
+        this.canvas.clear();
+    },
+    toJSON:function(){
+        return this.toObject();
+    },
+    toObject:function(){
+        for(let i=0;i<this.collections.animObjsWithEntrance.list.length;i++){
+            this.collections.animObjsWithEntrance.list[i].entranceBehaviour.entranceMode.setTurnIndexInEntraceList(i);
+        }
+        for(let i=0;i<this.collections.animObjsClippers.list.length;i++){
+            this.collections.animObjsClippers.list[i].indexInClipperObjectsList=i;
+        }
+        let object=this.canvas.toObject();
+        object.animatorDuration=SectionActionEditorMenu.widgetsTimelineTools.durationField.getVal();
+        return object;
+    },
+    loadFromJSON:function(json){
+        this.clear();
+
+        //Copied from staticCanvas.loadFromJSON
+        var serialized = (typeof json === 'string')
+            ? JSON.parse(json)
+            : fabric.util.object.clone(json);
+
+        this.canvas.loadFromJSON(serialized);
+        let allObjects=this.canvas.getObjects();
+        //filtering objects with entrance effects
+        let tmpListAnimableObjectsWithEntrances=[];
+        let tmpListClipperObjects=[];
+        for(let i=0;i<allObjects.length;i++){
+            let instance=allObjects[i];
+            if(instance.type==="ShapeAnimable"){
+                tmpListClipperObjects.push(instance);
+            }
+            if(instance.entranceBehaviour.entranceModeName!==EntranceName.none){
+                tmpListAnimableObjectsWithEntrances.push(instance);
+            }
+            if(instance.type==="CameraAnimable"){
+                this.camera=instance;
+            }
+        }
+        //sorting by turn index
+        this._sortLoadedObjectsWithEntraceMode(tmpListAnimableObjectsWithEntrances);
+        this._sortLoadedClipperObjects(tmpListClipperObjects);
+        for(let i=0;i<tmpListClipperObjects.length;i++){
+            this.setupNewObject(tmpListClipperObjects[i],[EnumCollectionsNames.animObjsClippers]);
+            console.log(CanvasManager.collections.animObjsClippers.list[0]);
+        }
+        for(let i=0;i<tmpListAnimableObjectsWithEntrances.length;i++){
+            this.setupNewObject(tmpListAnimableObjectsWithEntrances[i],[EnumCollectionsNames.animObjsWithEntrance]);
+        }
+        for(let i=0;i<allObjects.length;i++){
+            this.setupNewObject(allObjects[i],[EnumCollectionsNames.animObjs,EnumCollectionsNames.animObjsNotReady]);
+
+            let indexUnresolvedClipPath=allObjects[i].indexUnresolvedClipPath;
+            if(indexUnresolvedClipPath!==-1){
+                allObjects[i].clipPath=this.collections.animObjsClippers.list[indexUnresolvedClipPath];
+            }
+        }
+        this.canvas.renderAll(); //solution, the clipping was not been rendered
+
+        SectionActionEditorMenu.widgetsTimelineTools.durationField.setVal(serialized.animatorDuration)
+    },
+    _sortLoadedObjectsWithEntraceMode:function(inputArr) {
+        let n = inputArr.length;
+        for (let i = 1; i < n; i++) {
+            let current = inputArr[i];
+            let j = i-1;
+            while ((j > -1) && (current.entranceBehaviour.entranceMode.turnIndexInEntranceList < inputArr[j].entranceBehaviour.entranceMode.turnIndexInEntranceList)) {
+                inputArr[j+1] = inputArr[j];
+                j--;
+            }
+            inputArr[j+1] = current;
+        }
+    },
+    _sortLoadedClipperObjects:function(inputArr) {
+        let n = inputArr.length;
+        for (let i = 1; i < n; i++) {
+            let current = inputArr[i];
+            let j = i-1;
+            while ((j > -1) && (current.indexInClipperObjectsList < inputArr[j].indexInClipperObjectsList)) {
+                inputArr[j+1] = inputArr[j];
+                j--;
+            }
+            inputArr[j+1] = current;
+        }
     },
     notifyOnObjAddedToListObjectsWithEntrance:function(animObj){
         MainMediator.notify(this.name,this.events.OnObjAddedToListWithEntrance,[animObj]);
@@ -398,8 +437,8 @@ var CanvasManager={
     notifyOnObjDeletedFromListWithEntrance:function(indexInObjsWithEntrance){
         MainMediator.notify(this.name,this.events.OnObjDeletedFromListWidthEntraces,[indexInObjsWithEntrance]);
     },
-    notifyOnShapeAnimableDeleted:function(indexInShapeAnimableList){
-        MainMediator.notify(this.name,this.events.OnShapeAnimableDeleted,[indexInShapeAnimableList]);
+    notifyOnShapeAnimableDeleted:function(indexInShapeAnimableList,deletedItem){
+        MainMediator.notify(this.name,this.events.OnShapeAnimableDeleted,[indexInShapeAnimableList,deletedItem]);
     },
 
     notifyOnObjSelectionUpdated:function(opt){
@@ -419,9 +458,9 @@ var CanvasManager={
     },
     /*child*/notificationOnImageStateChanged:function(imageAnimable){/*naming convention exception, this could be considered as called by children, since it is being called by imageAnimables and svgAniambles*/
         if(imageAnimable.imageLoadingState===EnumAnimableLoadingState.ready){
-            let index=this.listNotReadyAnimableObjects.indexOf(imageAnimable);
+            let index=this.collections.animObjsNotReady.list.indexOf(imageAnimable);
             if(index!==-1){
-                this.listNotReadyAnimableObjects.splice(index,1);
+                this.collections.animObjsNotReady.list.splice(index,1);
             }
         }
     },
@@ -458,14 +497,14 @@ var CanvasManager={
       }
     },
     notificationPanelActionEditorOnMarkerDragEnded:function(){
-        for(let i=0;i<this.listAnimableObjects.length;i++){
-            this.listAnimableObjects[i].setCoords();
+        for(let i=0;i<this.collections.animObjs.list.length;i++){
+            this.collections.animObjs.list[i].setCoords();
         }
     },
     notificationPanelActionEditorOnDurationInput:function(args){
         let durationBefore=args[0];let durationAfter=args[1];
-        for(let i=0;i<this.listAnimableObjects.length;i++){
-            this.listAnimableObjects[i].animator.onDurationChange(durationBefore,durationAfter);
+        for(let i=0;i<this.collections.animObjs.list.length;i++){
+            this.collections.animObjs.list[i].animator.onDurationChange(durationBefore,durationAfter);
         }
     },
 }
@@ -832,13 +871,13 @@ var SectionEntranceObjectConfiguration={
             let entranceModeChoosen= this.unnormalizeUIEntraceMode(this.widgetsEntraceMode.modeSelector.getVal());
             let entranceModeBefore=this.currentAnimableObject.entranceBehaviour.getCurrentEntranceModeName();
             if(entranceModeBefore !==entranceModeChoosen){
+                this.currentAnimableObject.entranceBehaviour.setEntranceModeName(entranceModeChoosen);
                 if(entranceModeChoosen===EntranceName.none && entranceModeBefore!==EntranceName.none){
-                    CanvasManager.removeFromListObjectsWithEntrance(this.currentAnimableObject);
+                    CanvasManager.collections.animObjsWithEntrance.remove(this.currentAnimableObject);
                 }
                 else if(entranceModeBefore===EntranceName.none && entranceModeChoosen!==EntranceName.none){
-                    CanvasManager.addItemToListObjectsWithEntrance(this.currentAnimableObject);
+                    CanvasManager.collections.animObjsWithEntrance.add(this.currentAnimableObject);
                 }
-                this.currentAnimableObject.entranceBehaviour.setEntranceModeName(entranceModeChoosen);
             }
 
             for(let i=0;i<this.currentAnimableObject.applicableEntranceModes.length;i++){

@@ -1,15 +1,15 @@
 let FontsLoader=function(){
     this.init=function(){
-        var myfont = new FontFaceObserver("bauhs 93")
-        myfont.load()
-            .then(function() {
-                // when font is loaded, use it.
-                //canvas.getActiveObject().set("fontFamily", font);
-                //canvas.requestRenderAll();
-            }).catch(function(e) {
-            console.log(e)
-            alert('font loading failed ');
-        });
+        let listPromises=[];
+        for(let fontName in FontsNames){
+            let fontObserver = new FontFaceObserver(fontName);
+            listPromises.push(fontObserver.load());
+        }
+        Promise.all(listPromises).then(function(e){
+            console.log("fonts loaded successfuly");
+        }).catch(function(error){
+
+        })
     }
     this.init();
 }

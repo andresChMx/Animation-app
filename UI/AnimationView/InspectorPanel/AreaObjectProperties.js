@@ -158,7 +158,9 @@ var SectionTransformObject={
         }
     },
     notificationCanvasManagerOnObjModified:function(){
-        this.populateWidgetsWithObjectProperties();
+        if(this.currentSelectedAnimableObjects){//BUG SOLUTION: for some reason when canvas is loaded this event is fired, and since there is no selected object, causes a error inside the funcion in the next line
+            this.populateWidgetsWithObjectProperties();
+        }
     },
     notificationPanelActionEditorOnMarkerDragEnded:function(){
         if(this.currentSelectedAnimableObjects!==null && this.currentSelectedAnimableObjects!==undefined){
@@ -195,13 +197,13 @@ var AdapterSetValue={
 
         if(object.type==="ShapeAnimable"){
             /*for rectShapes*/
-            if(property==="width" || property==="height"){
-                object.calcStrokeLength();
+            if(property==="width"){
+                object.setWidth(value);
+            }else if(property==="height"){
+                object.setHeight(value);
             }
             if(property==="borderRadius"){
-                object.rx=value;
-                object.ry=value;
-                object.calcStrokeLength();
+                object.setBorderRadius(value);
             }
             /*for Circleshapes*/
             if(property==="radius"){
@@ -209,7 +211,6 @@ var AdapterSetValue={
             }
 
         }
-        CanvasManager.canvas.renderAll();
     }
 }
 var SectionStylingObject={
@@ -538,10 +539,10 @@ var SectionStylingObject={
         for(let i=0;i<this.currentSelectedAnimableObjects.length;i++){
             AdapterSetValue.set(this.currentSelectedAnimableObjects[i],property,value);
         }
+        CanvasManager.canvas.renderAll();
     },
     activateFloatingPanelForObjects:function(){
         if(this.currentSelectedAnimableObjects){
-            console.log(this.currentSelectedAnimableObjects[0]);
             for(let i=0;i<this.HTMLCollectionFloatingPanels.length;i++){
                 let idName=this.currentSelectedAnimableObjects[0].type + "-styling-panel";
                 if(this.HTMLCollectionFloatingPanels[i].id===idName) {

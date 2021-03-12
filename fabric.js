@@ -2010,6 +2010,8 @@ fabric.CommonMethods = {
         for (var property in source) {
           if (property === 'canvas') {
             destination[property] = extend({ }, source[property]);
+          }else if(property==='listObserversOnImageStateChanged' || property==='parentObject' || property==='animableObject'){
+            destination[property] = extend({ }, source[property]);
           }
           else if (source.hasOwnProperty(property)) {
             destination[property] = extend({ }, source[property], deep);

@@ -1,4 +1,5 @@
 var TextDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
+    type:"TextDrawn",
     initialize:function(parentObject){
         this.callSuper("initialize",parentObject);
         this.dataGenerator=new TextDrawingDataGenerator();
@@ -113,5 +114,15 @@ var TextDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         // return (coordY/((this.getHeightInDrawingCache()-this._getDisplacementTop()*2)/this.getHeightInMainCanvas()))-this.getHeightInMainCanvas()/2;
         return (((coordY-this._getDisplacementTop())/(((this.cacheCanvasHeight)/this.getHeightInMainCanvas())))-(this.getHeightInMainCanvas()/2))*1.1;
     },
-
+    toObject:function(){
+        let self=this;
+        return {
+            config:this.config,
+            turnIndexInEntranceList:self.turnIndexInEntranceList,
+        }
+    },
+    fromObject:function(object){
+        this.config=object.config;
+        this.turnIndexInEntranceList=object.turnIndexInEntranceList
+    }
 })

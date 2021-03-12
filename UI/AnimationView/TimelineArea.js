@@ -480,6 +480,10 @@ let Padding = fabric.util.createClass(Component, {
         ctx.fillStyle = this.localState.colors.idle;
         ctx.fillRect(this.localState.coords.left, this.localState.coords.top, PADDING_WITH, this.localState.coords.height);
     },
+    /*Overwritten method*/
+    notificationOnMouseDown: function (e) {
+        return false;
+    },
     notificationOnScrollBarResize: function () {
         if (this.name === "paddingRight") {
             this.localState.coords.left = this.parentState.scrollParams.scrollWidth - PADDING_WITH;
@@ -1946,10 +1950,10 @@ var KeyFrame = fabric.util.createClass(Component, {
         this.calcTimelineLocationFromTime(this.timeLineTime);
     },
     notificationOnDurationChange:function(durationBefore,durationAfter){
-        if(durationBefore>durationAfter){
-            let keyFrameTimePercent=this.timeLineTime/durationBefore;
-            this.timeLineTime=durationAfter*keyFrameTimePercent;
-        }
+        // if(durationBefore>durationAfter){
+        //     let keyFrameTimePercent=this.timeLineTime/durationBefore;
+        //     this.timeLineTime=durationAfter*keyFrameTimePercent;
+        // }
         this.calcTimelineLocationFromTime(this.timeLineTime);
     },
     registerOnMouseDown: function (obj) {

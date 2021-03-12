@@ -50,7 +50,6 @@ var DrawnEntranceMode=fabric.util.createClass(EntranceMode,{
         this.isMyTurnToCopyCache=turn;
     },
     notificationOnImageStateChanged:function(){
-        this.baseImage=this.parentObject.largeImage;
     },
     /* New abstract methods (to be implemented)*/
     getDrawingBaseImage:function(){},

@@ -139,23 +139,23 @@ var Animator=fabric.util.createClass({
     },
     onDurationChange:function(durationBefore,durationAfter){
         if(this.hasAnimations() && durationBefore>durationAfter){
-            for(const prop in this.dictAnimations){
-                if(this.hasPropertyAnimations(prop)) {
-                    for (let i = 0; i < this.dictAnimations[prop].length; i++) {
-                        let listAnims = this.dictAnimations[prop];
-                        if (listAnims[0].hasTwoKeys()) {
-                            let percentStartMoment = listAnims[i].startMoment / durationBefore;
-                            let percentEndMoment = listAnims[i].endMoment / durationBefore;
-                            listAnims[i].updateMoments(durationAfter * percentStartMoment, durationAfter * percentEndMoment)
-                        } else {
-                            let percentStartTime = listAnims[0].startMoment / durationBefore;
-                            listAnims[0].updateMoments(durationAfter * percentStartTime, -1)
-                            break;
-                        }
-
-                    }
-                }
-            }
+            // for(const prop in this.dictAnimations){
+            //     if(this.hasPropertyAnimations(prop)) {
+            //         for (let i = 0; i < this.dictAnimations[prop].length; i++) {
+            //             let listAnims = this.dictAnimations[prop];
+            //             if (listAnims[0].hasTwoKeys()) {
+            //                 let percentStartMoment = listAnims[i].startMoment / durationBefore;
+            //                 let percentEndMoment = listAnims[i].endMoment / durationBefore;
+            //                 listAnims[i].updateMoments(durationAfter * percentStartMoment, durationAfter * percentEndMoment)
+            //             } else {
+            //                 let percentStartTime = listAnims[0].startMoment / durationBefore;
+            //                 listAnims[0].updateMoments(durationAfter * percentStartTime, -1)
+            //                 break;
+            //             }
+            //
+            //         }
+            //     }
+            // }
         }
     },
     toObject:function(){
@@ -169,6 +169,24 @@ var Animator=fabric.util.createClass({
         }
         object.dictAnimations=dictAnimations;
         return object;
+    },
+    fromObject:function(object){
+        this.entranceTimes=object.entranceTimes;
+
+        for(let key in object.dictAnimations){
+            this.dictAnimations[key]=[];
+            for(let i in object.dictAnimations[key]){
+                let animationObj=object.dictAnimations[key][i];
+                this.addAnimation(animationObj.property,
+                    animationObj.startValue,
+                    animationObj.endValue,
+                    animationObj.startMoment,
+                    animationObj.endMoment,
+                    animationObj.easingType,
+                    animationObj.tweenType,
+                    )
+            }
+        }
     }
 });
 var AnimatorCamera=fabric.util.createClass(Animator,{

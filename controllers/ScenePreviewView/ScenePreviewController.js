@@ -42,8 +42,8 @@ var ScenePreviewController=fabric.util.createClass({
     },
     loadObjectsForAnimation:function(listForAnimator,listAnimableObjectDrawnEntrance){
         let startTimeCounter=0;
-        for(let i=0;i<CanvasManager.listAnimableObjectsWithEntrance.length;i++){
-            let animableObjWithEntrance=CanvasManager.listAnimableObjectsWithEntrance[i];
+        for(let i=0;i<CanvasManager.collections.animObjsWithEntrance.list.length;i++){
+            let animableObjWithEntrance=CanvasManager.collections.animObjsWithEntrance.list[i];
 
             animableObjWithEntrance.animator.entranceTimes.startTime=startTimeCounter;
             startTimeCounter+=animableObjWithEntrance.animator.entranceTimes.delay + animableObjWithEntrance.animator.entranceTimes.duration;
@@ -54,7 +54,9 @@ var ScenePreviewController=fabric.util.createClass({
                 this.counterObjectsWithEntranceForWaiting--;
             }.bind(this));
         }
-        let canvasObjects=CanvasManager.canvas.getObjects();
+        let canvasObjects=CanvasManager.canvas.getObjects();/*temporary, we should use the listAnimableObjects, but first we should update that list when objects are been moved back and forward
+        . We are using this solution because until this moment there is not no-animable objects in canvas, that is to say, all objects in canvas are animable, so there is no problem*/
+        // let canvasObjects=CanvasManager.listAnimableObjects;
         for(let i=0;i<canvasObjects.length;i++){
 
             let object=canvasObjects[i];
@@ -66,8 +68,8 @@ var ScenePreviewController=fabric.util.createClass({
         }
     },
     clearEntranceDataFromAnimableObjects:function(){
-        for(let i=0;i<CanvasManager.listAnimableObjects.length;i++) {//omitiendo el primer porque es la camara
-            let animableObj = CanvasManager.listAnimableObjects[i];
+        for(let i=0;i<CanvasManager.collections.animObjs.list.length;i++) {//omitiendo el primer porque es la camara
+            let animableObj = CanvasManager.collections.animObjs.list[i];
             animableObj.entranceBehaviour.sleep();
         }
     },

@@ -388,7 +388,7 @@ var SectionActionEditorMenu={
                 setVal:function(val){
                     this.field.setValue(val);
                 },
-                // getVal:function(){return this.field},
+                getVal:function(){return this.field.getValue()},
             }
         }
         this.initHTMLTweenMenu();
@@ -866,6 +866,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
     childNotificationOnDurationInput:function(durationBefore,newDuration){
         this.SectionTimeLine.notificationOnDurationChange(durationBefore,newDuration);
         this.timelineController.animator.setTotalDuration(newDuration); // se notifica directamente a este elemento porque es su controller, los componentes se pueden comunicar con libertar directamente con sus controllers
+
         MainMediator.notify(this.name,this.events.OnDurationInput,[durationBefore,newDuration]);
     },
     childNotificationOnBtnDeleteKeyFrame:function(){

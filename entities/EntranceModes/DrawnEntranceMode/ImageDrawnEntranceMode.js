@@ -1,5 +1,5 @@
 var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
-    type:"ImageDrawn",
+        type:"ImageDrawn",
     initialize:function(parentObject){
         this.callSuper("initialize",parentObject);
 
@@ -33,7 +33,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         this.meanWhileImage.src=this.cacheManager.canvas.toDataURL();
         this.isMyTurnToCopyCache=false;
 
-        if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
+            if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
             this.dataGenerator.generateDefaultDrawingPointsAndLineWidth(
                 this.baseImage.naturalWidth,
                 this.baseImage.naturalHeight,
@@ -48,7 +48,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
                 this.drawingData.points,
                 this.drawingData /*OUT*/
             );
-        }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+            }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
             this.dataGenerator.generateCrtlPointsFromPointsMatrix(
                 this.drawingData.points,
                 this.drawingData /*OUT*/
@@ -59,13 +59,13 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         callback();
     },
     clearEntranceData:function(){
-        if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
+            if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
             this.drawingData.points=[];
             this.drawingData.linesWidths=[];
             this.drawingData.ctrlPoints=[];
             this.drawingData.strokesTypes=[];
             this.drawingData.pathsNames=[];
-        }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+            }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
             this.drawingData.ctrlPoints=[];
         }
     },
@@ -113,7 +113,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         let canvas=document.createElement("canvas");
         let ctx=canvas.getContext("2d");
         // Generating drawing data if necessary, se estan limpiando los ctrlPoints al final, en caso fueron generados
-        if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
+            if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
             // canvas.width=this.baseImage.naturalWidth;
             // canvas.height=this.baseImage.naturalHeight;
             // ctx.drawImage(this.baseImage,0,0);
@@ -122,7 +122,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
             // canvas.remove();
             this.maskedImage=this.baseImage.cloneNode();
             return;
-        }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+            }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
             this.dataGenerator.generateCrtlPointsFromPointsMatrix(
                 this.drawingData.points,
                 this.drawingData /*OUT*/
@@ -131,7 +131,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         // lo siguiente es porque se puede invocar a esta funcion aun estando en otro entrance mode diferente a uno de tipo drawn, ya que se puede entrar al editor de paths desde cualquier modo
         // pero obviamente al final de ejecutar el pathIllustrator debemos devolverlo a como estaba
         let tmpCurrentEntranceMode=this.parentObject.entranceBehaviour.getCurrentEntranceModeName();
-        if(tmpCurrentEntranceMode!==this.type){
+            if(tmpCurrentEntranceMode!==this.type){
             this.parentObject.entranceBehaviour.setEntranceModeName(this.type);
         }
 
@@ -154,5 +154,18 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
             this.drawingData.ctrlPoints=[];
             this.parentObject.entranceBehaviour.setEntranceModeName(tmpCurrentEntranceMode); // restoring animable object entrance mode
         }.bind(this))
+    },
+    toObject:function(){
+        let self=this;
+        return {
+            config:self.config,
+            drawingData:self.drawingData,
+            turnIndexInEntranceList:self.turnIndexInEntranceList,
+        }
+    },
+    fromObject:function(object){
+        this.config=object.config;
+        this.drawingData=object.drawingData;
+        this.turnIndexInEntranceList=object.turnIndexInEntranceList
     }
 })

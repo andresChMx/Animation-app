@@ -27,9 +27,9 @@ let StaticResource={
         this.images.textThumbnail.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/pm6xunopcwgojwnmy8mm.png";
         this.images.camera.src="https://res.cloudinary.com/dfr41axmh/image/upload/v1614058005/temporary/gtye4hcshe2qcofikt4o.svg";
 
-
     },
     addListenerOnImagesReady:function(callback){
         this.cbOnImagesLoaded=callback;
     }
 }
+

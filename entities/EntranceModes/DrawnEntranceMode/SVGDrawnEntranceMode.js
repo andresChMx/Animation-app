@@ -8,7 +8,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         //auxiliary variables (not storing)
         this.auxEntranceDuration=0; // stores entrance effect duration value temporarily
         this.lastIndexTruePath=0;   //  used for fill reveal mode "fill_drawn"
-        this.finalImageBitmap=null; // TEMPORAL SOLUTION TO ABRUPT CHANGE FROM BITMAP TO VECTOS AT THE END OF SVG AUTOMATIC DRAWING. stores the bitmap version of the base vector image. Used when drawing and no paths were crated
+        this.finalImageBitmap=null; // (baseImage replacement)TEMPORAL SOLUTION TO ABRUPT CHANGE FROM BITMAP TO VECTOS AT THE END OF SVG AUTOMATIC DRAWING. stores the bitmap version of the base vector image. Used when drawing and no paths were crated
         this.cachesScalerFactor=2.5; // solution for pixeled svg images,
 
         this.cacheWidth=0;
@@ -27,11 +27,12 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         this.baseImage=this.parentObject.largeImage;
         if(this.parentObject.imageLoadingState===EnumAnimableLoadingState.ready){
             //the finalMasked iamge will be generated if paths are created. But now the need
-            //to have a pixels version of the image to avoid grows behavious al the end of drawing
+            //to have a pixels version of the image to avoid gross behavious al the end of drawing
             //in no-paths version of the drawing(pasaba de pixeles a vectores)
             this._calcCacheWidth();
             this._calcCacheHeight()
             this.generateBitmapSVGFinalImage();
+            this.generateFinalMaskedImage(); /*necesary then this object is a clone*/
         }
     },
     generateBitmapSVGFinalImage:function(){ //
@@ -163,6 +164,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
             this.drawingData.ctrlPoints=[];
             this.drawingData.strokesTypes=[];
             this.drawingData.pathsNames=[];
+            this.drawingData.linesColors=[];
 
             /*this is the addicional block, cleaning aditional data related to svganimables only*/
             if(this.config.fillRevealMode==="drawn_fill"){}
@@ -237,4 +239,5 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         this.parentObject.animator.entranceTimes.duration=this.auxEntranceDuration;
         this.parentObject.animator.removeHiddenAnimation("fadeInTransitionOpacity",0);
     },
+
 })

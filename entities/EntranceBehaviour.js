@@ -3,7 +3,7 @@ let EntranceEffectBehaviour=fabric.util.createClass({
         this.parentObject=parentObject;
         this.applicableEntranceModes=applicableEntranceModes;
 
-        this.isActive=false;
+        this.isActive=false;               //indicates whether should start rendering effect
         this.entranceModeName=null;       //holds the object's current entrance mode name
         this.entranceMode=null;
         this.dictEntranceModes={};
@@ -42,6 +42,23 @@ let EntranceEffectBehaviour=fabric.util.createClass({
         this.isActive=false;
         this.entranceMode.clearEntranceData();
     },
+    toObject:function(){
+        let self=this;
+        let dictEntranceModes={};
+        for(let key in this.dictEntranceModes){
+            dictEntranceModes[key]=this.dictEntranceModes[key].toObject();
+        }
+        return {
+            entranceModeName:self.entranceModeName,
+            dictEntranceModes:dictEntranceModes
+        }
+    },
+    fromObject:function(object){
+        for(let key in this.dictEntranceModes){
+            this.dictEntranceModes[key].fromObject(object.dictEntranceModes[key]);
+        }
+        this.setEntranceModeName(object.entranceModeName);
+    }
 })
 
 

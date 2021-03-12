@@ -91,12 +91,12 @@ var SectionObjectsEntraceEditor={
     },
     childNotificationOnDurationNewValue:function(value,target){
         let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode.parentNode)-1;
-        CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceTimes.duration=value;
+        CanvasManager.collections.animObjsWithEntrance.list[index].animator.entranceTimes.duration=value;
 
     },
     childNotificationOnDelayNewValue:function(value,target){
         let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode.parentNode)-1;
-        CanvasManager.listAnimableObjectsWithEntrance[index].animator.entranceTimes.delay=value;
+        CanvasManager.collections.animObjsWithEntrance.list[index].animator.entranceTimes.delay=value;
 
     },
     onHTMLItemClicked:function(e){
@@ -105,7 +105,7 @@ var SectionObjectsEntraceEditor={
             HTMLElem=HTMLElem.parentNode;
         }
         let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
-        CanvasManager.canvas.setActiveObject(CanvasManager.listAnimableObjectsWithEntrance[trueIndex])
+        CanvasManager.canvas.setActiveObject(CanvasManager.collections.animObjsWithEntrance.list[trueIndex])
         CanvasManager.canvas.renderAll();
     },
     /*NOTIFICACIONES ENTRANTES*/
@@ -150,8 +150,14 @@ var SectionAnimableObjectsEditor={
             isActive:false,
             htmlElemt:document.querySelector(".section-animable-object-inspector__object-menu"),
             mapMenuOptionAction:{
-                "duplicate":function(){
-
+                "duplicate":function(currentSelectedObject){
+                    currentSelectedObject.clone(function (cloned){
+                        cloned.set({
+                            left:cloned.left+10,
+                            top:cloned.top+10,
+                        })
+                        CanvasManager.setupNewObject(cloned);
+                    });
                 },
                 "delete":function(){
                     CanvasManager.removeActiveAnimableObject();
@@ -167,7 +173,7 @@ var SectionAnimableObjectsEditor={
             mapSubMenusOptions:{
                 "addMask":function(target,parent,currentSelectedObject){
                     let index=[].slice.call(parent.children).indexOf(target);
-                    let maskingObject=CanvasManager.listClipableAnimableObjects[index];
+                    let maskingObject=CanvasManager.collections.animObjsClippers.list[index];
                     currentSelectedObject.applyClipping(maskingObject);
 
                     CanvasManager.canvas.renderAll();
@@ -206,8 +212,8 @@ var SectionAnimableObjectsEditor={
             },
             _populateShapeObjectsName:function(){
                 let addMaskOptionSubmenu=this.htmlElemt.querySelector("#addMask").children[1];
-                for(let i=0;i<CanvasManager.listClipableAnimableObjects.length;i++){
-                    addMaskOptionSubmenu.children[i].textContent=CanvasManager.listClipableAnimableObjects[i].name;
+                for(let i=0;i<CanvasManager.collections.animObjsClippers.list.length;i++){
+                    addMaskOptionSubmenu.children[i].textContent=CanvasManager.collections.animObjsClippers.list[i].name;
                 }
             },
             createShapeObjectItem:function(animObj){
@@ -268,7 +274,7 @@ var SectionAnimableObjectsEditor={
         }
 
         let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
-        CanvasManager.canvas.setActiveObject(CanvasManager.listAnimableObjects[trueIndex]);
+        CanvasManager.canvas.setActiveObject(CanvasManager.collections.animObjs.list[trueIndex]);
 
         if(e.target.className==="group-box-actions__btn-menu button-solid-behaviour"){
             this.objectMenu.enableOptions(CanvasManager.getSelectedAnimableObj().applicableMenuOptions);
@@ -299,7 +305,7 @@ var SectionAnimableObjectsEditor={
             HTMLElem=HTMLElem.parentNode;
         }
         let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
-        CanvasManager.listAnimableObjects[trueIndex].name=newName;
+        CanvasManager.collections.animObjs.list[trueIndex].name=newName;
     },
     notificationOnMouseDown:function(e){
         //OBJECT MENU HANDLING

@@ -3,10 +3,20 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
     applicableEntranceModes:[EntranceName.none],
     applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
     applicableAnimationProperties:["position","scale","rotation","opacity","border_width","border_start","border_end"],
+    applicableCanvasManagerCollections:[
+        EnumCollectionsNames.renderingObjs,
+        EnumCollectionsNames.animObjs,
+        EnumCollectionsNames.animObjsWithEntrance,
+        EnumCollectionsNames.animObjsClippers
+    ],
     type:"ShapeAnimable",
     subtype:"PathAnimable",
     initialize:function(pathList,options){
+        if(!pathList){pathList=[];}
+        if(!options){options={};}
         this.callSuper('initialize', pathList,options);
+        this.shapeAssetModel=options.shapeAssetModel;
+        this.indexInClipperObjectsList=-1;
         /*selection,transforming styling*/
         this.padding=10;
         this.transparentCorners= false;    //
@@ -24,8 +34,6 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
         // siempre estableseremos !!!! dirty=true !!!!, cosa que le cache sera siempre refrescado.
         this.absolutePositioned=true;    // Propiedad de FABRIC util para cuando el objecto es usado como clipPath, hace que la posicion del enmascaramiento sea se forma absoluta
 
-        this.entranceMode=EntranceName.none; // Siempre sera none, por ende ni se permitira abrir el panel de configuraciones para ShapeAnimable
-
         /*Editable styling properties*/
         this.strokeWidth=4;             // Propiedad de FABRIC
         this.fill="#000000";        // Propiedad de FABRIC
@@ -38,19 +46,18 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
         this.inverted=false;            // Propiedad de FABRIC.
         this.listEditableStylingProperties=["strokeWidth", "fill", "transparentFill", "stroke", "transparentStroke", "startRenderingPoint", "endRenderingPoint", "clipBorder", "inverted",] //for the  object properties editor (UI)
 
+
         this.entranceBehaviour=new EntranceEffectBehaviour(this,this.applicableEntranceModes);
 
-        /*auxiliary attributes*/
-        this.totalStrokeLength=PathLength.calculate(this.pathOffset.x,this.pathOffset.y,this.path); //util for startRenderingPoint and endRenderingPoint styling properties. Store the total length of the path
         this.animator=new Animator(this);
+        /*Starting logic*/
+        if(pathList.length>0){
+            this.totalStrokeLength=PathLength.calculate(this.pathOffset.x,this.pathOffset.y,this.path); //util for startRenderingPoint and endRenderingPoint styling properties. Store the total length of the path
+        }
     },
-    setEntranceMode:function(mode){
-        this.entranceMode=mode;
+    load:function(){
+        //TODO: restart logic
     },
-    getEntranceMode:function(){
-        return this.entranceMode;
-    },
-
     /*Inspector main Object list, items options actions*/
     setLockState:function(val){
         this.selectable=!val;
@@ -164,8 +171,52 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
         // APARTIR DE AQUI ERA EL MISMO COMPORTAMIENTO QUE EL OBJECTO ORIGINAL, ASI QUE SOLO SE LLAMA AL METODO DEL PADRE (METODO ORIGINAL)
         this.callSuper("_renderPathCommands",ctx);
     },
+    toObject:function(){
+        let propertiesToInclude=[
+            "shapeAssetModel",
+            "indexInClipperObjectsList",
+            "name",
 
+            "transparentFill",
+            "transparentStroke",
+            "startRenderingPoint",
+            "endRenderingPoint",
+            "clipBorder"
+        ]
+        return fabric.util.object.extend(
+            fabric.Object.prototype.toObject.call(this,propertiesToInclude)
+            , {
+                pivotX:this.pivotX,
+                pivotY:this.pivotY,
+                pivotCornerX:this.pivotCornerX,
+                pivotCornerY:this.pivotCornerY,
+
+                entranceBehaviour:this.entranceBehaviour.toObject(),
+                animator:this.animator.toObject()
+            });
+    },
+    clone:function(callback){
+        let object=this.toObject();
+        object.path=this.path;
+        ShapeAnimable.cloneFromObject(object,callback)
+    }
 });
+ShapeAnimable.cloneFromObject = function(_object, callback) {
+    var object = fabric.util.object.clone(_object,true);
+    /*initializing with no state*/
+    let newShapeAnimable=new ShapeAnimable();
+    newShapeAnimable.setOptions(object)
+    fabric.Polyline.prototype._setPositionDimensions.call(newShapeAnimable, object);
+
+    newShapeAnimable.entranceBehaviour=new EntranceEffectBehaviour(newShapeAnimable,newShapeAnimable.applicableEntranceModes);
+    newShapeAnimable.animator=new Animator(newShapeAnimable);           //New fabric property
+    newShapeAnimable.entranceBehaviour.fromObject(object.entranceBehaviour);
+    newShapeAnimable.animator.fromObject(object.animator);
+
+    newShapeAnimable.totalStrokeLength=PathLength.calculate(newShapeAnimable.pathOffset.x,newShapeAnimable.pathOffset.y,newShapeAnimable.path); //util for startRenderingPoint and endRenderingPoint styling properties. Store the total length of the path
+
+    callback(newShapeAnimable);
+};
 
 var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
     applicableEntranceModes:[EntranceName.none],
@@ -174,7 +225,10 @@ var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
     type:"ShapeAnimable",
     subtype:"CircleShapeAnimable",
     initialize:function(options){
+        if(!options){options={}}
         this.callSuper('initialize',options);
+        this.shapeAssetModel=options.shapeAssetModel;
+        this.indexInClipperObjectsList=-1;
         /*selection,transforming styling*/
         this.padding=10;
         this.transparentCorners= false;    //
@@ -205,12 +259,6 @@ var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
 
         /*auxiliary attributes*/
         this.animator=new Animator(this);
-    },
-    setEntranceMode:function(mode){
-        this.entranceMode=mode;
-    },
-    getEntranceMode:function(){
-        return this.entranceMode;
     },
 
     /*Inspector main Object list, items options actions*/
@@ -306,14 +354,63 @@ var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
         this.endAngle=(this.endRenderingPoint/100)*Math.PI*2;
         this.callSuper("_render",ctx);
     },
+
+    toObject:function(){
+        let propertiesToInclude=[
+            "shapeAssetModel",
+            "indexInClipperObjectsList",
+            "name",
+
+            "transparentFill",
+            "transparentStroke",
+            "startRenderingPoint",
+            "endRenderingPoint",
+            "radius",
+            "clipBorder",
+        ]
+        return fabric.util.object.extend(
+            fabric.Object.prototype.toObject.call(this,propertiesToInclude)
+            , {
+                pivotX:this.pivotX,
+                pivotY:this.pivotY,
+                pivotCornerX:this.pivotCornerX,
+                pivotCornerY:this.pivotCornerY,
+
+                entranceBehaviour:this.entranceBehaviour.toObject(),
+                animator:this.animator.toObject()
+
+            });
+    },
+    clone:function(callback){
+        let object=this.toObject();
+        CircleShapeAnimable.cloneFromObject(object,callback)
+    }
 });
+CircleShapeAnimable.cloneFromObject = function(_object, callback) {
+    var object = fabric.util.object.clone(_object,true);
+    /*initializing with no state*/
+    let newCircleShapeAnimable=new CircleShapeAnimable();
+    newCircleShapeAnimable.setOptions(object)
+
+    newCircleShapeAnimable.entranceBehaviour=new EntranceEffectBehaviour(newCircleShapeAnimable,newCircleShapeAnimable.applicableEntranceModes);
+    newCircleShapeAnimable.animator=new Animator(newCircleShapeAnimable);           //New fabric property
+    newCircleShapeAnimable.entranceBehaviour.fromObject(object.entranceBehaviour);
+    newCircleShapeAnimable.animator.fromObject(object.animator);
+
+    callback(newCircleShapeAnimable);
+};
+
 let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
     applicableEntranceModes:[EntranceName.none],
     applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
     applicableAnimationProperties:["position","scale","rotation","opacity","border_width","border_start","border_end"],
     type:"ShapeAnimable",
+    subtype:"RectShapeAnimable",
     initialize:function(options){
+        if(!options){options={}}
         this.callSuper('initialize',options);
+        this.shapeAssetModel=options.shapeAssetModel;
+        this.indexInClipperObjectsList=-1;
         /*selection,transforming styling*/
         this.padding=10;
         this.transparentCorners= false;    //
@@ -346,6 +443,7 @@ let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
         /*auxiliary attributes*/
         this.animator=new Animator(this);
     },
+
     calcStrokeLength:function(){
         var rx = this.rx ? Math.min(this.rx, this.width / 2) : 0,
             ry = this.ry ? Math.min(this.ry, this.height / 2) : 0,
@@ -368,13 +466,19 @@ let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
             isRounded && path.push(["C",x, y + k * ry, x + k * rx, y, x + rx, y]);
         this.totalStrokeLength=PathLength.calculate(0,0,path); //util for startRenderingPoint and endRenderingPoint styling properties. Store the total length of the path
     },
-    setEntranceMode:function(mode){
-        this.entranceMode=mode;
+    setWidth:function(value){
+        this.width=value;
+        this.calcStrokeLength();
     },
-    getEntranceMode:function(){
-        return this.entranceMode;
+    setHeight:function(value){
+        this.height=value;
+        this.calcStrokeLength();
     },
-
+    setBorderRadius:function(value){
+        this.rx=value;
+        this.ry=value;
+        this.calcStrokeLength();
+    },
     /*Inspector main Object list, items options actions*/
     setLockState:function(val){
         this.selectable=!val;
@@ -480,4 +584,141 @@ let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
         ctx.setLineDash(pattern);
         this.callSuper("_render",ctx);
     },
+    toObject:function(){
+        let propertiesToInclude=[
+            "shapeAssetModel",
+            "indexInClipperObjectsList",
+            "name",
+
+
+
+            "transparentFill",
+            "transparentStroke",
+            "startRenderingPoint",
+            "endRenderingPoint",
+            "borderRadius",
+            "clipBorder"
+        ]
+        return fabric.util.object.extend(
+            fabric.Object.prototype.toObject.call(this,propertiesToInclude)
+            , {
+                pivotX:this.pivotX,
+                pivotY:this.pivotY,
+                pivotCornerX:this.pivotCornerX,
+                pivotCornerY:this.pivotCornerY,
+
+                entranceBehaviour:this.entranceBehaviour.toObject(),
+                animator:this.animator.toObject()
+            });
+    },
+    clone:function(callback){
+        let object=this.toObject();
+        RectShapeAnimable.cloneFromObject(object,callback)
+    }
 })
+
+RectShapeAnimable.cloneFromObject = function(_object, callback) {
+    var object = fabric.util.object.clone(_object,true);
+    /*initializing with no state*/
+    let newRectShapeAnimable=new RectShapeAnimable();
+    newRectShapeAnimable.setOptions(object)
+
+    newRectShapeAnimable.entranceBehaviour=new EntranceEffectBehaviour(newRectShapeAnimable,newRectShapeAnimable.applicableEntranceModes);
+    newRectShapeAnimable.animator=new Animator(newRectShapeAnimable);           //New fabric property
+    newRectShapeAnimable.entranceBehaviour.fromObject(object.entranceBehaviour);
+    newRectShapeAnimable.animator.fromObject(object.animator);
+
+    newRectShapeAnimable.setBorderRadius(object.borderRadius);/*also calculates path length*/
+
+    callback(newRectShapeAnimable);
+};
+
+/*===============================*/
+/*=====  Static functions  ======*/
+/*===============================*/
+ShapeAnimable.fromObject=function(object,callback){
+/*Object loading*/
+    // object.toObject()
+    /*initializing with no state*/
+    ShapeAnimable.createInstance(0,0,object.shapeAssetModel,function(newInstance){
+
+        let entranceBehaviourObject=object.entranceBehaviour;
+        let animatorObject=object.animator;
+        delete object.entranceBehaviour;
+        delete object.animator;
+
+        newInstance.setOptions(object);//suposed to set object state
+
+        newInstance.entranceBehaviour.fromObject(entranceBehaviourObject);
+        newInstance.animator.fromObject(animatorObject);
+
+        callback(newInstance,false);
+    })//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
+}
+/*====================================*/
+/*======== Object creation ===========*/
+/*====================================*/
+/*the next two methods are called separetely if object is cloned or loaded*/
+ShapeAnimable.createInstance=function(left,top,shapeAssetModel,callback){
+    /*TODO make it synchronously. */
+    fabric.loadSVGFromString(shapeAssetModel.data,function(objects, options){
+        var groupObj = fabric.util.groupSVGElements(objects, options);
+        //let path=groupObj;// TODO: if more than 1 path fuse them into one
+        let shapeAnimable=null;
+        if(groupObj.type==="path"){
+            shapeAnimable=new ShapeAnimable(groupObj.path,{
+                "left":left,
+                "top":top,
+                "shapeAssetModel":shapeAssetModel
+            })
+        }else if(groupObj.type==="circle"){
+            shapeAnimable=new CircleShapeAnimable({
+                "left":left,
+                "top":top,
+                "shapeAssetModel":shapeAssetModel
+            });
+        }else if(groupObj.type==="rect"){
+            shapeAnimable=new RectShapeAnimable({
+                "left":left,
+                "top":top,
+                "shapeAssetModel":shapeAssetModel
+            })
+        }else if(groupObj.type==="polygon"){
+            let pathStr="";
+            let x=0;
+            let y=0;
+            for(let j=0;j<groupObj.points.length;j++){
+                x=groupObj.points[j].x;
+                y=groupObj.points[j].y;
+                if(j===0){
+                    pathStr+="M " +x + " " + y + " ";
+                }else{
+                    pathStr+="L " +x + " " + y + " ";
+                }
+            }
+            //solucion bug con estrella, al parecer la longitud de la recta generada por comando "z" no es contada como longitud total de stroke de un shape
+            x=groupObj.points[0].x;
+            y=groupObj.points[0].y;
+            pathStr+="L " +x + " " + y + " ";
+
+            shapeAnimable=new ShapeAnimable(pathStr,{
+                "left":left,
+                "top":top,
+                "shapeAssetModel":shapeAssetModel
+            })
+            shapeAnimable.pathOffset={x:groupObj.pathOffset.x,y:groupObj.pathOffset.y}
+        }
+        callback(shapeAnimable);
+    })
+}
+ShapeAnimable.instanceSetupInCanvasManager=function(instance,collectionName){
+    let contains=this.prototype.applicableCanvasManagerCollections.indexOf(collectionName);
+    if(contains>-1){
+        CanvasManager.collections[collectionName].add(instance);
+    }
+}
+ShapeAnimable.removeInstance=function(instance){
+    this.prototype.applicableCanvasManagerCollections.forEach(function(elem){
+        CanvasManager.collections[elem].remove(instance)
+    })
+}

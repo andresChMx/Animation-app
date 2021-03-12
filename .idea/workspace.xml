@@ -21,9 +21,39 @@
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/InspectorPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Globals/Variables.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/Variables.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AnimationPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaObjectProperties.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaObjectProperties.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaSceneObjects.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaSceneObjects.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/TimelineArea.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/AnimationRelated/Animator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/StaticResource.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/StaticResource.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/fontsLoading/FontsLoader.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/fontsLoading/FontsLoader.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/fontsLoading/drawinData.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/AnimationView/AnimationController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/AnimationView/AnimationController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/ScenePreviewView/ScenePreviewController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/CameraAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/CameraAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/ImageAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/ImageAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/SVGAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/SVGAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/ShapeAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/ShapeAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/TextAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/TextAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceBehaviour.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceBehaviour.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/DrawnEntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/DrawnEntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/ImageDrawnEntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/ImageDrawnEntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/SVGDrawnEntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/SVGDrawnEntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/TextDrawnEntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/TextDrawnEntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/EntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/EntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/NoneEntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/NoneEntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enviroment.blend1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fabric.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabric.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fabricCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabricCustom.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/util.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -252,7 +282,16 @@
       <workItem from="1615043881621" duration="28365000" />
       <workItem from="1615130075054" duration="5669000" />
       <workItem from="1615142489558" duration="7371000" />
-      <workItem from="1615158443829" duration="16063000" />
+      <workItem from="1615158443829" duration="16485000" />
+      <workItem from="1615217771901" duration="43236000" />
+      <workItem from="1615300278745" duration="6533000" />
+      <workItem from="1615306976462" duration="32877000" />
+      <workItem from="1615385457216" duration="258000" />
+      <workItem from="1615385943076" duration="21305000" />
+      <workItem from="1615421932497" duration="18299000" />
+      <workItem from="1615469702976" duration="3283000" />
+      <workItem from="1615473339417" duration="190000" />
+      <workItem from="1615473618394" duration="25392000" />
     </task>
     <servers />
   </component>
@@ -284,10 +323,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="702" y="324" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1050@0.0.1920.1050" timestamp="1614045140566" />
-    <state x="689" y="269" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1614045588100">
+    <state x="689" y="269" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1615517427800">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="689" y="269" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1614045588100" />
+    <state x="689" y="269" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1615517427800" />
     <state x="92" y="92" width="1736" height="866" key="DiffContextDialog" timestamp="1612505073066">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -308,17 +347,17 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="569" y="201" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1050@0.0.1920.1050" timestamp="1608214205489" />
-    <state x="520" y="249" width="878" height="801" key="find.popup" timestamp="1615187459248">
+    <state x="520" y="249" width="878" height="801" key="find.popup" timestamp="1615493604832">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="520" y="249" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1615187459248" />
-    <state x="616" y="237" key="run.anything.popup" timestamp="1615050151818">
+    <state x="520" y="249" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1615493604832" />
+    <state x="616" y="237" key="run.anything.popup" timestamp="1615233214172">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1615050151818" />
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1614097635511">
+    <state x="616" y="237" key="run.anything.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1615233214172" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1615394241146">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1614097635511" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1615394241146" />
   </component>
 </project>
