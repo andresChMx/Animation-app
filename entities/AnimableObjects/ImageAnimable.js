@@ -7,7 +7,6 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     applicableEntranceModes:[EntranceName.image_drawn,EntranceName.none],
     applicableAnimationProperties:["position","scale","rotation","opacity"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.renderingObjs,
         EnumCollectionsNames.animObjs,
         EnumCollectionsNames.animObjsWithEntrance,
         EnumCollectionsNames.animObjsNotReady,
@@ -92,7 +91,9 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.setCoords();
         this.canvas && this.canvas.renderAll();
 
-        this.notifyOnImageStateChanged();
+        if(this.imageLoadingState===EnumAnimableLoadingState.ready){
+            this.notifyOnAssetStateReady();
+        }
     },
     /*Inspector main Object list, items options actions*/
     setLockState:function(val){
@@ -137,15 +138,15 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.entranceBehaviour.renderEntranceEffect(ctx);
     },
     /*observer pattern*/
-    registerOnImageStateChanged:function(obj){
+    registerOnAssetReadyState:function(obj){
         this.listObserversOnImageStateChanged.push(obj);
-        if(this.imageLoadingState!==EnumAnimableLoadingState.loading){
-            this.notifyOnImageStateChanged()
+        if(this.imageLoadingState===EnumAnimableLoadingState.ready){
+            this.notifyOnAssetStateReady()
         }
     },
-    notifyOnImageStateChanged:function(){
+    notifyOnAssetStateReady:function(){
         for(let i in this.listObserversOnImageStateChanged){
-            this.listObserversOnImageStateChanged[i].notificationOnImageStateChanged(this);
+            this.listObserversOnImageStateChanged[i].notificationOnAssetStateReady(this);
         }
     },
     listenOnThumbnailStateChanged:function(callback){

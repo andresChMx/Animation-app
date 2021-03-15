@@ -832,9 +832,3 @@ var AssetImage=function(model,parentClass){
 var AssetAudio=function(){
 
 };
-ko.bindingHandlers.setupEvents={
-    init:function(element,valueAccesor,allBindings){
-        valueAccesor();
-    }
-}
-ko.applyBindings(PanelAssets);

@@ -87,7 +87,7 @@ var TextDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         ctx.globalCompositeOperation="source-over";
         ctx.drawImage(prevPathSnapshot,0,0);
     },
-    notificationOnImageStateChanged:function(){
+    notificationOnAssetStateReady:function(){
         //NOTHING
     },
     /*overwritten methods*/

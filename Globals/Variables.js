@@ -108,7 +108,6 @@ let LANENAME_TO_PROPERTYS={
     "border_end":["endRenderingPoint"]
 };
 let EnumCollectionsNames={
-    renderingObjs:"renderingObjs",
     animObjs:"animObjs",
     animObjsWithEntrance:"animObjsWithEntrance",
     animObjsClippers:"animObjsClippers",

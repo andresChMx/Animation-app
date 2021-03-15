@@ -8,11 +8,31 @@ let SectionToolBox={
         let me=this;
         this.MODELTools=[
             {
-                available:false,/*temporary*/
+                available:true,/*temporary*/
+                icon:"icon-save",
+                label:"Home",
+                action:function(){
+                    PanelHome.showModal();
+                }
+            },
+            {
+                available:true,/*temporary*/
                 icon:"icon-save",
                 label:"Save",
                 action:function(){
+                    if(CanvasManager.AreAllImagesReady()){
 
+                        let json=JSON.stringify(CanvasManager);
+                        //next instruction from library FileSaver.js
+                        var blob = new Blob([json], {
+                            type: "text/plain;charset=utf-8;",
+                        });
+                        saveAs(blob, "project.acm");
+
+                    }else{
+                        alert("cannot preview while images are not ready, please delete those images");
+                        //TODO Show notification "cannot preview while images are not ready, please delete those images"
+                    }
                 }
             },
             {
@@ -147,6 +167,9 @@ var PanelInspector={
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnShapeAnimableAdded,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnShapeAnimableDeleted,this);
 
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjectMovedForward,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjectMovedBackward,this);
+
         MainMediator.registerObserver(PanelAnimation.name,PanelAnimation.events.OnPanelToggle,this);
 
         WindowManager.unregisterOnKeyEnterPressed()
@@ -202,7 +225,14 @@ var PanelInspector={
         let indexInShapeObjectsList=args[0];
         this.AreaSceneObjects.notificationCanvasManagerOnShapeAnimableDeleted(indexInShapeObjectsList);
     },
-
+    notificationCanvasManagerOnObjectMovedForward:function(args){
+        let index=args[0];
+        this.AreaSceneObjects.notificationCanvasManagerOnObjectMovedForward(index);
+    },
+    notificationCanvasManagerOnObjectMovedBackward:function(args){
+        let index=args[0];
+        this.AreaSceneObjects.notificationCanvasManagerOnObjectMovedBackward(index);
+    },
     notificationCanvasManagerOnObjModified:function(args){
         this.AreaObjectProperties.notificationCanvasManagerOnObjModified();
     },

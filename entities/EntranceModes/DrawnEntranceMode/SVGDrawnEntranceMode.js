@@ -23,7 +23,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
 
     },
     /*overwritten methods*/
-    notificationOnImageStateChanged:function(){
+    notificationOnAssetStateReady:function(){
         this.baseImage=this.parentObject.largeImage;
         if(this.parentObject.imageLoadingState===EnumAnimableLoadingState.ready){
             //the finalMasked iamge will be generated if paths are created. But now the need

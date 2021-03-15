@@ -1,116 +1,67 @@
 var SectionObjectsEntraceEditor={
     HTMLElement:null,
     parentClass:null,
+    listObjects:ko.observableArray([]),
     init:function(parentClass){
         this.parentClass=parentClass;
         this.HTMLElement=document.querySelector(".area-scene-objects__listing-objects-entrance__box-items");
-        this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
-
         this.lastActiveHTMLItems=[];
-        this.listPropertyInputsByItem=[{}]; //it contains a first dummy element, because in the items collection there is a first dummy element as well that serves to clone
 
     },
 
     activeBoxObjectsHTMLItem:function(index){
-        let trueIndex=index+1;
-        this.HTMLElement.children[trueIndex].id="active-item";
-        this.lastActiveHTMLItems.push(this.HTMLElement.children[trueIndex]);
+        this.listObjects()[index].select();
+        this.lastActiveHTMLItems.push(this.listObjects()[index]);
     },
     clearActivenessHTMLLastItem:function (){
         for(let i in this.lastActiveHTMLItems){
-            this.lastActiveHTMLItems[i].id="";
+            this.lastActiveHTMLItems[i].deselect();
         }
         this.lastActiveHTMLItems=[];
     },
     createHTMLItem:function(animObjWithEntrance){
-        let newItem=this.HTMLBoxItem.cloneNode(true);
-        let icon=newItem.querySelector(".icon img");
-        icon.replaceWith(animObjWithEntrance.thumbnailImage.cloneNode());
-        animObjWithEntrance.listenOnThumbnailStateChanged(function(state,img){
-            newItem.querySelector(".icon img").replaceWith(img);
-        })
-        let moveUp=newItem.querySelector(".btn-move-up");
-        let moveDown=newItem.querySelector(".btn-move-down");
-        moveUp.addEventListener("click",this.OnBtnMoveUpPressed.bind(this));
-        moveDown.addEventListener("click",this.OnBtnMoveDownPressed.bind(this));
-
-        let propInputDelay=new TimeButtonedField(newItem.querySelector(".input-field-box.delay .property-input"), "s",0,600, 0.5);
-        let propInputDuration=new TimeButtonedField(newItem.querySelector(".input-field-box.duration .property-input"), "s",0,600, 0.5);
-        propInputDelay.setValue(animObjWithEntrance.animator.entranceTimes.delay);
-        propInputDuration.setValue(animObjWithEntrance.animator.entranceTimes.duration);
-        propInputDelay.addListenerOnNewValue(this.childNotificationOnDelayNewValue.bind(this));
-        propInputDuration.addListenerOnNewValue(this.childNotificationOnDurationNewValue.bind(this));
-        this.listPropertyInputsByItem.push({duration:propInputDuration,delay:propInputDelay});
-
-        newItem.style.display="flex";
-        newItem.addEventListener("click",this.onHTMLItemClicked.bind(this))
-        this.HTMLElement.appendChild(newItem);
+        // se usa al objecto animObjWithEntrance como un transportador de datos
+        this.listObjects.push(new WithEntranceItem(animObjWithEntrance,this));
     },
     deleteHTMLItemAt:function(index){
-        this.listPropertyInputsByItem[index+1].duration.remove();
-        this.listPropertyInputsByItem[index+1].delay.remove();
-        this.listPropertyInputsByItem.splice(index+1,1);
-
-        this.HTMLElement.children[index+1].remove();// index-1 porque siempre hay un item oculto en el box items
+        this.listObjects()[index].remove();
+        this.listObjects.splice(index,1);
     },
     /*EVENTOS INTERNOS*/
-    OnBtnMoveUpPressed:function(e){
-        let indexInList=[].slice.call(this.HTMLElement.children).indexOf(e.target.parentNode.parentNode)-1;
-        if(indexInList>0){
-            let indexInCollection=indexInList+1;
-            let item=this.HTMLElement.children[indexInCollection];
-            let prevItem=this.HTMLElement.children[indexInCollection-1];
-
-            this.HTMLElement.removeChild(item)
-            this.HTMLElement.insertBefore(item,prevItem);
-
-
-            let prevInputs=this.listPropertyInputsByItem[indexInCollection];
-            this.listPropertyInputsByItem[indexInCollection]=this.listPropertyInputsByItem[indexInCollection-1];
-            this.listPropertyInputsByItem[indexInCollection-1]=prevInputs;
-
-            //ReplaceWith: elimina el elemento que se va a remplazar (target) y extrae el elemento que sera el sustituto de donde se encuentre (lo elimina de su pre posicion) y lo pone en la posicion del target que recordemos ya fue eliminado
+    childOnBtnMoveUpPressed:function(objectItem){
+        let index=this.listObjects.indexOf(objectItem);
+        if(index>0){
+            let array=this.listObjects();
+            this.listObjects.splice(index-1, 2, array[index], array[index-1]);
         }
-        this.parentClass.childNotificationOnBtnMoveUpEntranceOrderPressed(indexInList);
+        this.parentClass.childNotificationOnBtnMoveUpEntranceOrderPressed(index);
     },
-    OnBtnMoveDownPressed:function(e){
-        let index=[].slice.call(this.HTMLElement.children).indexOf(e.target.parentNode.parentNode)-1;
-        if((index)<this.HTMLElement.children.length-2){
-            let indexInCollection=index+1;
-            let item=this.HTMLElement.children[indexInCollection];
-            let nextItem=this.HTMLElement.children[indexInCollection+1];
-
-            this.HTMLElement.removeChild(nextItem)
-            this.HTMLElement.insertBefore(nextItem,item);
-
-            let prevInputs=this.listPropertyInputsByItem[indexInCollection];
-            this.listPropertyInputsByItem[indexInCollection]=this.listPropertyInputsByItem[indexInCollection+1];
-            this.listPropertyInputsByItem[indexInCollection+1]=prevInputs;
+    childOnBtnMoveDownPressed:function(objectItem){
+        let index=this.listObjects.indexOf(objectItem);
+        if((index)<this.listObjects().length-1){
+            let array=this.listObjects();
+            this.listObjects.splice(index,2,array[index+1],array[index]);
         }
         this.parentClass.childNotificationOnBtnMoveDownEntranceOrderPressed(index);
     },
-    childNotificationOnDurationNewValue:function(value,target){
-        let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode.parentNode)-1;
+    childOnHTMLItemClicked:function(objectItem){
+        let index=this.listObjects.indexOf(objectItem);
+        CanvasManager.canvas.setActiveObject(CanvasManager.collections.animObjsWithEntrance.list[index])
+        CanvasManager.canvas.renderAll();
+    },
+    childNotificationOnDurationNewValue:function(value,objectItem){
+        let index=this.listObjects.indexOf(objectItem);
         CanvasManager.collections.animObjsWithEntrance.list[index].animator.entranceTimes.duration=value;
 
     },
-    childNotificationOnDelayNewValue:function(value,target){
-        let index=[].slice.call(this.HTMLElement.children).indexOf(target.parentNode.parentNode.parentNode.parentNode)-1;
+    childNotificationOnDelayNewValue:function(value,objectItem){
+        let index=this.listObjects.indexOf(objectItem);
         CanvasManager.collections.animObjsWithEntrance.list[index].animator.entranceTimes.delay=value;
 
     },
-    onHTMLItemClicked:function(e){
-        let HTMLElem=e.target;
-        while(HTMLElem.className!=="area-scene-objects__listing-objects-entrance__box-items__item clearfix"){
-            HTMLElem=HTMLElem.parentNode;
-        }
-        let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
-        CanvasManager.canvas.setActiveObject(CanvasManager.collections.animObjsWithEntrance.list[trueIndex])
-        CanvasManager.canvas.renderAll();
-    },
+
     /*NOTIFICACIONES ENTRANTES*/
     notificationOnObjAddedToListObjectsWithEntrance:function (animObjWithEntrance){
-
         this.createHTMLItem(animObjWithEntrance)
         this.notificationCanvasManagerOnSelectionUpdated();
         //simulando seleccion, ya que se agregara un elemento a la listaObjectswithentrance
@@ -138,11 +89,71 @@ var SectionObjectsEntraceEditor={
         }
     }
 }
+var WithEntranceItem=function(animableObject,parentClass){
+    this.HTMLElement=null;
+    this.model=null;
+    this.parentClass=null;
+    this.constructor=function(){
+        this.model=animableObject;
+        this.parentClass=parentClass;
+        this.propInputDelay=null;
+        this.propInputDuration=null;
+    }
+    this.koBindingSetupHTML=function(HTMLContainer){
+        this.HTMLElement=HTMLContainer;
+
+        let icon=this.HTMLElement.querySelector(".icon img");
+        icon.replaceWith(this.model.thumbnailImage.cloneNode());
+        this.model.listenOnThumbnailStateChanged(function(state,img){
+            this.HTMLElement.querySelector(".icon img").replaceWith(img);
+        }.bind(this))
+        let moveUp=this.HTMLElement.querySelector(".btn-move-up");
+        let moveDown=this.HTMLElement.querySelector(".btn-move-down");
+        moveUp.addEventListener("click",this.OnBtnMoveUpPressed.bind(this));
+        moveDown.addEventListener("click",this.OnBtnMoveDownPressed.bind(this));
+
+        this.propInputDelay=new TimeButtonedField(this.HTMLElement.querySelector(".input-field-box.delay .property-input"), "s",0,600, 0.5);
+        this.propInputDuration=new TimeButtonedField(this.HTMLElement.querySelector(".input-field-box.duration .property-input"), "s",0,600, 0.5);
+        this.propInputDelay.setValue(this.model.animator.entranceTimes.delay);
+        this.propInputDuration.setValue(this.model.animator.entranceTimes.duration);
+        this.propInputDelay.addListenerOnNewValue(this.childNotificationOnDelayNewValue.bind(this));
+        this.propInputDuration.addListenerOnNewValue(this.childNotificationOnDurationNewValue.bind(this));
+        // this.listPropertyInputsByItem.push({duration:propInputDuration,delay:propInputDelay});
+
+        this.HTMLElement.addEventListener("click",this.OnHTMLItemClicked.bind(this))
+    }
+    this.select=function(){
+        this.HTMLElement.id="active-item";
+    };
+    this.deselect=function(){
+        this.HTMLElement.id="";
+    };
+    this.remove=function(){
+        this.propInputDuration.remove();
+        this.propInputDelay.remove();
+    };
+    this.OnHTMLItemClicked=function(e){
+        this.parentClass.childOnHTMLItemClicked(this);
+    };
+    this.OnBtnMoveUpPressed=function(e){
+        this.parentClass.childOnBtnMoveUpPressed(this);
+    };
+    this.OnBtnMoveDownPressed=function(e){
+        this.parentClass.childOnBtnMoveDownPressed(this);
+    };
+    this.childNotificationOnDelayNewValue=function(value,e){
+        this.parentClass.childNotificationOnDelayNewValue(value,this);
+    };
+    this.childNotificationOnDurationNewValue=function(value,e){
+        this.parentClass.childNotificationOnDurationNewValue(value,this);
+    };
+    this.constructor();
+}
 var SectionAnimableObjectsEditor={
     HTMLElement:null,
+    listObjects:ko.observableArray([]),
     init:function(){
         this.HTMLElement=document.querySelector(".area-scene-objects__listing-objects-all__box-items");
-        this.HTMLBoxItem=this.HTMLElement.children[0].cloneNode(true);
 
         this.HTMLObjectMenu=document.querySelector(".section-animable-object-inspector__object-menu");
 
@@ -226,72 +237,25 @@ var SectionAnimableObjectsEditor={
                 addMaskOptionSubmenu.removeChild(addMaskOptionSubmenu.children[index]);
             }
         }
-
-        this.listBoxTexts=[{name:"dummy element(read comment)"}]; //will have the same length as items
-
         this.lastActiveHTMLItems=[]; //performance matters, when selection updated, whe know that elements are stylized, so we know what to clean
-
         // this.notificationOnAnimableObjectAdded(CanvasManager.camera); //ya que cuando se creo la camara este aun no se habia suscrito al CanvasManager, por eso lo haremos manualmente
     },
     createItem:function(animObject){
-        let newItem=this.HTMLBoxItem.cloneNode(this);
-        newItem.style.display="flex";
-        this.HTMLElement.appendChild(newItem);
-        newItem.querySelector(".group-box-actions__lock-object").checked=animObject.getLockState();
-        newItem.querySelector(".group-box-actions__visible-object").checked=animObject.getVisibilityState();
-        newItem.addEventListener("click",this.OnItemClicked.bind(this));
-
-        let containerLabel=newItem.querySelector(".group-object-name");
-        //Boxtext initialization
-        let boxText=new BoxText(containerLabel);
-        boxText.setText(animObject.name);
-        this.listBoxTexts.push(boxText);
-        //Boxtext events initialization
-        boxText.onNewValue(this.childNotificationOnItemNewName.bind(this))
+        this.listObjects.push(new ObjectItem(animObject,this));
     },
     deleteItemAt:function(index){
-        this.listBoxTexts[index+1].remove();
-        this.listBoxTexts.splice(index+1,1);
-
-        this.HTMLElement.children[index+1].remove();
+        this.listObjects()[index].remove();
+        this.listObjects.splice(index,1);
     },
     activeBoxObjectsHTMLItem:function(index){
-        let trueIndex=index+1;
-        this.HTMLElement.children[trueIndex].id="active-item";
-        this.lastActiveHTMLItems.push(this.HTMLElement.children[trueIndex]);
+        this.listObjects()[index].select();
+        this.lastActiveHTMLItems.push(this.listObjects()[index]);
     },
     clearActivenessHTMLLastItem:function(){
         for(let i in this.lastActiveHTMLItems){
-            this.lastActiveHTMLItems[i].id="";
+            this.lastActiveHTMLItems[i].deselect();
         }
         this.lastActiveHTMLItems=[];
-    },
-
-    OnItemClicked:function(e){
-        let HTMLElem=e.target;
-        while(HTMLElem.className!=="area-scene-objects__listing-objects-all__box-items__item clearfix"){
-            HTMLElem=HTMLElem.parentNode;
-        }
-
-        let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
-        CanvasManager.canvas.setActiveObject(CanvasManager.collections.animObjs.list[trueIndex]);
-
-        if(e.target.className==="group-box-actions__btn-menu button-solid-behaviour"){
-            this.objectMenu.enableOptions(CanvasManager.getSelectedAnimableObj().applicableMenuOptions);
-            this.showObjectMenu();
-        }else if(e.target.className==="group-box-actions__lock-object"){
-            CanvasManager.getSelectedAnimableObj().setLockState(e.target.checked);
-            if(e.target.checked){
-                CanvasManager.canvas.discardActiveObject();
-            }
-        }else if(e.target.className==="group-box-actions__visible-object"){
-            CanvasManager.getSelectedAnimableObj().setVisibilityState(e.target.checked);
-            if(!(e.target.checked)){
-                CanvasManager.canvas.discardActiveObject();
-            }
-        }
-
-        CanvasManager.canvas.renderAll();
     },
     showObjectMenu:function(){
         let self=this;
@@ -299,13 +263,45 @@ var SectionAnimableObjectsEditor={
         setTimeout(()=>{self.objectMenu.isActive=true},100);
         this.objectMenu.setPosition(WindowManager.mouse.x,WindowManager.mouse.y);
     },
-    childNotificationOnItemNewName:function(newName,target){
-        let HTMLElem=target;
-        while(HTMLElem.className!=="area-scene-objects__listing-objects-all__box-items__item clearfix"){
-            HTMLElem=HTMLElem.parentNode;
+    moveItemUp:function(index){
+        if(index>0){
+            let array=this.listObjects();
+            this.listObjects.splice(index-1, 2, array[index], array[index-1]);
         }
-        let trueIndex=[].slice.call(this.HTMLElement.children).indexOf(HTMLElem)-1;
-        CanvasManager.collections.animObjs.list[trueIndex].name=newName;
+    },
+    moveItemDown:function(index){
+
+        if((index)<this.listObjects().length-1){
+            let array=this.listObjects();
+            this.listObjects.splice(index,2,array[index+1],array[index]);
+        }
+    },
+    childOnItemClicked:function(item){
+        let index=this.listObjects.indexOf(item);
+        CanvasManager.canvas.setActiveObject(CanvasManager.collections.animObjs.list[index]);
+        CanvasManager.canvas.renderAll();
+    },
+    childNotificationOnBtnObjectMenu:function(){
+        this.objectMenu.enableOptions(CanvasManager.getSelectedAnimableObj().applicableMenuOptions);
+        this.showObjectMenu();
+    },
+    childNotificationOnLockButton:function(checked){
+        CanvasManager.getSelectedAnimableObj().setLockState(checked);
+        if(checked){
+            CanvasManager.canvas.discardActiveObject();
+        }
+        CanvasManager.canvas.renderAll();
+    },
+    childNotificationOnVisibleButton:function(checked){
+        CanvasManager.getSelectedAnimableObj().setVisibilityState(checked);
+        if(!checked){
+            CanvasManager.canvas.discardActiveObject();
+        }
+        CanvasManager.canvas.renderAll();
+    },
+    childNotificationOnItemNewName:function(newName,item){
+        let index=this.listObjects.indexOf(item);
+        CanvasManager.collections.animObjs.list[index].name=newName;
     },
     notificationOnMouseDown:function(e){
         //OBJECT MENU HANDLING
@@ -331,6 +327,12 @@ var SectionAnimableObjectsEditor={
     notificationOnAnimableObjectDeleted:function(indexInAnimableObjectsList){
         this.deleteItemAt(indexInAnimableObjectsList)
     },
+    notificationCanvasManagerOnObjectMovedForward:function(index){
+        this.moveItemDown(index);
+    },
+    notificationCanvasManagerOnObjectMovedBackward:function(index){
+        this.moveItemUp(index);
+    },
     notificationCanvasManagerOnShapeAnimableAdded:function(animableObject){
         this.objectMenu.createShapeObjectItem(animableObject);
     },
@@ -354,9 +356,55 @@ var SectionAnimableObjectsEditor={
             }
         }
     }
-
 }
+let ObjectItem=function(animableObject,parentClass){
+    this.HTMLElement=null;
+    this.model=null;
+    this.parentClass=null;
+    this.constructor=function(){
+        this.model=animableObject;
+        this.parentClass=parentClass;
+        this.boxInput=null;
+    }
+    this.koBindingSetupHTML=function(HTMLContainer){
+        this.HTMLElement=HTMLContainer;
 
+        this.HTMLElement.querySelector(".group-box-actions__lock-object").checked=this.model.getLockState();
+        this.HTMLElement.querySelector(".group-box-actions__visible-object").checked=this.model.getVisibilityState();
+        this.HTMLElement.addEventListener("click",this.OnClick.bind(this));
+
+        let containerLabel=this.HTMLElement.querySelector(".group-object-name");
+        //Boxtext initialization
+        this.boxInput=new BoxText(containerLabel);
+        this.boxInput.setText(this.model.name);
+
+        //Boxtext events initialization
+        this.boxInput.onNewValue(this.childNotificationOnItemNewName.bind(this))
+    }
+    this.select=function(){
+        this.HTMLElement.id="active-item";
+    };
+    this.deselect=function(){
+        this.HTMLElement.id="";
+    };
+    this.remove=function(){
+        this.boxInput.remove();
+    };
+    this.OnClick=function(e){
+        this.parentClass.childOnItemClicked(this);
+        if(e.target.className==="group-box-actions__btn-menu button-solid-behaviour"){
+            this.parentClass.childNotificationOnBtnObjectMenu()
+        }else if(e.target.className==="group-box-actions__lock-object"){
+            this.parentClass.childNotificationOnLockButton(e.target.checked);
+        }else if(e.target.className==="group-box-actions__visible-object"){
+            this.parentClass.childNotificationOnVisibleButton(e.target.checked);
+        }
+    };
+    this.childNotificationOnItemNewName=function(value,e){
+        this.parentClass.childNotificationOnItemNewName(value,this);
+    };
+    this.constructor();
+}
 var AreaSceneObjects={
     HTMLElement:null,
     SectionAnimableObjectsEditor:SectionAnimableObjectsEditor,
@@ -389,6 +437,12 @@ var AreaSceneObjects={
     },
     notificationOnAnimableObjectDeleted:function(indexInAnimableObjectsList){
         this.SectionAnimableObjectsEditor.notificationOnAnimableObjectDeleted(indexInAnimableObjectsList);
+    },
+    notificationCanvasManagerOnObjectMovedBackward:function(index){
+        this.SectionAnimableObjectsEditor.notificationCanvasManagerOnObjectMovedBackward(index);
+    },
+    notificationCanvasManagerOnObjectMovedForward:function(index){
+        this.SectionAnimableObjectsEditor.notificationCanvasManagerOnObjectMovedForward(index);
     },
     notificationCanvasManagerOnShapeAnimableAdded:function(animableObject){
         this.SectionAnimableObjectsEditor.notificationCanvasManagerOnShapeAnimableAdded(animableObject);

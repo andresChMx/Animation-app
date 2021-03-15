@@ -3,7 +3,6 @@ var CameraAnimable=fabric.util.createClass(fabric.Image,{
     applicableMenuOptions:[],
     applicableAnimationProperties:["position","scale","rotation","opacity"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.renderingObjs,
         EnumCollectionsNames.animObjs,
         EnumCollectionsNames.animObjsWithEntrance,
     ],

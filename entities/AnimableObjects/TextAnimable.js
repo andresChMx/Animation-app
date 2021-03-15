@@ -3,9 +3,9 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
     applicableEntranceModes: [EntranceName.text_drawn,EntranceName.none/*,EntranceName.dragged,EntranceName.text_typed**/],//FOR UI
     applicableAnimationProperties:["position","scale","rotation","opacity"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.renderingObjs,
         EnumCollectionsNames.animObjs,
         EnumCollectionsNames.animObjsWithEntrance,
+        EnumCollectionsNames.animObjsNotReady
     ],
     type:"TextAnimable",
     initialize:function(text,options){
@@ -28,6 +28,9 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
         this.cbOnThumbnailStateChanged=function(){};
         this.thumbnailImage=StaticResource.images.textThumbnail.cloneNode();
         this.thumbnailLoadingState=EnumAnimableLoadingState.ready;
+
+        this.listObserversOnAssetStateReady=[];
+        this.fontLoadingState=EnumAnimableLoadingState.loading;
         // this.largeImage=null;
 
         this.entranceBehaviour=new EntranceEffectBehaviour(this,this.applicableEntranceModes);
@@ -43,7 +46,14 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
         if(!FontsFileName[fontname]){fontname=Object.keys(FontsFileName)[0];} //validando que nombre sea uno valido
 
         this.fontFamily=fontname;
-        OpenTypeFontManager.LoadOpenTypeFont(FontsFileName[fontname]);
+        OpenTypeFontManager.LoadOpenTypeFont(FontsFileName[fontname],function (error){
+            if(error){
+                this._setFontLoadingState(EnumAnimableLoadingState.error);
+                console.log("ERROR: NO CARGO LA FUENTE, HUBO UN PROBLEMA EN EL SERVER");
+            }else{
+                this._setFontLoadingState(EnumAnimableLoadingState.ready);
+            }
+        }.bind(this));
     },
     setFontSize:function(size){
         this.fontSize=size;
@@ -58,6 +68,12 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
     },
     _render:function(ctx){
         this.entranceBehaviour.renderEntranceEffect(ctx);
+    },
+    _setFontLoadingState:function(state){
+        this.fontLoadingState=state;
+        if(this.fontLoadingState===EnumAnimableLoadingState.ready){
+            this.notifyOnAssetStateReady();
+        }
     },
     /*Inspector main Object list, items options actions*/
     setLockState:function(val){
@@ -95,13 +111,21 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
         }
     },
     /*observer pattern*/
-    registerOnImageStateChanged:function(obj){
-
+    registerOnAssetReadyState:function(obj){
+        this.listObserversOnAssetStateReady.push(obj);
+        if(this.fontLoadingState===EnumAnimableLoadingState.ready){
+            this.notifyOnAssetStateReady();
+        }
     },
     listenOnThumbnailStateChanged:function(callback){
         this.cbOnThumbnailStateChanged=callback;
         if(this.thumbnailLoadingState!==EnumAnimableLoadingState.loading){
             this.cbOnThumbnailStateChanged(this.thumbnailLoadingState,this.thumbnailImage);
+        }
+    },
+    notifyOnAssetStateReady:function(){
+        for(let i in this.listObserversOnAssetStateReady){
+            this.listObserversOnAssetStateReady[i].notificationOnAssetStateReady(this);
         }
     },
     toObject:function(){

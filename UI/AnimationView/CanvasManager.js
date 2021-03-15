@@ -10,91 +10,61 @@ var CanvasManager={
         OnAnimableObjectDeleted:'OnAnimableObjectDeleted',
         OnShapeAnimableDeleted:'OnShapeAnimableDeleted',
 
+        OnObjectMovedForward:'OnObjectMovedForward',
+        OnObjectMovedBackward:'OnObjectMovedBackward',
+
         OnObjModified:'OnObjModified',
 
         OnDesignPathOptionClicked:'OnDesignPathOptionClicked',
     },
     HTMLElement:null,
     canvas:null,
-    listAnimableObjects:[],//(SII QUE LA TIENE)NO TIENE UNA RAZON DE SER CLARA PERO SE ESPERA QUE CUANDO DENGAMOS QUE HACER ALGO EN LOS ELEMENTOS ANIMABLES, NO TENGMOS QUE RECORRER TODOS LOS ELEMENTOS DEL CANVAS, sino solo lso animables, ademas son los que se muestran en el objects editor
-    listAnimableObjectsWithEntrance:[],// este es un subconjunto de la lista de arriba
-    listClipableAnimableObjects:[],
     camera:null,
 
     SectionFloatingMenu:null,
 
-    listNotReadyAnimableObjects:[], //holds images and svgs that are loading or failed loading
-
     init:function(){
         let me=this;
-
-        this.collections={
-            renderingObjs:{
-                add:function(obj){
-                    me.canvas.add(obj);
-                },
-                remove:function(obj){
-                    me.canvas.remove(obj);
-                }
-            },
+        this.collections=new AnimablesCollections();
+        this._collectionsCallbacks={
             animObjs:{
-                list:[],
-                add:function(obj){
-                    this.list.push(obj);
+                onItemAdded:function(obj){
                     me.notifyOnAnimableObjectAdded.bind(me)(obj);
                 },
-                remove:function(obj){
-                    let indexInList=this.list.indexOf(obj);
-                    if(indexInList!==-1){
-                        this.list.splice(indexInList,1);
-                        me.notifyOnAnimableObjectDeleted.bind(me)(indexInList);
-                    }
+                onItemDeleted:function(index,obj){
+                    me.notifyOnAnimableObjectDeleted.bind(me)(index);
                 }
             },
             animObjsWithEntrance:{
-                list:[],
-                add:function(obj){
-                    if(obj.entranceBehaviour.entranceModeName!==EntranceName.none) {
-                        this.list.push(obj);
-                        me.notifyOnObjAddedToListObjectsWithEntrance.bind(me)(obj);
-                    }
+                onItemAdded:function(obj){
+                    me.notifyOnObjAddedToListObjectsWithEntrance.bind(me)(obj);
                 },
-                remove:function(obj){
-                    let indexInList=this.list.indexOf(obj);
-                    if(indexInList!==-1){
-                        this.list.splice(indexInList,1);
-                        me.notifyOnObjDeletedFromListWithEntrance.bind(me)(indexInList);
-                    }
+                onItemDeleted:function(index,obj){
+                    me.notifyOnObjDeletedFromListWithEntrance.bind(me)(index);
                 }
             },
             animObjsClippers:{
-                list:[],
-                add:function(obj){
-                    this.list.push(obj);
+                onItemAdded:function(obj){
                     me.notifyOnShapeAnimableObjectAdded.bind(me)(obj);
                 },
-                remove:function(obj){
-                    let indexInList=this.list.indexOf(obj);
-                    if(indexInList!==-1){
-                        let deletedItems=this.list.splice(indexInList,1);
-                        me.notifyOnShapeAnimableDeleted.bind(me)(indexInList,deletedItems[0]);
-                    }
+                onItemDeleted:function(index,obj){
+                    me.notifyOnShapeAnimableDeleted.bind(me)(index,obj);
                 }
             },
             animObjsNotReady:{
-                list:[],
-                add:function(obj){
-                    this.list.push(obj);
-                    obj.registerOnImageStateChanged(me);
+                onItemAdded:function(obj){
+                    obj.registerOnAssetReadyState(me);
                 },
-                remove:function(obj){
-                    let indexInList=this.list.indexOf(obj);
-                    if(indexInList!==-1){
-                        this.list.splice(indexInList,1);
-                    }
+                onItemDeleted:function(index,obj){
                 }
-            }
+            },
         };
+
+
+        for(let key in EnumCollectionsNames){
+            this.collections[key].listenOnItemAdded(this._collectionsCallbacks[key].onItemAdded);
+            this.collections[key].listenOnItemDeleted(this._collectionsCallbacks[key].onItemDeleted);
+        }
 
         this.SectionFloatingMenu=SectionFloatingMenu;
         this.SectionEntranceObjectConfiguration=SectionEntranceObjectConfiguration;
@@ -249,6 +219,9 @@ var CanvasManager={
 
     },
     /*objects creating and deleting*/
+    /*
+    * Creates and setup a completely new object
+    * */
     createAnimableObject:function(model,type="ImageAnimable",thumbnail=null){
         let initPosition=this.objectInitializationPosition();
         if(type==="ShapeAnimable"){
@@ -263,18 +236,19 @@ var CanvasManager={
         }
     },
     setupNewObject:function(newObject,listCollNamesToBeSettedup=null/*optional: if null, all needed lists are used*/){
-        if(!listCollNamesToBeSettedup){
+        if(!listCollNamesToBeSettedup){                     //Invocado cuando se crea(desde cero) o clona un objeto
             for(let key in EnumCollectionsNames){
                 window[newObject.type].instanceSetupInCanvasManager(newObject,key);
             }
-        }else{
+            this.canvas.add(newObject);
+        }else{                                              // invocado cuando se carga un objeto
             listCollNamesToBeSettedup.forEach(function(elem){
                 window[newObject.type].instanceSetupInCanvasManager(newObject,elem);
             })
         }
     },
 
-    removeActiveAnimableObject:function(){
+    removeActiveAnimableObject:function(){//no called on loading project
         let activeAnimableObject=this.getSelectedAnimableObj();
         if(activeAnimableObject){
             let listObjects;
@@ -284,6 +258,8 @@ var CanvasManager={
             for(let i=0;i<listObjects.length;i++){
                 let object=listObjects[i];
                 this._removeAnimableObject(object);
+
+                this.canvas.remove(object);
             }
         }
     },
@@ -315,7 +291,24 @@ var CanvasManager={
             this.collections.animObjsWithEntrance.list[index+1]=tmp;
         }
     },
-
+    moveUpObjectInObjectsList:function(index){
+        if(index>0){
+            let tmp=this.collections.animObjs.list[index];
+            this.collections.animObjs.list[index]=this.collections.animObjs.list[index-1];
+            this.collections.animObjs.list[index-1]=tmp;
+            return true;
+        }
+        return false;
+    },
+    moveDownObjectInObjectsList:function(index){
+        if(index<this.collections.animObjs.list.length-1){
+            let tmp=this.collections.animObjs.list[index];
+            this.collections.animObjs.list[index]=this.collections.animObjs.list[index+1];
+            this.collections.animObjs.list[index+1]=tmp;
+            return true;
+        }
+        return false;
+    },
     AreAllImagesReady:function(){
         return this.collections.animObjsNotReady.list.length===0;
     },
@@ -378,9 +371,9 @@ var CanvasManager={
         //sorting by turn index
         this._sortLoadedObjectsWithEntraceMode(tmpListAnimableObjectsWithEntrances);
         this._sortLoadedClipperObjects(tmpListClipperObjects);
+        //Se hace asi, "cargando los collections por partes", ya que se necesita seguir las listas temporales creadas, puesto que se debe seguir el orden en que se encuentran los items en esas listas
         for(let i=0;i<tmpListClipperObjects.length;i++){
             this.setupNewObject(tmpListClipperObjects[i],[EnumCollectionsNames.animObjsClippers]);
-            console.log(CanvasManager.collections.animObjsClippers.list[0]);
         }
         for(let i=0;i<tmpListAnimableObjectsWithEntrances.length;i++){
             this.setupNewObject(tmpListAnimableObjectsWithEntrances[i],[EnumCollectionsNames.animObjsWithEntrance]);
@@ -395,7 +388,7 @@ var CanvasManager={
         }
         this.canvas.renderAll(); //solution, the clipping was not been rendered
 
-        SectionActionEditorMenu.widgetsTimelineTools.durationField.setVal(serialized.animatorDuration)
+        SectionActionEditorMenu.widgetsTimelineTools.durationField.setVal(serialized.animatorDuration*1000)
     },
     _sortLoadedObjectsWithEntraceMode:function(inputArr) {
         let n = inputArr.length;
@@ -453,16 +446,28 @@ var CanvasManager={
     notificationOnResize:function(){//window resize
         this._setCanvasDimensions();
     },
+    childNotificationOnBringForward:function(animableObject){
+        let index=this.collections.animObjs.list.indexOf(animableObject);
+        let performed=this.moveDownObjectInObjectsList(index)
+        if(performed){
+            CanvasManager.canvas.bringForward(animableObject);
+            MainMediator.notify(this.name,this.events.OnObjectMovedForward,[index]);
+        }
+    },
+    childNotificationOnBringBackward:function(animableObject){
+        let index=this.collections.animObjs.list.indexOf(animableObject);
+        let performed=this.moveUpObjectInObjectsList(index)
+        if(performed){
+            CanvasManager.canvas.sendBackwards(animableObject);
+            MainMediator.notify(this.name,this.events.OnObjectMovedBackward,[index]);
+        }
+    },
     childNotificationOnDesignPathOptionClicked:function(currentSelectedObject){
         MainMediator.notify(this.name,this.events.OnDesignPathOptionClicked,[currentSelectedObject])
     },
-    /*child*/notificationOnImageStateChanged:function(imageAnimable){/*naming convention exception, this could be considered as called by children, since it is being called by imageAnimables and svgAniambles*/
-        if(imageAnimable.imageLoadingState===EnumAnimableLoadingState.ready){
-            let index=this.collections.animObjsNotReady.list.indexOf(imageAnimable);
-            if(index!==-1){
-                this.collections.animObjsNotReady.list.splice(index,1);
-            }
-        }
+
+    /*child (de animables)*/notificationOnAssetStateReady:function(imageAnimable){/*naming convention exception, this could be considered as called by children, since it is being called by imageAnimables and svgAniambles*/
+        this.collections.animObjsNotReady.remove(imageAnimable);
     },
 
     notificationPanelInspectorOnBtnMoveDownObjectEntranceOrder:function(args){
@@ -516,7 +521,7 @@ var SectionFloatingMenu={
             icon:"icon-front",
             description:"Move forward",
             action:function(animableObject){
-                CanvasManager.canvas.bringForward(animableObject);
+                CanvasManager.childNotificationOnBringForward(animableObject);
             },
             HTMLElement:null
         },
@@ -524,7 +529,7 @@ var SectionFloatingMenu={
             icon:"icon-back",
             description:"Move backward",
             action:function (animableObject){
-                CanvasManager.canvas.sendBackwards(animableObject);
+                CanvasManager.childNotificationOnBringBackward(animableObject);
             },
             HTMLElement:null
         },
@@ -855,7 +860,6 @@ var SectionEntranceObjectConfiguration={
         }
         for(let i=0;i<animableObject.applicableEntranceModes.length;i++){
             let applicableEntraceMode=this.normalizeObjectEntraceMode(animableObject.applicableEntranceModes[i]);
-            console.log(applicableEntraceMode);
             this.HTMLAreaEntranceSettings.querySelector("#" + applicableEntraceMode ).style.display="inline";
         }
     },

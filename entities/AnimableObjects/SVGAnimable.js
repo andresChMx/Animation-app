@@ -2,7 +2,6 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
     applicableEntranceModes:[EntranceName.svg_drawn,EntranceName.none],
     applicableAnimationProperties:["position","scale","rotation","opacity"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.renderingObjs,
         EnumCollectionsNames.animObjs,
         EnumCollectionsNames.animObjsWithEntrance,
         EnumCollectionsNames.animObjsNotReady,

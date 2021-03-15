@@ -55,7 +55,7 @@ var SectionSettings={
         let self=this;
         let slider=document.querySelector(".setting-line-width__slider");
         let input=document.querySelector(".setting-line-width__field");
-        this.numericFieldLineWidth=new NumericField(input,"",1,100,ObserverType.temp);
+        this.numericFieldLineWidth=new NumericField(input,"",1,150,ObserverType.temp);
 
         slider.addEventListener("change",function(e){
             this.numericFieldLineWidth.setValue(e.target.value);// this will make call the callback which will notify the new value (lines below)

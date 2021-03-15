@@ -1,7 +1,7 @@
 var DrawnEntranceMode=fabric.util.createClass(EntranceMode,{
     initialize:function(parentObject){
         this.callSuper("initialize",parentObject);
-        this.parentObject.registerOnImageStateChanged(this);
+        this.parentObject.registerOnAssetReadyState(this);
 
         this.cacheManager=EntranceEffectManagerMap.DrawnEntranceMode;
         this.drawingData=this.generateInitialImageDrawingData();//new Class Property: Holds drawind data for 'drawn' entrance mode
@@ -49,7 +49,7 @@ var DrawnEntranceMode=fabric.util.createClass(EntranceMode,{
         }
         this.isMyTurnToCopyCache=turn;
     },
-    notificationOnImageStateChanged:function(){
+    notificationOnAssetStateReady:function(){
     },
     /* New abstract methods (to be implemented)*/
     getDrawingBaseImage:function(){},

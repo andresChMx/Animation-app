@@ -133,6 +133,8 @@ var WindowManager={
         CanvasManager.init();
         /*AUTHENTICATION*/
         PanelAuthentication.init();
+
+        PanelHome.init();
         /*ANIMATOR*/
         PanelAnimation.init();
         PanelAnimation.PanelActionEditor.init();

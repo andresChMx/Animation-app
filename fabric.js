@@ -930,7 +930,7 @@ fabric.CommonMethods = {
      * @param {String} namespace Namespace string e.g. 'fabric.Image.filter' or 'fabric'
      * @return {Object} Object for given namespace (default fabric)
      */
-    resolveNamespace: function(namespace) {
+      resolveNamespace: function(namespace) {
       if (!namespace) {
         return fabric;
       }

@@ -4,7 +4,6 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
     applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
     applicableAnimationProperties:["position","scale","rotation","opacity","border_width","border_start","border_end"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.renderingObjs,
         EnumCollectionsNames.animObjs,
         EnumCollectionsNames.animObjsWithEntrance,
         EnumCollectionsNames.animObjsClippers

@@ -20,9 +20,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="465c110f-32ef-4985-8db2-1a8922460364" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/FileSaver.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/UI/AnimationView/HomePanel.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/UI/AnimationView/ViewModel.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/AnimablesCollections.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Globals/OpenTypeFontManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/OpenTypeFontManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Globals/Variables.js" beforeDir="false" afterPath="$PROJECT_DIR$/Globals/Variables.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/AssetsPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/CanvasManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaSceneObjects.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/AreaSceneObjects.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/InspectorPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/AnimationView/InspectorPanel/InspectorPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/PathDesignView/DesignerOptionsPanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/WindowManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/UI/WindowManager.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/StaticResource.js" beforeDir="false" afterPath="$PROJECT_DIR$/common/StaticResource.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/CameraAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/CameraAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/ImageAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/ImageAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/SVGAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/SVGAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/ShapeAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/ShapeAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/AnimableObjects/TextAnimable.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/AnimableObjects/TextAnimable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/DrawnEntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/DrawnEntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/ImageDrawnEntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/ImageDrawnEntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/SVGDrawnEntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/SVGDrawnEntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/TextDrawnEntranceMode.js" beforeDir="false" afterPath="$PROJECT_DIR$/entities/EntranceModes/DrawnEntranceMode/TextDrawnEntranceMode.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fabric.js" beforeDir="false" afterPath="$PROJECT_DIR$/fabric.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,7 +69,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../nutrifood" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -260,7 +282,12 @@
       <workItem from="1615421932497" duration="18299000" />
       <workItem from="1615469702976" duration="3283000" />
       <workItem from="1615473339417" duration="190000" />
-      <workItem from="1615473618394" duration="27736000" />
+      <workItem from="1615473618394" duration="34105000" />
+      <workItem from="1615559004744" duration="14232000" />
+      <workItem from="1615641094782" duration="24615000" />
+      <workItem from="1615695075430" duration="1098000" />
+      <workItem from="1615732945612" duration="26690000" />
+      <workItem from="1615768536158" duration="3824000" />
     </task>
     <servers />
   </component>
@@ -280,10 +307,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="713" y="346" key="#Notifications" timestamp="1606972173737">
-      <screen x="0" y="0" width="1920" height="1050" />
-    </state>
-    <state x="713" y="346" key="#Notifications/0.0.1920.1050@0.0.1920.1050" timestamp="1606972173737" />
     <state x="413" y="177" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1610310487415">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -300,10 +323,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="92" y="92" width="1736" height="866" key="DiffContextDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1612505073066" />
-    <state x="739" y="277" key="FileChooserDialogImpl" timestamp="1607913452052">
+    <state x="739" y="277" key="FileChooserDialogImpl" timestamp="1615651174268">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="739" y="277" key="FileChooserDialogImpl/0.0.1920.1050@0.0.1920.1050" timestamp="1607913452052" />
+    <state x="739" y="277" key="FileChooserDialogImpl/0.0.1920.1050@0.0.1920.1050" timestamp="1615651174268" />
     <state x="539" y="265" key="IDE.errors.dialog" timestamp="1612927985442">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -316,10 +339,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="569" y="201" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1050@0.0.1920.1050" timestamp="1608214205489" />
-    <state x="520" y="249" width="878" height="801" key="find.popup" timestamp="1615493604832">
+    <state x="468" y="71" width="878" height="801" key="find.popup" timestamp="1615768900242">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="520" y="249" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1615493604832" />
+    <state x="468" y="71" width="878" height="801" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1615768900242" />
     <state x="616" y="237" key="run.anything.popup" timestamp="1615233214172">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

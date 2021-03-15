@@ -160,6 +160,23 @@
         </div>
     </div>
 
+    <div class="panel-home__filter modal__filter" >
+        <div class="panel-home modal">
+            <div class="panel-home__header modal__header">
+                <p class="modal__header__title">Home</p>
+                <div class="panel-home__header__btn-close icon-cross modal__header__btn-close-modal"></div>
+            </div>
+            <div class="panel-home__body modal__body">
+                <div class="panel-home__body__user-projects-container">
+<!--                    <p class="panel-home__subtitle"></p>-->
+                    <input id="input-load-project" type="file" />
+                </div>
+                <div class="panel-home__body__templates-container">
+                    <p class="panel-home__subtitle">Templates</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <!--==============================
     ==========ASSETS PANEL=========
     ===============================-->
@@ -194,13 +211,13 @@
                                 <li value="nature" >Nature</li>
                                 <li value="health" >Health</li>
                                 <li value="animal" >Animals</li>
-                                <li value="vector" >Vectors</li>
+                                <li value="vector" >Cartoon</li>
                             </ul>
                             <button id="control-right" class="icon-double-right"></button>
                         </div>
                     </div>
                 </div>
-                <div class="section-assets__box-assets" data-bind="foreach: SectionImageAssets.listAssets">
+                <div class="section-assets__box-assets" data-bind="foreach: SectionImageAssets">
                     <div class="image-asset" data-bind="setupEvents: koBindingSetupHTML($element)" >
                         <div class="image-asset__inner-container">
                             <img src="" data-bind="attr:{src:model.url_thumbnail}" crossorigin alt="" class="image-asset__inner-container__image" >
@@ -241,7 +258,7 @@
 <!--                        </div>-->
 <!--                    </div>-->
                 </div>
-                <div class="section-assets__box-assets" data-bind="foreach: SectionShapeAssets.listAssets">
+                <div class="section-assets__box-assets" data-bind="foreach: SectionShapeAssets">
                     <div class="shape-asset button-solid-behaviour" data-bind="setupEvents: koBindingSetupHTML($element)" >
                         <img data-bind="attr:{src:model.thumbnailUrl}" />
                     </div>
@@ -325,8 +342,8 @@
                                 <p class="area-scene-objects__listing-objects-all__title">Scene Objects</p>
                                 <div class="icons-actions" style="margin-left:auto;margin-right:27px; font-size:1.6rem; color:rgba(255,255,255,.6)"><i class="icon-lock"></i><i class="icon-eye"></i></div>
                             </div>
-                            <ul class="area-scene-objects__listing-objects-all__box-items ">
-                                <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" style="display:none;">
+                            <ul class="area-scene-objects__listing-objects-all__box-items" data-bind="foreach: SectionAnimableObjectsEditor">
+                                <li class="area-scene-objects__listing-objects-all__box-items__item clearfix" data-bind="setupEvents: koBindingSetupHTML($element)">
                                     <img src="" alt="" class="icon">
                                     <div class="group-object-name">
                                     </div>
@@ -341,8 +358,8 @@
 
                         <div class="panel-inspector__area-scene-objects__listing-objects-entrance">
                             <p class="area-scene-objects__listing-objects-entrance__title">Objects With Entrance Effects</p>
-                            <div class="area-scene-objects__listing-objects-entrance__box-items ">
-                                <div class="area-scene-objects__listing-objects-entrance__box-items__item clearfix" style="display:none;">
+                            <div class="area-scene-objects__listing-objects-entrance__box-items " data-bind="foreach: SectionObjectsEntraceEditor">
+                                <div class="area-scene-objects__listing-objects-entrance__box-items__item clearfix" data-bind="setupEvents: koBindingSetupHTML($element)">
                                     <div class="icon">
                                         <div class="image"><img src="" alt="" class=""></div>
                                     </div>
@@ -621,7 +638,7 @@
                     <input type="text" class="setting-line-width__field range-widget__field">
                 </div>
                 <div class="row">
-                    <input type="range" min="1" max="100" value="10" class="setting-line-width__slider range-widget__slider"/>
+                    <input type="range" min="1" max="150" value="10" class="setting-line-width__slider range-widget__slider"/>
                 </div>
             </div>
             <div class="section-settings__setting-duration range-widget">
@@ -721,8 +738,10 @@
     <script src="./util.js"></script>
     <script src="fabric.js"></script>
     <script src="OpenType.js"></script>
+    <script src="FileSaver.min.js"></script>
     <script src="./fabricCustom.js"></script>
 
+    <script src="common/AnimablesCollections.js"></script>
     <script src="common/fontsLoading/FontsLoader.js"></script>
     <script src="common/fontsLoading/FontFaceObserver.js"></script>
     <script src="common/SVGManager.js"></script>
@@ -762,6 +781,7 @@
     <script src="UI/CommonComponenets.js"></script>
     <script src="UI/AuthenticationView/AuthenticationView.js"></script>
     <script src="UI/AnimationView/CanvasManager.js"></script>
+    <script src="UI/AnimationView/HomePanel.js"></script>
     <script src="UI/AnimationView/AnimationPanel.js"></script>
 
     <script src="UI/AnimationView/InspectorPanel/AreaSceneObjects.js"></script>
@@ -774,6 +794,7 @@
     <script src="UI/PathDesignView/DesignerOptionsPanel.js"></script>
     <script src="UI/PathDesignView/PathDesignPanel.js"></script>
     <script src="UI/PreviewerView/PreviewerPanel.js"></script>
+    <script src="UI/AnimationView/ViewModel.js"></script><!--ViewModels por view al final de todos los componentes de la view-->
 
     <script src="main.js"></script>
 </body>

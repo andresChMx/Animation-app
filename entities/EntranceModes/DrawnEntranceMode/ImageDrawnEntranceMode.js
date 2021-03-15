@@ -15,7 +15,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         /*fin*/
     },
     /*overwritten methods*/
-    notificationOnImageStateChanged:function(){
+    notificationOnAssetStateReady:function(){
         this.baseImage=this.parentObject.largeImage;
         if(this.parentObject.imageLoadingState===EnumAnimableLoadingState.ready){
             this.generateFinalMaskedImage();

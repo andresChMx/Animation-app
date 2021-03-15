@@ -1,13 +1,14 @@
 var OpenTypeFontManager={
     fontServerURL:'https://limitless-castle-38573.herokuapp.com/',
     dictOpenTypeFontObjects:{},//{file name:opentypefontobject}  -> opentypefontobject nos permite generar los paths para cualquier mensaje
-    LoadOpenTypeFont:function(fontFileName){
-        if(this.dictOpenTypeFontObjects[fontFileName]){return}
+    LoadOpenTypeFont:function(fontFileName,callback){
+        if(this.dictOpenTypeFontObjects[fontFileName]){callback(false);return}
         opentype.load(this.fontServerURL+fontFileName, function(err, font) {
             if (err) {
-                alert('Font could not be loaded: ' + err);
+                callback(true);
             } else {
                 this.dictOpenTypeFontObjects[fontFileName]=font;
+                callback(false);
                 //const path = font.getPath('Hello, World!', 0, 150, 72);
             }
 
