@@ -1,6 +1,6 @@
 var ImageDrawingDataGenerator=fabric.util.createClass({
     initialize:function(){
-        this.canvasElem=document.createElement("canvas");
+        this.canvasElem=fabric.util.createCanvasElement();
         this.canvasElem.id="auxCanvas"
     },
     _triangleWidthHeight:function(arr, i, j){
@@ -22,7 +22,6 @@ var ImageDrawingDataGenerator=fabric.util.createClass({
         if(matPts.length===0){
             return;
         }
-        console.log(OUTImageDrawingData.ctrlPoints);
         for (var i = 0; i <matPts.length; i += 1) {
             let newCrtlPoints=[-1,-1];
             if(matPts[i].length>=3){
@@ -34,7 +33,6 @@ var ImageDrawingDataGenerator=fabric.util.createClass({
             newCrtlPoints.push(-1);
             OUTImageDrawingData.ctrlPoints.push(newCrtlPoints)
         }
-        console.log(OUTImageDrawingData.ctrlPoints);
     },
 
 
@@ -111,7 +109,7 @@ var ImageDrawingDataGenerator=fabric.util.createClass({
 
 var TextDrawingDataGenerator=fabric.util.createClass({
     initialize: function () {
-        this.auxCanvasForTexts=document.createElement("canvas");
+        this.auxCanvasForTexts=fabric.util.createCanvasElement();
         this.auxCanvasForTextsContext=this.auxCanvasForTexts.getContext("2d");
     },
 
@@ -120,7 +118,7 @@ var TextDrawingDataGenerator=fabric.util.createClass({
         let coords=this.getLeftTopLines(animableText);
         let commandsPath=[];
         for(let i=0;i<animableText.textLines.length;i++){
-            let openTypePath=OpenTypeFontManager.GeneratePath(FontsFileName[animableText.fontFamily],animableText.fontSize,coords[i].left+extraDisplacementX,coords[i].top+extraDisplacementY,animableText.textLines[i]);
+            let openTypePath=OpenTypeFontManager.GeneratePath(global.FontsFileName[animableText.fontFamily],animableText.fontSize,coords[i].left+extraDisplacementX,coords[i].top+extraDisplacementY,animableText.textLines[i]);
             commandsPath.push(openTypePath.commands);
             pathOpenTypeObjects.push(openTypePath);
         }
@@ -246,7 +244,7 @@ var TextDrawingDataGenerator=fabric.util.createClass({
             this.auxCanvasForTextsContext.fill();
 
         }
-        let image=new Image();
+        let image=fabric.util.createImage();
         image.onload=function(){
             callback(image);
         }

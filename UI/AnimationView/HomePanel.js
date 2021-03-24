@@ -36,7 +36,7 @@ var PanelHome={
     },
     OnFileReaderLoad:function(e){
         let contents=e.target.result;
-        CanvasManager.loadFromJSON(contents);
+        ScenesManager.projectPersistance.load(contents);
         this.hiddeModel();
         this.HTMLInputFile.value="";
     },

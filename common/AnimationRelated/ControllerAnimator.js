@@ -1,4 +1,3 @@
-var ControllerAnimatorState={playing:"playing",paused:"paused"};
 var ControllerAnimator=fabric.util.createClass({
     EnumStates:{playing:"playing",paused:"paused"},
     initialize:function(canvasToDisplay){
@@ -19,7 +18,7 @@ var ControllerAnimator=fabric.util.createClass({
 
         this.requestAnimFrameID=null;
 
-        this.state=ControllerAnimatorState.paused; //playing, paused,
+        this.state=global.ControllerAnimatorState.paused; //playing, paused,
     },
     setListObjectsToAnimate:function(list){
         this.objectsToAnimate=list;
@@ -35,10 +34,10 @@ var ControllerAnimator=fabric.util.createClass({
     setTotalProgress:function(valProgress){
         if(valProgress>this.totalDuration){
             valProgress=this.totalDuration;
-            alert("Advertancia: valor pasado mayor a la duracion total");
+            //alert("Advertancia: valor pasado mayor a la duracion total");
         }else if(valProgress<0){
             valProgress=0;
-            alert("Advertencia: valor pasado menor a 0");
+            //alert("Advertencia: valor pasado menor a 0");
         }
         this.totalProgress=valProgress;
         this._updateObjectsAccordAnims(this);
@@ -47,7 +46,7 @@ var ControllerAnimator=fabric.util.createClass({
     },
     playAnimation:function(){
         if(this.requestAnimFrameID!=null){alert("SE LLAMO CUANDO YA ESTABA EN APLAY EL ANIMATOR");return;}
-        this._setState(ControllerAnimatorState.playing);
+        this._setState(global.ControllerAnimatorState.playing);
         this._calcTimingValuesForLoop();
         this._loop();
     },
@@ -60,7 +59,7 @@ var ControllerAnimator=fabric.util.createClass({
     },
     stopAnimation:function(){
         if(this.requestAnimFrameID!=null){
-            this._setState(ControllerAnimatorState.paused);
+            this._setState(global.ControllerAnimatorState.paused);
             fabric.util.cancelAnimFrame(this.requestAnimFrameID);
             this.requestAnimFrameID=null;
         }

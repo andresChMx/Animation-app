@@ -528,10 +528,10 @@ var SectionStylingObject={
         //text animable widgets
         //- font family
         let select=document.querySelector(".styling-widget #font-family");
-        for(let i in FontsNames){
+        for(let i in global.FontsNames){
             let option=document.createElement("option");
             option.textContent=i;
-            option.value=FontsNames[i];
+            option.value=global.FontsNames[i];
             select.appendChild(option);
         }
     },

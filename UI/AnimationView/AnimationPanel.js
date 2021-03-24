@@ -88,8 +88,8 @@ var SectionActionEditorMenu={
     HTMLBtnDeleteKeyFrame:null,
     HTMLSelectFunctions:null,
 
-    MODELMenuTweenTypes:Object.keys(EnumAnimationTweenType),
-    MODELMenuEasingTypes:Object.keys(EnumAnimationEasingType),
+    MODELMenuTweenTypes:Object.keys(global.EnumAnimationTweenType),
+    MODELMenuEasingTypes:Object.keys(global.EnumAnimationEasingType),
 
     parentClass:null,
     init:function(parentClass){
@@ -212,13 +212,13 @@ var SectionActionEditorMenu={
                 }
             },
             btnPlay:{
-                val:ControllerAnimatorState.paused, //possible values equal to ControllerAnimatorStates
+                val:global.ControllerAnimatorState.paused, //possible values equal to global.ControllerAnimatorStates
                 htmlElem:document.querySelector('.action-editor__properties-area__toolbar .btn-play-timeline'),
                 initEvents:function(){
                     this.htmlElem.addEventListener("click",this.OnTrigger.bind(this))
                 },
                 OnTrigger:function(e){
-                    if(this.val===ControllerAnimatorState.paused){
+                    if(this.val===global.ControllerAnimatorState.paused){
                         me.OnWidgetChanged("play-timeline");
                     }
                     else{
@@ -231,9 +231,9 @@ var SectionActionEditorMenu={
                 setVal:function(val){
                     this.val=val;
                     let classList=this.htmlElem.classList;
-                    if(this.val===ControllerAnimatorState.playing){
+                    if(this.val===global.ControllerAnimatorState.playing){
                         classList.remove("icon-play");classList.add("icon-pause");
-                    }else if(this.val===ControllerAnimatorState.paused){
+                    }else if(this.val===global.ControllerAnimatorState.paused){
                         classList.remove("icon-pause");classList.add("icon-play");
                     }
 
@@ -385,8 +385,8 @@ var SectionActionEditorMenu={
                     me.OnWidgetChanged("update-duration", {before:this.prevValue,after:value});
                     this.prevValue=value;
                 },
-                setVal:function(val){
-                    this.field.setValue(val);
+                setVal:function(val,fireEvent=true){
+                    this.field.setValue(val,fireEvent);
                 },
                 getVal:function(){return this.field.getValue()},
             }
@@ -481,7 +481,12 @@ var SectionActionEditorMenu={
             this.widgetsTimelineTools.menuListAddPropertyAnimation.setVal([]);
         }
     },
-
+    notificationScenesManagerOnProjectCollectionsLoaded:function(loadPendingData){
+        //con esto disparar tambien los eventos, esto ocacionara que el scenePreviewController tambien sea notificado,
+        // siento notificado en total dos veces ya que este tambien esta suscrito al onprojectCollectionsloaded, pero esta bien,
+        //para evitar hacer mas extenso(creo 4 lineas mas) el codigo
+        this.widgetsTimelineTools.durationField.setVal(loadPendingData.animatorDuration*1000)
+    },
     notificationOnWindowMouseDown:function(){
         this.widgetsKeyframeTools.menuFunctions.notificationOnWindowMouseDown();
         this.widgetsTimelineTools.menuListAddPropertyAnimation.notificationOnWindowMouseDown();
@@ -543,7 +548,7 @@ let SectionTimeLine={
                             if(nextAnimation !== undefined){
                                 tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:endValues,easingType:nextAnimation.easingType,tweenType:nextAnimation.tweenType},time:firstPropertyAnim.endMoment});
                             }else{
-                                tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:endValues,easingType:EnumAnimationEasingType.In,tweenType:EnumAnimationTweenType.Sine},time:firstPropertyAnim.endMoment});
+                                tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:endValues,easingType:global.EnumAnimationEasingType.In,tweenType:global.EnumAnimationTweenType.Sine},time:firstPropertyAnim.endMoment});
                             }
                         }
 
@@ -554,7 +559,7 @@ let SectionTimeLine={
                                 values.push(this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[properties[k]][animationsLength-1].endValue);
                             }
                             let firstPropertyAnim=this.currentSelectedAnimableObjects[objectIndex].animator.dictAnimations[masterProperty][animationsLength-1];
-                            tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:values,easingType:EnumAnimationEasingType.In,tweenType:EnumAnimationTweenType.Sine},time:firstPropertyAnim.endMoment});
+                            tmplistDictsPropertyLanes[objectIndex][keyModel].push({data:{values:values,easingType:global.EnumAnimationEasingType.In,tweenType:global.EnumAnimationTweenType.Sine},time:firstPropertyAnim.endMoment});
                         }
                     }
                 }
@@ -609,7 +614,7 @@ let SectionTimeLine={
     _addObjectAnimationsByLane:function(laneName,animableObject){
         let lanePropeties=this.MODELLanesProperties[laneName];
         for(let i in lanePropeties){
-            animableObject.animator.addAnimation(lanePropeties[i],0,0,0,0,EnumAnimationEasingType.In,EnumAnimationTweenType.Sine);
+            animableObject.animator.addAnimation(lanePropeties[i],0,0,0,0,global.EnumAnimationEasingType.In,global.EnumAnimationTweenType.Sine);
         }
     },
 
@@ -655,7 +660,7 @@ let SectionTimeLine={
             let listListpropertiesValues=[];
             //collecting values
             for(let objectIndex=0;objectIndex<this.currentSelectedAnimableObjects.length;objectIndex++){
-                listListpropertiesValues.push({values:[],easingType:EnumAnimationEasingType.In,tweenType:EnumAnimationTweenType.Sine});
+                listListpropertiesValues.push({values:[],easingType:global.EnumAnimationEasingType.In,tweenType:global.EnumAnimationTweenType.Sine});
 
                 for(let i in this.MODELLanesProperties[laneName]){
                     let propertyValue=this.currentSelectedAnimableObjects[objectIndex].getCustom(this.MODELLanesProperties[laneName][i]);
@@ -820,6 +825,8 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
         MainMediator.registerObserver(this.timelineController.name,this.timelineController.events.OnAnimatorStateChanged,this);
         MainMediator.registerObserver(this.timelineController.name,this.timelineController.events.OnAnimatorNewProgress,this);
 
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.OnProjectCollectionsLoaded,this);
+
 
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnSelectionUpdated,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjModified,this);
@@ -845,7 +852,7 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
     },*/
     childNotificationOnBtnResetTimeline:function(){
         this.timelineController.animator.setTotalProgress(0);
-        if(this.timelineController.animator.state===ControllerAnimatorState.playing){
+        if(this.timelineController.animator.state===global.ControllerAnimatorState.playing){
             this.timelineController.animator._calcTimingValuesForLoop();
         }
         this.SectionTimeLine.notificationOnBtnResetTimeline();
@@ -903,7 +910,10 @@ let PanelActionEditor={ // EL PANEL ACTION EDITOR, DONDE SE ANIMAN PROPIEDADES. 
         this.SectionTimeLine.notificationOnSelectionUpdated();
         this.SectionActionEditorMenu.notificationCanvasManagerOnSelectionUpdated();
     },
-
+    notificationScenesManagerOnProjectCollectionsLoaded:function(args){
+        let loadPendingData=args[0];
+        this.SectionActionEditorMenu.notificationScenesManagerOnProjectCollectionsLoaded(loadPendingData);
+    },
     notificationCanvasManagerOnObjModified:function(){
 
     },

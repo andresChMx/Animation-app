@@ -2,19 +2,10 @@ var CanvasManager={
     name:'CanvasManager',
     events:{
         OnSelectionUpdated:'OnSelectionUpdated',// cuando se crea, oculta o cambia a otro objeto
-
-        OnObjAddedToListWithEntrance:'OnObjAddedToListWithEntrance',//cuando se agrego o elimina un elemento de la lista listAnimableObjectsWithEntraces
-        OnAnimableObjectAdded:'OnAnimableObjectAdded',
-        OnShapeAnimableAdded:"OnShapeAnimableAdded",
-        OnObjDeletedFromListWidthEntraces:'OnObjDeletedFromListWidthEntraces', // cuando se elimina un objeto del canvas (entonces de las dos listas)
-        OnAnimableObjectDeleted:'OnAnimableObjectDeleted',
-        OnShapeAnimableDeleted:'OnShapeAnimableDeleted',
-
-        OnObjectMovedForward:'OnObjectMovedForward',
-        OnObjectMovedBackward:'OnObjectMovedBackward',
-
         OnObjModified:'OnObjModified',
 
+        OnBtnMoveBackwards:'OnBtnMoveBackwards',
+        OnBtnMoveForward:'OnBtnMoveForward',
         OnDesignPathOptionClicked:'OnDesignPathOptionClicked',
     },
     HTMLElement:null,
@@ -25,65 +16,27 @@ var CanvasManager={
 
     init:function(){
         let me=this;
-        this.collections=new AnimablesCollections();
-        this._collectionsCallbacks={
-            animObjs:{
-                onItemAdded:function(obj){
-                    me.notifyOnAnimableObjectAdded.bind(me)(obj);
-                },
-                onItemDeleted:function(index,obj){
-                    me.notifyOnAnimableObjectDeleted.bind(me)(index);
-                }
-            },
-            animObjsWithEntrance:{
-                onItemAdded:function(obj){
-                    me.notifyOnObjAddedToListObjectsWithEntrance.bind(me)(obj);
-                },
-                onItemDeleted:function(index,obj){
-                    me.notifyOnObjDeletedFromListWithEntrance.bind(me)(index);
-                }
-            },
-            animObjsClippers:{
-                onItemAdded:function(obj){
-                    me.notifyOnShapeAnimableObjectAdded.bind(me)(obj);
-                },
-                onItemDeleted:function(index,obj){
-                    me.notifyOnShapeAnimableDeleted.bind(me)(index,obj);
-                }
-            },
-            animObjsNotReady:{
-                onItemAdded:function(obj){
-                    obj.registerOnAssetReadyState(me);
-                },
-                onItemDeleted:function(index,obj){
-                }
-            },
-        };
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsItemAdded,this);
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsItemRemoved,this);
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.OnProjectCollectionsLoaded,this);
 
-
-        for(let key in EnumCollectionsNames){
-            this.collections[key].listenOnItemAdded(this._collectionsCallbacks[key].onItemAdded);
-            this.collections[key].listenOnItemDeleted(this._collectionsCallbacks[key].onItemDeleted);
-        }
+        MainMediator.registerObserver(PanelPreviewer.name,PanelPreviewer.events.OnBtnClose,this);
 
         this.SectionFloatingMenu=SectionFloatingMenu;
         this.SectionEntranceObjectConfiguration=SectionEntranceObjectConfiguration;
+        this.SectionSelectHand=SectionSelectHand;
         this.SectionFloatingMenu.init();
         this.SectionEntranceObjectConfiguration.init();
+        this.SectionSelectHand.init();
 
         this.HTMLElement=document.querySelector(".canvas-animator");
         this.boundingClientRect=this.HTMLElement.getBoundingClientRect();
-
-        MainMediator.registerObserver(WindowManager.name,WindowManager.events.OnUILoaded,this);
 
         this.initCanvas();
 
         this.panningAndZoomBehaviour();
 
         this.initEvents();
-    },
-    notificationWindowManagerOnUILoaded:function(){//PARA EMISION DE EVENTOS DEBEMOS ESPERAR QUE TODOS ESTEN LISTOS
-        this.initCamera();
     },
     initCanvas:function(resolutionWidth,resolutionHeight){
         this.canvas=new fabric.Canvas('c',{backgroundColor: 'rgb(240,240,240)'});
@@ -109,23 +62,9 @@ var CanvasManager={
         this.canvas.on('object:modified',this.notifyOnObjModified.bind(this));
 
         //PanelInspector.SectionLanesEditor.registerOnFieldInput(this);
-        MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnDurationInput,this);
-        MainMediator.registerObserver(PanelActionEditor.name,PanelActionEditor.events.OnMarkerDragEnded,this)
-        MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnMoveUpObjectEntranceOrder,this);
-        MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnMoveDownObjectEntranceOrder,this);
 
-
-        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageAssetDummyDraggingEnded,this);
-        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnTextAssetDraggableDropped,this);
-        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnShapeAssetDraggableDropped,this);
-        MainMediator.registerObserver(PanelAssets.name,PanelAssets.events.OnImageURLLoaded,this);
         WindowManager.registerObserverOnResize(this);
-        WindowManager.registerOnKeyDeletePressed(this);
         },
-    initCamera:function(){
-        this.camera=CameraAnimable.createInstance(0,0);
-        this.setupNewObject(this.camera);
-    },
     panningAndZoomBehaviour:function(){
         let isDragging=false;
         let lastPosX=false;
@@ -195,78 +134,19 @@ var CanvasManager={
         //     }
         // }
     },
-    /*METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTOS DE ENTRADA (DRAWN Y DRAGGED)*/
-    getListIndexObjectWithEntrance:function(obj){
-        return this.collections.animObjsWithEntrance.list.indexOf(obj);
-    },
-    getListIndexAnimableObjects:function(obj){
-        return this.collections.animObjs.list.indexOf(obj);
-    },
-    getListIndexClipperObjects:function(obj){
-        return this.collections.animObjsClippers.list.indexOf(obj);
-    },
     /*FIN-METODOS RELACIONADOS A LA LISTA DE OBJETOS CON EFECTSO DE ENTRADA (DRAWN Y DRAGGED)*/
     getSelectedAnimableObj:function(){
         let activeObj=this.canvas.getActiveObject();
         if(activeObj){
             return activeObj;
         }
-        // if(activeObj && (activeObj.type==="ImageAnimable" || activeObj.type==="CameraAnimable" || activeObj.type==="TextAnimable")){
-        //     return activeObj
-        // }else{
-        //     return null;
-        // }
-
     },
     /*objects creating and deleting*/
     /*
     * Creates and setup a completely new object
     * */
-    createAnimableObject:function(model,type="ImageAnimable",thumbnail=null){
-        let initPosition=this.objectInitializationPosition();
-        if(type==="ShapeAnimable"){
-            window[type].createInstance(initPosition.x,initPosition.y,model,function(newInstance){
-                this.setupNewObject(newInstance);
-            }.bind(this));
-        }
-        else{
-            let newInstance=null;
-            newInstance=window[type].createInstance(initPosition.x,initPosition.y,model);
-            this.setupNewObject(newInstance);
-        }
-    },
-    setupNewObject:function(newObject,listCollNamesToBeSettedup=null/*optional: if null, all needed lists are used*/){
-        if(!listCollNamesToBeSettedup){                     //Invocado cuando se crea(desde cero) o clona un objeto
-            for(let key in EnumCollectionsNames){
-                window[newObject.type].instanceSetupInCanvasManager(newObject,key);
-            }
-            this.canvas.add(newObject);
-        }else{                                              // invocado cuando se carga un objeto
-            listCollNamesToBeSettedup.forEach(function(elem){
-                window[newObject.type].instanceSetupInCanvasManager(newObject,elem);
-            })
-        }
-    },
 
-    removeActiveAnimableObject:function(){//no called on loading project
-        let activeAnimableObject=this.getSelectedAnimableObj();
-        if(activeAnimableObject){
-            let listObjects;
-            if(activeAnimableObject.type==="activeSelection"){listObjects=activeAnimableObject.getObjects();}
-            else{listObjects=[activeAnimableObject]}
-            this.canvas.discardActiveObject();
-            for(let i=0;i<listObjects.length;i++){
-                let object=listObjects[i];
-                this._removeAnimableObject(object);
-
-                this.canvas.remove(object);
-            }
-        }
-    },
-    _removeAnimableObject:function(object){
-        window[object.type].removeInstance(object);
-    },
-    objectInitializationPosition:function(){
+    getMousePositionInCanvas:function(){
         let self=this;
         let canvasRelativePosition={
             x:WindowManager.mouse.x-self.canvas._offset.left,
@@ -277,161 +157,13 @@ var CanvasManager={
         return fabric.util.transformPoint(canvasRelativePosition,invertMat);
     },
 
-    moveUpObjectInEntranceList:function(index){
-        if(index>0){
-            let tmp=this.collections.animObjsWithEntrance.list[index];
-            this.collections.animObjsWithEntrance.list[index]=this.collections.animObjsWithEntrance.list[index-1];
-            this.collections.animObjsWithEntrance.list[index-1]=tmp;
-        }
-    },
-    moveDownObjectInEntranceList:function(index){
-        if(index<this.collections.animObjsWithEntrance.list.length-1){
-            let tmp=this.collections.animObjsWithEntrance.list[index];
-            this.collections.animObjsWithEntrance.list[index]=this.collections.animObjsWithEntrance.list[index+1];
-            this.collections.animObjsWithEntrance.list[index+1]=tmp;
-        }
-    },
-    moveUpObjectInObjectsList:function(index){
-        if(index>0){
-            let tmp=this.collections.animObjs.list[index];
-            this.collections.animObjs.list[index]=this.collections.animObjs.list[index-1];
-            this.collections.animObjs.list[index-1]=tmp;
-            return true;
-        }
-        return false;
-    },
-    moveDownObjectInObjectsList:function(index){
-        if(index<this.collections.animObjs.list.length-1){
-            let tmp=this.collections.animObjs.list[index];
-            this.collections.animObjs.list[index]=this.collections.animObjs.list[index+1];
-            this.collections.animObjs.list[index+1]=tmp;
-            return true;
-        }
-        return false;
-    },
-    AreAllImagesReady:function(){
-        return this.collections.animObjsNotReady.list.length===0;
-    },
-
     setCanvasOnAnimableObjects:function(){
-        for(let i=0;i<this.collections.animObjs.list.length;i++){
-            this.collections.animObjs.list[i]._set('canvas', this.canvas);
-            this.collections.animObjs.list[i].setCoords();
+        let listAnimObjs=ScenesManager.getCollection(global.EnumCollectionsNames.animObjs);
+        for(let i=0;i<listAnimObjs.length;i++){
+            listAnimObjs[i]._set('canvas', this.canvas);
+            listAnimObjs[i].setCoords();
         }
         this.canvas.renderAll();
-    },
-
-    /*used when loading project*/
-    clear:function(){
-        for(let i=0;i<this.collections.animObjs.list.length;i++){
-            this._removeAnimableObject(this.collections.animObjs.list[i]);
-            i--;
-        }
-        this.canvas.clear();
-    },
-    toJSON:function(){
-        return this.toObject();
-    },
-    toObject:function(){
-        for(let i=0;i<this.collections.animObjsWithEntrance.list.length;i++){
-            this.collections.animObjsWithEntrance.list[i].entranceBehaviour.entranceMode.setTurnIndexInEntraceList(i);
-        }
-        for(let i=0;i<this.collections.animObjsClippers.list.length;i++){
-            this.collections.animObjsClippers.list[i].indexInClipperObjectsList=i;
-        }
-        let object=this.canvas.toObject();
-        object.animatorDuration=SectionActionEditorMenu.widgetsTimelineTools.durationField.getVal();
-        return object;
-    },
-    loadFromJSON:function(json){
-        this.clear();
-
-        //Copied from staticCanvas.loadFromJSON
-        var serialized = (typeof json === 'string')
-            ? JSON.parse(json)
-            : fabric.util.object.clone(json);
-
-        this.canvas.loadFromJSON(serialized);
-        let allObjects=this.canvas.getObjects();
-        //filtering objects with entrance effects
-        let tmpListAnimableObjectsWithEntrances=[];
-        let tmpListClipperObjects=[];
-        for(let i=0;i<allObjects.length;i++){
-            let instance=allObjects[i];
-            if(instance.type==="ShapeAnimable"){
-                tmpListClipperObjects.push(instance);
-            }
-            if(instance.entranceBehaviour.entranceModeName!==EntranceName.none){
-                tmpListAnimableObjectsWithEntrances.push(instance);
-            }
-            if(instance.type==="CameraAnimable"){
-                this.camera=instance;
-            }
-        }
-        //sorting by turn index
-        this._sortLoadedObjectsWithEntraceMode(tmpListAnimableObjectsWithEntrances);
-        this._sortLoadedClipperObjects(tmpListClipperObjects);
-        //Se hace asi, "cargando los collections por partes", ya que se necesita seguir las listas temporales creadas, puesto que se debe seguir el orden en que se encuentran los items en esas listas
-        for(let i=0;i<tmpListClipperObjects.length;i++){
-            this.setupNewObject(tmpListClipperObjects[i],[EnumCollectionsNames.animObjsClippers]);
-        }
-        for(let i=0;i<tmpListAnimableObjectsWithEntrances.length;i++){
-            this.setupNewObject(tmpListAnimableObjectsWithEntrances[i],[EnumCollectionsNames.animObjsWithEntrance]);
-        }
-        for(let i=0;i<allObjects.length;i++){
-            this.setupNewObject(allObjects[i],[EnumCollectionsNames.animObjs,EnumCollectionsNames.animObjsNotReady]);
-
-            let indexUnresolvedClipPath=allObjects[i].indexUnresolvedClipPath;
-            if(indexUnresolvedClipPath!==-1){
-                allObjects[i].clipPath=this.collections.animObjsClippers.list[indexUnresolvedClipPath];
-            }
-        }
-        this.canvas.renderAll(); //solution, the clipping was not been rendered
-
-        SectionActionEditorMenu.widgetsTimelineTools.durationField.setVal(serialized.animatorDuration*1000)
-    },
-    _sortLoadedObjectsWithEntraceMode:function(inputArr) {
-        let n = inputArr.length;
-        for (let i = 1; i < n; i++) {
-            let current = inputArr[i];
-            let j = i-1;
-            while ((j > -1) && (current.entranceBehaviour.entranceMode.turnIndexInEntranceList < inputArr[j].entranceBehaviour.entranceMode.turnIndexInEntranceList)) {
-                inputArr[j+1] = inputArr[j];
-                j--;
-            }
-            inputArr[j+1] = current;
-        }
-    },
-    _sortLoadedClipperObjects:function(inputArr) {
-        let n = inputArr.length;
-        for (let i = 1; i < n; i++) {
-            let current = inputArr[i];
-            let j = i-1;
-            while ((j > -1) && (current.indexInClipperObjectsList < inputArr[j].indexInClipperObjectsList)) {
-                inputArr[j+1] = inputArr[j];
-                j--;
-            }
-            inputArr[j+1] = current;
-        }
-    },
-    notifyOnObjAddedToListObjectsWithEntrance:function(animObj){
-        MainMediator.notify(this.name,this.events.OnObjAddedToListWithEntrance,[animObj]);
-    },
-    notifyOnShapeAnimableObjectAdded:function(animObj){
-        MainMediator.notify(this.name,this.events.OnShapeAnimableAdded,[animObj]);
-    },
-    notifyOnAnimableObjectAdded:function(animObj){
-        MainMediator.notify(this.name,this.events.OnAnimableObjectAdded,[animObj]);
-    },
-    notifyOnAnimableObjectDeleted:function(indexInAnimableObjectsList){
-        MainMediator.notify(this.name,this.events.OnAnimableObjectDeleted,[indexInAnimableObjectsList]);
-    },
-    /*Object deleted from every where*/
-    notifyOnObjDeletedFromListWithEntrance:function(indexInObjsWithEntrance){
-        MainMediator.notify(this.name,this.events.OnObjDeletedFromListWidthEntraces,[indexInObjsWithEntrance]);
-    },
-    notifyOnShapeAnimableDeleted:function(indexInShapeAnimableList,deletedItem){
-        MainMediator.notify(this.name,this.events.OnShapeAnimableDeleted,[indexInShapeAnimableList,deletedItem]);
     },
 
     notifyOnObjSelectionUpdated:function(opt){
@@ -440,77 +172,44 @@ var CanvasManager={
     notifyOnObjModified:function(opt){
         MainMediator.notify(this.name,this.events.OnObjModified,[opt.target]);
     },
-    notificationOnKeyDeleteUp:function(){
-        this.removeActiveAnimableObject()
-    },
     notificationOnResize:function(){//window resize
         this._setCanvasDimensions();
     },
+
+    notificationScenesManageranimObjsItemAdded:function(args){
+        let object=args[0];
+        this.canvas.add(object);
+
+    },
+    notificationScenesManageranimObjsItemRemoved:function(args){
+        let index=args[0];
+        let object=args[1];
+        this.canvas.remove(object);
+
+    },
+    notificationScenesManagerOnProjectCollectionsLoaded:function(args){
+        let loadPendingData=args[0];
+        this.setCanvasOnAnimableObjects();
+    },
+
+    notificationPanelPreviewerOnBtnClose:function(){
+        this.setCanvasOnAnimableObjects();
+    },
+
     childNotificationOnBringForward:function(animableObject){
-        let index=this.collections.animObjs.list.indexOf(animableObject);
-        let performed=this.moveDownObjectInObjectsList(index)
-        if(performed){
-            CanvasManager.canvas.bringForward(animableObject);
-            MainMediator.notify(this.name,this.events.OnObjectMovedForward,[index]);
-        }
+        let index=ScenesManager.getObjectIndexInCollection(global.EnumCollectionsNames.animObjs,animableObject);
+        this.canvas.bringForward(animableObject);
+        MainMediator.notify(this.name,this.events.OnBtnMoveForward,[index]);
+
     },
     childNotificationOnBringBackward:function(animableObject){
-        let index=this.collections.animObjs.list.indexOf(animableObject);
-        let performed=this.moveUpObjectInObjectsList(index)
-        if(performed){
-            CanvasManager.canvas.sendBackwards(animableObject);
-            MainMediator.notify(this.name,this.events.OnObjectMovedBackward,[index]);
-        }
+        let index=ScenesManager.getObjectIndexInCollection(global.EnumCollectionsNames.animObjs,animableObject);
+        this.canvas.sendBackwards(animableObject);
+        MainMediator.notify(this.name,this.events.OnBtnMoveBackwards,[index]);
+
     },
     childNotificationOnDesignPathOptionClicked:function(currentSelectedObject){
         MainMediator.notify(this.name,this.events.OnDesignPathOptionClicked,[currentSelectedObject])
-    },
-
-    /*child (de animables)*/notificationOnAssetStateReady:function(imageAnimable){/*naming convention exception, this could be considered as called by children, since it is being called by imageAnimables and svgAniambles*/
-        this.collections.animObjsNotReady.remove(imageAnimable);
-    },
-
-    notificationPanelInspectorOnBtnMoveDownObjectEntranceOrder:function(args){
-        let index=args[0];
-        this.moveDownObjectInEntranceList(index);
-    },
-    notificationPanelInspectorOnBtnMoveUpObjectEntranceOrder:function(args){
-        let index=args[0];
-        this.moveUpObjectInEntranceList(index);
-    },
-    notificationPanelAssetsOnImageAssetDummyDraggingEnded:function(args){
-        let model=args[0];
-        let thumbnail=args[1]
-        this.createAnimableObject(model,"ImageAnimable",thumbnail);
-    },
-    notificationPanelAssetsOnTextAssetDraggableDropped:function(args){
-        let fontFamily=args[0];
-        let model={fontFamily:fontFamily}
-        this.createAnimableObject(model,"TextAnimable")
-    },
-    notificationPanelAssetsOnShapeAssetDraggableDropped:function(args){
-        let model=args[0];
-        this.createAnimableObject(model,"ShapeAnimable");
-    },
-    notificationPanelAssetsOnImageURLLoaded:function(args){
-      let url=args[0];
-      let model={id:"1",url_thumbnail:url,url_image:url,user_id:"",category:"",name:""};
-      if(Utils.isSVG(url)){
-        this.createAnimableObject(model,"SVGAnimable");
-      }else{
-        this.createAnimableObject(model);
-      }
-    },
-    notificationPanelActionEditorOnMarkerDragEnded:function(){
-        for(let i=0;i<this.collections.animObjs.list.length;i++){
-            this.collections.animObjs.list[i].setCoords();
-        }
-    },
-    notificationPanelActionEditorOnDurationInput:function(args){
-        let durationBefore=args[0];let durationAfter=args[1];
-        for(let i=0;i<this.collections.animObjs.list.length;i++){
-            this.collections.animObjs.list[i].animator.onDurationChange(durationBefore,durationAfter);
-        }
     },
 }
 
@@ -537,7 +236,7 @@ var SectionFloatingMenu={
             icon:"icon-bin",
             description:"Remove",
             action:function (){
-                CanvasManager.removeActiveAnimableObject();
+                ScenesManager.removeActiveAnimableObject();
             },
             HTMLElement:null
         },
@@ -553,7 +252,7 @@ var SectionFloatingMenu={
             icon:"icon-edit",
             description:"design path for this object",
             action:function(animableObject){
-                if(CanvasManager.AreAllImagesReady()){
+                if(ScenesManager.AreAllAssetsReady()){
                     CanvasManager.childNotificationOnDesignPathOptionClicked(animableObject);
                 }else{
                     alert("cannot perform this action while there are not ready images, please delete those images");
@@ -683,6 +382,7 @@ var SectionEntranceObjectConfiguration={
         this.HTMLCollectionEntranceButtons=document.querySelectorAll(".canvas-animator__object-entrance-configuration__entrance-settings__box-buttons .entrance-button")
         this.HTMLCollectionModesAreas=document.querySelectorAll(".canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings__mode-options")
 
+        let me=this;
         this.widgetsEntraceMode={
             modeSelector:{
                 value:"",
@@ -788,12 +488,40 @@ var SectionEntranceObjectConfiguration={
                 setVal:function(showBool){this.htmlElem.querySelector("#checkbox-force-stroke-drawing").checked=showBool;},
                 getVal:function(){return this.htmlElem.querySelector("#checkbox-force-stroke-drawing").checked;}
             },
+            drawn_drawingHandName:{
+                htmlElem:document.querySelector(".drawn-mode-widget__drawing-hand-name"),
+                value:"",
+                initEvent:function(){
+                    this.htmlElem.style.display="flex";
+                    this.htmlElem.querySelector(".current-drawing-hand-name").addEventListener("click",this.OnTriggered.bind(this))
+                },
+                removeEvent:function(){
+                    this.htmlElem.style.display="flex";
+                    this.htmlElem.querySelector(".current-drawing-hand-name").removeEventListener("click",this.OnTriggered.bind(this))
+                },
+                OnTriggered:function(e){
+                    SectionSelectHand.showModal(this.value,this);
+                },
+                setVal:function(drawingHandName){
+                    this.value=drawingHandName;
+                    let currentDrawingHandElem=this.htmlElem.querySelector(".current-drawing-hand-name");
+                    let newIcon=StaticResource.images.drawing_hands[drawingHandName].elem.cloneNode();
+                    currentDrawingHandElem.replaceChild(newIcon,currentDrawingHandElem.children[0]);
+                    },
+                getVal:function(){return this.value},
+                invokedModalConfirmed:function(modalName,value){
+                    if(modalName==="SectionSelectHand"){
+                        this.setVal(value);
+                    }
+                }
+            }
         }
 
 
 
         this.HTMLcloseBtn=document.querySelector(".canvas-animator__object-entrance-configuration__btn-close");
         this.HTMLAcceptBtn=document.querySelector(".canvas-animator__object-entrance-configuration__footer .btn-accept")
+        this.HTMLCancelBtn=document.querySelector(".canvas-animator__object-entrance-configuration__footer .btn-cancel")
 
         this.currentAnimableObject=null;
         this.currentSelectedOptions={};
@@ -803,7 +531,7 @@ var SectionEntranceObjectConfiguration={
     },
     initEvents:function(){
         this.HTMLcloseBtn.addEventListener("click",this.OnBtnCloseClicked.bind(this));
-
+        this.HTMLCancelBtn.addEventListener("click",this.OnBtnCloseClicked.bind(this));
         this.HTMLAcceptBtn.addEventListener("click",this.OnBtnAcceptClicked.bind(this))
 
         //INIT WIDGETS
@@ -876,11 +604,11 @@ var SectionEntranceObjectConfiguration={
             let entranceModeBefore=this.currentAnimableObject.entranceBehaviour.getCurrentEntranceModeName();
             if(entranceModeBefore !==entranceModeChoosen){
                 this.currentAnimableObject.entranceBehaviour.setEntranceModeName(entranceModeChoosen);
-                if(entranceModeChoosen===EntranceName.none && entranceModeBefore!==EntranceName.none){
-                    CanvasManager.collections.animObjsWithEntrance.remove(this.currentAnimableObject);
+                if(entranceModeChoosen===global.EntranceName.none && entranceModeBefore!==global.EntranceName.none){
+                    ScenesManager.removeInstanceFromCollection(this.currentAnimableObject,global.EnumCollectionsNames.animObjsWithEntrance);
                 }
-                else if(entranceModeBefore===EntranceName.none && entranceModeChoosen!==EntranceName.none){
-                    CanvasManager.collections.animObjsWithEntrance.add(this.currentAnimableObject);
+                else if(entranceModeBefore===global.EntranceName.none && entranceModeChoosen!==global.EntranceName.none){
+                    ScenesManager.addInstanceToCollection(this.currentAnimableObject,global.EnumCollectionsNames.animObjsWithEntrance);
                 }
             }
 
@@ -902,26 +630,109 @@ var SectionEntranceObjectConfiguration={
         this.hiddeModel();
     },
     normalizeObjectEntraceMode:function(objectEntraceModeName){
-        if(objectEntraceModeName===EntranceName.text_drawn ||
-            objectEntraceModeName===EntranceName.image_drawn ||
-            objectEntraceModeName===EntranceName.svg_drawn){return "drawn"}
+        if(objectEntraceModeName===global.EntranceName.text_drawn ||
+            objectEntraceModeName===global.EntranceName.image_drawn ||
+            objectEntraceModeName===global.EntranceName.svg_drawn){return "drawn"}
 
-        else if(objectEntraceModeName===EntranceName.text_typed){return 'typed'}
+        else if(objectEntraceModeName===global.EntranceName.text_typed){return 'typed'}
         else{return objectEntraceModeName.toLowerCase();}
     },
     unnormalizeUIEntraceMode:function(UIentraceModeName){
         if(UIentraceModeName==="drawn"){
-            if(this.currentAnimableObject.type==="TextAnimable"){return EntranceName.text_drawn}
-            else if(this.currentAnimableObject.type==="ImageAnimable"){return EntranceName.image_drawn}
-            else if(this.currentAnimableObject.type==="SVGAnimable"){return EntranceName.svg_drawn}
+            if(this.currentAnimableObject.type==="TextAnimable"){return global.EntranceName.text_drawn}
+            else if(this.currentAnimableObject.type==="ImageAnimable"){return global.EntranceName.image_drawn}
+            else if(this.currentAnimableObject.type==="SVGAnimable"){return global.EntranceName.svg_drawn}
 
         }else if(UIentraceModeName==='typed'){
-            return EntranceName.text_typed;
+            return global.EntranceName.text_typed;
         }
         return Utils.capitalize(UIentraceModeName);
 
-    }
+    },
+
 };
+
+let SectionSelectHand={
+    name:'SectionSelectHand',
+    init:function(){
+        this.HTMLElement=document.querySelector(".canvas-animator__object-drawing-hand__filter");
+        this.HTMLcloseBtn=document.querySelector(".canvas-animator__object-drawing-hand__btn-close");
+        this.HTMLAcceptBtn=document.querySelector(".canvas-animator__object-drawing-hand__footer .btn-accept")
+        this.HTMLCancelBtn=document.querySelector(".canvas-animator__object-drawing-hand__footer .btn-cancel")
+
+        this.invoker=null;
+        this.currentSelectedOption="";
+
+        this.initEvents();
+
+    },
+    initHTML:function(){
+        let boxContainer=this.HTMLElement.querySelector(".box-drawing-hands")
+        for(let image in StaticResource.images.drawing_hands){
+            console.log("adsfasdfasd");
+            let div=document.createElement("div");
+            let icon=StaticResource.images.drawing_hands[image].elem.cloneNode();
+            icon.className="drawing-hand-item__icon";
+
+            div.classList.add("drawing-hand-item");
+            div.classList.add("button-solid-behaviour");
+            div.setAttribute("data",StaticResource.images.drawing_hands[image].name);
+
+            div.addEventListener("click",this.OnDrawingHandItemClicked.bind(this))
+
+            div.appendChild(icon);
+            boxContainer.appendChild(div);
+        }
+    },
+    initEvents:function(){
+        this.HTMLcloseBtn.addEventListener("click",this.OnBtnCloseClicked.bind(this));
+        this.HTMLCancelBtn.addEventListener("click",this.OnBtnCloseClicked.bind(this));
+        this.HTMLAcceptBtn.addEventListener("click",this.OnBtnAcceptClicked.bind(this))
+
+        MainMediator.registerObserver(WindowManager.name,WindowManager.events.OnUILoaded,this);
+        //INIT WIDGETS
+    },
+    clearActivenessHTMLAllItems:function(){
+        let boxContainer=this.HTMLElement.querySelector(".box-drawing-hands")
+        for(let i=0;i<boxContainer.children.length;i++){
+            boxContainer.children[i].classList.remove("active");
+        }
+    },
+    activateHTMLItem:function(drawingHandName){
+        this.HTMLElement.querySelectorAll('[data=' + drawingHandName + "]")[0].classList.add("active");
+    },
+    OnDrawingHandItemClicked:function(e){
+        this.clearActivenessHTMLAllItems();
+        this.currentSelectedOption=e.target.getAttribute("data");
+        this.activateHTMLItem(this.currentSelectedOption);
+    },
+    OnBtnCloseClicked:function(){
+        this.hiddeModel();
+    },
+    /*SE PROCESA LA INFORMACION EDITADA*/
+    OnBtnAcceptClicked:function(){
+        this.invoker.invokedModalConfirmed(this.name,this.currentSelectedOption);
+        this.hiddeModel();
+    },
+    hiddeModel:function(){
+        this.currentAnimableObject=null;
+        this.currentSelectedOptions="";
+        this.HTMLElement.style.display="none";
+    },
+    showModal:function(animableDrawingHandName,invoker){
+        if(CanvasManager.getSelectedAnimableObj()){
+            this.invoker=invoker;
+            this.currentSelectedOption=animableDrawingHandName;
+            this.clearActivenessHTMLAllItems();
+            this.activateHTMLItem(this.currentSelectedOption);
+
+            this.HTMLElement.style.display="block";
+        }
+    },
+    notificationWindowManagerOnUILoaded:function(){
+        this.initHTML();
+    }
+}
 
 
 

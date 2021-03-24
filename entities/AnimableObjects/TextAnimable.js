@@ -1,18 +1,18 @@
-var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de imageAnimable porque solo podemos heredar de una clase
+global.TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de imageAnimable porque solo podemos heredar de una clase
     //drawn y text_draw NO son lo mismo, ya que su logica es diferente
-    applicableEntranceModes: [EntranceName.text_drawn,EntranceName.none/*,EntranceName.dragged,EntranceName.text_typed**/],//FOR UI
+    applicableEntranceModes: [global.EntranceName.text_drawn,global.EntranceName.none/*,global.EntranceName.dragged,global.EntranceName.text_typed**/],//FOR UI
     applicableAnimationProperties:["position","scale","rotation","opacity"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.animObjs,
-        EnumCollectionsNames.animObjsWithEntrance,
-        EnumCollectionsNames.animObjsNotReady
+        global.EnumCollectionsNames.animObjs,
+        global.EnumCollectionsNames.animObjsWithEntrance,
+        global.EnumCollectionsNames.animObjsNotReady
     ],
     type:"TextAnimable",
     initialize:function(text,options){
         if(!options){options={}}
         if(!text){text=""}
         /*exact copy of animable object*/
-        this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];
+        this.applicableMenuOptions=[global.AnimObjectOptionMenu.duplicate,global.AnimObjectOptionMenu.delete,global.AnimObjectOptionMenu.addMask];
         /*selection,transforming styling*/
         this.padding=10;
         this.transparentCorners= false;    //
@@ -26,32 +26,35 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
         this.fill="#000000";
 
         this.cbOnThumbnailStateChanged=function(){};
-        this.thumbnailImage=StaticResource.images.textThumbnail.cloneNode();
-        this.thumbnailLoadingState=EnumAnimableLoadingState.ready;
+        this.thumbnailImage=StaticResource.images.general.textThumbnail.elem.cloneNode();
+        this.thumbnailLoadingState=global.EnumAssetLoadingState.ready;
 
         this.listObserversOnAssetStateReady=[];
-        this.fontLoadingState=EnumAnimableLoadingState.loading;
+        this.fontLoadingState=global.EnumAssetLoadingState.loading;
         // this.largeImage=null;
 
-        this.entranceBehaviour=new EntranceEffectBehaviour(this,this.applicableEntranceModes);
+        this.entranceBehaviour=new global.EntranceEffectBehaviour(this,this.applicableEntranceModes);
 
         this.animator=new Animator(this);
 
+        if(global.browserBehaviour.RegisterAnimableOnClipperRemoved){
+            MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsClippersItemRemoved,this);/*solo objectos que se les pueda agrega clipping*/
+        }
         this.setFontSize(72);
         this.setFontFamily(options.fontFamily);
         /*---------------------------*/
     },//exitEditing
 
     setFontFamily:function(fontname){ //Cargando Font Object y guardandolo, solo si aun no esta cargado
-        if(!FontsFileName[fontname]){fontname=Object.keys(FontsFileName)[0];} //validando que nombre sea uno valido
+        if(!global.FontsFileName[fontname]){fontname=Object.keys(global.FontsFileName)[0];} //validando que nombre sea uno valido
 
         this.fontFamily=fontname;
-        OpenTypeFontManager.LoadOpenTypeFont(FontsFileName[fontname],function (error){
+        OpenTypeFontManager.LoadOpenTypeFont(global.FontsFileName[fontname],function (error){
             if(error){
-                this._setFontLoadingState(EnumAnimableLoadingState.error);
+                this._setFontLoadingState(global.EnumAssetLoadingState.error);
                 console.log("ERROR: NO CARGO LA FUENTE, HUBO UN PROBLEMA EN EL SERVER");
             }else{
-                this._setFontLoadingState(EnumAnimableLoadingState.ready);
+                this._setFontLoadingState(global.EnumAssetLoadingState.ready);
             }
         }.bind(this));
     },
@@ -71,7 +74,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
     },
     _setFontLoadingState:function(state){
         this.fontLoadingState=state;
-        if(this.fontLoadingState===EnumAnimableLoadingState.ready){
+        if(this.fontLoadingState===global.EnumAssetLoadingState.ready){
             this.notifyOnAssetStateReady();
         }
     },
@@ -94,8 +97,8 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
     applyClipping:function(animObject){
         this.clipPath=animObject;
         for(let i=0;i<this.applicableMenuOptions.length;i++){
-            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.addMask){
-                this.applicableMenuOptions[i]=AnimObjectOptionMenu.removeMask;
+            if(this.applicableMenuOptions[i]===global.AnimObjectOptionMenu.addMask){
+                this.applicableMenuOptions[i]=global.AnimObjectOptionMenu.removeMask;
                 break;
             }
         }
@@ -104,8 +107,8 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
         this.clipPath=null;
         this.dirty=true;
         for(let i=0;i<this.applicableMenuOptions.length;i++){
-            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.removeMask){
-                this.applicableMenuOptions[i]=AnimObjectOptionMenu.addMask;
+            if(this.applicableMenuOptions[i]===global.AnimObjectOptionMenu.removeMask){
+                this.applicableMenuOptions[i]=global.AnimObjectOptionMenu.addMask;
                 break;
             }
         }
@@ -113,19 +116,26 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
     /*observer pattern*/
     registerOnAssetReadyState:function(obj){
         this.listObserversOnAssetStateReady.push(obj);
-        if(this.fontLoadingState===EnumAnimableLoadingState.ready){
+        if(this.fontLoadingState===global.EnumAssetLoadingState.ready){
             this.notifyOnAssetStateReady();
         }
     },
     listenOnThumbnailStateChanged:function(callback){
         this.cbOnThumbnailStateChanged=callback;
-        if(this.thumbnailLoadingState!==EnumAnimableLoadingState.loading){
+        if(this.thumbnailLoadingState!==global.EnumAssetLoadingState.loading){
             this.cbOnThumbnailStateChanged(this.thumbnailLoadingState,this.thumbnailImage);
         }
     },
     notifyOnAssetStateReady:function(){
         for(let i in this.listObserversOnAssetStateReady){
             this.listObserversOnAssetStateReady[i].notificationOnAssetStateReady(this);
+        }
+    },
+    notificationScenesManageranimObjsClippersItemRemoved:function(args){
+        let deletedObject=args[1];
+        if(deletedObject===this.clipPath){
+            this.removeClipping();
+            this.canvas && this.canvas.renderAll();
         }
     },
     toObject:function(){
@@ -146,7 +156,7 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
 
         delete object.clipPath; // temporal, ya que Object.toObject lo igualara al toObject de clipPath, si es que hay
         if(this.clipPath){
-            object.clipPath=CanvasManager.getListIndexClipperObjects(this.clipPath);
+            object.clipPath=ScenesManager.getObjectIndexInCollection(global.EnumCollectionsNames.animObjsClippers,this.clipPath);
             if(object.clipPath===-1){alert("BUGGGy7543");}// si es que tienes un clippath este tiene que estar en la lista del canvasManager si o sii, algo anda mall
         }
 
@@ -154,38 +164,43 @@ var TextAnimable=fabric.util.createClass(fabric.IText, {// NO heredamos de image
     },
     clone:function(callback){
         let object=this.toObject();
-        TextAnimable.cloneFromObject(
+        global.TextAnimable.cloneFromObject(
             object,
             callback)
-    }
+    },
+    remove:function(){
+        if(global.browserBehaviour.RegisterAnimableOnClipperRemoved){
+            MainMediator.unregisterObserver(ScenesManager.name,ScenesManager.events.animObjsClippersItemRemoved,this)
+        }
+    },
 });
 /*===============================*/
 /*=====  Static functions  ======*/
 /*===============================*/
 /*Object loading*/
-TextAnimable.cloneFromObject = function(_object, callback) {
+global.TextAnimable.cloneFromObject = function(_object, callback) {
     var object = fabric.util.object.clone(_object,true);
     /*initializing with no state*/
     let fakeModel={fontFamily:object.fontFamily}
-    let newTextShapeAnimable=TextAnimable.createInstance(0,0,fakeModel)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
+    let newTextShapeAnimable=global.TextAnimable.createInstance(0,0,fakeModel)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
 
     newTextShapeAnimable.setOptions(object)
 
     if(object.hasOwnProperty("clipPath")){
-        newTextShapeAnimable.clipPath=CanvasManager.collections.animObjsClippers.list[object.clipPath];
+        newTextShapeAnimable.clipPath=ScenesManager.getCollection(global.EnumCollectionsNames.animObjsClippers)[object.clipPath];
     }
 
-    newTextShapeAnimable.entranceBehaviour=new EntranceEffectBehaviour(newTextShapeAnimable,newTextShapeAnimable.applicableEntranceModes);
+    newTextShapeAnimable.entranceBehaviour=new global.EntranceEffectBehaviour(newTextShapeAnimable,newTextShapeAnimable.applicableEntranceModes);
     newTextShapeAnimable.animator=new Animator(newTextShapeAnimable);           //New fabric property
     newTextShapeAnimable.entranceBehaviour.fromObject(object.entranceBehaviour);
     newTextShapeAnimable.animator.fromObject(object.animator);
 
     callback(newTextShapeAnimable);
 };
-TextAnimable.fromObject=function(object,callback){
+global.TextAnimable.fromObject=function(object,callback){
     let fakeModel={fontFamily:object.fontFamily}
     /*initializing with no state*/
-    let newInstance=TextAnimable.createInstance(0,0,fakeModel)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
+    let newInstance=global.TextAnimable.createInstance(0,0,fakeModel)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
 
     let entranceBehaviourObject=object.entranceBehaviour;
     let animatorObject=object.animator;
@@ -207,8 +222,8 @@ TextAnimable.fromObject=function(object,callback){
 /*======== Object creation ===========*/
 /*====================================*/
 /*the next two methods are called separetely if object is cloned or loaded*/
-TextAnimable.createInstance=function(left,top,assetModel){/*fake model, since it will only contain fontFamily*/
-    let newObjectAnimable=new TextAnimable("Sample Text",{
+global.TextAnimable.createInstance=function(left,top,assetModel){/*fake model, since it will only contain fontFamily*/
+    let newObjectAnimable=new global.TextAnimable("Sample Text",{
         left:left,
         top:top,
         fontFamily:assetModel.fontFamily,
@@ -219,14 +234,4 @@ TextAnimable.createInstance=function(left,top,assetModel){/*fake model, since it
 
     return newObjectAnimable;
 }
-TextAnimable.instanceSetupInCanvasManager=function(instance,collectionName){
-    let contains=this.prototype.applicableCanvasManagerCollections.indexOf(collectionName);
-    if(contains>-1){
-        CanvasManager.collections[collectionName].add(instance);
-    }
-}
-TextAnimable.removeInstance=function(instance){
-    this.prototype.applicableCanvasManagerCollections.forEach(function(elem){
-        CanvasManager.collections[elem].remove(instance)
-    })
-}
+

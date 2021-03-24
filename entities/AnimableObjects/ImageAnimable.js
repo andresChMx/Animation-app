@@ -1,20 +1,16 @@
-let EnumAnimableLoadingState={
-    "loading":"loading",
-    "error":"error",
-    "ready":"ready"
-};
-var ImageAnimable=fabric.util.createClass(fabric.Image,{
-    applicableEntranceModes:[EntranceName.image_drawn,EntranceName.none],
+
+global.ImageAnimable=fabric.util.createClass(fabric.Image,{
+    applicableEntranceModes:[global.EntranceName.image_drawn,global.EntranceName.none],
     applicableAnimationProperties:["position","scale","rotation","opacity"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.animObjs,
-        EnumCollectionsNames.animObjsWithEntrance,
-        EnumCollectionsNames.animObjsNotReady,
+        global.EnumCollectionsNames.animObjs,
+        global.EnumCollectionsNames.animObjsWithEntrance,
+        global.EnumCollectionsNames.animObjsNotReady,
     ],
     type:'ImageAnimable',
     initialize:function(options){
         if(!options){options={};}
-        this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];
+        this.applicableMenuOptions=[global.AnimObjectOptionMenu.duplicate,global.AnimObjectOptionMenu.delete,global.AnimObjectOptionMenu.addMask];
         /*fabric.Object setting*/
         this.left=options.left;
         this.top=options.top;
@@ -30,22 +26,24 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.listObserversOnImageStateChanged=[];
         this.imageAssetModel=options.imageAssetModel;           //New Class Property, de aqui solo usamod thumbnail_url, y image_url. Solo las urls
         this.cbOnThumbnailStateChanged=function(){};
-        this.largeImage=StaticResource.images.loading;          //New Class Property
-        this.thumbnailImage=StaticResource.images.loading;             //New Class Property /*for ui, when appears in lists*/
-        this.imageLoadingState=EnumAnimableLoadingState.loading;//New Class Property
-        this.thumbnailLoadingState=EnumAnimableLoadingState.loading;
+        this.largeImage=StaticResource.images.general.loading.elem;          //New Class Property
+        this.thumbnailImage=StaticResource.images.general.loading.elem;             //New Class Property /*for ui, when appears in lists*/
+        this.imageLoadingState=global.EnumAssetLoadingState.loading;//New Class Property
+        this.thumbnailLoadingState=global.EnumAssetLoadingState.loading;
 
         this.callSuper("initialize",this.largeImage,{})
         /*fin -- images loading*/
 
-        this.entranceBehaviour=new EntranceEffectBehaviour(this,this.applicableEntranceModes);
+        this.entranceBehaviour=new global.EntranceEffectBehaviour(this,this.applicableEntranceModes);
 
         this.animator=new Animator(this);           //New fabric property
 
         //el entranceMode debe estar establecido a drawn antes de generar la imagen final mascarada (la siguiente funcion invocada)
 
         /*starting logic*/
-        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnShapeAnimableDeleted,this);/*solo objectos que se les pueda agrega clipping*/
+        if(global.browserBehaviour.RegisterAnimableOnClipperRemoved){
+            MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsClippersItemRemoved,this);/*solo objectos que se les pueda agrega clipping*/
+        }
 
         if(this.imageAssetModel){
             this.loadImages(); // because this object is just been created, be can call it here, since we already passed image asset model at initialization time
@@ -55,27 +53,27 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     },
     /*Used by path design editor*/
     getDrawingData:function(){
-        return this.entranceBehaviour.dictEntranceModes[EntranceName.image_drawn].drawingData;
+        return this.entranceBehaviour.dictEntranceModes[global.EntranceName.image_drawn].drawingData;
     },
     generateFinalMaskedImage:function(){ //called after path editor design is saved
-        this.entranceBehaviour.dictEntranceModes[EntranceName.image_drawn].generateFinalMaskedImage();
+        this.entranceBehaviour.dictEntranceModes[global.EntranceName.image_drawn].generateFinalMaskedImage();
     },
     /*state images loading methods*/
     loadImages:function(){
         fabric.util.loadImage(this.imageAssetModel.url_image, function(img, error) {
             if (error) {
-                this._setImageLoadingState(EnumAnimableLoadingState.error,StaticResource.images.loadingError);
+                this._setImageLoadingState(global.EnumAssetLoadingState.error,StaticResource.images.general.loadingError.elem);
                 return;
             }
-            this._setImageLoadingState(EnumAnimableLoadingState.ready,img);
+            this._setImageLoadingState(global.EnumAssetLoadingState.ready,img);
         }.bind(this),null,true);
 
         fabric.util.loadImage(this.imageAssetModel.url_thumbnail, function(img, error) {
             if (error) {
-                this._setThumbnailLoadingState(EnumAnimableLoadingState.error,StaticResource.images.loadingError.cloneNode());
+                this._setThumbnailLoadingState(global.EnumAssetLoadingState.error,StaticResource.images.general.loadingError.elem.cloneNode());
                 return;
             }
-            this._setThumbnailLoadingState(EnumAnimableLoadingState.ready,img);
+            this._setThumbnailLoadingState(global.EnumAssetLoadingState.ready,img);
         }.bind(this),null,true);
 
     },
@@ -91,7 +89,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         this.setCoords();
         this.canvas && this.canvas.renderAll();
 
-        if(this.imageLoadingState===EnumAnimableLoadingState.ready){
+        if(this.imageLoadingState===global.EnumAssetLoadingState.ready){
             this.notifyOnAssetStateReady();
         }
     },
@@ -115,8 +113,8 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     applyClipping:function(animObject){
         this.clipPath=animObject;
         for(let i=0;i<this.applicableMenuOptions.length;i++){
-            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.addMask){
-                this.applicableMenuOptions[i]=AnimObjectOptionMenu.removeMask;
+            if(this.applicableMenuOptions[i]===global.AnimObjectOptionMenu.addMask){
+                this.applicableMenuOptions[i]=global.AnimObjectOptionMenu.removeMask;
                 break;
             }
         }
@@ -124,8 +122,8 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     removeClipping:function(){
         this.clipPath=null;
         for(let i=0;i<this.applicableMenuOptions.length;i++){
-            if(this.applicableMenuOptions[i]===AnimObjectOptionMenu.removeMask){
-                this.applicableMenuOptions[i]=AnimObjectOptionMenu.addMask;
+            if(this.applicableMenuOptions[i]===global.AnimObjectOptionMenu.removeMask){
+                this.applicableMenuOptions[i]=global.AnimObjectOptionMenu.addMask;
                 break;
             }
         }
@@ -140,7 +138,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     /*observer pattern*/
     registerOnAssetReadyState:function(obj){
         this.listObserversOnImageStateChanged.push(obj);
-        if(this.imageLoadingState===EnumAnimableLoadingState.ready){
+        if(this.imageLoadingState===global.EnumAssetLoadingState.ready){
             this.notifyOnAssetStateReady()
         }
     },
@@ -151,11 +149,11 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     },
     listenOnThumbnailStateChanged:function(callback){
         this.cbOnThumbnailStateChanged=callback;
-        if(this.thumbnailLoadingState!==EnumAnimableLoadingState.loading){
+        if(this.thumbnailLoadingState!==global.EnumAssetLoadingState.loading){
             this.cbOnThumbnailStateChanged(this.thumbnailLoadingState,this.thumbnailImage);
         }
     },
-    notificationCanvasManagerOnShapeAnimableDeleted:function(args){
+    notificationScenesManageranimObjsClippersItemRemoved:function(args){
         let deletedObject=args[1];
         if(deletedObject===this.clipPath){
             this.removeClipping();
@@ -192,7 +190,7 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
         }
         delete object.clipPath; // temporal, ya que Object.toObject lo igualara al toObject de clipPath, si es que hay
         if(this.clipPath){
-            object.clipPath=CanvasManager.getListIndexClipperObjects(this.clipPath);
+            object.clipPath=ScenesManager.getObjectIndexInCollection(global.EnumCollectionsNames.animObjsClippers,this.clipPath);
             if(object.clipPath===-1){alert("BUGGGy7543");}// si es que tienes un clippath este tiene que estar en la lista del canvasManager si o sii, algo anda mall
         }
         return object;
@@ -202,22 +200,27 @@ var ImageAnimable=fabric.util.createClass(fabric.Image,{
     // },
     clone:function(callback){
         let object=this.toObject();
-        ImageAnimable.cloneFromObject(
+        global.ImageAnimable.cloneFromObject(
             object,
             this.largeImage.cloneNode(),
             this.thumbnailImage.cloneNode(),
             callback)
-    }
+    },
+    remove:function(){
+        if(global.browserBehaviour.RegisterAnimableOnClipperRemoved){
+            MainMediator.unregisterObserver(ScenesManager.name,ScenesManager.events.animObjsClippersItemRemoved,this)
+        }
+    },
 })
 /*===============================*/
 /*=====  Static functions  ======*/
 /*===============================*/
 /*Object loading*/
-ImageAnimable.cloneFromObject = function(_object,largeImage,thumbnailImage, callback) {
+global.ImageAnimable.cloneFromObject = function(_object,largeImage,thumbnailImage, callback) {
     var object = fabric.util.object.clone(_object,true);
     /*initializing with no state*/
     /*we are not pasing model, so it will not start logic*/
-    let newImageAnimable=ImageAnimable.createInstance(0,0,null)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
+    let newImageAnimable=global.ImageAnimable.createInstance(0,0,null)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
 
     let entranceBehaviourObject=object.entranceBehaviour;
     let animatorObject=object.animator;
@@ -237,11 +240,11 @@ ImageAnimable.cloneFromObject = function(_object,largeImage,thumbnailImage, call
             newImageAnimable.entranceBehaviour.fromObject(entranceBehaviourObject);
             newImageAnimable.animator.fromObject(animatorObject);
             if(object.hasOwnProperty("clipPath")){
-                newImageAnimable.clipPath=CanvasManager.collections.animObjsClippers.list[object.clipPath];
+                newImageAnimable.clipPath=ScenesManager.getCollection(global.EnumCollectionsNames.animObjsClippers)[object.clipPath];
             }
 
-            newImageAnimable._setImageLoadingState(EnumAnimableLoadingState.ready,largeImage);
-            newImageAnimable._setThumbnailLoadingState(EnumAnimableLoadingState.ready,thumbnailImage);
+            newImageAnimable._setImageLoadingState(global.EnumAssetLoadingState.ready,largeImage);
+            newImageAnimable._setThumbnailLoadingState(global.EnumAssetLoadingState.ready,thumbnailImage);
 
             callback(newImageAnimable);
             // });
@@ -249,10 +252,10 @@ ImageAnimable.cloneFromObject = function(_object,largeImage,thumbnailImage, call
     });
 
 };
-ImageAnimable.fromObject=function(object,callback){
+global.ImageAnimable.fromObject=function(object,callback){
     // object.toObject()
     /*initializing with no state*/
-    let newImageAnimable=ImageAnimable.createInstance(0,0,object.imageAssetModel)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
+    let newImageAnimable=global.ImageAnimable.createInstance(0,0,object.imageAssetModel)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
 
     let entranceBehaviourObject=object.entranceBehaviour;
     let animatorObject=object.animator;
@@ -277,24 +280,11 @@ ImageAnimable.fromObject=function(object,callback){
 /*======== Object creation ===========*/
 /*====================================*/
 /*the next two methods are called separetely if object is cloned or loaded*/
-ImageAnimable.createInstance=function(left,top,imageAssetModel){
-    let newObjectAnimable=new ImageAnimable({
+global.ImageAnimable.createInstance=function(left,top,imageAssetModel){
+    let newObjectAnimable=new global.ImageAnimable({
         left:left,
         top:top,
         imageAssetModel:imageAssetModel,
     });
     return newObjectAnimable;
-}
-ImageAnimable.instanceSetupInCanvasManager=function(instance,collectionName){
-    let contains=this.prototype.applicableCanvasManagerCollections.indexOf(collectionName);
-    if(contains>-1){
-        CanvasManager.collections[collectionName].add(instance);
-    }
-};
-ImageAnimable.removeInstance=function(instance){
-    MainMediator.unregisterObserver(CanvasManager.name,CanvasManager.events.OnShapeAnimableDeleted,instance);
-
-    this.prototype.applicableCanvasManagerCollections.forEach(function(elem){
-        CanvasManager.collections[elem].remove(instance)
-    })
 }

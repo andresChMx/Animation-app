@@ -1,4 +1,4 @@
-var NoneEntranceMode=fabric.util.createClass(EntranceMode,{
+global.NoneEntranceMode=fabric.util.createClass(global.EntranceMode,{
     type:"None",
     initialize:function(parentObject){
         this.callSuper("initialize",parentObject);

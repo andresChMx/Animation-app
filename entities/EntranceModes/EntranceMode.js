@@ -1,4 +1,4 @@
-let EntranceMode=fabric.util.createClass({
+global.EntranceMode=fabric.util.createClass({
     initialize:function(parentObject){
         this.parentObject=parentObject;
         this.turnIndexInEntranceList=-1; /*gets updated just before project serialization (project saving).*/

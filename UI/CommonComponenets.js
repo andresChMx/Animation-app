@@ -7,6 +7,7 @@ var NumericField=fabric.util.createClass({
         this.maxVal=maxVal;
         this.sufix=sufix;
 
+        this.cbOnNewValue=function(){};
         this.refFuncOnInputFocusIn=this.OnInputFocusIn.bind(this);
         this.refFuncOnInputFocusOut=this.OnInputFocusOut.bind(this);
         WindowManager.registerOnKeyEnterPressed(this,this.windowObserverType);
@@ -24,6 +25,12 @@ var NumericField=fabric.util.createClass({
         this.htmlElement.addEventListener("focusin",this.refFuncOnInputFocusIn);
         this.htmlElement.addEventListener("focusout",this.refFuncOnInputFocusOut);
 
+    },
+    disable:function(){
+        this.htmlElement.disabled=true;
+    },
+    enable:function(){
+        this.htmlElement.disabled=false;
     },
     OnInputFocusIn:function(){
         this.htmlElement.value=this.value;

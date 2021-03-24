@@ -1,14 +1,14 @@
-var DrawnEntranceMode=fabric.util.createClass(EntranceMode,{
+global.DrawnEntranceMode=fabric.util.createClass(global.EntranceMode,{
     initialize:function(parentObject){
         this.callSuper("initialize",parentObject);
         this.parentObject.registerOnAssetReadyState(this);
 
-        this.cacheManager=EntranceEffectManagerMap.DrawnEntranceMode;
+        this.cacheManager=global.EntranceEffectManagerMap.DrawnEntranceMode;
         this.drawingData=this.generateInitialImageDrawingData();//new Class Property: Holds drawind data for 'drawn' entrance mode
 
         this.isMyTurnToCopyCache=false;
         this.baseImage=this.parentObject.largeImage;
-        this.meanWhileImage=new Image();
+        this.meanWhileImage=fabric.util.createImage();
 
     },
     /*implemented inherited methods*/
@@ -40,7 +40,7 @@ var DrawnEntranceMode=fabric.util.createClass(EntranceMode,{
             pathsNames:[],
             strokesTypes:[],
             ctrlPoints:[],
-            type:DrawingDataType.CREATED_NOPATH
+            type:global.DrawingDataType.CREATED_NOPATH
         }
     },
     setTurnToCopyCache:function(turn,meanwhileImage){

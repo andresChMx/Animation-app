@@ -1,14 +1,73 @@
-function Save(){
-    //saving other things
-    //saving image models -> collection: images
-    // for i in imagesModels
-    //      if(imagesModels[i].paths.type==DrawingDataType.CREATED_NO_PATH){
-    //          NOTHING
-    //      }
-    //      else if(imagesModels[i].paths.type==DrawingDataType.CREATED_PATHDESIGNED || CREATED_PATHLOADED){
-    //          SAVING ALL FIELDS
-    //      }
-}
+// const fabric = require('fabric').fabric;
+// const Blob = require('node-blob');
+// var createObjectURL = require('create-object-url');
+
+var applyViewboxTransform=function(element){/*modificado de: applyViewboxTransform() */ /*obtener dimensiones reales de svg, ya que las dimenciones dadas por el tag html <img> son muy diferentes a las dadas por fabric,
+por lo que conclui que las dimenciones reales las halla fabric, es asi que de esta funcion se conservo solo lo que permite calcular las dimenciones reales del svg, esto es usado por
+NetworkManager.loadSVG , la cual fue a su vez modificada de fabric.util.loadSVGFromURL, para que una vez cargada la iamgen,
+se modifique el codigo svg para pasar las dimenciones como atributos, y de esta forma el tag <img> usa esas dimenciones, las cuale son las reales.
+En conclusion, esta funcion calcula las dimenciones reales de la imagen svg*/
+    var reViewBoxAttrValue = new RegExp(
+        '^' +
+        '\\s*(' + fabric.reNum + '+)\\s*,?' +
+        '\\s*(' + fabric.reNum + '+)\\s*,?' +
+        '\\s*(' + fabric.reNum + '+)\\s*,?' +
+        '\\s*(' + fabric.reNum + '+)\\s*' +
+        '$'
+    );
+    let parseUnit = fabric.util.parseUnit;
+    var viewBoxAttr = element.getAttribute('viewBox'),
+        scaleX = 1,
+        scaleY = 1,
+        minX = 0,
+        minY = 0,
+        viewBoxWidth, viewBoxHeight, matrix, el,
+        widthAttr = element.getAttribute('width'),
+        heightAttr = element.getAttribute('height'),
+        x = element.getAttribute('x') || 0,
+        y = element.getAttribute('y') || 0,
+        preserveAspectRatio = element.getAttribute('preserveAspectRatio') || '',
+        missingViewBox = (!viewBoxAttr || !fabric.svgViewBoxElementsRegEx.test(element.nodeName)
+            || !(viewBoxAttr = viewBoxAttr.match(reViewBoxAttrValue))),
+        missingDimAttr = (!widthAttr || !heightAttr || widthAttr === '100%' || heightAttr === '100%'),
+        toBeParsed = missingViewBox && missingDimAttr,
+        parsedDim = { }, translateMatrix = '', widthDiff = 0, heightDiff = 0;
+
+    parsedDim.width = 0;
+    parsedDim.height = 0;
+    parsedDim.toBeParsed = toBeParsed;
+
+    if (toBeParsed) {
+        return parsedDim;
+    }
+
+    if (missingViewBox) {
+        parsedDim.width = parseUnit(widthAttr);
+        parsedDim.height = parseUnit(heightAttr);
+        return parsedDim;
+    }
+    minX = -parseFloat(viewBoxAttr[1]);
+    minY = -parseFloat(viewBoxAttr[2]);
+    viewBoxWidth = parseFloat(viewBoxAttr[3]);
+    viewBoxHeight = parseFloat(viewBoxAttr[4]);
+    parsedDim.minX = minX;
+    parsedDim.minY = minY;
+    parsedDim.viewBoxWidth = viewBoxWidth;
+    parsedDim.viewBoxHeight = viewBoxHeight;
+    if (!missingDimAttr) {
+        parsedDim.width = parseUnit(widthAttr);
+        parsedDim.height = parseUnit(heightAttr);
+        scaleX = parsedDim.width / viewBoxWidth;
+        scaleY = parsedDim.height / viewBoxHeight;
+    }
+    else {
+        parsedDim.width = viewBoxWidth;
+        parsedDim.height = viewBoxHeight;
+    }
+    return parsedDim
+};
+
+
 var NetworkManager={
     UploadImageFile:function(files){
             let promises=[];
@@ -263,9 +322,14 @@ var NetworkManager={
                 var xml = r.responseXML;
                 let svg = r.response;
                 let blob = new Blob([svg], {type: 'image/svg+xml'});
-                let url = URL.createObjectURL(blob);
 
-                let image=new Image();
+                let url=null;
+                if(global.browserBehaviour.createObjectURL){
+                    url = URL.createObjectURL(blob);
+                }else{
+                    url = createObjectURL(blob)
+                }
+                let image=fabric.util.createImage();
                 image.src=url;
                 image.onload=function(){
 
@@ -278,7 +342,13 @@ var NetworkManager={
                     //generando imagen a partir de svg string con modificado (dimenciones establecidas)
                     let newSvgString=(new XMLSerializer).serializeToString(xml.documentElement);
                     blob = new Blob([newSvgString], {type: 'image/svg+xml'});
-                    url = URL.createObjectURL(blob);
+
+                    if(global.browserBehaviour.createObjectURL){
+                        url = URL.createObjectURL(blob);
+                    }else{
+                        url = createObjectURL(blob)
+                    }
+
                     image.src=url;
                     image.onload=function(){
                         callback(newSvgString,image,false);
@@ -291,4 +361,11 @@ var NetworkManager={
 
         }
     }
+}
+function createObjectURL(blob){
+    var mime = 'image/svg+xml';
+    var encoding = 'base64';
+    var data = blob.buffer.toString(encoding);
+    var uri = 'data:' + mime + ';' + encoding + ',' + data;
+    return uri;
 }

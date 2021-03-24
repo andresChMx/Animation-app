@@ -1,4 +1,4 @@
-var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
+global.SVGDrawnEntranceMode=fabric.util.createClass(global.ImageDrawnEntranceMode,{
     type:"SVGDrawn",
     initialize:function(parentObject){
         this.callSuper("initialize",parentObject);
@@ -14,7 +14,9 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         this.cacheWidth=0;
         this.cacheHeight=0;
         // /*configuration parameters*/
+        let self=this;
         this.config={
+            drawingHandName:self.cacheManager.drawingHand.defaultDrawingHandName,
             showHand:true,
             forceStrokeDrawing:true,
             fillRevealMode:'fadein',  // // fadein || drawn_fill || no-fill
@@ -25,7 +27,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
     /*overwritten methods*/
     notificationOnAssetStateReady:function(){
         this.baseImage=this.parentObject.largeImage;
-        if(this.parentObject.imageLoadingState===EnumAnimableLoadingState.ready){
+        if(this.parentObject.imageLoadingState===global.EnumAssetLoadingState.ready){
             //the finalMasked iamge will be generated if paths are created. But now the need
             //to have a pixels version of the image to avoid gross behavious al the end of drawing
             //in no-paths version of the drawing(pasaba de pixeles a vectores)
@@ -36,7 +38,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         }
     },
     generateBitmapSVGFinalImage:function(){ //
-        let canvas=document.createElement("canvas");
+        let canvas=fabric.util.createCanvasElement();
         let ctx=canvas.getContext("2d");
 
         canvas.width=this.getWidthInDrawingCache();
@@ -84,12 +86,18 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
     },
     /*Implementing inherited abstract methods*/
     generateEntranceData:function(callback){
-        this.meanWhileImage=new Image();
+        let meanWhileImageLoaded=false;
+        let drawingPathsLoaded=false;
+        let flagCallbackCalled=false;
+
+        this.meanWhileImage=fabric.util.createImage();
+        this.meanWhileImage.onload=function(){meanWhileImageLoaded=true;attemptFinish();}
         this.meanWhileImage.src=this.cacheManager.canvas.toDataURL();
+
         this.isMyTurnToCopyCache=false;
         this.parentObject.fadeInTransitionOpacity=0;
 
-        if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
+        if(this.drawingData.type===global.DrawingDataType.CREATED_NOPATH){
             this.dataGeneratorForSVG.generateDrawingData(
                 this.parentObject.svgString,
                 this.getWidthInMainCanvas(),
@@ -139,15 +147,23 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
                     svgDrawingData.type=this.drawingData.type;/*CREATED_NOPATH*/
                     this.drawingData=svgDrawingData;
 
-                    callback();
+                    drawingPathsLoaded=true;
+                    attemptFinish();
                 }.bind(this)
             );
-        }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+        }else if(this.drawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
             this.dataGenerator.generateCrtlPointsFromPointsMatrix(
                 this.drawingData.points,
                 this.drawingData /*OUT*/
             );
-            callback();
+            drawingPathsLoaded=true;
+            attemptFinish();
+        }
+        function attemptFinish(){
+            if(!flagCallbackCalled && meanWhileImageLoaded&&drawingPathsLoaded){
+                flagCallbackCalled=true;
+                callback();
+            }
         }
     },
     generateFinalMaskedImage:function(){
@@ -158,7 +174,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         this._calcCacheHeight();
     },
     clearEntranceData:function(){/*in addition */
-        if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
+        if(this.drawingData.type===global.DrawingDataType.CREATED_NOPATH){
             this.drawingData.points=[];
             this.drawingData.linesWidths=[];
             this.drawingData.ctrlPoints=[];
@@ -172,7 +188,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
                 this._removeFadeInAnimationOfObject();
             }else if(this.config.fillRevealMode==="no-fill"){}
 
-        }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+        }else if(this.drawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
             this.drawingData.ctrlPoints=[];
         }
 
@@ -197,16 +213,16 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         }
     },
     getDrawingFinalImage:function(){/*insted of returning one or the other regarding one configuration varible, now it is done regarding the image has a path designed or not*/
-        if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+        if(this.drawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
             return this.maskedImage;
-        }else if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
+        }else if(this.drawingData.type===global.DrawingDataType.CREATED_NOPATH){
             // return this.baseImage;
             return this.finalImageBitmap;
         }
     },
     illustrationFunctionOnCache:function(canvas,ctx,baseImage,prevPathSnapshot,indexLayer/*Used For SVGAnimable*/){
-        if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
-            ImageDrawnEntranceMode.prototype.illustrationFunctionOnCache(canvas,ctx,baseImage,prevPathSnapshot,indexLayer);
+        if(this.drawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
+            global.ImageDrawnEntranceMode.prototype.illustrationFunctionOnCache(canvas,ctx,baseImage,prevPathSnapshot,indexLayer);
         }else if(indexLayer<=this.lastIndexTruePath){
             ctx.clearRect(0,0,canvas.width,canvas.height);
             ctx.stroke();
@@ -232,7 +248,7 @@ var SVGDrawnEntranceMode=fabric.util.createClass(ImageDrawnEntranceMode,{
         let startMoment=this.parentObject.animator.entranceTimes.startTime+this.parentObject.animator.entranceTimes.delay+newEntranceDuration;
         let endMoment=startMoment+fadeinDuration;
         if(this.parentObject.animator.dictHiddenAnimations["fadeInTransitionOpacity"].length>0){alert("ERROR: SE INTENTO REGISTRAR ANIMMACION DE FADEIN CUANDO YA HABIA UNA");return;}
-        this.parentObject.animator.addHiddenAnimation("fadeInTransitionOpacity",0,1,startMoment,endMoment,EnumAnimationEasingType.InOut,EnumAnimationTweenType.Sine);
+        this.parentObject.animator.addHiddenAnimation("fadeInTransitionOpacity",0,1,startMoment,endMoment,global.EnumAnimationEasingType.InOut,global.EnumAnimationTweenType.Sine);
     },
     _removeFadeInAnimationOfObject:function(){
         this.parentObject.animator.entranceTimes.transitionDelay=0;

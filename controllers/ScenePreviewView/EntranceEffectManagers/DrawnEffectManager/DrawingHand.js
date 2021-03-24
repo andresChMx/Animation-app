@@ -1,11 +1,11 @@
 var DrawingHand=fabric.util.createClass({
+    defaultDrawingHandName:"man",
     initialize:function(options){
-        this.image=null;
-        fabric.Image.fromURLImageOutOfCamera('https://res.cloudinary.com/dkhbeokkp/image/upload/v1609085047/sohbzhlyfcj6mjpqdxgy.png', function(oImg) {
-            this.image=oImg;
-            this.image.originX="left";
-            this.image.originY="top";
-        }.bind(this));
+        this.image=new ImageOutOfCamera(null,{
+            originX:"left",
+            originY:"top"
+        });
+        this.offsetDrawingHand={x:0,y:0};
     },
     getHandImage:function(){
         return this.image;
@@ -13,6 +13,15 @@ var DrawingHand=fabric.util.createClass({
     updatePosition:function(posx,posy){
         this.image.set({left:posx});
         this.image.set({top:posy});
+    },
+    setCanvasCameraScalerDims:function(x,y){
+        this.image.scaleX=x;
+        this.image.scaleY=y;
+    },
+    setHandImage:function(drawingHandName){
+        let image=StaticResource.images.drawing_hands[drawingHandName].elem
+        this.image.setElement(image);
+        this.offsetDrawingHand=StaticResource.images.drawing_hands[drawingHandName].offset;
     }
 });
 var ImageOutOfCamera=fabric.util.createClass(fabric.Image,{
@@ -21,6 +30,8 @@ var ImageOutOfCamera=fabric.util.createClass(fabric.Image,{
         this.callSuper('initialize', element,options);
     },
     render: function(ctx) {
+        if(!this._element){return;}
+
         ctx.save();
         ctx.setTransform(1,0,0,1,0,0);
         this._setupCompositeOperation(ctx);
@@ -47,12 +58,4 @@ var ImageOutOfCamera=fabric.util.createClass(fabric.Image,{
         this.clipTo && ctx.restore();
         ctx.restore();
     },
-
-})
-fabric.util.object.extend(fabric.Image,{
-    fromURLImageOutOfCamera:function(url, callback, imgOptions){
-        fabric.util.loadImage(url, function(img) {
-            callback && callback(new ImageOutOfCamera(img, imgOptions));
-        }, null, imgOptions && imgOptions.crossOrigin);
-    }
 })

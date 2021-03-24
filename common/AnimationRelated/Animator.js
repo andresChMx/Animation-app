@@ -193,6 +193,8 @@ var AnimatorCamera=fabric.util.createClass(Animator,{
     initialize:function(animableObject,canvasCamera){
         this.callSuper("initialize",animableObject);
         this.canvasCamera=canvasCamera;
+        this.canvasCameraScalerX=1;
+        this.canvasCameraScalerY=1;
         this.startCameraAnimation=false;
     },
     executeAnimations:function(currentTime){
@@ -207,7 +209,7 @@ var AnimatorCamera=fabric.util.createClass(Animator,{
         newReferenceMatrix=this.invertTransform(newReferenceMatrix);
         newReferenceMatrix[4]+=this.animableObject.width/2;
         newReferenceMatrix[5]+=this.animableObject.height/2;
-        newReferenceMatrix=fabric.util.multiplyTransformMatrices([PanelPreviewer.scalerFactorX,0,0,PanelPreviewer.scalerFactorX,0,0],newReferenceMatrix,false)
+        newReferenceMatrix=fabric.util.multiplyTransformMatrices([this.canvasCameraScalerX,0,0,this.canvasCameraScalerY,0,0],newReferenceMatrix,false)
         this.canvasCamera.setViewportTransform(newReferenceMatrix);
         
         this.canvasCamera.opacity=this.animableObject.opacity;
@@ -223,6 +225,10 @@ var AnimatorCamera=fabric.util.createClass(Animator,{
     start:function(camera){
         this.startCameraAnimation=true;
         this.canvasCamera=camera;
+    },
+    setCanvasCameraScalerDims:function(x,y){
+        this.canvasCameraScalerX=x;
+        this.canvasCameraScalerY=y;
     },
     stop:function(){
         this.startCameraAnimation=false;

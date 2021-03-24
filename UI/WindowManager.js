@@ -41,6 +41,7 @@ var WindowManager={
 
     activeObserverType:ObserverType.main,
 
+    pageLoaded:false,
     init:function(){
         window.addEventListener("load",this.initUI.bind(this));
         window.addEventListener("resize",this.onWindowResize.bind(this));
@@ -94,8 +95,10 @@ var WindowManager={
         if(index!==-1){this.listObservers[obsType].onKeyEnterUp.splice(index,1);}
     },
     onWindowResize:function(){
-        for(var i=0;i<this.listObservers[this.activeObserverType].onResize.length;i++){
-            this.listObservers[this.activeObserverType].onResize[i].notificationOnResize();
+        if(this.pageLoaded){
+            for(var i=0;i<this.listObservers[this.activeObserverType].onResize.length;i++){
+                this.listObservers[this.activeObserverType].onResize[i].notificationOnResize();
+            }
         }
     },
     onWindowMouseUp:function(e){
@@ -130,11 +133,13 @@ var WindowManager={
         // document.body.style.width=window.innerWidth + "px";
         // document.body.style.height=window.innerHeight + "px";
 
+        ScenesManager.init();
         CanvasManager.init();
         /*AUTHENTICATION*/
         PanelAuthentication.init();
 
         PanelHome.init();
+        PanelConfig.init();
         /*ANIMATOR*/
         PanelAnimation.init();
         PanelAnimation.PanelActionEditor.init();
@@ -156,5 +161,9 @@ var WindowManager={
             MainMediator.notify(this.name,this.events.OnUILoaded,[]);
         }.bind(this))
         StaticResource.init();
+
+
+        this.pageLoaded=true;
+        this.onWindowResize();
     }
 }

@@ -1,15 +1,15 @@
-var SVGAnimable=fabric.util.createClass(ImageAnimable,{
-    applicableEntranceModes:[EntranceName.svg_drawn,EntranceName.none],
+global.SVGAnimable=fabric.util.createClass(global.ImageAnimable,{
+    applicableEntranceModes:[global.EntranceName.svg_drawn,global.EntranceName.none],
     applicableAnimationProperties:["position","scale","rotation","opacity"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.animObjs,
-        EnumCollectionsNames.animObjsWithEntrance,
-        EnumCollectionsNames.animObjsNotReady,
+        global.EnumCollectionsNames.animObjs,
+        global.EnumCollectionsNames.animObjsWithEntrance,
+        global.EnumCollectionsNames.animObjsNotReady,
     ],
     type:'SVGAnimable',
     initialize:function(options){
         if(!options){options={};}
-        this.applicableMenuOptions=[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete,AnimObjectOptionMenu.addMask];
+        this.applicableMenuOptions=[global.AnimObjectOptionMenu.duplicate,global.AnimObjectOptionMenu.delete,global.AnimObjectOptionMenu.addMask];
         this.callSuper('initialize',options);
 
         this.svgString=null                 //stores svg image in string format
@@ -21,10 +21,10 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
     },
     /*Used by path design editor*/
     getDrawingData:function(){
-        return this.entranceBehaviour.dictEntranceModes[EntranceName.svg_drawn].drawingData;
+        return this.entranceBehaviour.dictEntranceModes[global.EntranceName.svg_drawn].drawingData;
     },
     generateFinalMaskedImage:function(){ //called after path editor design is saved
-        this.entranceBehaviour.dictEntranceModes[EntranceName.svg_drawn].generateFinalMaskedImage();
+        this.entranceBehaviour.dictEntranceModes[global.EntranceName.svg_drawn].generateFinalMaskedImage();
     },
     /*state images loading methods*/
     loadImages:function(){
@@ -32,19 +32,19 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
         NetworkManager.loadSVG(this.imageAssetModel.url_image,function(svgString,image,error){
             if(!error){
                 this.svgString=svgString;
-                this._setImageLoadingState(EnumAnimableLoadingState.ready,image);
+                this._setImageLoadingState(global.EnumAssetLoadingState.ready,image);
             }else{
                 this.svgString="";
-                this._setImageLoadingState(EnumAnimableLoadingState.error,StaticResource.images.loadingError.cloneNode());
+                this._setImageLoadingState(global.EnumAssetLoadingState.error,StaticResource.images.general.loadingError.elem.cloneNode());
             }
         }.bind(this))
 
         fabric.util.loadImage(this.imageAssetModel.url_thumbnail, function(img, error) {
             if (error) {
-                this._setThumbnailLoadingState(EnumAnimableLoadingState.error,StaticResource.images.loadingError.cloneNode());
+                this._setThumbnailLoadingState(global.EnumAssetLoadingState.error,StaticResource.images.general.loadingError.elem.cloneNode());
                 return;
             }
-            this._setThumbnailLoadingState(EnumAnimableLoadingState.ready,img);
+            this._setThumbnailLoadingState(global.EnumAssetLoadingState.ready,img);
         }.bind(this),null,true);
     },
     clone:function(callback){
@@ -52,7 +52,7 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
         delete object.filters;
         delete object.resizeFilter;
         object.svgString=this.svgString;
-        SVGAnimable.cloneFromObject(
+        global.SVGAnimable.cloneFromObject(
             object,
             this.largeImage.cloneNode(),
             this.thumbnailImage.cloneNode(),
@@ -63,10 +63,10 @@ var SVGAnimable=fabric.util.createClass(ImageAnimable,{
 /*=====  Static functions  ======*/
 /*===============================*/
 /*Object loading*/
-SVGAnimable.cloneFromObject = function(_object,largeImage,thumbnailImage, callback) {
+global.SVGAnimable.cloneFromObject = function(_object,largeImage,thumbnailImage, callback) {
     var object = fabric.util.object.clone(_object,true);
     /*initializing with no state*/
-    let newSVGAnimable=new SVGAnimable({});
+    let newSVGAnimable=new global.SVGAnimable({});
 
     let entranceBehaviourObject=object.entranceBehaviour;
     let animatorObject=object.animator;
@@ -80,20 +80,20 @@ SVGAnimable.cloneFromObject = function(_object,largeImage,thumbnailImage, callba
         newSVGAnimable.animator.fromObject(animatorObject);
 
         if(object.hasOwnProperty("clipPath")){
-            newSVGAnimable.clipPath=CanvasManager.collections.animObjsClippers.list[object.clipPath];
+            newSVGAnimable.clipPath=ScenesManager.getCollection(global.EnumCollectionsNames.animObjsClippers)[object.clipPath];
         }
 
         newSVGAnimable.svgString=object.svgString;
 
-        newSVGAnimable._setImageLoadingState(EnumAnimableLoadingState.ready,largeImage);
-        newSVGAnimable._setThumbnailLoadingState(EnumAnimableLoadingState.ready,thumbnailImage);
+        newSVGAnimable._setImageLoadingState(global.EnumAssetLoadingState.ready,largeImage);
+        newSVGAnimable._setThumbnailLoadingState(global.EnumAssetLoadingState.ready,thumbnailImage);
         callback(newSVGAnimable);
     },1)
 };
 SVGAnimable.fromObject=function(object,callback){
     // object.toObject()
     /*initializing with no state*/
-    let newSVGAnimable=SVGAnimable.createInstance(0,0,null)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
+    let newSVGAnimable=global.SVGAnimable.createInstance(0,0,null)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
 
     let entranceBehaviourObject=object.entranceBehaviour;
     let animatorObject=object.animator;
@@ -117,18 +117,11 @@ SVGAnimable.fromObject=function(object,callback){
 /*======== Object creation ===========*/
 /*====================================*/
 /*the next two methods are called separetely if object is cloned or loaded*/
-SVGAnimable.createInstance=function(left,top,imageAssetModel){
-    let newObjectAnimable=new SVGAnimable({
+global.SVGAnimable.createInstance=function(left,top,imageAssetModel){
+    let newObjectAnimable=new global.SVGAnimable({
         left:left,
         top:top,
         imageAssetModel:imageAssetModel,
     });
     return newObjectAnimable;
 }
-SVGAnimable.instanceSetupInCanvasManager=function(instance,collectionName){
-    ImageAnimable.instanceSetupInCanvasManager(instance,collectionName);
-}
-SVGAnimable.removeInstance=function(instance){
-    ImageAnimable.removeInstance(instance);
-}
-

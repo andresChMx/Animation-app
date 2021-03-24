@@ -24,13 +24,13 @@ var AnimationController=fabric.util.createClass({
         MainMediator.notify(this.name,this.events.OnAnimatorStateChanged,[state]);
     },
     notificationWindowManagerOnUILoaded:function(){
-        this.animator.setListObjectsToAnimate(CanvasManager.collections.animObjs.list);
+        this.animator.setListObjectsToAnimate(ScenesManager.getCollection(global.EnumCollectionsNames.animObjs));
         this.animator.canvasToDisplay=CanvasManager.canvas;
     },
     notificationPanelActionEditorOnMarkerDragged:function(args){
         let newProgress=args[0];
         this.animator.setTotalProgress(newProgress);
-        if(this.animator.state===ControllerAnimatorState.playing){
+        if(this.animator.state===global.ControllerAnimatorState.playing){
             this.animator._calcTimingValuesForLoop();
         }
     },

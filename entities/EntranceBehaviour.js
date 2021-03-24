@@ -1,4 +1,4 @@
-let EntranceEffectBehaviour=fabric.util.createClass({
+global.EntranceEffectBehaviour=fabric.util.createClass({
     initialize:function(parentObject,applicableEntranceModes){
         this.parentObject=parentObject;
         this.applicableEntranceModes=applicableEntranceModes;
@@ -13,7 +13,7 @@ let EntranceEffectBehaviour=fabric.util.createClass({
     _initApplicableEntranceModes:function(){
         for(let i=0;i<this.applicableEntranceModes.length;i++){
             let entranceModeName=this.applicableEntranceModes[i];
-            let classTmp=window[entranceModeName + "EntranceMode"];
+            let classTmp=global[entranceModeName + "EntranceMode"];
             this.dictEntranceModes[entranceModeName]=new classTmp(this.parentObject);
         }
     },

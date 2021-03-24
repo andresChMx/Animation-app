@@ -130,6 +130,9 @@ html{
 input{
     border:none;
 }
+input:disabled{
+    color:rgba(255,255,255,.6)
+}
 button{
     border:none;
 }
@@ -1630,7 +1633,15 @@ hijo por supuesto)                              */
 .canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings .mode-settings .drawn-mode-widged.drawn-mode-widget__fill-reveal .fill-reveal-button{
     padding:5px;
 }
-
+.canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings .mode-settings .drawn-mode-widged.drawn-mode-widget__drawing-hand-name .current-drawing-hand-name{
+    width:40px !important;
+    height:40px !important;
+    overflow: hidden;
+    background: red;
+}
+.canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings .mode-settings .drawn-mode-widged.drawn-mode-widget__drawing-hand-name .current-drawing-hand-name img{
+    width:100%;
+}
 /*footer*/
 .canvas-animator__object-entrance-configuration__footer .btn-accept{
     margin-right:10px;
@@ -1642,6 +1653,21 @@ hijo por supuesto)                              */
     color: #353535;
 }
 
+/*select hand section*/
+.canvas-animator__object-drawing-hand .box-drawing-hands{
+    display: flex;
+}
+.canvas-animator__object-drawing-hand .box-drawing-hands .drawing-hand-item{
+    width:80px;
+    height:80px;
+    overflow: hidden;
+}
+.canvas-animator__object-drawing-hand .box-drawing-hands .drawing-hand-item__icon{
+    width:100%;
+}
+.canvas-animator__object-drawing-hand .box-drawing-hands .drawing-hand-item.active{
+    border:3px solid red;
+}
 /*======================
 ==== JS helper clasess==
 =======================*/

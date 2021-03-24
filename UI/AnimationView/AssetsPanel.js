@@ -182,7 +182,7 @@ let SectionImageAssets={
     baseUrl:"https://res.cloudinary.com/dswkzmiyh",
     //https://www.alamy.com/happy-family-with-young-children-hand-drawn-doodle-vector-illustration-sketch-drawing-family-isolated-on-white-background-young-family-with-son-and-daughter-image344422627.html
     MODELItemAssets:[
-        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603391302/700_FO49918911_12cfed34802ecb4daaa7a7b7fddd464d_w2lfrh.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:DrawingDataType.CREATED_NOPATH,delay:0}},
+        {url:"https://res.cloudinary.com/dswkzmiyh/image/upload/v1603391302/700_FO49918911_12cfed34802ecb4daaa7a7b7fddd464d_w2lfrh.jpg",paths:{points:[],linesWidths:[],pathsNames:[],strokesTypes:[],duration:3000,ctrlPoints:[],type:global.DrawingDataType.CREATED_NOPATH,delay:0}},
     ],
     //state:imported-empty,imported-designed,ours, bitmap-empty,bitmap-designed,svg-emtpy,svg-designed,svg-custom,
     MODELItemMenuOptions:[
@@ -477,9 +477,9 @@ var SectionTextAssets={
     },
     initListAssets:function(){
         let htmlBoxAssets=this.HTMLElement.querySelector(".section-assets__box-assets");
-        for(let i in FontsNames){
+        for(let i in global.FontsNames){
             let newAsset=this.HTMLAssetPrefab.cloneNode(true);
-            newAsset.style.fontFamily=FontsNames[i];
+            newAsset.style.fontFamily=global.FontsNames[i];
             newAsset.addEventListener("mousedown",this.OnAssetDragStarted.bind(this));
             htmlBoxAssets.appendChild(newAsset);
         }

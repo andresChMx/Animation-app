@@ -68,7 +68,7 @@ fabric.ActiveSelection.prototype.onDeselect=function(){
 * ================================================================================================
 * */
 
-// sets properties in batch where the given properties are in world coordinates
+// sets properties in batch where the given properties are in global coordinates
 // Esta funcion existe para lograr manejar la seleccion multiple de objectos, es como un proxy entre coordenadas grupales y las absolutas. Consiste en que cuando el objecto se encuentra en un grupo,
 // primero obtenemos sus propiedades en coordenadas absolutas con calcTransformMatrix() para poder alterar esos valores con otros que estan en coordenadas aboslutas, de forma que
 // siembre estaremos trabajando con coordenadas aboslutas, el problema de hallar una matriz de transformaciones
@@ -80,7 +80,7 @@ fabric.Object.prototype.setBatch=function(dictNewProperties){
         if(Object.keys(dictNewProperties).length===0){//meaning if it has no properties, just for purposes of performance
             return;
         }
-        let absoluteMatrix=this.calcTransformMatrix(); // absolute values (world coordinates, never changes)
+        let absoluteMatrix=this.calcTransformMatrix(); // absolute values (global coordinates, never changes)
         let optionsInWorld=fabric.util.qrDecompose(absoluteMatrix);
 
         // El siguiente bloque se debe a que EN CASO EL ANIMATOR NO ESTABLESCA LAS PROPIEDADES de left y top, no lo sobrescriba al objecto con las propiedaes del centro sino de su origen
@@ -100,15 +100,15 @@ fabric.Object.prototype.setBatch=function(dictNewProperties){
         }
 
         let newMat=fabric.util.composeMatrix(optionsInWorld);
-        let groupInverseMatrix=fabric.util.invertTransform(this.group.calcTransformMatrix());// matrix to convert world coordinates to group coordinates
-        let finalMatrix=fabric.util.multiplyTransformMatrices(groupInverseMatrix,newMat); //converting object new world coordinates to group coordinates
+        let groupInverseMatrix=fabric.util.invertTransform(this.group.calcTransformMatrix());// matrix to convert global coordinates to group coordinates
+        let finalMatrix=fabric.util.multiplyTransformMatrices(groupInverseMatrix,newMat); //converting object new global coordinates to group coordinates
         let optionsFinal=fabric.util.qrDecompose(finalMatrix);
         //Setting all properties comming from the animator, this will set wronly the transformations properties
         this.set(optionsInWorld);
         //Overwritting wrong transformation properterties setted by above instruction
         this.set(optionsFinal);
         //this conditional enables de use of the variable angleInWorld by the getCustom function. This way the animator can get the angle value setted
-        // by the inspector, which is in world coordinates and is not "normalized" by fabricjs. And will return the true angle value as soon as the Active selection is rotated
+        // by the inspector, which is in global coordinates and is not "normalized" by fabricjs. And will return the true angle value as soon as the Active selection is rotated
         if(dictNewProperties.angle !==undefined){
             this.angleInWorld=dictNewProperties.angle;
         }
@@ -128,7 +128,7 @@ fabric.Object.prototype.setBatch=function(dictNewProperties){
 * la aplicacion se retornan las coordenadas absolutas del objecto. Funciona a la par de la funcion setBatch, que de maneja las coordenadas absolutas
 * en caso el objecto esté en una seleccion
 * */
-fabric.Object.prototype.getCustom=function(property){ // gets properties in world coordinates whether it is in a group or not
+fabric.Object.prototype.getCustom=function(property){ // gets properties in global coordinates whether it is in a group or not
     if(this.group){
         //getting object transformation in group coordinates system. Note that the location is acoording the center of the object, not its origin
         let optionsInGroup=fabric.util.qrDecompose(this.calcOwnMatrix());
@@ -137,7 +137,7 @@ fabric.Object.prototype.getCustom=function(property){ // gets properties in worl
         this.set(optionsInWorld); // we do this because in order to find the location according the object's origin, the next function makes use of the angle and scale of the object, but those values before this line were according the group.
         // finding the object's location its origin
         this.setPositionByOrigin({x:optionsInWorld.translateX,y:optionsInWorld.translateY},"center","center");
-        let worldPositionAtOrigin={x:this.left,y:this.top};
+        let globalPositionAtOrigin={x:this.left,y:this.top};
 
         //bringing back coordintates according its group
         this.set(optionsInGroup);
@@ -145,7 +145,7 @@ fabric.Object.prototype.getCustom=function(property){ // gets properties in worl
 
         //getting the required value;
         switch (property){
-            case "left":return worldPositionAtOrigin.x;case "top":return worldPositionAtOrigin.y;
+            case "left":return globalPositionAtOrigin.x;case "top":return globalPositionAtOrigin.y;
             case "angle":if(this.angleInWorld){return this.angleInWorld}else{return optionsInWorld.angle}
             case "scaleX":return optionsInWorld.scaleX;
             case "scaleY":return optionsInWorld.scaleY;default:return this.get(property);
@@ -186,7 +186,7 @@ fabric.Object.prototype.mouseStickRange=10;
 fabric.Object.indexUnresolvedClipPath=-1;//used only when animable is loaded from json and has clippath. As a temporal clippath index storage until CanvasManager animObjsClippers collection is populated
 
 fabric.Object.prototype.movePivotCornerPos=function(x,y){
-    let stickyCorners={}; //will store world key point's positions
+    let stickyCorners={}; //will store global key point's positions
     for(let i in this.aCoords){
         stickyCorners[i]={x:this.aCoords[i].x, y:this.aCoords[i].y};
     }
@@ -621,70 +621,71 @@ fabric.Object.prototype.customRenderOffScreen=function(ctx){ //SOBREESCRITO DE R
     ctx.restore();
 }
 
-var applyViewboxTransform=function(element){/*modificado de: applyViewboxTransform() */ /*obtener dimensiones reales de svg, ya que las dimenciones dadas por el tag html <img> son muy diferentes a las dadas por fabric,
-por lo que conclui que las dimenciones reales las halla fabric, es asi que de esta funcion se conservo solo lo que permite calcular las dimenciones reales del svg, esto es usado por
-NetworkManager.loadSVG , la cual fue a su vez modificada de fabric.util.loadSVGFromURL, para que una vez cargada la iamgen,
-se modifique el codigo svg para pasar las dimenciones como atributos, y de esta forma el tag <img> usa esas dimenciones, las cuale son las reales.
-En conclusion, esta funcion calcula las dimenciones reales de la imagen svg*/
-    var reViewBoxAttrValue = new RegExp(
-        '^' +
-        '\\s*(' + fabric.reNum + '+)\\s*,?' +
-        '\\s*(' + fabric.reNum + '+)\\s*,?' +
-        '\\s*(' + fabric.reNum + '+)\\s*,?' +
-        '\\s*(' + fabric.reNum + '+)\\s*' +
-        '$'
-    );
-    let parseUnit = fabric.util.parseUnit;
-    var viewBoxAttr = element.getAttribute('viewBox'),
-        scaleX = 1,
-        scaleY = 1,
-        minX = 0,
-        minY = 0,
-        viewBoxWidth, viewBoxHeight, matrix, el,
-        widthAttr = element.getAttribute('width'),
-        heightAttr = element.getAttribute('height'),
-        x = element.getAttribute('x') || 0,
-        y = element.getAttribute('y') || 0,
-        preserveAspectRatio = element.getAttribute('preserveAspectRatio') || '',
-        missingViewBox = (!viewBoxAttr || !fabric.svgViewBoxElementsRegEx.test(element.nodeName)
-            || !(viewBoxAttr = viewBoxAttr.match(reViewBoxAttrValue))),
-        missingDimAttr = (!widthAttr || !heightAttr || widthAttr === '100%' || heightAttr === '100%'),
-        toBeParsed = missingViewBox && missingDimAttr,
-        parsedDim = { }, translateMatrix = '', widthDiff = 0, heightDiff = 0;
-
-    parsedDim.width = 0;
-    parsedDim.height = 0;
-    parsedDim.toBeParsed = toBeParsed;
-
-    if (toBeParsed) {
-        return parsedDim;
-    }
-
-    if (missingViewBox) {
-        parsedDim.width = parseUnit(widthAttr);
-        parsedDim.height = parseUnit(heightAttr);
-        return parsedDim;
-    }
-    minX = -parseFloat(viewBoxAttr[1]);
-    minY = -parseFloat(viewBoxAttr[2]);
-    viewBoxWidth = parseFloat(viewBoxAttr[3]);
-    viewBoxHeight = parseFloat(viewBoxAttr[4]);
-    parsedDim.minX = minX;
-    parsedDim.minY = minY;
-    parsedDim.viewBoxWidth = viewBoxWidth;
-    parsedDim.viewBoxHeight = viewBoxHeight;
-    if (!missingDimAttr) {
-        parsedDim.width = parseUnit(widthAttr);
-        parsedDim.height = parseUnit(heightAttr);
-        scaleX = parsedDim.width / viewBoxWidth;
-        scaleY = parsedDim.height / viewBoxHeight;
-    }
-    else {
-        parsedDim.width = viewBoxWidth;
-        parsedDim.height = viewBoxHeight;
-    }
-    return parsedDim
-};
+/*El siguiente bloque que tambien es un customizacion de fabric esta en NetworkManager.js*/
+// var applyViewboxTransform=function(element){/*modificado de: applyViewboxTransform() */ /*obtener dimensiones reales de svg, ya que las dimenciones dadas por el tag html <img> son muy diferentes a las dadas por fabric,
+// por lo que conclui que las dimenciones reales las halla fabric, es asi que de esta funcion se conservo solo lo que permite calcular las dimenciones reales del svg, esto es usado por
+// NetworkManager.loadSVG , la cual fue a su vez modificada de fabric.util.loadSVGFromURL, para que una vez cargada la iamgen,
+// se modifique el codigo svg para pasar las dimenciones como atributos, y de esta forma el tag <img> usa esas dimenciones, las cuale son las reales.
+// En conclusion, esta funcion calcula las dimenciones reales de la imagen svg*/
+//     var reViewBoxAttrValue = new RegExp(
+//         '^' +
+//         '\\s*(' + fabric.reNum + '+)\\s*,?' +
+//         '\\s*(' + fabric.reNum + '+)\\s*,?' +
+//         '\\s*(' + fabric.reNum + '+)\\s*,?' +
+//         '\\s*(' + fabric.reNum + '+)\\s*' +
+//         '$'
+//     );
+//     let parseUnit = fabric.util.parseUnit;
+//     var viewBoxAttr = element.getAttribute('viewBox'),
+//         scaleX = 1,
+//         scaleY = 1,
+//         minX = 0,
+//         minY = 0,
+//         viewBoxWidth, viewBoxHeight, matrix, el,
+//         widthAttr = element.getAttribute('width'),
+//         heightAttr = element.getAttribute('height'),
+//         x = element.getAttribute('x') || 0,
+//         y = element.getAttribute('y') || 0,
+//         preserveAspectRatio = element.getAttribute('preserveAspectRatio') || '',
+//         missingViewBox = (!viewBoxAttr || !fabric.svgViewBoxElementsRegEx.test(element.nodeName)
+//             || !(viewBoxAttr = viewBoxAttr.match(reViewBoxAttrValue))),
+//         missingDimAttr = (!widthAttr || !heightAttr || widthAttr === '100%' || heightAttr === '100%'),
+//         toBeParsed = missingViewBox && missingDimAttr,
+//         parsedDim = { }, translateMatrix = '', widthDiff = 0, heightDiff = 0;
+//
+//     parsedDim.width = 0;
+//     parsedDim.height = 0;
+//     parsedDim.toBeParsed = toBeParsed;
+//
+//     if (toBeParsed) {
+//         return parsedDim;
+//     }
+//
+//     if (missingViewBox) {
+//         parsedDim.width = parseUnit(widthAttr);
+//         parsedDim.height = parseUnit(heightAttr);
+//         return parsedDim;
+//     }
+//     minX = -parseFloat(viewBoxAttr[1]);
+//     minY = -parseFloat(viewBoxAttr[2]);
+//     viewBoxWidth = parseFloat(viewBoxAttr[3]);
+//     viewBoxHeight = parseFloat(viewBoxAttr[4]);
+//     parsedDim.minX = minX;
+//     parsedDim.minY = minY;
+//     parsedDim.viewBoxWidth = viewBoxWidth;
+//     parsedDim.viewBoxHeight = viewBoxHeight;
+//     if (!missingDimAttr) {
+//         parsedDim.width = parseUnit(widthAttr);
+//         parsedDim.height = parseUnit(heightAttr);
+//         scaleX = parsedDim.width / viewBoxWidth;
+//         scaleY = parsedDim.height / viewBoxHeight;
+//     }
+//     else {
+//         parsedDim.width = viewBoxWidth;
+//         parsedDim.height = viewBoxHeight;
+//     }
+//     return parsedDim
+// };
 
 /*========================================*/
 /*storing/loading project*/
@@ -695,6 +696,23 @@ En conclusion, esta funcion calcula las dimenciones reales de la imagen svg*/
 
 /*deserialization*/
 
+fabric.util.resolveNamespace=function(namespace) {
+    if (!namespace) {
+        return fabric;
+    }
+
+    // var parts = namespace.split('.'),
+    //     len = parts.length, i,
+    //     obj = global || fabric.window;
+    //
+    // for (i = 0; i < len; ++i) {
+    //     obj = obj[parts[i]];
+    // }
+
+    //return obj;
+    return global;
+};
+
 fabric.StaticCanvas.prototype._enlivenObjects=function (objects, callback, reviver) {
     if (!objects || objects.length === 0) {
         callback && callback([]);
@@ -703,7 +721,7 @@ fabric.StaticCanvas.prototype._enlivenObjects=function (objects, callback, reviv
 
     fabric.util.enlivenObjects(objects, function(enlivenedObjects) {
         callback && callback(enlivenedObjects);
-    }, "window", reviver);
+    }, "global", reviver);
 };
 
 fabric.StaticCanvas.prototype.__setupCanvas=function(serialized, enlivenedObjects, renderOnAddRemove, callback) {
@@ -729,6 +747,41 @@ fabric.StaticCanvas.prototype.__setupCanvas=function(serialized, enlivenedObject
     callback && callback();
 };
 
+
+/*RENDERIZER BACKEND*/
+
+/*New method, modification from StaticCanvas.setDimentions*/
+//solution for bug in backend rendering, since setWith,setHeight were rendering and no meanwhileimage was still ready at that point in time. This was causing weird canvas positioning, and an error thrown at execution time
+fabric.StaticCanvas.prototype.setDimentionsWithNoRendering= function (dimensions, options) {
+    var cssValue;
+    options = options || {};
+
+    for (var prop in dimensions) {
+        cssValue = dimensions[prop];
+
+        if (!options.cssOnly) {
+            this._setBackstoreDimension(prop, dimensions[prop]);
+            cssValue += 'px';
+            this.hasLostContext = true;
+        }
+
+        if (!options.backstoreOnly) {
+            this._setCssDimension(prop, cssValue);
+        }
+    }
+    if (this._isCurrentlyDrawing) {
+        this.freeDrawingBrush && this.freeDrawingBrush._setBrushStyles();
+    }
+    this._initRetinaScaling();
+    this.calcOffset();
+
+    //MODIFICATION
+    // if (!options.cssOnly) {
+    //     this.requestRenderAll();
+    // }
+
+    return this;
+};
 
 
 

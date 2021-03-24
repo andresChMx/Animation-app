@@ -5,18 +5,6 @@ var SVGManager=fabric.util.createClass({
         this.parsedFabricObj=null;  //path || group
         this.parsedFabricObjTransform=null;
     },
-    fetchTextSVGData:function(animableText,callback){
-        let request={
-            message: animableText.text,
-            font_size:animableText.fontSize
-        }
-        fetch("https://wicked-nightmare-94207.herokuapp.com/",{
-            method: 'POST',
-            headers: {'Content-Type': 'application/json',},
-            body: JSON.stringify(request),
-        })  .then(response => response.json())
-            .then(data => callback(data.response));
-    },
 
 
     calcDrawingDataFromString_noForcePaths:function(string,imgWidth,imgHeight,callback){

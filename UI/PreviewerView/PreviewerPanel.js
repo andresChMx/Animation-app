@@ -27,8 +27,15 @@ var PanelPreviewer={
         this.initEvents();
         MainMediator.registerObserver(this.scenePreviewerController.name,this.scenePreviewerController.events.OnAnimatorTick,this)
         MainMediator.registerObserver(PanelInspector.name,PanelInspector.events.OnBtnPreviewClicked,this);
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.OnProjectCollectionsLoaded,this);
+        MainMediator.registerObserver(PanelConfig.name,PanelConfig.events.OnDimensionsChanged,this);
+        MainMediator.registerObserver(WindowManager.name,WindowManager.events.OnResize,this);
+        WindowManager.registerObserverOnResize(this);
         this.canvas=new PreviewerCanvas('panel-previewer__canvas');
         this.scenePreviewerController.setPreviewerCanvas(this.canvas);
+
+        this.setupDimentions(PanelConfig.getSettingProjectWidth(),PanelConfig.getSettingProjectHeight(),15,30,10);
+
     },
     setController:function(controller){//controllers are setted before initialization (init())
         this.scenePreviewerController=controller;
@@ -38,17 +45,35 @@ var PanelPreviewer={
         this.HTMLControls_playBtn.addEventListener("click",this.OnBtnPlayClicked.bind(this));
         //this.HTMLControls_progressBar.addEventListener("click",this.On.bind(this));
     },
+    //getters
+    getCanvasScalerFactorX:function(){
+        return this.scalerFactorX;
+    },
+    getCanvasScalerFactorY:function(){
+        return this.scalerFactorY;
+    },
+    //incomming notifications
+    notificationPanelConfigOnDimensionsChanged:function(){
+        this.setupDimentions(PanelConfig.getSettingProjectWidth(),PanelConfig.getSettingProjectHeight(),15,30,10);
+    },
+    notificationScenesManagerOnProjectCollectionsLoaded:function(args){
+        let loadPendingData=args[0]
+        this.setupDimentions(loadPendingData.projectWidth,loadPendingData.projectHeight,15,30,10);
+    },
+    notificationOnResize:function(){
+        this.setupDimentions(PanelConfig.getSettingProjectWidth(),PanelConfig.getSettingProjectHeight(),15,30,10);
+    },
     notificationPanelInspectorOnBtnPreviewClicked:function(){
-        this.setupDimentions(1400,800,15,30,10);
         this.HTMLControls_playBtn.classList.add("pause");
         this.HTMLParent.style.display="block";
     },
-    notificationScenePreviewControllerOnAnimatorTick:function(args){
+
+    notificationEnlivedScenePreviewControllerOnAnimatorTick:function(args){
         let progress=args[0];
         let totalDuration=this.scenePreviewerController.animator.totalDuration;
         let normalizedProgress=progress/totalDuration;
         this.HTMLControls_progressBar.style.width=this.progressBarCompleteWidth*normalizedProgress + "px";
-        if(progress===totalDuration && this.scenePreviewerController.animator.state===ControllerAnimatorState.paused){ //termino la animacion
+        if(progress===totalDuration && this.scenePreviewerController.animator.state===global.ControllerAnimatorState.paused){ //termino la animacion
             this.HTMLControls_playBtn.classList.remove("pause");
         }
     },
@@ -74,8 +99,9 @@ var PanelPreviewer={
         this.scalerFactorX=actualWidth/resolutionWidth;
         this.scalerFactorY=actualHeight/resolutionHeight;
 
-        this.canvas.setWidth(actualWidth);
-        this.canvas.setHeight(actualHeight);
+        //solution for bug in backend rendering, since setWith,setHeight were rendering and no meanwhileimage was still ready at that point
+        this.canvas.setDimentionsWithNoRendering({width:actualWidth,height:actualHeight});
+
         document.querySelector(".panel-previewer__canvas-container").style.height=actualHeight + "px";
         this.HTMLElement.style.width=actualWidth+padding*2 + "px";
         this.HTMLElement.style.height=actualHeight+padding+controlsHeight + "px";

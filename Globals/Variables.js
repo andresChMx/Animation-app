@@ -1,8 +1,57 @@
-var IMAGE_UPLOAD_APIS_URLS=["https://api.cloudinary.com/v1_1/dhc21c3yy/image/upload"];
-var CLOUDINARY_PRESET_NAME="nkq5azoh";
-var USER_ID="5RUawVPijiUA7yHmwJFnWhkQDhH3";
-//FontsName
-var FontsNames={ //serves as the truth source of the names of fonts
+if (typeof document !== 'undefined' && typeof window !== 'undefined') {
+    var global = window;
+    global.browserBehaviour={}
+    global.browserBehaviour.RegisterAnimableOnClipperRemoved=true;
+
+    global.browserBehaviour.LoadOpenTypeFontForBrowser=true;
+    global.browserBehaviour.LoadStaticResourcesForBrowser=true;
+    global.browserBehaviour.createObjectURL=true; // when loading svg
+
+}
+else {
+    global.browserBehaviour={}
+    global.browserBehaviour.RegisterAnimableOnClipperRemoved=false;
+
+    global.browserBehaviour.LoadOpenTypeFontForBrowser=false;
+    global.browserBehaviour.LoadStaticResourcesForBrowser=false;
+    global.browserBehaviour.createObjectURL=false;
+}
+
+global.production=false;
+
+global.EntranceEffectManagerMap={
+    NoneEntranceMode:null,
+    DrawnEntranceMode:null,
+}
+global.EnumCollectionsNames={
+    animObjs:"animObjs",
+    animObjsWithEntrance:"animObjsWithEntrance",
+    animObjsClippers:"animObjsClippers",
+    animObjsNotReady:"animObjsNotReady",
+};
+global.ControllerAnimatorState={playing:"playing",paused:"paused"};
+global.EntranceName={/*Entrance modes are only applicable to Scene objects (ImageAnimable, TextAnimable, CameraAnimable)*/
+    image_drawn:"ImageDrawn",
+    dragged:"Dragged",
+    none:"None",
+
+    svg_drawn:"SVGDrawn",
+
+    text_drawn:"TextDrawn",
+    text_typed:"TextTyped"
+}
+global.DrawingDataType={/*global.DrawingDataTypes are used when an object has entreancemode drawn or text_drawn*/
+    PROVIDED:"PROVIDED",
+    CREATED_PATHLOADED:"CREATED_PATHLOADED",
+    CREATED_PATHDESIGNED:"CREATED_PATHDESIGNED",
+    CREATED_NOPATH:"CREATED_NOPATH"
+}
+global.EnumAssetLoadingState={
+    "loading":"loading",
+    "error":"error",
+    "ready":"ready"
+};
+global.FontsNames={ //serves as the truth source of the names of fonts
     "AlegreyaSans":"AlegreyaSans",
     "Alice":"Alice",
     "Amita":"Amita",
@@ -17,7 +66,7 @@ var FontsNames={ //serves as the truth source of the names of fonts
     "Lobster":"Lobster",
     "Pacifico":"Pacifico"
 }
-var FontsFileName={ // allows as to get the name file of the font in the server from the font name
+global.FontsFileName={ // allows as to get the name file of the font in the server from the font name
     "AlegreyaSans":'AlegreyaSans-Regular.ttf',
     "Alice":"Alice-Regular.ttf",
     "Amita":"Amita-Regular.ttf",
@@ -33,36 +82,46 @@ var FontsFileName={ // allows as to get the name file of the font in the server 
     "Pacifico":"Pacifico-Regular.ttf",
 
 }
-
-const EntranceName={/*Entrance modes are only applicable to Scene objects (ImageAnimable, TextAnimable, CameraAnimable)*/
-    image_drawn:"ImageDrawn",
-    dragged:"Dragged",
-    none:"None",
-
-    svg_drawn:"SVGDrawn",
-
-    text_drawn:"TextDrawn",
-    text_typed:"TextTyped"
-}
-var DrawingDataType={/*DrawingDataTypes are used when an object has entreancemode drawn or text_drawn*/
-    PROVIDED:"PROVIDED",
-    CREATED_PATHLOADED:"CREATED_PATHLOADED",
-    CREATED_PATHDESIGNED:"CREATED_PATHDESIGNED",
-    CREATED_NOPATH:"CREATED_NOPATH"
-}
-var TextType={
-    PROVIDED:'PROVIDED'
-}
-var AnimObjectOptionMenu={
+global.AnimObjectOptionMenu={
     duplicate:"duplicate",
     delete:"delete",
     removeMask:"removeMask",
     addMask:"addMask",
 }
-/*RUTES*/
-var RUTES={
-    assets_images:"/assets/images/"
+/*Animation related*/
+global.EnumAnimationTweenType={
+    Linear:'Linear',
+    Sine:'Sine',
+    Cubic:'Cubic',
+    Quint:'Quint',
+    Circ:'Circ',
+    Back:'Back',
+    Elastic:'Elastic',
+    Bounce:'Bounce',
 }
+global.EnumAnimationEasingType={
+    In:'In',
+    Out:'Out',
+    InOut:'InOut',
+}
+/*RUTES*/
+global.RUTES={
+    assets_static_images:"/assets/images/",
+}
+
+// var global = global || window;
+//
+// global.entity={};
+
+var IMAGE_UPLOAD_APIS_URLS=["https://api.cloudinary.com/v1_1/dhc21c3yy/image/upload"];
+var CLOUDINARY_PRESET_NAME="nkq5azoh";
+var USER_ID="5RUawVPijiUA7yHmwJFnWhkQDhH3";
+//FontsName
+
+var TextType={
+    PROVIDED:'PROVIDED'
+}
+
 
 /*Styling variables*/
 let CSS_VARIABLE={
@@ -106,10 +165,4 @@ let LANENAME_TO_PROPERTYS={
     "radius":["radius"],
     "border_start":["startRenderingPoint"],
     "border_end":["endRenderingPoint"]
-};
-let EnumCollectionsNames={
-    animObjs:"animObjs",
-    animObjsWithEntrance:"animObjsWithEntrance",
-    animObjsClippers:"animObjsClippers",
-    animObjsNotReady:"animObjsNotReady",
 };

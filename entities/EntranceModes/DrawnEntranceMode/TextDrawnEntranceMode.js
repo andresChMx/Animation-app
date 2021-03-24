@@ -1,4 +1,4 @@
-var TextDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
+global.TextDrawnEntranceMode=fabric.util.createClass(global.DrawnEntranceMode,{
     type:"TextDrawn",
     initialize:function(parentObject){
         this.callSuper("initialize",parentObject);
@@ -6,7 +6,10 @@ var TextDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
 
         this.cacheCanvasWidth=0;
         this.cacheCanvasHeight=0;
+
+        let self=this;
         this.config={
+            drawingHandName:self.cacheManager.drawingHand.defaultDrawingHandName,
             showHand:true,
         }
     },
@@ -17,7 +20,13 @@ var TextDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
 * We have to set the meanwhileImage var to the empty canvas because we need that while
 * it is not its drawing turn this should be rendering an empy transparent image.
 * */
-        this.meanWhileImage=new Image();
+
+        let meanWhileImageLoaded=false;
+        let drawingPathsLoaded=false;
+        let flagCallbackCalled=false;
+
+        this.meanWhileImage=fabric.util.createImage();
+        this.meanWhileImage.onload=function(){meanWhileImageLoaded=true;attemptFinish();}
         this.meanWhileImage.src=this.cacheManager.canvas.toDataURL();
         this.isMyTurnToCopyCache=false;
 
@@ -31,17 +40,27 @@ var TextDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         let pathOpenTypeObjects=[] //for each line we need the path to generate the image
         let result=this.dataGenerator.generateTextDrawingData(this.parentObject,this.getWidthInDrawingCache(),this.getHeightInDrawingCache(),this._getDisplacementLeft(),this._getDisplacementTop(),pathOpenTypeObjects);
         this.drawingData = result;
-        this.drawingData.type=DrawingDataType.CREATED_NOPATH;
+        this.drawingData.type=global.DrawingDataType.CREATED_NOPATH;
 
         this.dataGenerator.generateTextBaseImage(this.parentObject,pathOpenTypeObjects,function(image){
             this.baseImage=image;
 
             this.parentObject.set("fontSize",tmpOriginalFontSize);
             this.parentObject.exitEditing();
-            callback();
+
+            drawingPathsLoaded=true;
+            attemptFinish();
+
         }.bind(this));
 
         this.parentObject.objectCaching=false;
+
+        function attemptFinish(){
+            if(!flagCallbackCalled && meanWhileImageLoaded&&drawingPathsLoaded){
+                flagCallbackCalled=true;
+                callback();
+            }
+        }
     },
         /*temporal font size for while generating drawing data*/
         _getTemporalFontSize:function(fontSize){

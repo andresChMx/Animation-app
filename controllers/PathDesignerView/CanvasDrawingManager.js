@@ -42,7 +42,7 @@ var CanvasDrawingManager=fabric.util.createClass({
         this.setupCanvasDimensions();
         this.initDrawingPath();
 
-        if(imageDrawingData.type===DrawingDataType.CREATED_NOPATH){
+        if(imageDrawingData.type===global.DrawingDataType.CREATED_NOPATH){
             this.initDrawingDataAsEmpty();
         }else{
             this.loadPaths(imageDrawingData);

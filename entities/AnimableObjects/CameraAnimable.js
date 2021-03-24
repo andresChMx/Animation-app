@@ -1,10 +1,10 @@
-var CameraAnimable=fabric.util.createClass(fabric.Image,{
-    applicableEntranceModes:[EntranceName.none],//FOR UI
+global.CameraAnimable=fabric.util.createClass(fabric.Image,{
+    applicableEntranceModes:[global.EntranceName.none],//FOR UI
     applicableMenuOptions:[],
     applicableAnimationProperties:["position","scale","rotation","opacity"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.animObjs,
-        EnumCollectionsNames.animObjsWithEntrance,
+        global.EnumCollectionsNames.animObjs,
+        global.EnumCollectionsNames.animObjsWithEntrance,
     ],
     type:"CameraAnimable",
     initialize:function(element,options){
@@ -22,7 +22,7 @@ var CameraAnimable=fabric.util.createClass(fabric.Image,{
 
 
         //entrace animaction related
-        this.entranceBehaviour=new EntranceEffectBehaviour(this,this.applicableEntranceModes);
+        this.entranceBehaviour=new global.EntranceEffectBehaviour(this,this.applicableEntranceModes);
 
 
         //preview canvas animation related
@@ -64,11 +64,14 @@ var CameraAnimable=fabric.util.createClass(fabric.Image,{
             });
 
         return object;
+    },
+    remove:function(){
+
     }
 });
 
-CameraAnimable.fromObject=function(object,callback){
-    let newCameraAnimable=CameraAnimable.createInstance(0,0)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
+global.CameraAnimable.fromObject=function(object,callback){
+    let newCameraAnimable=global.CameraAnimable.createInstance(0,0)//ya no pasamos nada, ya que setOptions(mas abajo) setteara todas las propiedades
 
     /*hack to avoid overwritting entraceBehaviour and animator once these are initialized with object initialization*/
     let entranceBehaviourObject=object.entranceBehaviour;
@@ -81,28 +84,17 @@ CameraAnimable.fromObject=function(object,callback){
     newCameraAnimable.animator.fromObject(animatorObject);
 
     callback(newCameraAnimable,false);
-},
+};
 /*====================================*/
 /*======== Object creation ===========*/
 /*====================================*/
 /*these next two methods are called separetely if object is cloned or loaded*/
-CameraAnimable.createInstance=function(left,top){
-    let newObjectAnimable=new CameraAnimable(StaticResource.images.camera,{
+global.CameraAnimable.createInstance=function(left,top){
+    let newObjectAnimable=new global.CameraAnimable(StaticResource.images.general.camera.elem,{
         left:left,
         top:top,
-        width:1400,
-        height:800,
+        width:1920,
+        height:1080,
     });
     return newObjectAnimable;
 };
-CameraAnimable.instanceSetupInCanvasManager=function(instance,collectionName){
-    let contains=this.prototype.applicableCanvasManagerCollections.indexOf(collectionName);
-    if(contains>-1){
-        CanvasManager.collections[collectionName].add(instance);
-    }
-}
-CameraAnimable.removeInstance=function(instance){
-    this.prototype.applicableCanvasManagerCollections.forEach(function(elem){
-        CanvasManager.collections[elem].remove(instance)
-    })
-}

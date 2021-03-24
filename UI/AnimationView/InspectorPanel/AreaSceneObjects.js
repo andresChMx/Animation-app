@@ -46,18 +46,18 @@ var SectionObjectsEntraceEditor={
     },
     childOnHTMLItemClicked:function(objectItem){
         let index=this.listObjects.indexOf(objectItem);
-        CanvasManager.canvas.setActiveObject(CanvasManager.collections.animObjsWithEntrance.list[index])
+        let objectInstance=ScenesManager.getCollection(global.EnumCollectionsNames.animObjsWithEntrance)[index];
+        CanvasManager.canvas.setActiveObject(objectInstance)
         CanvasManager.canvas.renderAll();
     },
     childNotificationOnDurationNewValue:function(value,objectItem){
         let index=this.listObjects.indexOf(objectItem);
-        CanvasManager.collections.animObjsWithEntrance.list[index].animator.entranceTimes.duration=value;
+        ScenesManager.getCollection(global.EnumCollectionsNames.animObjsWithEntrance)[index].animator.entranceTimes.duration=value;
 
     },
     childNotificationOnDelayNewValue:function(value,objectItem){
         let index=this.listObjects.indexOf(objectItem);
-        CanvasManager.collections.animObjsWithEntrance.list[index].animator.entranceTimes.delay=value;
-
+        ScenesManager.getCollection(global.EnumCollectionsNames.animObjsWithEntrance)[index].animator.entranceTimes.delay=value;
     },
 
     /*NOTIFICACIONES ENTRANTES*/
@@ -81,7 +81,8 @@ var SectionObjectsEntraceEditor={
             else{listObjects=[animbleActiveObject]}
 
             for(let i in listObjects){
-                let indexInEntrancedObjectsList=CanvasManager.getListIndexObjectWithEntrance(listObjects[i]);
+
+                let indexInEntrancedObjectsList=ScenesManager.getObjectIndexInCollection(global.EnumCollectionsNames.animObjsWithEntrance,listObjects[i]);;
                 if(indexInEntrancedObjectsList!==-1){
                     this.activeBoxObjectsHTMLItem(indexInEntrancedObjectsList);
                 }
@@ -167,11 +168,11 @@ var SectionAnimableObjectsEditor={
                             left:cloned.left+10,
                             top:cloned.top+10,
                         })
-                        CanvasManager.setupNewObject(cloned);
+                        ScenesManager.sceneList.addInstanceToAllCollections(cloned)
                     });
                 },
                 "delete":function(){
-                    CanvasManager.removeActiveAnimableObject();
+                    ScenesManager.removeActiveAnimableObject();
                 },
                 "removeMask":function(currentSelectedObject){
                     currentSelectedObject.removeClipping();
@@ -184,7 +185,8 @@ var SectionAnimableObjectsEditor={
             mapSubMenusOptions:{
                 "addMask":function(target,parent,currentSelectedObject){
                     let index=[].slice.call(parent.children).indexOf(target);
-                    let maskingObject=CanvasManager.collections.animObjsClippers.list[index];
+
+                    let maskingObject=ScenesManager.getCollection(global.EnumCollectionsNames.animObjsClippers)[index];
                     currentSelectedObject.applyClipping(maskingObject);
 
                     CanvasManager.canvas.renderAll();
@@ -196,7 +198,7 @@ var SectionAnimableObjectsEditor={
                 }
                 for(let i=0;i<listIds.length;i++){
                     this.htmlElemt.querySelector("#" + listIds[i]).style.display="block";
-                    if(listIds[i]===AnimObjectOptionMenu.addMask){
+                    if(listIds[i]===global.AnimObjectOptionMenu.addMask){
                         this._populateShapeObjectsName();
                     }
                 }
@@ -223,8 +225,10 @@ var SectionAnimableObjectsEditor={
             },
             _populateShapeObjectsName:function(){
                 let addMaskOptionSubmenu=this.htmlElemt.querySelector("#addMask").children[1];
-                for(let i=0;i<CanvasManager.collections.animObjsClippers.list.length;i++){
-                    addMaskOptionSubmenu.children[i].textContent=CanvasManager.collections.animObjsClippers.list[i].name;
+
+                let listAnimObjsClippers=ScenesManager.getCollection(global.EnumCollectionsNames.animObjsClippers);
+                for(let i=0;i<listAnimObjsClippers.length;i++){
+                    addMaskOptionSubmenu.children[i].textContent=listAnimObjsClippers[i].name;
                 }
             },
             createShapeObjectItem:function(animObj){
@@ -278,7 +282,7 @@ var SectionAnimableObjectsEditor={
     },
     childOnItemClicked:function(item){
         let index=this.listObjects.indexOf(item);
-        CanvasManager.canvas.setActiveObject(CanvasManager.collections.animObjs.list[index]);
+        CanvasManager.canvas.setActiveObject(ScenesManager.getCollection(global.EnumCollectionsNames.animObjs)[index]);
         CanvasManager.canvas.renderAll();
     },
     childNotificationOnBtnObjectMenu:function(){
@@ -301,7 +305,7 @@ var SectionAnimableObjectsEditor={
     },
     childNotificationOnItemNewName:function(newName,item){
         let index=this.listObjects.indexOf(item);
-        CanvasManager.collections.animObjs.list[index].name=newName;
+        ScenesManager.getCollection(global.EnumCollectionsNames.animObjs)[index].name=newName;
     },
     notificationOnMouseDown:function(e){
         //OBJECT MENU HANDLING
@@ -349,7 +353,8 @@ var SectionAnimableObjectsEditor={
             }else{listObjects=[animbleActiveObject]}
 
             for(let i=0;i<listObjects.length;i++){
-                let activeObjectIndex=CanvasManager.getListIndexAnimableObjects(listObjects[i]);
+                let activeObjectIndex=ScenesManager.getObjectIndexInCollection(global.EnumCollectionsNames.animObjs,listObjects[i]);
+
                 if(activeObjectIndex!==-1){
                     this.activeBoxObjectsHTMLItem(activeObjectIndex);
                 }
@@ -426,29 +431,30 @@ var AreaSceneObjects={
     },
 
     /*------------EVENTOS ENTRANTES EXTERNOS*/
-    notificationOnObjAddedToListObjectsWithEntrance:function(animObjWithEntrance){
+    notificationScenesManageranimObjsWithEntranceItemAdded:function(animObjWithEntrance){
         this.SectionObjectsEntraceEditor.notificationOnObjAddedToListObjectsWithEntrance(animObjWithEntrance)
     },
-    notificationOnObjDeletedFromListWithEntrance:function(indexObjsWithEntranceList){
+    notificationScenesManageranimObjsWithEntranceItemRemoved:function(indexObjsWithEntranceList){
         this.SectionObjectsEntraceEditor.notificationOnObjDeletedFromListWithEntrance(indexObjsWithEntranceList);
     },
-    notificationOnAnimableObjectAdded:function(animableObject){
+    notificationScenesManageranimObjsItemAdded:function(animableObject){
         this.SectionAnimableObjectsEditor.notificationOnAnimableObjectAdded(animableObject);
     },
-    notificationOnAnimableObjectDeleted:function(indexInAnimableObjectsList){
+    notificationScenesManageranimObjsItemRemoved:function(indexInAnimableObjectsList){
         this.SectionAnimableObjectsEditor.notificationOnAnimableObjectDeleted(indexInAnimableObjectsList);
     },
+    notificationScenesManageranimObjsClippersItemAdded:function(animableObject){
+        this.SectionAnimableObjectsEditor.notificationCanvasManagerOnShapeAnimableAdded(animableObject);
+    },
+    notificationScenesManageranimObjsClippersItemRemoved:function(indexInShapeObjectsList){
+        this.SectionAnimableObjectsEditor.notificationCanvasManagerOnShapeAnimableDeleted(indexInShapeObjectsList);
+    },
+
     notificationCanvasManagerOnObjectMovedBackward:function(index){
         this.SectionAnimableObjectsEditor.notificationCanvasManagerOnObjectMovedBackward(index);
     },
     notificationCanvasManagerOnObjectMovedForward:function(index){
         this.SectionAnimableObjectsEditor.notificationCanvasManagerOnObjectMovedForward(index);
-    },
-    notificationCanvasManagerOnShapeAnimableAdded:function(animableObject){
-        this.SectionAnimableObjectsEditor.notificationCanvasManagerOnShapeAnimableAdded(animableObject);
-    },
-    notificationCanvasManagerOnShapeAnimableDeleted:function(indexInShapeObjectsList){
-        this.SectionAnimableObjectsEditor.notificationCanvasManagerOnShapeAnimableDeleted(indexInShapeObjectsList);
     },
     notificationCanvasManagerOnSelectionUpdated:function(){
         this.SectionObjectsEntraceEditor.notificationCanvasManagerOnSelectionUpdated();

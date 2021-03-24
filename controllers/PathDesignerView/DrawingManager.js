@@ -5,11 +5,11 @@ var CrtlPoinstManagement=fabric.util.createClass({
     /*
     wakeUp:function(canvasManagerPoints,drawingData,imgWidth,imgHeight){
         //this.list=[]; en sleep() ya se limpia
-        if(drawingData.type===DrawingDataType.CREATED_NOPATH){
+        if(drawingData.type===global.DrawingDataType.CREATED_NOPATH){
 
-        }else if(drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+        }else if(drawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
             this.generateCrtlPointsFromPointsMatrix(canvasManagerPoints);
-        }else if(drawingData.type===DrawingDataType.CREATED_PATHLOADED){
+        }else if(drawingData.type===global.DrawingDataType.CREATED_PATHLOADED){
             this.generateCrtlPointsFromLoadedData(drawingData,imgWidth,imgHeight)
         }
 
@@ -201,13 +201,13 @@ var DrawingManager=fabric.util.createClass({
     },
     wakeUp:function(imageDrawingData,baseImage){
 
-        if(imageDrawingData.type===DrawingDataType.CREATED_NOPATH){
+        if(imageDrawingData.type===global.DrawingDataType.CREATED_NOPATH){
             this.initPathsNamesAsEmpty();
             this.ctrlPointsManager.initCtrlPointsAsEmpty()
-        }else if(imageDrawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+        }else if(imageDrawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
             this.loadPathsNames(imageDrawingData);
             this.ctrlPointsManager.generateCrtlPointsFromPointsMatrix(this.canvasManager.listPoints)
-        }else if(imageDrawingData.type===DrawingDataType.CREATED_PATHLOADED){
+        }else if(imageDrawingData.type===global.DrawingDataType.CREATED_PATHLOADED){
             this.loadPathsNames(imageDrawingData);
             this.ctrlPointsManager.generateCrtlPointsFromLoadedData(imageDrawingData,baseImage.naturalWidth,baseImage.naturalHeight)
         }

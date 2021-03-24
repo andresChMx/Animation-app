@@ -1,12 +1,12 @@
 var CommonShapeAnimableStylingProperties=["strokeWidth", "fill", "transparentFill", "stroke", "transparentStroke", "startRenderingPoint", "endRenderingPoint", "clipBorder", "inverted"]
-var ShapeAnimable=fabric.util.createClass(fabric.Path, {
-    applicableEntranceModes:[EntranceName.none],
-    applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
+global.ShapeAnimable=fabric.util.createClass(fabric.Path, {
+    applicableEntranceModes:[global.EntranceName.none],
+    applicableMenuOptions:[global.AnimObjectOptionMenu.duplicate,global.AnimObjectOptionMenu.delete],
     applicableAnimationProperties:["position","scale","rotation","opacity","border_width","border_start","border_end"],
     applicableCanvasManagerCollections:[
-        EnumCollectionsNames.animObjs,
-        EnumCollectionsNames.animObjsWithEntrance,
-        EnumCollectionsNames.animObjsClippers
+        global.EnumCollectionsNames.animObjs,
+        global.EnumCollectionsNames.animObjsWithEntrance,
+        global.EnumCollectionsNames.animObjsClippers
     ],
     type:"ShapeAnimable",
     subtype:"PathAnimable",
@@ -46,7 +46,7 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
         this.listEditableStylingProperties=["strokeWidth", "fill", "transparentFill", "stroke", "transparentStroke", "startRenderingPoint", "endRenderingPoint", "clipBorder", "inverted",] //for the  object properties editor (UI)
 
 
-        this.entranceBehaviour=new EntranceEffectBehaviour(this,this.applicableEntranceModes);
+        this.entranceBehaviour=new global.EntranceEffectBehaviour(this,this.applicableEntranceModes);
 
         this.animator=new Animator(this);
         /*Starting logic*/
@@ -197,17 +197,20 @@ var ShapeAnimable=fabric.util.createClass(fabric.Path, {
     clone:function(callback){
         let object=this.toObject();
         object.path=this.path;
-        ShapeAnimable.cloneFromObject(object,callback)
-    }
+        global.ShapeAnimable.cloneFromObject(object,callback)
+    },
+    remove:function(){
+
+    },
 });
-ShapeAnimable.cloneFromObject = function(_object, callback) {
+global.ShapeAnimable.cloneFromObject = function(_object, callback) {
     var object = fabric.util.object.clone(_object,true);
     /*initializing with no state*/
-    let newShapeAnimable=new ShapeAnimable();
+    let newShapeAnimable=new global.ShapeAnimable();
     newShapeAnimable.setOptions(object)
     fabric.Polyline.prototype._setPositionDimensions.call(newShapeAnimable, object);
 
-    newShapeAnimable.entranceBehaviour=new EntranceEffectBehaviour(newShapeAnimable,newShapeAnimable.applicableEntranceModes);
+    newShapeAnimable.entranceBehaviour=new global.EntranceEffectBehaviour(newShapeAnimable,newShapeAnimable.applicableEntranceModes);
     newShapeAnimable.animator=new Animator(newShapeAnimable);           //New fabric property
     newShapeAnimable.entranceBehaviour.fromObject(object.entranceBehaviour);
     newShapeAnimable.animator.fromObject(object.animator);
@@ -217,10 +220,15 @@ ShapeAnimable.cloneFromObject = function(_object, callback) {
     callback(newShapeAnimable);
 };
 
-var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
-    applicableEntranceModes:[EntranceName.none],
-    applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
+global.CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
+    applicableEntranceModes:[global.EntranceName.none],
+    applicableMenuOptions:[global.AnimObjectOptionMenu.duplicate,global.AnimObjectOptionMenu.delete],
     applicableAnimationProperties:["position","scale","rotation","opacity","border_width","border_start","border_end"],
+    applicableCanvasManagerCollections:[
+        global.EnumCollectionsNames.animObjs,
+        global.EnumCollectionsNames.animObjsWithEntrance,
+        global.EnumCollectionsNames.animObjsClippers
+    ],
     type:"ShapeAnimable",
     subtype:"CircleShapeAnimable",
     initialize:function(options){
@@ -237,7 +245,7 @@ var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
 
         this.absolutePositioned=true;    // Propiedad de FABRIC util para cuando el objecto es usado como clipPath, hace que la posicion del enmascaramiento sea se forma absoluta
 
-        this.entranceMode=EntranceName.none; // Siempre sera none, por ende ni se permitira abrir el panel de configuraciones para ShapeAnimable
+        this.entranceMode=global.EntranceName.none; // Siempre sera none, por ende ni se permitira abrir el panel de configuraciones para ShapeAnimable
 
         /*Editable styling properties*/
         this.strokeWidth=4;             // Propiedad de FABRIC
@@ -254,7 +262,7 @@ var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
 
         this.set("radius",this.radius); //this will trigger objects dimentions calculation
 
-        this.entranceBehaviour=new EntranceEffectBehaviour(this,this.applicableEntranceModes);
+        this.entranceBehaviour=new global.EntranceEffectBehaviour(this,this.applicableEntranceModes);
 
         /*auxiliary attributes*/
         this.animator=new Animator(this);
@@ -382,16 +390,19 @@ var CircleShapeAnimable=fabric.util.createClass(fabric.Circle,{
     },
     clone:function(callback){
         let object=this.toObject();
-        CircleShapeAnimable.cloneFromObject(object,callback)
-    }
+        global.CircleShapeAnimable.cloneFromObject(object,callback)
+    },
+    remove:function(){
+
+    },
 });
-CircleShapeAnimable.cloneFromObject = function(_object, callback) {
+global.CircleShapeAnimable.cloneFromObject = function(_object, callback) {
     var object = fabric.util.object.clone(_object,true);
     /*initializing with no state*/
-    let newCircleShapeAnimable=new CircleShapeAnimable();
+    let newCircleShapeAnimable=new global.CircleShapeAnimable();
     newCircleShapeAnimable.setOptions(object)
 
-    newCircleShapeAnimable.entranceBehaviour=new EntranceEffectBehaviour(newCircleShapeAnimable,newCircleShapeAnimable.applicableEntranceModes);
+    newCircleShapeAnimable.entranceBehaviour=new global.EntranceEffectBehaviour(newCircleShapeAnimable,newCircleShapeAnimable.applicableEntranceModes);
     newCircleShapeAnimable.animator=new Animator(newCircleShapeAnimable);           //New fabric property
     newCircleShapeAnimable.entranceBehaviour.fromObject(object.entranceBehaviour);
     newCircleShapeAnimable.animator.fromObject(object.animator);
@@ -399,10 +410,15 @@ CircleShapeAnimable.cloneFromObject = function(_object, callback) {
     callback(newCircleShapeAnimable);
 };
 
-let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
-    applicableEntranceModes:[EntranceName.none],
-    applicableMenuOptions:[AnimObjectOptionMenu.duplicate,AnimObjectOptionMenu.delete],
+global.RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
+    applicableEntranceModes:[global.EntranceName.none],
+    applicableMenuOptions:[global.AnimObjectOptionMenu.duplicate,global.AnimObjectOptionMenu.delete],
     applicableAnimationProperties:["position","scale","rotation","opacity","border_width","border_start","border_end"],
+    applicableCanvasManagerCollections:[
+        global.EnumCollectionsNames.animObjs,
+        global.EnumCollectionsNames.animObjsWithEntrance,
+        global.EnumCollectionsNames.animObjsClippers
+    ],
     type:"ShapeAnimable",
     subtype:"RectShapeAnimable",
     initialize:function(options){
@@ -419,7 +435,7 @@ let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
 
         this.absolutePositioned=true;    // Propiedad de FABRIC util para cuando el objecto es usado como clipPath, hace que la posicion del enmascaramiento sea se forma absoluta
 
-        this.entranceMode=EntranceName.none; // Siempre sera none, por ende ni se permitira abrir el panel de configuraciones para ShapeAnimable
+        this.entranceMode=global.EntranceName.none; // Siempre sera none, por ende ni se permitira abrir el panel de configuraciones para ShapeAnimable
 
         /*Editable styling properties*/
         this.strokeWidth=4;             // Propiedad de FABRIC
@@ -437,7 +453,7 @@ let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
         this.listEditableStylingProperties=["strokeWidth", "fill", "transparentFill", "stroke", "transparentStroke","width","height","borderRadius","startRenderingPoint", "endRenderingPoint", "clipBorder", "inverted",] //for the  object properties editor (UI)
 
         this.calcStrokeLength();
-        this.entranceBehaviour=new EntranceEffectBehaviour(this,this.applicableEntranceModes);
+        this.entranceBehaviour=new global.EntranceEffectBehaviour(this,this.applicableEntranceModes);
 
         /*auxiliary attributes*/
         this.animator=new Animator(this);
@@ -612,17 +628,20 @@ let RectShapeAnimable=fabric.util.createClass(fabric.Rect,{
     },
     clone:function(callback){
         let object=this.toObject();
-        RectShapeAnimable.cloneFromObject(object,callback)
-    }
+        global.RectShapeAnimable.cloneFromObject(object,callback)
+    },
+    remove:function(){
+
+    },
 })
 
-RectShapeAnimable.cloneFromObject = function(_object, callback) {
+global.RectShapeAnimable.cloneFromObject = function(_object, callback) {
     var object = fabric.util.object.clone(_object,true);
     /*initializing with no state*/
-    let newRectShapeAnimable=new RectShapeAnimable();
+    let newRectShapeAnimable=new global.RectShapeAnimable();
     newRectShapeAnimable.setOptions(object)
 
-    newRectShapeAnimable.entranceBehaviour=new EntranceEffectBehaviour(newRectShapeAnimable,newRectShapeAnimable.applicableEntranceModes);
+    newRectShapeAnimable.entranceBehaviour=new global.EntranceEffectBehaviour(newRectShapeAnimable,newRectShapeAnimable.applicableEntranceModes);
     newRectShapeAnimable.animator=new Animator(newRectShapeAnimable);           //New fabric property
     newRectShapeAnimable.entranceBehaviour.fromObject(object.entranceBehaviour);
     newRectShapeAnimable.animator.fromObject(object.animator);
@@ -635,11 +654,11 @@ RectShapeAnimable.cloneFromObject = function(_object, callback) {
 /*===============================*/
 /*=====  Static functions  ======*/
 /*===============================*/
-ShapeAnimable.fromObject=function(object,callback){
+global.ShapeAnimable.fromObject=function(object,callback){
 /*Object loading*/
     // object.toObject()
     /*initializing with no state*/
-    ShapeAnimable.createInstance(0,0,object.shapeAssetModel,function(newInstance){
+    global.ShapeAnimable.createInstance(0,0,object.shapeAssetModel,function(newInstance){
 
         let entranceBehaviourObject=object.entranceBehaviour;
         let animatorObject=object.animator;
@@ -658,26 +677,26 @@ ShapeAnimable.fromObject=function(object,callback){
 /*======== Object creation ===========*/
 /*====================================*/
 /*the next two methods are called separetely if object is cloned or loaded*/
-ShapeAnimable.createInstance=function(left,top,shapeAssetModel,callback){
+global.ShapeAnimable.createInstance=function(left,top,shapeAssetModel,callback){
     /*TODO make it synchronously. */
     fabric.loadSVGFromString(shapeAssetModel.data,function(objects, options){
         var groupObj = fabric.util.groupSVGElements(objects, options);
         //let path=groupObj;// TODO: if more than 1 path fuse them into one
         let shapeAnimable=null;
         if(groupObj.type==="path"){
-            shapeAnimable=new ShapeAnimable(groupObj.path,{
+            shapeAnimable=new global.ShapeAnimable(groupObj.path,{
                 "left":left,
                 "top":top,
                 "shapeAssetModel":shapeAssetModel
             })
         }else if(groupObj.type==="circle"){
-            shapeAnimable=new CircleShapeAnimable({
+            shapeAnimable=new global.CircleShapeAnimable({
                 "left":left,
                 "top":top,
                 "shapeAssetModel":shapeAssetModel
             });
         }else if(groupObj.type==="rect"){
-            shapeAnimable=new RectShapeAnimable({
+            shapeAnimable=new global.RectShapeAnimable({
                 "left":left,
                 "top":top,
                 "shapeAssetModel":shapeAssetModel
@@ -700,7 +719,7 @@ ShapeAnimable.createInstance=function(left,top,shapeAssetModel,callback){
             y=groupObj.points[0].y;
             pathStr+="L " +x + " " + y + " ";
 
-            shapeAnimable=new ShapeAnimable(pathStr,{
+            shapeAnimable=new global.ShapeAnimable(pathStr,{
                 "left":left,
                 "top":top,
                 "shapeAssetModel":shapeAssetModel
@@ -708,16 +727,5 @@ ShapeAnimable.createInstance=function(left,top,shapeAssetModel,callback){
             shapeAnimable.pathOffset={x:groupObj.pathOffset.x,y:groupObj.pathOffset.y}
         }
         callback(shapeAnimable);
-    })
-}
-ShapeAnimable.instanceSetupInCanvasManager=function(instance,collectionName){
-    let contains=this.prototype.applicableCanvasManagerCollections.indexOf(collectionName);
-    if(contains>-1){
-        CanvasManager.collections[collectionName].add(instance);
-    }
-}
-ShapeAnimable.removeInstance=function(instance){
-    this.prototype.applicableCanvasManagerCollections.forEach(function(elem){
-        CanvasManager.collections[elem].remove(instance)
     })
 }

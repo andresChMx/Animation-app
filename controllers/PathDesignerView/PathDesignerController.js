@@ -68,14 +68,14 @@ var PathDesignerController=fabric.util.createClass({
                 this.imageDrawingData.pathsNames=listPathsNames;
                 this.imageDrawingData.strokesTypes=listPathStrokesType;
 
-                if(this.imageDrawingData.type===DrawingDataType.CREATED_NOPATH){
+                if(this.imageDrawingData.type===global.DrawingDataType.CREATED_NOPATH){
                     if(this.getTotalStrokesAmount(matPoints)===0) {
                     }else{
-                        this.imageDrawingData.type = DrawingDataType.CREATED_PATHDESIGNED;
+                        this.imageDrawingData.type = global.DrawingDataType.CREATED_PATHDESIGNED;
                     }
-                }else if(this.imageDrawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+                }else if(this.imageDrawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
                     if(this.getTotalStrokesAmount(matPoints)===0) {
-                        this.imageDrawingData.type=DrawingDataType.CREATED_NOPATH;
+                        this.imageDrawingData.type=global.DrawingDataType.CREATED_NOPATH;
                     }
                 }
 
@@ -127,7 +127,7 @@ var PathDesignerController=fabric.util.createClass({
     //
     //                 this.hasLoadedFromSVG=true;
     //
-    //                 svgLoadedData.type=DrawingDataType.CREATED_PATHLOADED;
+    //                 svgLoadedData.type=global.DrawingDataType.CREATED_PATHLOADED;
     //                 svgLoadedData.url=this.imageDrawingData.url;
     //                 svgLoadedData.imgHigh=this.imageDrawingData.imgHigh;
     //

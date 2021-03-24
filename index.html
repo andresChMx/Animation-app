@@ -142,6 +142,12 @@
                                 <p class="widget-label">Force Stroke Drawing </p>
                                 <input id="checkbox-force-stroke-drawing" type="checkbox">
                             </div>
+                            <div class="form-group drawn-mode-widget__drawing-hand-name drawn-mode-widged">
+                                <p class="widget-label">Hand Type</p>
+                                <div class="current-drawing-hand-name">
+                                    <img src="" alt="">
+                                </div>
+                            </div>
                         </div>
                         <div class="dragged-mode-settings mode-settings">
                             opciones del modo dragged
@@ -160,6 +166,24 @@
         </div>
     </div>
 
+    <div class="canvas-animator__object-drawing-hand__filter modal__filter">
+        <div class="canvas-animator__object-drawing-hand modal">
+            <div class="canvas-animator__object-drawing-hand__header modal__header">
+                <p class="modal__header__title">Select Hand</p>
+                <div class="canvas-animator__object-drawing-hand__btn-close icon-cross modal__header__btn-close-modal"></div>
+            </div>
+            <div class="canvas-animator__object-drawing-hand__body modal__body">
+                <div class="box-drawing-hands">
+
+                </div>
+            </div>
+            <div class="canvas-animator__object-drawing-hand__footer modal__footer">
+                <button class="btn-accept modal__footer__btn-action">OK</button>
+                <button class="btn-cancel modal__footer__btn-action">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div class="panel-home__filter modal__filter" >
         <div class="panel-home modal">
             <div class="panel-home__header modal__header">
@@ -174,6 +198,34 @@
                 <div class="panel-home__body__templates-container">
                     <p class="panel-home__subtitle">Templates</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-config__filter modal__filter">
+        <div class="panel-config modal">
+            <div class="panel-config__header modal__header">
+                <p class="modal__header__title">Configuration</p>
+                <div class="panel-config__header__btn-close icon-cross modal__header__btn-close-modal"></div>
+            </div>
+            <div class="panel-config__body modal__body">
+                <p class="panel-config__body__tittle">Aspect Ratio</p>
+                <div class="row">
+                    <select name="" id="select-aspect-ratios">
+                    </select>
+                    <div class="field">
+                        <label for="project-width">Width</label>
+                        <input type="text" id="project-width">
+                    </div>
+                    <div class="field">
+                        <label for="project-height">Height</label>
+                        <input type="text" id="project-height">
+                    </div>
+                </div>
+            </div>
+            <div class="panel-config__footer modal__footer">
+                <button class="btn-accept modal__footer__btn-action">Accept</button>
+                <button class="btn-cancel modal__footer__btn-action">Cancel</button>
             </div>
         </div>
     </div>
@@ -741,15 +793,16 @@
     <script src="FileSaver.min.js"></script>
     <script src="./fabricCustom.js"></script>
 
-    <script src="common/AnimablesCollections.js"></script>
+    <script src="common/ScenesManagement/Scene.js"></script>
+    <script src="common/ScenesManagement/ScenesList.js"></script>
+    <script src="common/ScenesManagement/SceneManager.js"></script>
+    <script src="common/ScenesManagement/ProjectPersistance.js"></script>
     <script src="common/fontsLoading/FontsLoader.js"></script>
     <script src="common/fontsLoading/FontFaceObserver.js"></script>
     <script src="common/SVGManager.js"></script>
     <script src="common/AnimationRelated/Animation.js"></script>
     <script src="common/AnimationRelated/Animator.js"></script>
-    <script src="common/DrawingHand.js"></script>
-    <script src="common/PathIllustrator.js"></script>
-    <script src="common/ControllerAnimator.js"></script>
+    <script src="common/AnimationRelated/ControllerAnimator.js"></script>
     <script src="common/DrawingDataGeneration.js"></script>
     <script src="common/StaticResource.js"></script>
 
@@ -774,14 +827,18 @@
     <script src="./controllers/PathDesignerView/DrawingManager.js"></script>
     <script src="./controllers/PathDesignerView/PreviewManager.js"></script>
     <script src="./controllers/PathDesignerView/CanvasDrawingManager.js"></script>
-    <script src="./controllers/ScenePreviewView/DrawingCacheManager.js"></script>
     <script src="./controllers/ScenePreviewView/ScenePreviewController.js"></script>
+    <script src="controllers/ScenePreviewView/EntranceEffectManagers/DrawnEffectManager/DrawingCacheManager.js"></script>
+    <script src="controllers/ScenePreviewView/EntranceEffectManagers/DrawnEffectManager/DrawingHand.js"></script>
+    <script src="controllers/ScenePreviewView/EntranceEffectManagers/DrawnEffectManager/PathIllustrator.js"></script>
+    <script src="controllers/ScenePreviewView/EntranceEffectManagers/DrawnEffectManager/PathIllustratorDataAdapters.js"></script>
 
     <script src="UI/WindowManager.js"></script>
     <script src="UI/CommonComponenets.js"></script>
     <script src="UI/AuthenticationView/AuthenticationView.js"></script>
     <script src="UI/AnimationView/CanvasManager.js"></script>
     <script src="UI/AnimationView/HomePanel.js"></script>
+    <script src="UI/AnimationView/ConfigurationPanel.js"></script>
     <script src="UI/AnimationView/AnimationPanel.js"></script>
 
     <script src="UI/AnimationView/InspectorPanel/AreaSceneObjects.js"></script>

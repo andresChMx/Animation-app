@@ -54,10 +54,10 @@ var PathIllustrator=fabric.util.createClass({
         this.data=dataAdapter;
         this.loopMode=loopMode;
 
-        this.baseImageCanvas=document.createElement("canvas");
+        this.baseImageCanvas=fabric.util.createCanvasElement();
         this.baseImageCtx=this.baseImageCanvas.getContext("2d");
 
-        this.prevPathCanvas=document.createElement("canvas");
+        this.prevPathCanvas=fabric.util.createCanvasElement();
         this.prevPathSnapshot=this.prevPathCanvas.getContext("2d");
 
         this.counterInterruption=0;
@@ -172,7 +172,7 @@ var PathIllustrator=fabric.util.createClass({
         }
     },
     _setupOnNewImage:function(nowTime){
-        let imageFinalFrame=new Image();
+        let imageFinalFrame=fabric.util.createImage();
         if(!this.flagFirstTime){
             //// Completing not drawn lines
             imageFinalFrame=this.data.getFinalDrawingImageOf(this.k);
@@ -277,7 +277,7 @@ var PathIllustrator=fabric.util.createClass({
         this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
         this.ctx.lineWidth=this.data.getLineWidthAt(this.k,this.i);
 
-        if(this.data.getTypeOf(this.k)==="SVGAnimable" && this.data.getPathTypeOf(this.k)===DrawingDataType.CREATED_NOPATH){
+        if(this.data.getTypeOf(this.k)==="SVGAnimable" && this.data.getPathTypeOf(this.k)===global.DrawingDataType.CREATED_NOPATH){
             this.ctx.strokeStyle=this.data.getLineColorAt(this.k,this.i);
         }
         if(this.data.getTypeOf(this.k)==="TextAnimable"){
@@ -332,7 +332,7 @@ var PathIllustrator=fabric.util.createClass({
     },
     drawCompletePath:function(k,i,pAIndex){
         let self=this;
-        if(this.data.getEntraceModeOf(k)!==EntranceName.text_drawn){ //para los text-drawn no se debe hacer moveto en cada stroke, ya que de lo contrario, no se mostrara el relleno ya que al hacer move to como que que se resetea
+        if(this.data.getEntraceModeOf(k)!==global.EntranceName.text_drawn){ //para los text-drawn no se debe hacer moveto en cada stroke, ya que de lo contrario, no se mostrara el relleno ya que al hacer move to como que que se resetea
             //el punto desde el cual se aplica el composite operation effect para que solo se pinte las partes que coinciden. Esto no resulve del todo el problema ya que, la forma en que funcionan las funciones de dibujado de un stroke
             // es que se provee los puntos del stroke considerando el punto inicial del stroke, asi que es oblicatio que se haga un move to al punto inicial siempre
             // aun asi esto es una solucion que funciona bien
@@ -372,7 +372,7 @@ var PathIllustrator=fabric.util.createClass({
     },
 
     drawCurveSegment:function(k,i,pAIndex,temperature){
-        if(this.data.getEntraceModeOf(k)!==EntranceName.text_drawn) { //para los text-drawn no se debe hacer moveto en cada stroke
+        if(this.data.getEntraceModeOf(k)!==global.EntranceName.text_drawn) { //para los text-drawn no se debe hacer moveto en cada stroke
             this.ctx.moveTo(this.data.getStrokeCoordXAt(k, i, pAIndex), this.data.getStrokeCoordYAt(k, i, pAIndex));
         }
         var len = this.data.getPathLength(k,i); // number of points
@@ -457,188 +457,5 @@ var PathIllustrator=fabric.util.createClass({
     },
     registerOnLastObjectDrawingFinished:function(obj){
         this.observerOnLastObjectDrawingFinished=obj;
-    }
-})
-
-
-var IllustratorDataAdapterPreview=fabric.util.createClass({
-    initialize:function(drawingManager,canvasDrawingManager,previewManager,scalerFactorX,scalerFactorY,imgHigh){
-        this.drawingManager=drawingManager;
-        this.canvasDrawingManager=canvasDrawingManager;
-        this.previewManager=previewManager;
-
-        this.scalerFactorX=scalerFactorX;
-        this.scalerFactorY=scalerFactorY;
-        this.duration=3000;
-        this.delay=0;
-        this.baseImage=imgHigh;
-    },
-    getStrokeCoordXAt:function(k,i,j){
-        return this.canvasDrawingManager.listPoints[i][j].get("left")*this.scalerFactorX;
-    },
-    getStrokeCoordYAt:function(k,i,j){
-        return this.canvasDrawingManager.listPoints[i][j].get("top")*this.scalerFactorY;
-    },
-    getPathLength:function(k,i){
-        return this.canvasDrawingManager.listPoints[i].length;
-    },
-    getPathListLength:function(k){
-        return this.canvasDrawingManager.listPoints.length;
-    },
-
-    getCtrlPointCoordXAt:function(k,i,j){
-        return this.drawingManager.ctrlPointsManager.list[i][j]*this.scalerFactorX;
-    },
-    getCtrlPointCoordYAt:function(k,i,j){
-        return this.drawingManager.ctrlPointsManager.list[i][j]*this.scalerFactorY;
-    },
-
-    getListLinesWidthsLength:function(k,){
-        return this.canvasDrawingManager.listLinesWidths.length;
-    },
-    getLineWidthAt:function(k,i){
-        return this.canvasDrawingManager.listLinesWidths[i]*this.scalerFactorX;
-    },
-
-    getStrokeTypeAt:function(k,i,j){
-        return this.canvasDrawingManager.listPathStrokesType[i][j];
-    },
-
-    getDurationOf:function(k){
-        return this.duration;
-    },
-    getDelayOf:function(k){
-        return this.delay;
-    },
-    getExitDelayOf:function(k){
-        return 0;
-    },
-    getWidthCanvasCacheOf:function(k){
-        return this.previewManager.canvas.width;
-    },
-    getHeightCanvasCacheOf:function(k){
-        return this.previewManager.canvas.height;
-    },
-    getWidthMainCanvasOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getWidthInMainCanvas();
-    },
-    getHeightMainCanvasOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInMainCanvas();
-    },
-
-    getTypeOf:function(k){
-        return "ImageAnimable";
-    },
-    getPathTypeOf:function(k){
-        return DrawingDataType.CREATED_PATHDESIGNED;
-    },
-    getBaseImageOf:function(k){
-        return this.baseImage;
-    },
-    getFinalDrawingImageOf:function(k){
-        return null;
-    },
-    getObjectsToDrawLength:function(){
-        return 1;
-    },
-    getEntraceModeOf:function(k){
-        return EntranceName.image_drawn;
-    },
-    getIllustrationFunction:function(k){
-        return ImageDrawnEntranceMode.prototype.illustrationFunctionOnCache;
-    }
-})
-
-
-var IllustratorDataAdapterCache=fabric.util.createClass({
-    initialize:function(listAnimableObjectsWidthDrawnEntrances){
-        this.listAnimableObjectsWithDrawnEntrances=listAnimableObjectsWidthDrawnEntrances;
-    },
-    getStrokeCoordXAt:function(k,i,j){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.points[i][j*2]
-            * this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getWidthInDrawingCache();
-    },
-    getStrokeCoordYAt:function(k,i,j){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.points[i][j*2+1]
-            * this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInDrawingCache();
-    },
-    getPathLength:function(k,i){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.points[i].length/2;
-    },
-    getPathListLength:function(k,){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.points.length;
-    },
-    getPathTypeOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.type;
-    },
-    getCtrlPointCoordXAt:function(k,i,j){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.ctrlPoints[i][j]
-            * this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getWidthInDrawingCache();
-    },
-    getCtrlPointCoordYAt:function(k,i,j){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.ctrlPoints[i][j]
-            * this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInDrawingCache();
-    },
-    getStrokeTypeAt:function(k,i,j){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.strokesTypes[i][j];
-    },
-    getListLinesWidthsLength:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.linesWidths.length;
-    },
-    getBaseImageOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getDrawingBaseImage();
-    },
-    getFinalDrawingImageOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getDrawingFinalImage();
-    },
-    getLineWidthAt:function(k,i){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.linesWidths[i]
-            * this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getWidthInDrawingCache();
-    },
-    getLineColorAt:function(k,i){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.drawingData.linesColors[i];
-    },
-    getFillColorOf:function(k){/*for texts*/
-        return this.listAnimableObjectsWithDrawnEntrances[k].fill;
-    },
-    getDurationOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].animator.entranceTimes.duration;
-    },
-    getDelayOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].animator.entranceTimes.delay;
-    },
-    getExitDelayOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].animator.entranceTimes.transitionDelay;
-    },
-    getWidthCanvasCacheOf:function(k){//usado por el drawinCacheManger
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getWidthInDrawingCache();
-    },
-    getHeightCanvasCacheOf:function(k){//usado por el drawinCacheManger
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInDrawingCache();
-    },
-    getWidthMainCanvasOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getWidthInMainCanvas();
-    },
-    getHeightMainCanvasOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.getHeightInMainCanvas();
-    },
-    convertPathLeftCoordToHandCoordOf:function(k,coordX){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.convertPathLeftCoordToHandCoord(coordX);
-    },
-    convertPathTopCoordToHandCoordOf:function(k,coordY){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.convertPathTopCoordToHandCoord(coordY);
-    },
-
-    getObjectsToDrawLength:function(){
-      return this.listAnimableObjectsWithDrawnEntrances.length;
-    },
-    getEntraceModeOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.getCurrentEntranceModeName();
-    },
-    getTypeOf:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].type;
-    },
-    getIllustrationFunction:function(k){
-        return this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode.illustrationFunctionOnCache.bind(this.listAnimableObjectsWithDrawnEntrances[k].entranceBehaviour.entranceMode);
     }
 })

@@ -20,19 +20,15 @@ let SectionToolBox={
                 icon:"icon-save",
                 label:"Save",
                 action:function(){
-                    if(CanvasManager.AreAllImagesReady()){
-
-                        let json=JSON.stringify(CanvasManager);
-                        //next instruction from library FileSaver.js
-                        var blob = new Blob([json], {
-                            type: "text/plain;charset=utf-8;",
-                        });
-                        saveAs(blob, "project.acm");
-
-                    }else{
-                        alert("cannot preview while images are not ready, please delete those images");
-                        //TODO Show notification "cannot preview while images are not ready, please delete those images"
-                    }
+                    ScenesManager.projectPersistance.save();
+                }
+            },
+            {
+                available:true,/*temporary*/
+                icon:"icon-settings",
+                label:"Config",
+                action:function(){
+                    PanelConfig.showModal();
                 }
             },
             {
@@ -40,7 +36,7 @@ let SectionToolBox={
                 icon:"icon-preview",
                 label:"Preview",
                 action:function(){
-                    if(CanvasManager.AreAllImagesReady()){
+                    if(ScenesManager.AreAllAssetsReady()){
                         me.parentClass.childNotificationOnToolPreviewClicked();
                     }else{
                         alert("cannot preview while images are not ready, please delete those images");
@@ -158,17 +154,17 @@ var PanelInspector={
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnSelectionUpdated,this);
         MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjModified,this);
 
-        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjAddedToListWithEntrance,this);
-        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjDeletedFromListWidthEntraces,this);
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsWithEntranceItemAdded,this);
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsWithEntranceItemRemoved,this);
 
-        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnAnimableObjectAdded,this);
-        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnAnimableObjectDeleted,this);
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsItemAdded,this);
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsItemRemoved,this);
 
-        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnShapeAnimableAdded,this);
-        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnShapeAnimableDeleted,this);
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsClippersItemAdded,this);
+        MainMediator.registerObserver(ScenesManager.name,ScenesManager.events.animObjsClippersItemRemoved,this);
 
-        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjectMovedForward,this);
-        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnObjectMovedBackward,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnBtnMoveForward,this);
+        MainMediator.registerObserver(CanvasManager.name,CanvasManager.events.OnBtnMoveBackwards,this);
 
         MainMediator.registerObserver(PanelAnimation.name,PanelAnimation.events.OnPanelToggle,this);
 
@@ -197,41 +193,44 @@ var PanelInspector={
     notificationPanelDesignerOptionsOnActionClicked:function(data){
         this.HTMLElement.style.display="block"
     },
-    notificationCanvasManagerOnObjAddedToListWithEntrance:function(args){
+
+    notificationScenesManageranimObjsWithEntranceItemAdded:function(args){
         let animObjWithEntrance=args[0];
-        this.AreaSceneObjects.notificationOnObjAddedToListObjectsWithEntrance(animObjWithEntrance);
+        this.AreaSceneObjects.notificationScenesManageranimObjsWithEntranceItemAdded(animObjWithEntrance);
     },
-    notificationCanvasManagerOnObjDeletedFromListWidthEntraces:function(args){
+    notificationScenesManageranimObjsWithEntranceItemRemoved:function(args){
         let indexObjsWithEntranceList=args[0];
-        this.AreaSceneObjects.notificationOnObjDeletedFromListWithEntrance(indexObjsWithEntranceList)
+        this.AreaSceneObjects.notificationScenesManageranimObjsWithEntranceItemRemoved(indexObjsWithEntranceList)
     },
-    notificationCanvasManagerOnSelectionUpdated:function(){
-        this.AreaSceneObjects.notificationCanvasManagerOnSelectionUpdated();
-        this.AreaObjectProperties.notificationCanvasManagerOnSelectionUpdated();
-    },
-    notificationCanvasManagerOnAnimableObjectAdded:function(args){
+    notificationScenesManageranimObjsItemAdded:function(args){
         let animableObject=args[0];
-        this.AreaSceneObjects.notificationOnAnimableObjectAdded(animableObject);
+        this.AreaSceneObjects.notificationScenesManageranimObjsItemAdded(animableObject);
     },
-    notificationCanvasManagerOnAnimableObjectDeleted:function(args){
+    notificationScenesManageranimObjsItemRemoved:function(args){
         let indexInAnimableObjsList=args[0];
-        this.AreaSceneObjects.notificationOnAnimableObjectDeleted(indexInAnimableObjsList);
+        this.AreaSceneObjects.notificationScenesManageranimObjsItemRemoved(indexInAnimableObjsList);
     },
-    notificationCanvasManagerOnShapeAnimableAdded:function(args){
+    notificationScenesManageranimObjsClippersItemAdded:function(args){
         let animableObject=args[0]
-        this.AreaSceneObjects.notificationCanvasManagerOnShapeAnimableAdded(animableObject);
+        this.AreaSceneObjects.notificationScenesManageranimObjsClippersItemAdded(animableObject);
     },
-    notificationCanvasManagerOnShapeAnimableDeleted:function(args){
+    notificationScenesManageranimObjsClippersItemRemoved:function(args){
         let indexInShapeObjectsList=args[0];
-        this.AreaSceneObjects.notificationCanvasManagerOnShapeAnimableDeleted(indexInShapeObjectsList);
+        this.AreaSceneObjects.notificationScenesManageranimObjsClippersItemRemoved(indexInShapeObjectsList);
     },
-    notificationCanvasManagerOnObjectMovedForward:function(args){
+
+    notificationCanvasManagerOnBtnMoveForward:function(args){
         let index=args[0];
         this.AreaSceneObjects.notificationCanvasManagerOnObjectMovedForward(index);
     },
-    notificationCanvasManagerOnObjectMovedBackward:function(args){
+    notificationCanvasManagerOnBtnMoveBackwards:function(args){
         let index=args[0];
         this.AreaSceneObjects.notificationCanvasManagerOnObjectMovedBackward(index);
+    },
+
+    notificationCanvasManagerOnSelectionUpdated:function(){
+        this.AreaSceneObjects.notificationCanvasManagerOnSelectionUpdated();
+        this.AreaObjectProperties.notificationCanvasManagerOnSelectionUpdated();
     },
     notificationCanvasManagerOnObjModified:function(args){
         this.AreaObjectProperties.notificationCanvasManagerOnObjModified();

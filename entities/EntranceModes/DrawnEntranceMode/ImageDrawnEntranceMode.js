@@ -1,4 +1,4 @@
-var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
+global.ImageDrawnEntranceMode=fabric.util.createClass(global.DrawnEntranceMode,{
         type:"ImageDrawn",
     initialize:function(parentObject){
         this.callSuper("initialize",parentObject);
@@ -8,7 +8,9 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         /*auxiliary attributes*/
 
         /*configuration attributes*/
+        let self=this;
         this.config={
+            drawingHandName:self.cacheManager.drawingHand.defaultDrawingHandName,
             showHand:true,
             finalDrawingAppearance:'masked',  // masked || original
         }
@@ -17,7 +19,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
     /*overwritten methods*/
     notificationOnAssetStateReady:function(){
         this.baseImage=this.parentObject.largeImage;
-        if(this.parentObject.imageLoadingState===EnumAnimableLoadingState.ready){
+        if(this.parentObject.imageLoadingState===global.EnumAssetLoadingState.ready){
             this.generateFinalMaskedImage();
         }
     },
@@ -28,12 +30,16 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         * We have to set the meanwhileImage var to the empty canvas because we need that while
         * it is not its drawing turn this should be rendering an empy transparent image.
         * */
+        let meanWhileImageLoaded=false;
+        let drawingPathsLoaded=false;
+        let flagCallbackCalled=false;
 
-        this.meanWhileImage=new Image();
+        this.meanWhileImage=fabric.util.createImage();
+        this.meanWhileImage.onload=function(){meanWhileImageLoaded=true;attemptFinish();}
         this.meanWhileImage.src=this.cacheManager.canvas.toDataURL();
         this.isMyTurnToCopyCache=false;
 
-            if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
+        if(this.drawingData.type===global.DrawingDataType.CREATED_NOPATH){
             this.dataGenerator.generateDefaultDrawingPointsAndLineWidth(
                 this.baseImage.naturalWidth,
                 this.baseImage.naturalHeight,
@@ -48,24 +54,31 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
                 this.drawingData.points,
                 this.drawingData /*OUT*/
             );
-            }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+        }else if(this.drawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
             this.dataGenerator.generateCrtlPointsFromPointsMatrix(
                 this.drawingData.points,
                 this.drawingData /*OUT*/
             );
         }
         /*setting up object*/
+        drawingPathsLoaded=true;
+        attemptFinish();
 
-        callback();
+        function attemptFinish(){
+            if(!flagCallbackCalled && meanWhileImageLoaded&&drawingPathsLoaded){
+                flagCallbackCalled=true;
+                callback();
+            }
+        }
     },
     clearEntranceData:function(){
-            if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
+            if(this.drawingData.type===global.DrawingDataType.CREATED_NOPATH){
             this.drawingData.points=[];
             this.drawingData.linesWidths=[];
             this.drawingData.ctrlPoints=[];
             this.drawingData.strokesTypes=[];
             this.drawingData.pathsNames=[];
-            }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+            }else if(this.drawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
             this.drawingData.ctrlPoints=[];
         }
     },
@@ -113,7 +126,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
         let canvas=document.createElement("canvas");
         let ctx=canvas.getContext("2d");
         // Generating drawing data if necessary, se estan limpiando los ctrlPoints al final, en caso fueron generados
-            if(this.drawingData.type===DrawingDataType.CREATED_NOPATH){
+            if(this.drawingData.type===global.DrawingDataType.CREATED_NOPATH){
             // canvas.width=this.baseImage.naturalWidth;
             // canvas.height=this.baseImage.naturalHeight;
             // ctx.drawImage(this.baseImage,0,0);
@@ -122,7 +135,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
             // canvas.remove();
             this.maskedImage=this.baseImage.cloneNode();
             return;
-            }else if(this.drawingData.type===DrawingDataType.CREATED_PATHDESIGNED){
+            }else if(this.drawingData.type===global.DrawingDataType.CREATED_PATHDESIGNED){
             this.dataGenerator.generateCrtlPointsFromPointsMatrix(
                 this.drawingData.points,
                 this.drawingData /*OUT*/
@@ -147,7 +160,7 @@ var ImageDrawnEntranceMode=fabric.util.createClass(DrawnEntranceMode,{
             // document.body.removeChild(link);
             // delete link;
 
-            this.maskedImage=new Image();
+            this.maskedImage=fabric.util.createImage();
             this.maskedImage.src=dataUrl;
             //CLEANING
             canvas.remove();

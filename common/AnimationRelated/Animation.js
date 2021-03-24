@@ -1,18 +1,4 @@
-var EnumAnimationTweenType={
-    Linear:'Linear',
-    Sine:'Sine',
-    Cubic:'Cubic',
-    Quint:'Quint',
-    Circ:'Circ',
-    Back:'Back',
-    Elastic:'Elastic',
-    Bounce:'Bounce',
-}
-var EnumAnimationEasingType={
-    In:'In',
-    Out:'Out',
-    InOut:'InOut',
-}
+
 fabric.util.ease.Linear=function(t,b,c,d){
     return (t/d)*c + b;
 }
@@ -30,7 +16,7 @@ var Animation=fabric.util.createClass({
     functionName:'easeInSine', // found from the next two variables
     tweenType:'Sine', // sine,quart, etc...
     easingType:'In',  // In | Out | InOut | linear
-    initialize:function(property,startValue,endValue,startMoment,endMoment,easingType=EnumAnimationEasingType.In,tweenType=EnumAnimationTweenType.Sine){
+    initialize:function(property,startValue,endValue,startMoment,endMoment,easingType=global.EnumAnimationEasingType.In,tweenType=global.EnumAnimationTweenType.Sine){
         this.property=property;
         this.initParameters(startValue,endValue,startMoment,endMoment,easingType,tweenType)
     },
@@ -58,23 +44,23 @@ var Animation=fabric.util.createClass({
 
     },
     setTweenType:function(tweenType){
-        let name=EnumAnimationTweenType[tweenType];
+        let name=global.EnumAnimationTweenType[tweenType];
         if(name===undefined){
-            name=EnumAnimationTweenType.Sine;
+            name=global.EnumAnimationTweenType.Sine;
         }
         this.tweenType=name;
         this.assembleFunctionName();
     },
     setEasingType:function(easingType){
-        let type=EnumAnimationEasingType[easingType];
+        let type=global.EnumAnimationEasingType[easingType];
         if(type===undefined){
-            type=EnumAnimationEasingType.In;
+            type=global.EnumAnimationEasingType.In;
         }
         this.easingType=type;
         this.assembleFunctionName();
     },
     assembleFunctionName:function(){
-        if(this.tweenType===EnumAnimationTweenType.Linear){
+        if(this.tweenType===global.EnumAnimationTweenType.Linear){
             this.functionName='Linear';
         }else{
             this.functionName='ease' + this.easingType + this.tweenType;

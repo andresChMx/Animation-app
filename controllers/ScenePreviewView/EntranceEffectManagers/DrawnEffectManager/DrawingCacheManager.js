@@ -1,7 +1,8 @@
 var DrawingCacheManager=fabric.util.createClass({
     
-    initialize:function(drawingHand){
-        this.canvas=document.createElement("canvas");
+    initialize:function(){
+        this.canvas=fabric.util.createCanvasElement();
+        fabric.util.createImage()
         this.ctx=this.canvas.getContext("2d");
         this.canvas.style.display="none";
         // this.canvas.style.position="absolute";
@@ -15,7 +16,7 @@ var DrawingCacheManager=fabric.util.createClass({
         // document.body.append(this.canvas);
 
         this.pathIllustrator=null;
-        this.drawingHand=drawingHand;
+        this.drawingHand=new DrawingHand();
         this.UIScenePreviewerCanvas=null;
         this.indexDrawableTurn=-1;
 
@@ -23,26 +24,10 @@ var DrawingCacheManager=fabric.util.createClass({
         this.animator={
             executeAnimations:this._executeAnimations.bind(self)
         }
-        this.PIXEL_RATIO = (function () {
-            var ctx = document.createElement("canvas").getContext("2d"),
-                dpr = window.devicePixelRatio || 1,
-                bsr = ctx.webkitBackingStorePixelRatio ||
-                    ctx.mozBackingStorePixelRatio ||
-                    ctx.msBackingStorePixelRatio ||
-                    ctx.oBackingStorePixelRatio ||
-                    ctx.backingStorePixelRatio || 1;
-
-            return dpr / bsr;
-        })();
-
     },
     setCanvasDimentions:function(w,h){
         this.canvas.width = w ;
         this.canvas.height = h ;
-        //this.canvas.style.width = w + "px";
-        //this.canvas.style.height = h + "px";
-        //this.ctx=this.canvas.getContext("2d");
-        //this.ctx.setTransform(this.PIXEL_RATIO, 0, 0, this.PIXEL_RATIO, 0, 0);
     },
     addDrawingHandToCanvas:function(canvas){
         canvas.add(this.drawingHand.getHandImage());
@@ -51,7 +36,7 @@ var DrawingCacheManager=fabric.util.createClass({
     OnReplayPreview:function(){
       this.pathIllustrator.setupPreviewSceneVars();
       this.ctx.clearRect(0,0,2000,2000);
-      let placeholderBlankImage=new Image();
+      let placeholderBlankImage=fabric.util.createImage();
       placeholderBlankImage.src=this.canvas.toDataURL();
       for(let i=0;i<this.listAnimableWithDrawnEntrance.length;i++){
           this.listAnimableWithDrawnEntrance[i].entranceBehaviour.entranceMode.setTurnToCopyCache(false,placeholderBlankImage);
@@ -61,26 +46,27 @@ var DrawingCacheManager=fabric.util.createClass({
     _executeAnimations:function(animatorTime){
         let finalSegmentPoint=this.pathIllustrator._manualDrawingLoop(animatorTime);
         if(finalSegmentPoint===null){// no more drawings or the pathillustrator is in a delay time ||
-            this.drawingHand.updatePosition(-1000,-1000);
+            this.drawingHand.updatePosition(-2000,-2000);
         }else if(this.listAnimableWithDrawnEntrance[this.indexDrawableTurn].entranceBehaviour &&
             !this.listAnimableWithDrawnEntrance[this.indexDrawableTurn].entranceBehaviour.entranceMode.config.showHand
         ){
-            this.drawingHand.updatePosition(-1000,-1000);
+            this.drawingHand.updatePosition(-2000,-2000);
         }
         else {
             if(finalSegmentPoint.x!==null && finalSegmentPoint.y!==null){
                 let objMatrix = this.listAnimableWithDrawnEntrance[this.indexDrawableTurn].calcOwnMatrix();
-                //finalp=originalp*scaledwidth
-                // normalp=orginalp*mainWidth
-                // normalp=finalp/scaledwidth*mainwidth
+
                 finalSegmentPoint.x=this.pathIllustrator.data.convertPathLeftCoordToHandCoordOf(this.indexDrawableTurn,finalSegmentPoint.x);
                 finalSegmentPoint.y=this.pathIllustrator.data.convertPathTopCoordToHandCoordOf(this.indexDrawableTurn,finalSegmentPoint.y);
-
                 finalSegmentPoint=fabric.util.transformPoint(new fabric.Point(finalSegmentPoint.x,finalSegmentPoint.y),objMatrix);
+
+                finalSegmentPoint.x=finalSegmentPoint.x-this.drawingHand.offsetDrawingHand.x;
+                finalSegmentPoint.y=finalSegmentPoint.y-this.drawingHand.offsetDrawingHand.y;
+
                 finalSegmentPoint=fabric.util.transformPoint(finalSegmentPoint,this.UIScenePreviewerCanvas.viewportTransform);
                 this.drawingHand.updatePosition(finalSegmentPoint.x,finalSegmentPoint.y);
             }else{
-                this.drawingHand.updatePosition(-1000,-1000);
+                this.drawingHand.updatePosition(-2000,-2000);
             }
         }
     },
@@ -93,6 +79,8 @@ var DrawingCacheManager=fabric.util.createClass({
         this.pathIllustrator.setupPreviewSceneVars();
     },
     notificationOnDrawingNewObject:function(lastObjIndex,newObjIndex,lastDataUrl){
+        this.drawingHand.setHandImage(this.pathIllustrator.data.getDrawingHandNameOf(newObjIndex));
+
         this.OnIllustratorDrawingNewObject(lastObjIndex,newObjIndex,lastDataUrl);
     },
     notificationOnLastObjectDrawingFinished:function(indexLastObject,finalObjectImage){

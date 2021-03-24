@@ -1,4 +1,5 @@
-MainMediator.registerSubjects([WindowManager,PanelActionEditor,PanelAssets,CanvasManager,PanelInspector,PanelDesignerOptions,  PanelPreviewer, PanelAnimation]);
+
+MainMediator.registerSubjects([WindowManager,PanelConfig,PanelActionEditor,PanelAssets,CanvasManager,PanelInspector,PanelDesignerOptions,  PanelPreviewer, PanelAnimation,ScenesManager]);
 
 /*Loading fonts for general use*/
 var fontsLoader=new FontsLoader();
@@ -13,7 +14,7 @@ var fontsLoader=new FontsLoader();
   var pathDesignerController= new PathDesignerController();
   PanelDesignerOptions.setController(pathDesignerController);
 
-  var scenePreviewController=new ScenePreviewController();
+  var scenePreviewController=new EnlivedScenePreviewController(ScenesManager);
   PanelPreviewer.setController(scenePreviewController);
 
   //registering controllers as subjects
