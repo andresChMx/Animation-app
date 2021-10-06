@@ -11,9 +11,9 @@
 
 ### Showcase
 
-![](./showcase\animation.JPG)
+![](./showcase/animation.JPG)
 
-![](./showcase\path-designer.JPG)
+![](./showcase/path-designer.JPG)
 
 ![](./showcase/preview.JPG)
 
