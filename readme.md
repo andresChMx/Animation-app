@@ -1,20 +1,19 @@
 # Overview
 
-A web application to create animated videos from images, videos, text and music.
+### [Demo](https://andreschmx.github.io/Animation-app/index.html)
 
 ### Features
 
 * Fully featured timeline
-* Advanced animation effects
+* Animation easing functions
 * Embeded media assets gallery 
-* Usage of your own assets
-* SVG Images Parsing
+* Drawing animation effect path editor
 
-### In action
+### Showcase
 
-It can be used to create two video styles :
+![](C:\github\doodly-clone\showcase\animation.JPG)
 
-* Whiteboard animation videos ([see result](see result))
-* Promotional videos ([see result]()])
+![](C:\github\doodly-clone\showcase\path-designer.JPG)
 
-#### [Demo](https://andreschmx.github.io/Animation-app/index.html)
+![](C:\github\doodly-clone\showcase\preview.JPG)
+
