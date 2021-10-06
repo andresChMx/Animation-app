@@ -11,9 +11,9 @@
 
 ### Showcase
 
-![](C:\github\doodly-clone\showcase\animation.JPG)
+![](./showcase\animation.JPG)
 
-![](C:\github\doodly-clone\showcase\path-designer.JPG)
+![](./showcase\path-designer.JPG)
 
-![](C:\github\doodly-clone\showcase\preview.JPG)
+![](./showcase/preview.JPG)
 
