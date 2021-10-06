@@ -1476,6 +1476,76 @@ hijo por supuesto)                              */
     content:"\ea1d";
 }
 /*======================
+=====  HOME PANEL  =====
+=======================*/
+
+.panel-home__body__user-projects-container{
+    height: 100%;
+}
+.panel-home__body__user-projects-container .load-project-form{
+    height: 100%;
+    margin:auto;
+    display: flex;
+    justify-content: center;
+}
+.panel-home__body__user-projects-container #load-project-form__input{
+    display: none;
+}
+.panel-home__body__user-projects-container .load-project-form__label{
+    padding:10px;
+    font-size: 1.3rem;
+    align-self: center;
+    background:var(--fields-color);
+    cursor:pointer;
+}
+/*===============================
+=====  CONFIGURATION PANEL  =====
+===============================*/
+.panel-config.modal{
+    width: 400px;
+}
+.panel-config.modal .modal__footer__btn-action:first-child{
+    margin-right:10px;
+}
+.panel-config__body.modal__body{
+    padding:0 20px;
+}
+.panel-config__body__section__title{
+    font-size: 1.3rem;
+    padding:10px 0;
+    border-bottom:1px solid white;
+}
+.panel-config__body__section__content{
+    margin-top:10px;
+    display: flex;
+    justify-content: space-between;
+    height:25px;
+}
+.panel-config__body__section__content .field{
+    width:30%;
+    height:100%;
+}
+.panel-config__body__section__content .field__label{
+    font-size: 1.3rem;
+    display: inline-block;
+    width:45%;
+    line-height:100%;
+    margin:0 !important;
+    padding:0 !important;
+}
+.panel-config__body__section__content .field__text-input{
+    margin:0 !important;
+    padding:0 !important;
+    border:none !important;
+    width: 50%;
+    height:100%;
+}
+
+.panel-config__body__section__content .field__select-input{
+    width: 100%;
+    height:100%;
+}
+/*======================
 ==== canvas-animator==
 =======================*/
 .canvas-outterContainer{

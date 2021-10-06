@@ -193,11 +193,14 @@
             <div class="panel-home__body modal__body">
                 <div class="panel-home__body__user-projects-container">
 <!--                    <p class="panel-home__subtitle"></p>-->
-                    <input id="input-load-project" type="file" />
+                    <form action="" class="load-project-form">
+                        <label for="load-project-form__input" class="load-project-form__label">Open project</label>
+                        <input id="load-project-form__input" type="file" />
+                    </form>
                 </div>
-                <div class="panel-home__body__templates-container">
-                    <p class="panel-home__subtitle">Templates</p>
-                </div>
+<!--                <div class="panel-home__body__templates-container">-->
+<!--                    <p class="panel-home__subtitle">Templates</p>-->
+<!--                </div>-->
             </div>
         </div>
     </div>
@@ -209,21 +212,47 @@
                 <div class="panel-config__header__btn-close icon-cross modal__header__btn-close-modal"></div>
             </div>
             <div class="panel-config__body modal__body">
-                <p class="panel-config__body__tittle">Aspect Ratio</p>
-                <div class="row">
-                    <select name="" id="select-aspect-ratios">
-                    </select>
-                    <div class="field">
-                        <label for="project-width">Width</label>
-                        <input type="text" id="project-width">
-                    </div>
-                    <div class="field">
-                        <label for="project-height">Height</label>
-                        <input type="text" id="project-height">
+                <div class="panel-config__body__section">
+                    <p class="panel-config__body__section__title">Aspect Ratio</p>
+                    <div class="panel-config__body__section__content">
+                        <div class="field">
+                            <select name="" id="select-aspect-ratios" class="field__select-input"></select>
+                        </div>
+                        <div class="field">
+                            <label for="project-width" class="field__label">Width:</label>
+                            <input type="text" id="project-width" class="field__text-input">
+                        </div>
+                        <div class="field">
+                            <label for="project-height" class="field__label">Height:</label>
+                            <input type="text" id="project-height" class="field__text-input">
+                        </div>
                     </div>
                 </div>
+
             </div>
             <div class="panel-config__footer modal__footer">
+                <button class="btn-accept modal__footer__btn-action">Accept</button>
+                <button class="btn-cancel modal__footer__btn-action">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div class="panel-publish__filter modal__filter">
+        <div class="panel-publish modal">
+            <div class="panel-publish__header modal__header">
+                <p class="modal__header__title">PUBLISH</p>
+                <div class="panel-publish__header__btn-close icon-cross modal__header__btn-close-modal"></div>
+            </div>
+
+            <div class="panel-publish__body modal__body">
+                <div class="panel-publish__body__section">
+                    Apoya el trabajo puesto en este software gratuito donando un monto a tu voluntad. Si donas mas de 7$ obtendras los siguientes beneficios
+                    * 1 desktop software were you will be able to render your drawnimate projects at high quality.
+                    * Pack de 7 projectos que podras personalizar a tu gusto
+
+<!--                    <button>DONAR AHORA</button>-->
+                </div>
+            </div>
+            <div class="panel-publish__footer modal__footer">
                 <button class="btn-accept modal__footer__btn-action">Accept</button>
                 <button class="btn-cancel modal__footer__btn-action">Cancel</button>
             </div>

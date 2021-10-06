@@ -4,7 +4,7 @@ var PanelHome={
         this.HTMLElement=document.querySelector(".panel-home__filter");
         this.HTMLcloseBtn=document.querySelector(".panel-home__header__btn-close");
 
-        this.HTMLInputFile=this.HTMLElement.querySelector("#input-load-project")
+        this.HTMLInputFile=this.HTMLElement.querySelector("#load-project-form__input")
         this.fileReader=new FileReader();
         this.initEvents();
 

@@ -30,3 +30,4 @@ let FontsLoader=function(){
     }
     this.init();
 }
+//module.exports=FontsLoader;

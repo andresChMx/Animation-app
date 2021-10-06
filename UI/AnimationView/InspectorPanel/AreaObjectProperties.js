@@ -344,7 +344,7 @@ var SectionStylingObject={
                 field:null,
                 initEvent:function(){
                     let fieldHTML=this.htmlElem.querySelector(".property-input");
-                    this.field=new ButtonedField(fieldHTML,"",1,1000,10)
+                    this.field=new ButtonedField(fieldHTML,"",0,1000,10)
                     this.field.addListenerOnNewValue(this.OnTriggered.bind(this));
                 },
                 activate:function(){this.htmlElem.style.display="flex"},
@@ -362,7 +362,7 @@ var SectionStylingObject={
                 field:null,
                 initEvent:function(){
                     let fieldHTML=this.htmlElem.querySelector(".property-input");
-                    this.field=new ButtonedField(fieldHTML,"",1,1000,10)
+                    this.field=new ButtonedField(fieldHTML,"",0,1000,10)
                     this.field.addListenerOnNewValue(this.OnTriggered.bind(this));
                 },
                 activate:function(){this.htmlElem.style.display="flex"},
