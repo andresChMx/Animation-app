@@ -1,5 +1,7 @@
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
@@ -7,42 +9,45 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Drawnimate</title>
     <script src="knockout.js"></script>
-    <script  src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-auth.js"></script>
 
-<!--    <script src="https://kit.fontawesome.com/8abefba5b4.js" crossorigin="anonymous"></script>-->
+    <!--    <script src="https://kit.fontawesome.com/8abefba5b4.js" crossorigin="anonymous"></script>-->
     <style>
-        *{
-            margin:0;
-            padding:0;
+        * {
+            margin: 0;
+            padding: 0;
         }
-
     </style>
 
- <link rel="stylesheet" href="assets/styles/font-icons.css">
- <link rel="stylesheet" href="styles.css">
- <link rel="stylesheet" href="stylesPathsDesigner.css">
+    <link rel="stylesheet" href="assets/styles/font-icons.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="stylesPathsDesigner.css">
 
- <!-- Global site tag (gtag.js) - Google Analytics -->
- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145130203-1"></script>
- <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145130203-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
 
-    gtag('config', 'UA-145130203-1');
- </script>
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-145130203-1');
+    </script>
     <!--google adsense-->
-<!--    <script data-ad-client="ca-pub-3992883932590172" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
+    <!--    <script data-ad-client="ca-pub-3992883932590172" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
 </head>
+
 <body>
     <!--==============================
     ========== AUTHENTICATION  =========
     ===============================-->
     <div class="panel-authentication__filter" style="display: none;">
         <div class="panel-authentication">
-            <div class="panel-authentication__signup-section" >
+            <div class="panel-authentication__signup-section">
                 <p class="panel-authentication__signup-section__title">Sign Up</p>
                 <form class="panel-authentication__signup-section__form" method="POST">
                     <div class="form-group">
@@ -53,7 +58,7 @@
                         <label for=""></label>
                         <input type="password" class="password-input" placeholder="Password">
                     </div>
-                    <input type="submit" value="Sign Up" class="panel-authentication__auth-form__submit-button" >
+                    <input type="submit" value="Sign Up" class="panel-authentication__auth-form__submit-button">
                 </form>
                 <div class="panel-authentication__signup-section__footer">
                     <p>New around here? <a href="" class="panel-authentication__signup-section__footer__login">Log In</a></p>
@@ -97,21 +102,22 @@
                 <div class="canvas-animator__object-entrance-configuration__entrance-settings">
                     <p class="canvas-animator__object-entrance-configuration__entrance-settings__title title">Entrace Modes</p>
                     <div class="canvas-animator__object-entrance-configuration__entrance-settings__box-buttons">
-                        <div class="form-group entrance-button button-solid-behaviour" id="none"><!--el radio box debe ser segundo hijo-->
+                        <div class="form-group entrance-button button-solid-behaviour" id="none">
+                            <!--el radio box debe ser segundo hijo-->
                             <img class="entrance-button__icon" src="assets/images/entrance-mode-none.png" alt="">
-                            <p class="entrance-button__label" >None</p>
+                            <p class="entrance-button__label">None</p>
                         </div>
                         <div class="form-group entrance-button button-solid-behaviour" id="drawn">
                             <img class="entrance-button__icon" src="assets/images/entrance-mode-drawn.png" alt="">
-                            <p class="entrance-button__label" >Drawn</p>
+                            <p class="entrance-button__label">Drawn</p>
                         </div>
                         <div class="form-group entrance-button button-solid-behaviour" id="dragged">
                             <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
-                            <p class="entrance-button__label" >Dragged</p>
+                            <p class="entrance-button__label">Dragged</p>
                         </div>
                         <div class="form-group entrance-button button-solid-behaviour" id="typed">
                             <img class="entrance-button__icon" src="https://static.thenounproject.com/png/2972511-200.png" alt="">
-                            <p class="entrance-button__label" >Typed</p>
+                            <p class="entrance-button__label">Typed</p>
                         </div>
                     </div>
                     <div class="canvas-animator__object-entrance-configuration__entrance-settings__box-mode-settings">
@@ -123,7 +129,7 @@
                                 <p class="">Show Drawing Hand </p>
                                 <input id="checkbox-show-hand" type="checkbox">
                             </div>
-                            <div class="form-group drawn-mode-widget__resulting-drawing drawn-mode-widged multiselection-widget" >
+                            <div class="form-group drawn-mode-widget__resulting-drawing drawn-mode-widged multiselection-widget">
                                 <p class="multiselection-widget__title">Resulting Drawing </p>
                                 <div class="box-resulting-drawing-buttons multiselection-widget__box-options">
                                     <div class="resulting-drawing-button multiselection-widget__option " id="original"><img src="assets/images/drawn-entrace-mode_original.png" alt=""><span class="tooltip">Original Image</span></div>
@@ -184,7 +190,7 @@
         </div>
     </div>
 
-    <div class="panel-home__filter modal__filter" >
+    <div class="panel-home__filter modal__filter">
         <div class="panel-home modal">
             <div class="panel-home__header modal__header">
                 <p class="modal__header__title">Home</p>
@@ -192,15 +198,15 @@
             </div>
             <div class="panel-home__body modal__body">
                 <div class="panel-home__body__user-projects-container">
-<!--                    <p class="panel-home__subtitle"></p>-->
+                    <!--                    <p class="panel-home__subtitle"></p>-->
                     <form action="" class="load-project-form">
                         <label for="load-project-form__input" class="load-project-form__label">Open project</label>
                         <input id="load-project-form__input" type="file" />
                     </form>
                 </div>
-<!--                <div class="panel-home__body__templates-container">-->
-<!--                    <p class="panel-home__subtitle">Templates</p>-->
-<!--                </div>-->
+                <!--                <div class="panel-home__body__templates-container">-->
+                <!--                    <p class="panel-home__subtitle">Templates</p>-->
+                <!--                </div>-->
             </div>
         </div>
     </div>
@@ -245,11 +251,10 @@
 
             <div class="panel-publish__body modal__body">
                 <div class="panel-publish__body__section">
-                    Apoya el trabajo puesto en este software gratuito donando un monto a tu voluntad. Si donas mas de 7$ obtendras los siguientes beneficios
-                    * 1 desktop software were you will be able to render your drawnimate projects at high quality.
-                    * Pack de 7 projectos que podras personalizar a tu gusto
+                    Apoya el trabajo puesto en este software gratuito donando un monto a tu voluntad. Si donas mas de 7$ obtendras los siguientes beneficios * 1 desktop software were you will be able to render your drawnimate projects at high quality. * Pack de 7 projectos
+                    que podras personalizar a tu gusto
 
-<!--                    <button>DONAR AHORA</button>-->
+                    <!--                    <button>DONAR AHORA</button>-->
                 </div>
             </div>
             <div class="panel-publish__footer modal__footer">
@@ -284,24 +289,24 @@
                         <div class="section-assets__box-options__second-row__menu-categories">
                             <button id="control-left" class="icon-double-left"></button>
                             <ul class="section-assets__box-options__menu-categories__list-categories">
-                                <li value="" >All</li>
-                                <li value="business" >Business</li>
-                                <li value="people" >people</li>
-                                <li value="background" >Backgrounds</li>
-                                <li value="technology" >Technology</li>
-                                <li value="nature" >Nature</li>
-                                <li value="health" >Health</li>
-                                <li value="animal" >Animals</li>
-                                <li value="vector" >Cartoon</li>
+                                <li value="">All</li>
+                                <li value="business">Business</li>
+                                <li value="people">people</li>
+                                <li value="background">Backgrounds</li>
+                                <li value="technology">Technology</li>
+                                <li value="nature">Nature</li>
+                                <li value="health">Health</li>
+                                <li value="animal">Animals</li>
+                                <li value="vector">Cartoon</li>
                             </ul>
                             <button id="control-right" class="icon-double-right"></button>
                         </div>
                     </div>
                 </div>
                 <div class="section-assets__box-assets" data-bind="foreach: SectionImageAssets">
-                    <div class="image-asset" data-bind="setupEvents: koBindingSetupHTML($element)" >
+                    <div class="image-asset" data-bind="setupEvents: koBindingSetupHTML($element)">
                         <div class="image-asset__inner-container">
-                            <img src="" data-bind="attr:{src:model.url_thumbnail}" crossorigin alt="" class="image-asset__inner-container__image" >
+                            <img src="" data-bind="attr:{src:model.url_thumbnail}" crossorigin alt="" class="image-asset__inner-container__image">
                             <button class="image-asset__btn-options"></button>
                         </div>
                     </div>
@@ -318,35 +323,35 @@
             </div>
             <div class="section-assets shape">
                 <div class="section-assets__box-options">
-<!--                    <div class="section-assets__box-options__first-row">-->
-<!--                        <button class="btn-create-shape btn-action">Create Shape</button>-->
-<!--                    </div>-->
-<!--                    <div class="section-assets__box-options__second-row">-->
-<!--                        <div class="section-assets__box-options__second-row__menu-categories">-->
-<!--                            <button id="shape__control-left" class="icon-double-left"></button>-->
-<!--                            <ul class="section-assets__box-options__menu-categories__list-categories">-->
-<!--                                <li value="" >All</li>-->
-<!--                                <li value="business" >Business</li>-->
-<!--                                <li value="people" >people</li>-->
-<!--                                <li value="background" >Backgrounds</li>-->
-<!--                                <li value="technology" >Technology</li>-->
-<!--                                <li value="nature" >Nature</li>-->
-<!--                                <li value="health" >Health</li>-->
-<!--                                <li value="animal" >Animals</li>-->
-<!--                                <li value="vector" >Vectors</li>-->
-<!--                            </ul>-->
-<!--                            <button id="shape__control-right" class="icon-double-right"></button>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <!--                    <div class="section-assets__box-options__first-row">-->
+                    <!--                        <button class="btn-create-shape btn-action">Create Shape</button>-->
+                    <!--                    </div>-->
+                    <!--                    <div class="section-assets__box-options__second-row">-->
+                    <!--                        <div class="section-assets__box-options__second-row__menu-categories">-->
+                    <!--                            <button id="shape__control-left" class="icon-double-left"></button>-->
+                    <!--                            <ul class="section-assets__box-options__menu-categories__list-categories">-->
+                    <!--                                <li value="" >All</li>-->
+                    <!--                                <li value="business" >Business</li>-->
+                    <!--                                <li value="people" >people</li>-->
+                    <!--                                <li value="background" >Backgrounds</li>-->
+                    <!--                                <li value="technology" >Technology</li>-->
+                    <!--                                <li value="nature" >Nature</li>-->
+                    <!--                                <li value="health" >Health</li>-->
+                    <!--                                <li value="animal" >Animals</li>-->
+                    <!--                                <li value="vector" >Vectors</li>-->
+                    <!--                            </ul>-->
+                    <!--                            <button id="shape__control-right" class="icon-double-right"></button>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
                 </div>
                 <div class="section-assets__box-assets" data-bind="foreach: SectionShapeAssets">
-                    <div class="shape-asset button-solid-behaviour" data-bind="setupEvents: koBindingSetupHTML($element)" >
+                    <div class="shape-asset button-solid-behaviour" data-bind="setupEvents: koBindingSetupHTML($element)">
                         <img data-bind="attr:{src:model.thumbnailUrl}" />
                     </div>
                 </div>
-<!--                <div class="section-assets__btn-load-more">-->
-<!--                    Load More...-->
-<!--                </div>-->
+                <!--                <div class="section-assets__btn-load-more">-->
+                <!--                    Load More...-->
+                <!--                </div>-->
             </div>
 
             <div class="section-assets text">
@@ -370,15 +375,15 @@
 
     </section>
 
-<!--    <div class="panel-assets__modal-upload-image__filter">-->
-<!--        <section class="panel-assets__modal-upload-image">-->
-<!--            <div class="panel-assets__modal-upload-image__btn-close"></div>-->
-<!--            <form class="panel-assets__modal-upload-image__form-uploader">-->
-<!--                <input type="file" class="form-uploader__input-file" multiple>-->
-<!--                <input type="submit" value="Upload" class="form-uploader__input-submit">-->
-<!--            </form>-->
-<!--        </section>-->
-<!--    </div>-->
+    <!--    <div class="panel-assets__modal-upload-image__filter">-->
+    <!--        <section class="panel-assets__modal-upload-image">-->
+    <!--            <div class="panel-assets__modal-upload-image__btn-close"></div>-->
+    <!--            <form class="panel-assets__modal-upload-image__form-uploader">-->
+    <!--                <input type="file" class="form-uploader__input-file" multiple>-->
+    <!--                <input type="submit" value="Upload" class="form-uploader__input-submit">-->
+    <!--            </form>-->
+    <!--        </section>-->
+    <!--    </div>-->
 
     <div class="panel-assets__modal-load-url-image__filter modal__filter">
         <section class="panel-assets__modal-load-url-image modal">
@@ -402,11 +407,11 @@
     <section class="panel-inspector">
         <div class="btn-toggle-panel-right"><i class="icon-eject"></i></div>
         <div class="panel-inspector__toolbox">
-<!--            <div class="panel-inspector__toolbox__item-text">-->
-<!--                <p class="toolbox__item-text__title">Text:</p>-->
-<!--                <button class="toolbox__item-text__button-add-text" action="add-text">Add Text</button>-->
+            <!--            <div class="panel-inspector__toolbox__item-text">-->
+            <!--                <p class="toolbox__item-text__title">Text:</p>-->
+            <!--                <button class="toolbox__item-text__button-add-text" action="add-text">Add Text</button>-->
 
-<!--            </div>-->
+            <!--            </div>-->
         </div>
         <div class="panel-inspector__manu-areas">
             <ul>
@@ -448,17 +453,17 @@
                                         <div class="input-field-box delay">
                                             <label for="">Delay</label>
                                             <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
-                                            <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+                                            <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value" /><button class="btn-increase"></button></div>
                                         </div>
                                         <div class="input-field-box duration">
                                             <label for="">Duration</label>
                                             <!--debe estar 2 niveles del padre, porque el index esta en el padre-->
-                                            <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+                                            <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value" /><button class="btn-increase"></button></div>
                                         </div>
                                     </div>
                                     <div class="arrangement-controls-container">
                                         <div class="button-control btn-move-up button-solid-behaviour"><i class="icon-move-up"></i></div>
-    <!--                                    <div class="button-control btn-free-movement button-solid-behaviour"><i class="icon-pencil"></i></div>-->
+                                        <!--                                    <div class="button-control btn-free-movement button-solid-behaviour"><i class="icon-pencil"></i></div>-->
                                         <div class="button-control btn-move-down button-solid-behaviour"><i class="icon-move-down"></i></div>
                                     </div>
                                 </div>
@@ -472,32 +477,37 @@
                             <div class="box-related-widgets clearfix">
                                 <div class="widget-property-left widget">
                                     <label>Left</label>
-                                    <div class="property-input"><button class="btn-decrease"></button><input type="text" property="left" class="field-value"/><button class="btn-increase"></button></div>
+                                    <div class="property-input"><button class="btn-decrease"></button><input type="text" property="left" class="field-value" /><button class="btn-increase"></button></div>
                                 </div>
                             </div>
                             <div class="box-related-widgets clearfix">
                                 <div class="widget-property-top widget">
-                                    <label>Top</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="top" class="field-value"/><button class="btn-increase"></button></div>
+                                    <label>Top</label>
+                                    <div class="property-input"><button class="btn-decrease"></button><input type="text" property="top" class="field-value" /><button class="btn-increase"></button></div>
                                 </div>
                             </div>
                             <div class="box-related-widgets clearfix">
                                 <div class="widget-property-scaleX widget">
-                                    <label>scale X</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value"/><button class="btn-increase"></button></div>
+                                    <label>scale X</label>
+                                    <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleX" class="field-value" /><button class="btn-increase"></button></div>
                                 </div>
                             </div>
                             <div class="box-related-widgets clearfix">
                                 <div class="widget-property-scaleY widget">
-                                    <label>scale Y</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleY" class="field-value"/><button class="btn-increase"></button></div>
+                                    <label>scale Y</label>
+                                    <div class="property-input"><button class="btn-decrease"></button><input type="text" property="scaleY" class="field-value" /><button class="btn-increase"></button></div>
                                 </div>
                             </div>
                             <div class="box-related-widgets clearfix">
                                 <div class="widget-property-angle widget">
-                                    <label>Angle</label><div class="property-input"><button class="btn-decrease"></button><input type="text" property="angle" class="field-value"/><button class="btn-increase"></button></div>
+                                    <label>Angle</label>
+                                    <div class="property-input"><button class="btn-decrease"></button><input type="text" property="angle" class="field-value" /><button class="btn-increase"></button></div>
                                 </div>
                             </div>
                             <div class="box-related-widgets clearfix">
                                 <div class="widget-property-opacity widget">
-                                    <label>Opacity</label><div class="property-input"><input step="10"  type="range" property="opacity" class="range-value"/><input type="text" property="opacity" class="field-value"/></div>
+                                    <label>Opacity</label>
+                                    <div class="property-input"><input step="10" type="range" property="opacity" class="range-value" /><input type="text" property="opacity" class="field-value" /></div>
                                 </div>
                             </div>
                         </div>
@@ -544,23 +554,23 @@
                                         <label for="stroke-width-widget">Stroke Width </label>
                                         <div class="property-input"><button class="btn-decrease"></button><input id="stroke-width-widget" type="text" value="1.16" class="field-value"><button class="btn-increase"></button></div>
                                     </div>
-                                        <div class="form-group styling-widget fill">
-                                            <label for="fill-widget">Fill Color</label>
-                                            <input id="fill-widget" type="color">
-                                            <div class="form-group styling-widget transparent-fill">
-                                                <label for="transparent-fill-widget">transp.</label>
-                                                <input id="transparent-fill-widget" type="checkbox">
-                                            </div>
+                                    <div class="form-group styling-widget fill">
+                                        <label for="fill-widget">Fill Color</label>
+                                        <input id="fill-widget" type="color">
+                                        <div class="form-group styling-widget transparent-fill">
+                                            <label for="transparent-fill-widget">transp.</label>
+                                            <input id="transparent-fill-widget" type="checkbox">
                                         </div>
+                                    </div>
 
-                                        <div class="form-group styling-widget stroke">
-                                            <label for="stroke-widget">Stroke Color </label>
-                                            <input id="stroke-widget" type="color">
-                                            <div class="form-group styling-widget transparent-stroke">
-                                                <label for="transparent-stroke-widget">transp.</label>
-                                                <input id="transparent-stroke-widget" type="checkbox">
-                                            </div>
+                                    <div class="form-group styling-widget stroke">
+                                        <label for="stroke-widget">Stroke Color </label>
+                                        <input id="stroke-widget" type="color">
+                                        <div class="form-group styling-widget transparent-stroke">
+                                            <label for="transparent-stroke-widget">transp.</label>
+                                            <input id="transparent-stroke-widget" type="checkbox">
                                         </div>
+                                    </div>
 
                                     <div class="form-group styling-widget start-point range-widget">
                                         <div class="row">
@@ -568,7 +578,7 @@
                                             <input type="text" class="styling-widget__start-rendering-point__field range-widget__field">
                                         </div>
                                         <div>
-                                            <input type="range" min="0" max="100" value="0" step="1" class="styling-widget__start-rendering-point__slider range-widget__slider"/>
+                                            <input type="range" min="0" max="100" value="0" step="1" class="styling-widget__start-rendering-point__slider range-widget__slider" />
                                         </div>
                                     </div>
                                     <div class="form-group styling-widget end-point range-widget">
@@ -577,10 +587,10 @@
                                             <input type="text" class="styling-widget__end-rendering-point__field range-widget__field">
                                         </div>
                                         <div class="row">
-                                            <input type="range" min="0" max="100" value="100" step="1" class="styling-widget__end-rendering-point__slider range-widget__slider"/>
+                                            <input type="range" min="0" max="100" value="100" step="1" class="styling-widget__end-rendering-point__slider range-widget__slider" />
                                         </div>
                                     </div>
-<!--                                    propiedades de RectShapeAnimable-->
+                                    <!--                                    propiedades de RectShapeAnimable-->
                                     <div class="form-group styling-widget width">
                                         <label for="width-widget">Width </label>
                                         <div class="property-input"><button class="btn-decrease"></button><input id="width-widget" type="text" value="300" class="field-value"><button class="btn-increase"></button></div>
@@ -593,12 +603,12 @@
                                         <label for="borderRadius-widget">Hor. border radius </label>
                                         <div class="property-input"><button class="btn-decrease"></button><input id="borderRadius-widget" type="text" value="300" class="field-value"><button class="btn-increase"></button></div>
                                     </div>
-<!--                                    propiedades para CircleShapeAnimable-->
+                                    <!--                                    propiedades para CircleShapeAnimable-->
                                     <div class="form-group styling-widget radius">
                                         <label for="radius-widget">Radius </label>
                                         <div class="property-input"><button class="btn-decrease"></button><input id="radius-widget" type="text" value="300" class="field-value"><button class="btn-increase"></button></div>
                                     </div>
-<!--                                    propiedades de masking (generales a tdodos shapes)-->
+                                    <!--                                    propiedades de masking (generales a tdodos shapes)-->
                                     <p class="subtitle">Masking properties</p>
                                     <div class="form-group styling-widget inverted">
                                         <label for="inverted-widget">Inverted ClipPath</label>
@@ -628,10 +638,10 @@
     <section class="panel-animation">
         <div class="btn-toggle-panel-bottom"><i class="icon-eject"></i></div>
         <div class="panel-animation__top-bar">
-             <ul class="panel-animation__top-bar__top-menu">
-                 <li class="panel-animation__top-bar__top-menu__item available-soon">Action</li>
-                 <li class="panel-animation__top-bar__top-menu__item available-soon">Scenes</li>
-                 <li class="panel-animation__top-bar__top-menu__item available-soon">Curves</li>
+            <ul class="panel-animation__top-bar__top-menu">
+                <li class="panel-animation__top-bar__top-menu__item available-soon">Action</li>
+                <li class="panel-animation__top-bar__top-menu__item available-soon">Scenes</li>
+                <li class="panel-animation__top-bar__top-menu__item available-soon">Curves</li>
             </ul>
 
             <div class="panel-animation__top-bar__area-editors-menus">
@@ -645,44 +655,47 @@
             </div>
         </div>
         <div class="panel-animation__editors-container">
-                <section class="action-editor">
-                    <div class="action-editor__properties-area">
-                        <div class="action-editor__properties-area__toolbar">
-                            <div class="btn-reset-timeline tool"><span class="icon-previous"></span></div>
-                            <div class="btn-play-timeline tool"></div>
-                            <div class="btn-delete-keyframe tool disabled"> <span class="icon-bin"></span></div>
-                            <nav class="menu-functions tool disabled">
-                                <div class="menu-functions__trigger"></div>
-                                <div class="menu-functions__dropdown dropdown">
-                                    <div class="menu-functions__dropdown__easing-list">
-                                    </div>
-                                    <div class="menu-functions__dropdown__tween-list"><!--list tweens-->
-                                    </div>
+            <section class="action-editor">
+                <div class="action-editor__properties-area">
+                    <div class="action-editor__properties-area__toolbar">
+                        <div class="btn-reset-timeline tool"><span class="icon-previous"></span></div>
+                        <div class="btn-play-timeline tool"></div>
+                        <div class="btn-delete-keyframe tool disabled"> <span class="icon-bin"></span></div>
+                        <nav class="menu-functions tool disabled">
+                            <div class="menu-functions__trigger"></div>
+                            <div class="menu-functions__dropdown dropdown">
+                                <div class="menu-functions__dropdown__easing-list">
                                 </div>
-                            </nav>
-                            <nav class="menu-add-animation-lane tool disabled">
-                                <div class="menu-add-animation-lane__trigger"></div>
-                                <div class="menu-add-animation-lane__dropdown dropdown">
-                                    <div class="menu-add-animation-lane__dropdown__list-lane-names">
-
-                                    </div>
+                                <div class="menu-functions__dropdown__tween-list">
+                                    <!--list tweens-->
                                 </div>
-
-                            </nav>
-                        </div>
-
-                        <div class="parent-list"><!--parent to allow scrolling without showing bars-->
-                            <div class="action-editor__properties-area__list"> <!--Los lanes se estan añadiendo a este elemento en runtime-->
                             </div>
-                        </div>
+                        </nav>
+                        <nav class="menu-add-animation-lane tool disabled">
+                            <div class="menu-add-animation-lane__trigger"></div>
+                            <div class="menu-add-animation-lane__dropdown dropdown">
+                                <div class="menu-add-animation-lane__dropdown__list-lane-names">
 
+                                </div>
+                            </div>
+
+                        </nav>
                     </div>
-                    <div class="action-editor__timeline-area">
-                        <canvas id="cTimeLine"></canvas>
+
+                    <div class="parent-list">
+                        <!--parent to allow scrolling without showing bars-->
+                        <div class="action-editor__properties-area__list">
+                            <!--Los lanes se estan añadiendo a este elemento en runtime-->
+                        </div>
                     </div>
-                </section>
-                <section class="scenes-editor">2</section>
-                <section class="curves-editor">3</section>
+
+                </div>
+                <div class="action-editor__timeline-area">
+                    <canvas id="cTimeLine"></canvas>
+                </div>
+            </section>
+            <section class="scenes-editor">2</section>
+            <section class="curves-editor">3</section>
         </div>
     </section>
     <!--====================================================================================================================
@@ -719,16 +732,16 @@
                     <input type="text" class="setting-line-width__field range-widget__field">
                 </div>
                 <div class="row">
-                    <input type="range" min="1" max="150" value="10" class="setting-line-width__slider range-widget__slider"/>
+                    <input type="range" min="1" max="150" value="10" class="setting-line-width__slider range-widget__slider" />
                 </div>
             </div>
             <div class="section-settings__setting-duration range-widget">
                 <div class="row">
-                    <label for="" class="setting-duration__title range-widget__title" >Animation Duration: </label>
+                    <label for="" class="setting-duration__title range-widget__title">Animation Duration: </label>
                     <input type="text" class="setting-duration__field range-widget__field">
                 </div>
                 <div>
-                    <input type="range" min="2" max="10" step="1"  value="3" class="setting-duration__slider range-widget__slider"/>
+                    <input type="range" min="2" max="10" step="1" value="3" class="setting-duration__slider range-widget__slider" />
                 </div>
             </div>
         </div>
@@ -736,7 +749,7 @@
             <p class="panel-designer-options__section-paths__title">Paths: </p>
             <div class="panel-designer-options__section-paths__paths-box">
             </div>
-            
+
             <button class="panel-designer-options__section-paths__button">Add Path</button>
         </div>
     </section>
@@ -799,7 +812,8 @@
         <div class="object-menu-option" id="duplicate">Duplicate</div>
         <div class="object-menu-option" id="delete">Delete</div>
         <div class="object-menu-option" id="removeMask">Remove Mask</div>
-        <div class="object-menu-option" id="addMask"><p>Add Mask</p>
+        <div class="object-menu-option" id="addMask">
+            <p>Add Mask</p>
             <div class="object-menu-option__submenu">
 
             </div>
@@ -815,7 +829,6 @@
     <script src="Globals/NetworkManager.js"></script>
     <script src="Globals/OpenTypeFontManager.js"></script>
     <script src="Globals/UserEventsHandler.js"></script>
-    <script src="./variables/globales.js"></script>
     <script src="./util.js"></script>
     <script src="fabric.js"></script>
     <script src="OpenType.js"></script>
@@ -880,9 +893,10 @@
     <script src="UI/PathDesignView/DesignerOptionsPanel.js"></script>
     <script src="UI/PathDesignView/PathDesignPanel.js"></script>
     <script src="UI/PreviewerView/PreviewerPanel.js"></script>
-    <script src="UI/AnimationView/ViewModel.js"></script><!--ViewModels por view al final de todos los componentes de la view-->
+    <script src="UI/AnimationView/ViewModel.js"></script>
+    <!--ViewModels por view al final de todos los componentes de la view-->
 
     <script src="main.js"></script>
 </body>
-</html>
 
+</html>
